@@ -1,0 +1,7 @@
+stage,train,test,notes
+Original CUAD master contracts,,,510
+Wide contract rows,410,100,one row per contract
+Long-format rows,10545,2556,one row per extracted span
+Metadata rows,3541,877,excluded from embedding
+Substantive rows,7004,1679,classification categories
+Rows embedded,7004,,persisted metadata count

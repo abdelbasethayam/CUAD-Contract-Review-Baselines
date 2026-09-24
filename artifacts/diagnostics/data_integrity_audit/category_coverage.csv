@@ -1,0 +1,37 @@
+category,train_clauses,test_clauses,embedded_train_clauses,exists_in_train,retention_percent,fixed_pilot_rows
+Affiliate License-Licensee,88,16,88,True,100.0,0
+Affiliate License-Licensor,39,8,39,True,100.0,1
+Anti-Assignment,498,114,498,True,100.0,0
+Audit Rights,485,128,485,True,100.0,1
+Cap On Liability,522,110,522,True,100.0,0
+Change Of Control,170,43,170,True,100.0,0
+Competitive Restriction Exception,92,22,92,True,100.0,1
+Covenant Not To Sue,131,28,131,True,100.0,0
+Exclusivity,314,74,314,True,100.0,0
+Governing Law,369,88,369,True,100.0,0
+Insurance,413,118,413,True,100.0,0
+Ip Ownership Assignment,247,49,247,True,100.0,0
+Irrevocable Or Perpetual License,116,34,116,True,100.0,0
+Joint Ip Ownership,83,17,83,True,100.0,1
+License Grant,566,150,566,True,100.0,0
+Liquidated Damages,105,8,105,True,100.0,0
+Minimum Commitment,330,62,330,True,100.0,0
+Most Favored Nation,29,7,29,True,100.0,0
+No-Solicit Of Customers,38,7,38,True,100.0,0
+No-Solicit Of Employees,65,10,65,True,100.0,0
+Non-Compete,189,37,189,True,100.0,1
+Non-Disparagement,43,11,43,True,100.0,0
+Non-Transferable License,223,59,223,True,100.0,0
+Notice Period To Terminate Renewal,86,31,86,True,100.0,0
+Post-Termination Services,327,82,327,True,100.0,0
+Price Restrictions,25,1,25,True,100.0,1
+Renewal Term,155,44,155,True,100.0,0
+Revenue/Profit Sharing,304,91,304,True,100.0,1
+Rofr/Rofo/Rofn,283,67,283,True,100.0,1
+Source Code Escrow,47,16,47,True,100.0,0
+Termination For Convenience,186,37,186,True,100.0,1
+Third Party Beneficiary,31,8,31,True,100.0,0
+Uncapped Liability,123,28,123,True,100.0,0
+Unlimited/All-You-Can-Eat-License,18,9,18,True,100.0,0
+Volume Restriction,121,44,121,True,100.0,0
+Warranty Duration,143,21,143,True,100.0,1

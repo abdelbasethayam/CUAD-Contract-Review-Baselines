@@ -1,0 +1,7 @@
+# Optional, isolated CPU-oriented dependencies for the segmentation evaluation
+# prototype. This file is intentionally not included by the production image.
+docling-slim==2.126.0
+docling-parse==7.18.0
+rtree==1.4.1
+torch==2.14.0+cpu
+transformers==5.16.1

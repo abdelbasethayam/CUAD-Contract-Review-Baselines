@@ -1,0 +1,7 @@
+# Docling's standard PDF layout pipeline is optional in production and is not
+# included by docling-slim's base install. These are the non-Torch model-runtime
+# dependencies needed by the current parser path in this Python 3.12 image.
+transformers>=4.42.0,<6
+accelerate>=1.0.0,<2
+docling-ibm-models>=4.0.2,<5
+opencv-python-headless>=4.6.0.66,<5

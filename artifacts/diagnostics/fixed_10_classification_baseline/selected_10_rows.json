@@ -1,0 +1,119 @@
+{
+  "benchmark_id": "fixed_10_classification_baseline",
+  "selection_seed": 20260910,
+  "selection_strategy": "One reproducibly sampled row from each of ten shuffled non-metadata CUAD categories.",
+  "source_test_csv": "data/splits/test/master_clauses_test.csv",
+  "source_absolute_path_at_creation": "/workspace/data/splits/test/master_clauses_test.csv",
+  "source_row_count": 2556,
+  "eligible_row_count": 1679,
+  "excluded_metadata_labels": [
+    "Agreement Date",
+    "Document Name",
+    "Effective Date",
+    "Expiration Date",
+    "Parties"
+  ],
+  "row_count": 10,
+  "rows": [
+    {
+      "benchmark_row_id": "fixed-10-01",
+      "selection_rank": 1,
+      "original_row_index": 1906,
+      "document_id": "LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf",
+      "clause_type": "Warranty Duration",
+      "clause_text": "Unless Liquidmetal notifies Eutectix that the Liquidmetal Product does not meet the Specifications within thirty (30) calendar days after receipt of the Liquidmetal Product, then the Liquidmetal Product shall be deemed Accepted.",
+      "answer": "Yes",
+      "is_metadata": "False"
+    },
+    {
+      "benchmark_row_id": "fixed-10-02",
+      "selection_rank": 2,
+      "original_row_index": 669,
+      "document_id": "ENTERPRISEPRODUCTSPARTNERSLP_07_08_1998-EX-10.3-TRANSPORTATION CONTRACT.PDF",
+      "clause_type": "Price Restrictions",
+      "clause_text": "When for Shipper's convenience a trailer is set out at the facilities of the    Consignor or Consignee or any other site designated, a charge of $10.00 per    hour or fraction thereof will apply, subject to a maximum charge of $100.00    per trailer in any consecutive twenty-four (24) hour period.",
+      "answer": "Yes",
+      "is_metadata": "False"
+    },
+    {
+      "benchmark_row_id": "fixed-10-03",
+      "selection_rank": 3,
+      "original_row_index": 1086,
+      "document_id": "HYPERIONSOFTWARECORP_09_28_1994-EX-10.47-EXCLUSIVE DISTRIBUTOR AGREEMENT.PDF",
+      "clause_type": "Non-Compete",
+      "clause_text": "During the term of this Agreement and for a period of two (2) years after the termination hereof for any reason, Distributor will not market, or attempt to market, a computer program which competes in any way with the Products in the areas of consolidation, financial information, financial transaction processing, reporting, data collection, or modeling, including but not limited to the use of personal computers, nor which competes with any modification, alteration or enhancement to the Products which is developed during the term of this Agreement.",
+      "answer": "Yes",
+      "is_metadata": "False"
+    },
+    {
+      "benchmark_row_id": "fixed-10-04",
+      "selection_rank": 4,
+      "original_row_index": 147,
+      "document_id": "ANIXABIOSCIENCESINC_06_09_2020-EX-10.1-COLLABORATION AGREEMENT.PDF",
+      "clause_type": "Rofr/Rofo/Rofn",
+      "clause_text": "If Anixa decides to not license those uses or compounds for this novel antiviral use, OntoChem is free to develop those molecules further as its own intellectual property without any further restrictions.",
+      "answer": "Yes",
+      "is_metadata": "False"
+    },
+    {
+      "benchmark_row_id": "fixed-10-05",
+      "selection_rank": 5,
+      "original_row_index": 432,
+      "document_id": "RandWorldwideInc_20010402_8-KA_EX-10.2_2102464_EX-10.2_Co-Branding Agreement.pdf",
+      "clause_type": "Competitive Restriction Exception",
+      "clause_text": "During the Term of this Agreement, PlanetCAD shall be permitted to market new functions and services relating to the Co-Branded Service directly to Dassault Systemes Customers with Dassault Systemes prior written approval, but only to the extent such functions and services are offered by PlanetCAD on the PlanetCAD Web site(s).",
+      "answer": "Yes",
+      "is_metadata": "False"
+    },
+    {
+      "benchmark_row_id": "fixed-10-06",
+      "selection_rank": 6,
+      "original_row_index": 1883,
+      "document_id": "LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf",
+      "clause_type": "Joint Ip Ownership",
+      "clause_text": "To the extent that the Parties have jointly developed any New Amorphous Alloy Technology and they have agreed that such New Amorphous Alloy Technology will be jointly owned, as set forth in Section 8.2 above, each Party hereby assigns to the other, and will cause its employees, contractors, representatives, successors, assigns, Affiliates, parents, subsidiaries, officers and directors to assign to the other, a co-equal right, title and interest in and to any such jointly developed New Amorphous Alloy Technology.",
+      "answer": "Yes",
+      "is_metadata": "False"
+    },
+    {
+      "benchmark_row_id": "fixed-10-07",
+      "selection_rank": 7,
+      "original_row_index": 2096,
+      "document_id": "CYBERIANOUTPOSTINC_07_09_1998-EX-10.13-PROMOTION AGREEMENT.PDF",
+      "clause_type": "Revenue/Profit Sharing",
+      "clause_text": "For each month during the Term, the Company will pay CNET a                  minimum of [XXXX] in cash, plus [XXX] of CNET Sales.",
+      "answer": "Yes",
+      "is_metadata": "False"
+    },
+    {
+      "benchmark_row_id": "fixed-10-08",
+      "selection_rank": 8,
+      "original_row_index": 1238,
+      "document_id": "THERAVANCEBIOPHARMA,INC_05_08_2020-EX-10.2-SERVICE AGREEMENT.PDF",
+      "clause_type": "Termination For Convenience",
+      "clause_text": "The Company may, in its sole and absolute discretion, terminate the Executive's employment under this Agreement at any time and with immediate effect by notifying the Executive that the Company is exercising its right under this clause 17 and that it will make a payment in l ieu of  not ice (\"PILON\") to the Executive.",
+      "answer": "Yes",
+      "is_metadata": "False"
+    },
+    {
+      "benchmark_row_id": "fixed-10-09",
+      "selection_rank": 9,
+      "original_row_index": 2157,
+      "document_id": "PHREESIA,INC_05_28_2019-EX-10.18-STRATEGIC ALLIANCE AGREEMENT.PDF",
+      "clause_type": "Audit Rights",
+      "clause_text": "Each Party will bear all costs and expenses it incurs in connection with preparing for, conducting, or complying with any such audit including, in the case of the auditing Party, the costs and expenses of conducting the audit.",
+      "answer": "Yes",
+      "is_metadata": "False"
+    },
+    {
+      "benchmark_row_id": "fixed-10-10",
+      "selection_rank": 10,
+      "original_row_index": 2246,
+      "document_id": "ArmstrongFlooringInc_20190107_8-K_EX-10.2_11471795_EX-10.2_Intellectual Property Agreement.pdf",
+      "clause_type": "Affiliate License-Licensor",
+      "clause_text": "\"Arizona Licensed Patents\" means the Patents set forth on Schedule 1.1(l) and all other Patents owned by Licensing or Seller or their respective Affiliates as of the Effective Date and used or held for use in the Company Field during the five (5) years prior to the Effective Date (other than the Arizona Assigned Patents).<omitted>Subject to the terms and conditions of this Agreement, Arizona hereby grants to the Company a perpetual, non-exclusive, royalty-free license in, to and under the Arizona Licensed Patents for use in the Company Field throughout the world.",
+      "answer": "Yes",
+      "is_metadata": "False"
+    }
+  ]
+}

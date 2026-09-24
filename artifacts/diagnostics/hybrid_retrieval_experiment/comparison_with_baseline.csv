@@ -1,0 +1,12 @@
+metric,classification_fix,hybrid_retrieval,change
+recall_at_1,0.5,0.5,0.0
+recall_at_3,0.6,0.6,0.0
+recall_at_5,0.6,0.6,0.0
+mrr,0.55,0.5590038314176244,0.009003831417624397
+classification_accuracy,0.4,0.5,0.09999999999999998
+retrieval_miss_count,4,4,0
+classification_error_count,1,0,-1
+ollama_selected_label_absent_from_top5_count,0,0,0
+unknown_count,0,0,0
+pipeline_error_count,0,0,0
+retrieval_recovery_count,0,0,0

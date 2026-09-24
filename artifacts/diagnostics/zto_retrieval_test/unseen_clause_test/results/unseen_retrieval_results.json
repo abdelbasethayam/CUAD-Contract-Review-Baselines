@@ -1,0 +1,23 @@
+{
+  "status": "INCOMPLETE",
+  "reason": "The latest Docling-based ZTO segmentation could not be executed in the isolated diagnostic image.",
+  "segmentation_failure": {
+    "parser_requested": "docling",
+    "error_type": "ModuleNotFoundError",
+    "missing_dependency": "torch",
+    "error": "No module named 'torch'"
+  },
+  "retrieval_executed": false,
+  "cohere_called": false,
+  "qdrant_queried": false,
+  "ollama_called": false,
+  "results": [],
+  "safety": {
+    "production_files_modified": false,
+    "env_modified": false,
+    "qdrant_modified": false,
+    "embedding_artifacts_modified": false,
+    "segmentation_code_modified": false,
+    "git_commit_created": false
+  }
+}

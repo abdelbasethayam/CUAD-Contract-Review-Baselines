@@ -1,0 +1,4 @@
+# Install these from the official CPU-only PyTorch index. Using the default
+# PyPI index would pull CUDA libraries into this CPU diagnostic image.
+torch>=2.2.2,<3
+torchvision>=0,<1

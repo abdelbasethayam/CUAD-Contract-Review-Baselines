@@ -1,0 +1,38 @@
+flowchart TD
+    subgraph KB[LEGAL KNOWLEDGE BASE]
+        MD[Curated Markdown under backend/data/legal_knowledge]
+        KCH[1200-char chunks with 150-char overlap]
+        KEM[Cohere search_document embeddings]
+        KQ[(Qdrant legal_knowledge)]
+        MD --> KCH --> KEM --> KQ
+    end
+
+    U[User PDF or TXT upload] --> TMP[Temporary upload file]
+    TMP --> PARSE[Docling parser; pdfplumber fallback]
+    PARSE --> SEG[ClauseNode structure-aware segmentation]
+    SEG --> VAL[Ollama real-clause validator]
+    VAL --> QEM[Cohere search_query embeddings]
+    QEM --> CQ[(Qdrant cuad_train)]
+    CQ --> RET[Dense Top-5 CUAD retrieval]
+    RET --> CAND[Unique retrieved candidate labels]
+    CAND --> CLS[Candidate-constrained Ollama CUAD classification]
+    CLS --> STATUS[Classification status check]
+    STATUS -->|VALID_CANDIDATE| MAP[Map CUAD label to legal category]
+    STATUS -->|UNKNOWN / MALFORMED / OUT_OF_CANDIDATE| SKIP[Typed risk SKIPPED]
+    MAP --> LRET[Category-filtered legal Top-3 retrieval]
+    KQ --> LRET
+    LRET --> IND[Regex indicators and contract evidence]
+    IND --> RISK[Constrained Ollama risk assessment]
+    RISK --> STRICT[Strict validation]
+    STRICT --> OUT[Typed ClauseResult]
+    SKIP --> OUT
+    OUT --> API[FastAPI JSON or SSE]
+    API --> UI[React frontend]
+
+    subgraph BUILD[CUAD INDEX BUILD]
+        RAW[CUAD v1 raw wide CSV] --> SPLIT[Contract-level train/test split]
+        SPLIT --> LONG[Long clause rows; metadata flagged]
+        LONG --> EMB[Train substantive clause embeddings]
+        EMB --> CQ
+    end
+

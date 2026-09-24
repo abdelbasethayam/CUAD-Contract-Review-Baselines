@@ -1,0 +1,11 @@
+benchmark_row_id,document_id,clause_type,vector_gt_rank,bm25_gt_rank,hybrid_gt_rank,vector_gt_in_top5,bm25_gt_in_top5,hybrid_gt_in_top5,ollama_prediction,prediction_status,prediction_equals_ground_truth,result_category,previous_miss_analysis
+fixed-10-01,LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf,Warranty Duration,1,1,1,True,True,True,Warranty Duration,VALID_CANDIDATE,True,CORRECT,NOT_PREVIOUS_MISS
+fixed-10-02,ENTERPRISEPRODUCTSPARTNERSLP_07_08_1998-EX-10.3-TRANSPORTATION CONTRACT.PDF,Price Restrictions,15,,29,False,False,False,Termination For Convenience,VALID_CANDIDATE,False,RETRIEVAL_MISS,VECTOR_FOUND
+fixed-10-03,HYPERIONSOFTWARECORP_09_28_1994-EX-10.47-EXCLUSIVE DISTRIBUTOR AGREEMENT.PDF,Non-Compete,1,2,1,True,True,True,Non-Compete,VALID_CANDIDATE,True,CORRECT,NOT_PREVIOUS_MISS
+fixed-10-04,ANIXABIOSCIENCESINC_06_09_2020-EX-10.1-COLLABORATION AGREEMENT.PDF,Rofr/Rofo/Rofn,,,,False,False,False,License Grant,VALID_CANDIDATE,False,RETRIEVAL_MISS,BOTH_MISSED
+fixed-10-05,RandWorldwideInc_20010402_8-KA_EX-10.2_2102464_EX-10.2_Co-Branding Agreement.pdf,Competitive Restriction Exception,,,,False,False,False,License Grant,VALID_CANDIDATE,False,RETRIEVAL_MISS,BOTH_MISSED
+fixed-10-06,LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf,Joint Ip Ownership,2,12,2,True,False,True,Joint Ip Ownership,VALID_CANDIDATE,True,CORRECT,NOT_PREVIOUS_MISS
+fixed-10-07,CYBERIANOUTPOSTINC_07_09_1998-EX-10.13-PROMOTION AGREEMENT.PDF,Revenue/Profit Sharing,1,1,1,True,True,True,Revenue/Profit Sharing,VALID_CANDIDATE,True,CORRECT,NOT_PREVIOUS_MISS
+fixed-10-08,"THERAVANCEBIOPHARMA,INC_05_08_2020-EX-10.2-SERVICE AGREEMENT.PDF",Termination For Convenience,1,1,1,True,True,True,Termination For Convenience,VALID_CANDIDATE,True,CORRECT,NOT_PREVIOUS_MISS
+fixed-10-09,"PHREESIA,INC_05_28_2019-EX-10.18-STRATEGIC ALLIANCE AGREEMENT.PDF",Audit Rights,1,1,1,True,True,True,UNKNOWN,OUT_OF_CANDIDATE,False,INVALID_OUT_OF_CANDIDATE,NOT_PREVIOUS_MISS
+fixed-10-10,ArmstrongFlooringInc_20190107_8-K_EX-10.2_11471795_EX-10.2_Intellectual Property Agreement.pdf,Affiliate License-Licensor,,17,18,False,False,False,License Grant,VALID_CANDIDATE,False,RETRIEVAL_MISS,BM25_FOUND_BUT_RRF_DID_NOT_PROMOTE

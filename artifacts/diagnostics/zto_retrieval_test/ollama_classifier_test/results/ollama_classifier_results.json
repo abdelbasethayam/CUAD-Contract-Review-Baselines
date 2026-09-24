@@ -1,0 +1,863 @@
+{
+  "status": "COMPLETE",
+  "timestamp_utc": "2026-09-10T10:18:54.657463+00:00",
+  "environment": {
+    "parser": "docling",
+    "python_version": "3.12.14",
+    "parsed_block_count": 46,
+    "top_level_clause_count": 16,
+    "selected_clause_count": 12,
+    "embedding_model": "embed-english-v3.0",
+    "qdrant_collection": "cuad_train",
+    "qdrant_path": "/workspace/diagnostics/zto_retrieval_test/qdrant_snapshot",
+    "retrieval_top_k": 5,
+    "ollama_url": "http://host.docker.internal:11434",
+    "ollama_model": "llama3.2:3b",
+    "ollama_timeout_seconds": 60,
+    "ollama_max_retry_attempts": 3,
+    "generation_options": {
+      "temperature": 0,
+      "num_gpu": 0,
+      "use_mmap": true,
+      "num_ctx": 4096
+    },
+    "allowed_label_count": 36,
+    "package_versions": {
+      "torch": "2.14.0+cpu",
+      "transformers": "5.17.0",
+      "accelerate": "1.15.0",
+      "docling": "2.126.0",
+      "docling-ibm-models": "4.0.2",
+      "opencv-python-headless": "4.14.0.94"
+    }
+  },
+  "results": [
+    {
+      "clause_id": "1.",
+      "clause_number": "1.",
+      "page_start": 1,
+      "page_end": 1,
+      "query_characters": 114,
+      "clause_preview": "1. Party B shall provide parcel transportation services on highway line-haul routes based on the needs of Party A.",
+      "ground_truth_label": null,
+      "ground_truth_available": false,
+      "ground_truth_reason": "No CUAD annotation was identified for this target clause.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Rofr/Rofo/Rofn",
+          "score": 0.5638601034595816,
+          "document_id": null,
+          "clause_excerpt": "If other services are required by Party B in Party B Business, Party B shall first provide Party A with the content and requirements of such services in writing.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 2,
+          "label": "Insurance",
+          "score": 0.5562686225871223,
+          "document_id": null,
+          "clause_excerpt": "Party B shall purchase sufficient insurance for the transportation vehicles.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 3,
+          "label": "Most Favored Nation",
+          "score": 0.5389664539839872,
+          "document_id": null,
+          "clause_excerpt": "Party B guarantees that the Driver User will enjoy the most favorable treatment in accordance with the terms and conditions stipulated in This Agreement during the Period of Cooperation.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 4,
+          "label": "Most Favored Nation",
+          "score": 0.5303882074043569,
+          "document_id": null,
+          "clause_excerpt": "Party B shall provide the Driver User with long-term and stable rental sources and the most favorable financial leasing scheme, complete the vehicle leasing transactions with the Driver User through the Platform, and provide the Driver User with high-quality financial leasing se…",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 5,
+          "label": "License Grant",
+          "score": 0.5288900956565672,
+          "document_id": null,
+          "clause_excerpt": "Both Parties agree that Party A shall license the Program Content required in Party B Business to Party B, and Party B shall accept the services provided by Party A, to the extent, at the time or times, and in the manner as agreed to by the Parties herein.",
+          "selected_by_ollama": true
+        }
+      ],
+      "qdrant_top1_label": "Rofr/Rofo/Rofn",
+      "qdrant_top1_score": 0.5638601034595816,
+      "raw_ollama_response": "{\"clause_type\": \"License Grant\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"1. Party B shall provide parcel transportation services on highway line-haul routes based on the needs of Party A.\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Rofr/Rofo/Rofn\n   Retrieval score: 0.5639\n   Clause: \"If other services are required by Party B in Party B Business, Party B shall first provide Party A with the content and requirements of such  services in writing.\"\n\n2. Label: Insurance\n   Retrieval score: 0.5563\n   Clause: \"Party B shall purchase sufficient insurance for the transportation vehicles.\"\n\n3. Label: Most Favored Nation\n   Retrieval score: 0.5390\n   Clause: \"Party B guarantees that the Driver User will enjoy the most favorable treatment in accordance with the terms and conditions stipulated in This Agreement during the Period of Cooperation.\"\n\n4. Label: Most Favored Nation\n   Retrieval score: 0.5304\n   Clause: \"Party B shall provide the Driver User with long-term and stable rental sources and the most favorable financial leasing scheme, complete the vehicle leasing transactions with the Driver User through the Platform, and provide the Driver User with high-quality financial leasing services.\"\n\n5. Label: License Grant\n   Retrieval score: 0.5289\n   Clause: \"Both Parties agree that Party A shall license the Program Content required in Party B Business to Party B, and Party B shall accept the services  provided by Party A, to the extent, at the time or times, and in the manner as agreed to by the Parties herein.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"provide\",\n    \"shall\"\n  ],\n  \"legal_concepts\": [],\n  \"legal_actions\": [\n    \"provide\"\n  ],\n  \"rights\": [],\n  \"obligations\": [\n    \"shall\"\n  ],\n  \"restrictions\": [],\n  \"conditions\": [],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"1\"\n  ]\n}\n",
+      "parsed_prediction": "License Grant",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": false,
+      "correct_label_in_top5": false,
+      "correct_label_rank": null,
+      "retrieval_top1_correct": false,
+      "decision_relationship": "OLLAMA_SELECTED_RETRIEVED_LABEL",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "3.",
+      "clause_number": "3.",
+      "page_start": 1,
+      "page_end": 1,
+      "query_characters": 30,
+      "clause_preview": "3. Freight and payment method:",
+      "ground_truth_label": null,
+      "ground_truth_available": false,
+      "ground_truth_reason": "No CUAD annotation was identified for this target clause.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Revenue/Profit Sharing",
+          "score": 0.5123864974618589,
+          "document_id": null,
+          "clause_excerpt": "The Principal shall pay the Company a fee of $1.00 (one dollar), inclusive of VAT, per one net tonne of Commodity shipped pursuant to this Contract.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 2,
+          "label": "Liquidated Damages",
+          "score": 0.4562470680947849,
+          "document_id": null,
+          "clause_excerpt": "Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB1,000 per trip on the second working day and RMB2,000 per tr…",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 3,
+          "label": "Minimum Commitment",
+          "score": 0.45458753214888475,
+          "document_id": null,
+          "clause_excerpt": "Sender with Contracted Capacity in Firm: 22.2.1 If by any reason the delivery is less than 95% or more than 105% of their Scheduled Capacity, the Sender shall Pay: 22.2.1.1.1 The Transportation fee for volumes delivered when they are higher than the Contracted Capacity in firm. …",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 4,
+          "label": "Revenue/Profit Sharing",
+          "score": 0.4505557541369097,
+          "document_id": null,
+          "clause_excerpt": "In addition, Client shall be entitled to receive a royalty payment on the shipping and handling charges paid by customers during the applicable Calendar Quarter (\"Shipping Royalty\") equal to the Royalty percentage multiplied by the shipping profit.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 5,
+          "label": "Minimum Commitment",
+          "score": 0.44724812943261494,
+          "document_id": null,
+          "clause_excerpt": "Shipper guarantees that during each Contract Year, Shipper will meet its Quarterly Volume Commitment or, in the event it fails to do so, shall remit to MPL the Quarterly Deficiency Payment pursuant to Section 3.5.",
+          "selected_by_ollama": false
+        }
+      ],
+      "qdrant_top1_label": "Revenue/Profit Sharing",
+      "qdrant_top1_score": 0.5123864974618589,
+      "raw_ollama_response": "{\"clause_type\": \"License Grant\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"3. Freight and payment method:\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Revenue/Profit Sharing\n   Retrieval score: 0.5124\n   Clause: \"The Principal shall pay the Company a fee of $1.00 (one dollar), inclusive      of VAT, per one net tonne of Commodity shipped pursuant to this Contract.\"\n\n2. Label: Liquidated Damages\n   Retrieval score: 0.4562\n   Clause: \"Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB1,000 per trip on the second working day and RMB2,000 per trip on the third working day (based on the time records on the parcel transfer documents) and such liquidated damages will be deducted from the current month's freight.\"\n\n3. Label: Minimum Commitment\n   Retrieval score: 0.4546\n   Clause: \"Sender with Contracted Capacity in Firm:     22.2.1 If by any reason the delivery is less than 95% or more than 105% of their Scheduled Capacity, the Sender shall Pay:     22.2.1.1.1 The Transportation fee for volumes delivered when they are higher than the Contracted Capacity in firm. When they are equal or less the  Sender shall Pay Transportation fee on the Contracted Capacity in firm.     22.2.1.1.2 The Transporter may decide to charge the Sender a sanction equivalent to 5% of the Transportation Fee of the Scheduled Capacity.\n\n\n\n   22.2.1.2 If by any reason, delivery is between 95% and up to 105% of its scheduled Capacity, the Transporter shall charge the Transportation fee  for volumes delivered when these are above the Contracted Capacity in firm. When they are equal or less the Sender shall pay the Transportation  fee on the Contracted Capacity in firm. In this case there shall not be any sanction, without prejudice of the application of other types of sanctions.     22.2.2 Sender without Contracted Capacity in firm:     22.2.2.1 If by any reason, the delivery is less than 95% or more than 105% of its scheduled Capacity, the Sender shall Pay:     22.2.2.1.1 The Transportation fee for volumes delivered     22.2.2.1.1 The Transporter may decide to charge the Sender a sanction equivalent to 5% of the Transportation Fee of the Scheduled Capacity.     22.2.2.2 If by any reason, delivery is between 95% and up to 105% of its scheduled Capacity, the Transporter shall charge the Transportation fee  for volumes delivered. In this case there shall not be any sanction, without prejudice of the application of other types of sanctions.\"\n\n4. Label: Revenue/Profit Sharing\n   Retrieval score: 0.4506\n   Clause: \"In addition, Client shall be entitled to receive a royalty payment on the shipping and  handling charges paid by customers during the applicable Calendar Quarter (\"Shipping Royalty\") equal to the Royalty percentage  multiplied by the shipping profit.\"\n\n5. Label: Minimum Commitment\n   Retrieval score: 0.4472\n   Clause: \"Shipper guarantees that during each Contract Year, Shipper will meet its Quarterly Volume Commitment or, in the event it fails to do so, shall remit to MPL the Quarterly Deficiency Payment pursuant to Section 3.5.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"pay\"\n  ],\n  \"legal_concepts\": [],\n  \"legal_actions\": [\n    \"pay\"\n  ],\n  \"rights\": [],\n  \"obligations\": [],\n  \"restrictions\": [],\n  \"conditions\": [],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"3\"\n  ]\n}\n",
+      "parsed_prediction": "License Grant",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": false,
+      "prediction_in_retrieved_evidence": false,
+      "ollama_selected_top1": false,
+      "correct_label_in_top5": false,
+      "correct_label_rank": null,
+      "retrieval_top1_correct": false,
+      "decision_relationship": "OLLAMA_SELECTED_LABEL_NOT_RETRIEVED",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "4.",
+      "clause_number": "4.",
+      "page_start": 1,
+      "page_end": 1,
+      "query_characters": 48,
+      "clause_preview": "4. Transportation route, time and relevant rules",
+      "ground_truth_label": null,
+      "ground_truth_available": false,
+      "ground_truth_reason": "No CUAD annotation was identified for this target clause.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Notice Period To Terminate Renewal",
+          "score": 0.4799134427119086,
+          "document_id": null,
+          "clause_excerpt": "Thereafter, this Agreement shall be effective month to month, until terminated by Transporter or Shipper upon the following written notice to the other specifying a termination date: sixty (60) days for interruptible transportation under Rate Schedule ITS and 180 days for firm t…",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 2,
+          "label": "Renewal Term",
+          "score": 0.4799134427119086,
+          "document_id": null,
+          "clause_excerpt": "Thereafter, this Agreement shall be effective month to month, until terminated by Transporter or Shipper upon the following written notice to the other specifying a termination date: sixty (60) days for interruptible transportation under Rate Schedule ITS and 180 days for firm t…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 3,
+          "label": "Minimum Commitment",
+          "score": 0.4353665376189834,
+          "document_id": null,
+          "clause_excerpt": "The Transporter reserves the right to reject any Transportation request in addition to the reasons mentioned during the nomination process and the Transportation schedule, those coming from a Sender who has breached a Transportation contract, this Manual or any applicable regula…",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 4,
+          "label": "Minimum Commitment",
+          "score": 0.41113777152734216,
+          "document_id": null,
+          "clause_excerpt": "The Sender shall notify the Transporter as soon as possible, if it is found that: (i) its deliveries during a month of Operation at a Point of Entrance will be less than 95% of the Scheduled Capacity or (ii) its withdrawals at any Point of Exit shall be less than 95% of the Sche…",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 5,
+          "label": "Liquidated Damages",
+          "score": 0.40904516172483707,
+          "document_id": null,
+          "clause_excerpt": "Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB1,000 per trip on the second working day and RMB2,000 per tr…",
+          "selected_by_ollama": false
+        }
+      ],
+      "qdrant_top1_label": "Notice Period To Terminate Renewal",
+      "qdrant_top1_score": 0.4799134427119086,
+      "raw_ollama_response": "{\"clause_type\": \"Renewal Term\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"4. Transportation route, time and relevant rules\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Notice Period To Terminate Renewal\n   Retrieval score: 0.4799\n   Clause: \"Thereafter, this\n\n\n\n\n\n                  Agreement shall be effective month to month, until terminated                   by Transporter or Shipper upon the following written notice to                   the other specifying a termination date: sixty (60) days for\n\n                  interruptible transportation under Rate Schedule ITS and 180                   days for firm transportation under Rate Schedule FTS.\"\n\n2. Label: Renewal Term\n   Retrieval score: 0.4799\n   Clause: \"Thereafter, this\n\n\n\n\n\n                  Agreement shall be effective month to month, until terminated                   by Transporter or Shipper upon the following written notice to                   the other specifying a termination date: sixty (60) days for\n\n                  interruptible transportation under Rate Schedule ITS and 180                   days for firm transportation under Rate Schedule FTS.\"\n\n3. Label: Minimum Commitment\n   Retrieval score: 0.4354\n   Clause: \"The Transporter reserves the right to reject any Transportation request in addition to the reasons mentioned during the nomination process  and the Transportation schedule, those coming from a Sender who has breached a Transportation contract, this Manual or any applicable  regulations, including but without being limited to:     11.1.1 Delivery of Hydrocarbons without the minimum quality specifications indicated in this Manual.     11.1.2 Failing to deliver sufficient Hydrocarbons to fill in the line in the proportion that corresponds,\"\n\n4. Label: Minimum Commitment\n   Retrieval score: 0.4111\n   Clause: \"The Sender shall notify the Transporter as soon as possible, if it is found that: (i) its deliveries during a month of Operation at a Point of  Entrance will be less than 95% of the Scheduled Capacity or (ii) its withdrawals at any Point of Exit shall be less than 95% of the Scheduled  Capacity.\"\n\n5. Label: Liquidated Damages\n   Retrieval score: 0.4090\n   Clause: \"Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB1,000 per trip on the second working day and RMB2,000 per trip on the third working day (based on the time records on the parcel transfer documents) and such liquidated damages will be deducted from the current month's freight.\"\n\nExtracted legal information:\n{\n  \"keywords\": [],\n  \"legal_concepts\": [],\n  \"legal_actions\": [],\n  \"rights\": [],\n  \"obligations\": [],\n  \"restrictions\": [],\n  \"conditions\": [],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"4\"\n  ]\n}\n",
+      "parsed_prediction": "Renewal Term",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": false,
+      "correct_label_in_top5": false,
+      "correct_label_rank": null,
+      "retrieval_top1_correct": false,
+      "decision_relationship": "OLLAMA_SELECTED_RETRIEVED_LABEL",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "5.",
+      "clause_number": "5.",
+      "page_start": 2,
+      "page_end": 2,
+      "query_characters": 122,
+      "clause_preview": "5. In order to guarantee rapid transfer of Party A's parcel, Party B shall strictly comply with the following obligations:",
+      "ground_truth_label": null,
+      "ground_truth_available": false,
+      "ground_truth_reason": "No CUAD annotation was identified for this target clause.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Exclusivity",
+          "score": 0.5255886423226489,
+          "document_id": null,
+          "clause_excerpt": "Party A irrevocably undertakes that it will make best efforts to assist and endeavor to achieve the exclusive operation of thecooperative business to the extent permitted by laws.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 2,
+          "label": "Rofr/Rofo/Rofn",
+          "score": 0.5236255620153227,
+          "document_id": null,
+          "clause_excerpt": "The party proposing the Transfer (the \"transferor\") must obtain a bona fide, executed written offer (accompanied by a \"good faith\" earnest money deposit of at least five percent (5%) of the proposed purchase price) from a responsible and fully disclosed purchaser, and must submi…",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 3,
+          "label": "Audit Rights",
+          "score": 0.5225353439487309,
+          "document_id": null,
+          "clause_excerpt": "Each Party will comply with any reasonable safety and security measures which may be imposed by the other Party when visiting such other Party's location.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 4,
+          "label": "Insurance",
+          "score": 0.5092528987276433,
+          "document_id": null,
+          "clause_excerpt": "Party B shall purchase sufficient insurance for the transportation vehicles.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 5,
+          "label": "Most Favored Nation",
+          "score": 0.5076019140016909,
+          "document_id": null,
+          "clause_excerpt": "Party B guarantees that the Driver User will enjoy the most favorable treatment in accordance with the terms and conditions stipulated in This Agreement during the Period of Cooperation.",
+          "selected_by_ollama": false
+        }
+      ],
+      "qdrant_top1_label": "Exclusivity",
+      "qdrant_top1_score": 0.5255886423226489,
+      "raw_ollama_response": "{\"clause_type\": \"Exclusivity\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"5. In order to guarantee rapid transfer of Party A's parcel, Party B shall strictly comply with the following obligations:\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Exclusivity\n   Retrieval score: 0.5256\n   Clause: \"Party A irrevocably undertakes that it will make best efforts to assist and endeavor to achieve the exclusive operation of thecooperative business to the extent permitted by laws.\"\n\n2. Label: Rofr/Rofo/Rofn\n   Retrieval score: 0.5236\n   Clause: \"The party proposing the Transfer (the \"transferor\") must obtain a bona fide, executed written offer (accompanied by a \"good faith\" earnest money deposit of at least five percent (5%) of the proposed purchase price) from a responsible and fully disclosed purchaser, and must submit an exact copy of the offer to us.\"\n\n3. Label: Audit Rights\n   Retrieval score: 0.5225\n   Clause: \"Each Party will comply with any reasonable safety and security measures which may be imposed by the other Party when visiting such  other Party's location.\"\n\n4. Label: Insurance\n   Retrieval score: 0.5093\n   Clause: \"Party B shall purchase sufficient insurance for the transportation vehicles.\"\n\n5. Label: Most Favored Nation\n   Retrieval score: 0.5076\n   Clause: \"Party B guarantees that the Driver User will enjoy the most favorable treatment in accordance with the terms and conditions stipulated in This Agreement during the Period of Cooperation.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"transfer\",\n    \"shall\"\n  ],\n  \"legal_concepts\": [\n    \"transfer\"\n  ],\n  \"legal_actions\": [\n    \"transfer\"\n  ],\n  \"rights\": [],\n  \"obligations\": [\n    \"shall\"\n  ],\n  \"restrictions\": [],\n  \"conditions\": [],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"5\"\n  ]\n}\n",
+      "parsed_prediction": "Exclusivity",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": true,
+      "correct_label_in_top5": false,
+      "correct_label_rank": null,
+      "retrieval_top1_correct": false,
+      "decision_relationship": "RETRIEVAL_TOP1_MATCH",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "6.",
+      "clause_number": "6.",
+      "page_start": 3,
+      "page_end": 3,
+      "query_characters": 455,
+      "clause_preview": "6. Party B shall purchase sufficient insurance for the transportation vehicles. The coverage of third-party liability insurance shall not be lower than RMB1 million. In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with…",
+      "ground_truth_label": "Insurance",
+      "ground_truth_available": true,
+      "ground_truth_reason": "ZTO CUAD annotations identify three Insurance spans within clause 6.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Insurance",
+          "score": 0.7654467867011041,
+          "document_id": null,
+          "clause_excerpt": "In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with coverage not lower than RMB500,000 per person.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 2,
+          "label": "Insurance",
+          "score": 0.6482274973683331,
+          "document_id": null,
+          "clause_excerpt": "Party B shall purchase sufficient insurance for the transportation vehicles.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 3,
+          "label": "Insurance",
+          "score": 0.6400202143323286,
+          "document_id": null,
+          "clause_excerpt": "The coverage of third-party liability insurance shall not be lower than RMB1 million.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 4,
+          "label": "Insurance",
+          "score": 0.5762551863544236,
+          "document_id": null,
+          "clause_excerpt": "Each Party shall purchase and maintain, at its own expense, the following insurance coverages: (a) cargo liability insurance, subject to a combined single limit of not less than One Hundred Thousand dollars ($100,000.00) inclusive per occurrence. The other Party shall be named a…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 5,
+          "label": "Liquidated Damages",
+          "score": 0.5579517745445784,
+          "document_id": null,
+          "clause_excerpt": "Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB…",
+          "selected_by_ollama": false
+        }
+      ],
+      "qdrant_top1_label": "Insurance",
+      "qdrant_top1_score": 0.7654467867011041,
+      "raw_ollama_response": "{\"clause_type\": \"Insurance\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"6. Party B shall purchase sufficient insurance for the transportation vehicles. The coverage of third-party liability insurance shall not be lower than RMB1 million. In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with coverage not lower than RMB500,000 per person. Party B shall bear any consequence arising out of the non-compliance of insurance purchase, and Party A shall have no liability.\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Insurance\n   Retrieval score: 0.7654\n   Clause: \"In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with coverage not lower than RMB500,000 per person.\"\n\n2. Label: Insurance\n   Retrieval score: 0.6482\n   Clause: \"Party B shall purchase sufficient insurance for the transportation vehicles.\"\n\n3. Label: Insurance\n   Retrieval score: 0.6400\n   Clause: \"The coverage of third-party liability insurance shall not be lower than RMB1 million.\"\n\n4. Label: Insurance\n   Retrieval score: 0.5763\n   Clause: \"Each Party shall purchase and maintain, at its own expense, the        following insurance coverages:\n\n    (a)     cargo liability insurance, subject to a combined single limit of                not less than One Hundred Thousand dollars ($100,000.00)                inclusive per occurrence. The other Party shall be named as an                additional insured and the policy shall contain a cross                liability clause;\n\n    (b)     automobile, non-owned automobile, fleet, comprehensive general,                public and property liability insurance with a limit of not less                than Two Million dollars ($2,000,000.00) inclusive of bodily                injury and property damage for any one occurrence arising out of                one (1) cause. The policy shall cover all non-air operations,                non-owned automobile, contractual liability and liability                specifically assumed under this Agreement. The other party shall                be named as an additional insured and the policy shall contain a                cross liability clause;\"\n\n5. Label: Liquidated Damages\n   Retrieval score: 0.5580\n   Clause: \"Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB 50,000 (RMB FIFTY THOUSAND) and indemnify for all losses incurred to Party A thereby.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"liability\",\n    \"insurance\",\n    \"purchase\",\n    \"insure\",\n    \"shall\",\n    \"shall not\",\n    \"no\",\n    \"not\"\n  ],\n  \"legal_concepts\": [\n    \"insurance\",\n    \"liability\"\n  ],\n  \"legal_actions\": [\n    \"purchase\",\n    \"insure\"\n  ],\n  \"rights\": [],\n  \"obligations\": [\n    \"shall\"\n  ],\n  \"restrictions\": [\n    \"shall not\",\n    \"no\",\n    \"not\"\n  ],\n  \"conditions\": [],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"6\",\n    \"000\"\n  ]\n}\n",
+      "parsed_prediction": "Insurance",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": true,
+      "correct_label_in_top5": true,
+      "correct_label_rank": 1,
+      "retrieval_top1_correct": true,
+      "decision_relationship": "RETRIEVAL_TOP1_MATCH",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "9.",
+      "clause_number": "9.",
+      "page_start": 3,
+      "page_end": 3,
+      "query_characters": 236,
+      "clause_preview": "9. Party A has the right to terminate this Agreement if Party B has breached the above articles in this Agreement. The termination of this Agreement shall not prejudice Party A's right to hold Party B responsible for breach of contract.",
+      "ground_truth_label": null,
+      "ground_truth_available": false,
+      "ground_truth_reason": "No CUAD annotation was identified for this target clause.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Liquidated Damages",
+          "score": 0.6474151265481198,
+          "document_id": null,
+          "clause_excerpt": "In the event that Party B breaches this covenant, Party A has the right to terminate this Agreement at any time and require Party B to pay 30% of Party A's share of revenues as liquidated damages.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 2,
+          "label": "Termination For Convenience",
+          "score": 0.6389110268598238,
+          "document_id": null,
+          "clause_excerpt": "Party B shall have the right to terminate this Agreement in advance without the prior written consent from Party A, bysending a written notice to Party A but Party A may not terminate or rescind this Agreement;",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 3,
+          "label": "Cap On Liability",
+          "score": 0.6144208438356474,
+          "document_id": null,
+          "clause_excerpt": "Neither Party shall be liable to the Other Party for any direct, indirect, consequential, incidental, special, punitive or exemplary damages arising out of or relating to the 9 suspension or termination of any of its obligations or duties under this Agreement by reason of the oc…",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 4,
+          "label": "Termination For Convenience",
+          "score": 0.6104180313663692,
+          "document_id": null,
+          "clause_excerpt": "Either party shall have the right to terminate this Agreement at any time for any reason.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 5,
+          "label": "Cap On Liability",
+          "score": 0.6065343102309296,
+          "document_id": null,
+          "clause_excerpt": "Upon termination of this Agreement, NEITHER PARTY SHALL BE LIABLE TO THE OTHER FOR ANY CONSEQUENTIAL, EXEMPLARY, SPECIAL, INCIDENTAL OR PUNITIVE DAMAGES, EVEN IF IT HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, WHICH ARE RELATED TO THE AGREEMENT OR ITS BREACH.",
+          "selected_by_ollama": false
+        }
+      ],
+      "qdrant_top1_label": "Liquidated Damages",
+      "qdrant_top1_score": 0.6474151265481198,
+      "raw_ollama_response": "{\"clause_type\": \"Termination For Convenience\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"9. Party A has the right to terminate this Agreement if Party B has breached the above articles in this Agreement. The termination of this Agreement shall not prejudice Party A's right to hold Party B responsible for breach of contract.\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Liquidated Damages\n   Retrieval score: 0.6474\n   Clause: \"In the event that Party B breaches this covenant, Party A has the right to terminate this Agreement at any time and require Party B to pay 30% of Party A's share of revenues as liquidated damages.\"\n\n2. Label: Termination For Convenience\n   Retrieval score: 0.6389\n   Clause: \"Party B shall have the right to terminate this Agreement in advance without the prior written consent from Party A, bysending a written notice to Party A but Party A may not terminate or rescind this Agreement;\"\n\n3. Label: Cap On Liability\n   Retrieval score: 0.6144\n   Clause: \"Neither Party shall be liable to the Other Party for any direct, indirect, consequential, incidental, special, punitive or exemplary damages arising out of or relating to the\n\n                                                                               9\n\nsuspension or termination of any of its obligations or duties under this Agreement by reason of the occurrence of Force Majeure. In the event that Force Majeure has occurred and is continuing for a period of at least six (6) months, the Other Party shall have the right to terminate this Agreement upon thirty (30) days' notice.\"\n\n4. Label: Termination For Convenience\n   Retrieval score: 0.6104\n   Clause: \"Either party shall have the right to terminate this Agreement at any time for any reason.\"\n\n5. Label: Cap On Liability\n   Retrieval score: 0.6065\n   Clause: \"Upon termination of this Agreement, NEITHER PARTY SHALL BE LIABLE TO THE OTHER FOR ANY CONSEQUENTIAL,  EXEMPLARY, SPECIAL, INCIDENTAL OR PUNITIVE DAMAGES, EVEN IF IT HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH  DAMAGES, WHICH ARE RELATED TO THE AGREEMENT OR ITS BREACH.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"termination\",\n    \"terminate\",\n    \"right to\",\n    \"shall\",\n    \"shall not\",\n    \"not\",\n    \"if\"\n  ],\n  \"legal_concepts\": [\n    \"termination\"\n  ],\n  \"legal_actions\": [\n    \"terminate\"\n  ],\n  \"rights\": [\n    \"right to\"\n  ],\n  \"obligations\": [\n    \"shall\"\n  ],\n  \"restrictions\": [\n    \"shall not\",\n    \"not\"\n  ],\n  \"conditions\": [\n    \"if\"\n  ],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"9\"\n  ]\n}\n",
+      "parsed_prediction": "Termination For Convenience",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": false,
+      "correct_label_in_top5": false,
+      "correct_label_rank": null,
+      "retrieval_top1_correct": false,
+      "decision_relationship": "OLLAMA_SELECTED_RETRIEVED_LABEL",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "11.",
+      "clause_number": "11.",
+      "page_start": 3,
+      "page_end": 3,
+      "query_characters": 195,
+      "clause_preview": "11. Without Party A's approval, Party B shall not transfer the carriage of goods to any third party in the designated route. Otherwise, Party A has the right to terminate this Agreement directly.",
+      "ground_truth_label": null,
+      "ground_truth_available": false,
+      "ground_truth_reason": "No CUAD annotation was identified for this target clause.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Termination For Convenience",
+          "score": 0.6030398783129638,
+          "document_id": null,
+          "clause_excerpt": "Party B shall have the right to terminate this Agreement in advance without the prior written consent from Party A, bysending a written notice to Party A but Party A may not terminate or rescind this Agreement;",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 2,
+          "label": "Anti-Assignment",
+          "score": 0.5885784739091928,
+          "document_id": null,
+          "clause_excerpt": "Except otherwise expressly agreed between the parties or agreed by Party A beforehand, Party B shall not transfer any cooperation business to a third party in any form whatsoever.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 3,
+          "label": "Termination For Convenience",
+          "score": 0.5803340489371289,
+          "document_id": null,
+          "clause_excerpt": "Either Party may terminate this Agreement at any time prior to delivery of the Product.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 4,
+          "label": "Anti-Assignment",
+          "score": 0.5787250278671678,
+          "document_id": null,
+          "clause_excerpt": "For the avoidance of doubt, in the event that either Party assigns this Agreement pursuant to this Section 14.3(a), the other Party shall have the right to terminate this Agreement pursuant to Section 12.2(i).",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 5,
+          "label": "Anti-Assignment",
+          "score": 0.576215466108285,
+          "document_id": null,
+          "clause_excerpt": "The Parties may not assign this Agreement or the rights and obligations hereunder to any third party without the prior express written approval of the other Party.",
+          "selected_by_ollama": true
+        }
+      ],
+      "qdrant_top1_label": "Termination For Convenience",
+      "qdrant_top1_score": 0.6030398783129638,
+      "raw_ollama_response": "{\"clause_type\": \"Anti-Assignment\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"11. Without Party A's approval, Party B shall not transfer the carriage of goods to any third party in the designated route. Otherwise, Party A has the right to terminate this Agreement directly.\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Termination For Convenience\n   Retrieval score: 0.6030\n   Clause: \"Party B shall have the right to terminate this Agreement in advance without the prior written consent from Party A, bysending a written notice to Party A but Party A may not terminate or rescind this Agreement;\"\n\n2. Label: Anti-Assignment\n   Retrieval score: 0.5886\n   Clause: \"Except otherwise expressly agreed between the parties or agreed by Party A beforehand, Party B shall not transfer any cooperation business to a third party in any form whatsoever.\"\n\n3. Label: Termination For Convenience\n   Retrieval score: 0.5803\n   Clause: \"Either Party may terminate this Agreement at any time prior to delivery of the Product.\"\n\n4. Label: Anti-Assignment\n   Retrieval score: 0.5787\n   Clause: \"For the avoidance of doubt, in the event that either Party assigns this Agreement pursuant to this Section 14.3(a), the other Party shall have the right to terminate this Agreement pursuant to Section 12.2(i).\"\n\n5. Label: Anti-Assignment\n   Retrieval score: 0.5762\n   Clause: \"The Parties may not assign this Agreement or the rights and obligations hereunder to any third party without the prior express written approval of the other Party.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"terminate\",\n    \"transfer\",\n    \"termination\",\n    \"right to\",\n    \"shall\",\n    \"shall not\",\n    \"not\",\n    \"without\"\n  ],\n  \"legal_concepts\": [\n    \"transfer\",\n    \"termination\"\n  ],\n  \"legal_actions\": [\n    \"transfer\",\n    \"terminate\"\n  ],\n  \"rights\": [\n    \"right to\"\n  ],\n  \"obligations\": [\n    \"shall\"\n  ],\n  \"restrictions\": [\n    \"shall not\",\n    \"not\",\n    \"without\"\n  ],\n  \"conditions\": [],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"11\"\n  ]\n}\n",
+      "parsed_prediction": "Anti-Assignment",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": false,
+      "correct_label_in_top5": false,
+      "correct_label_rank": null,
+      "retrieval_top1_correct": false,
+      "decision_relationship": "OLLAMA_SELECTED_RETRIEVED_LABEL",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "12.",
+      "clause_number": "12.",
+      "page_start": 4,
+      "page_end": 4,
+      "query_characters": 210,
+      "clause_preview": "12. Any dispute arising out of the execution of this Agreement, which cannot be negotiated and settled by both Parties, shall be subject to the jurisdiction of the People's Court where this Agreement is signed.",
+      "ground_truth_label": null,
+      "ground_truth_available": false,
+      "ground_truth_reason": "No CUAD annotation was identified for this target clause.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Governing Law",
+          "score": 0.531984645929346,
+          "document_id": null,
+          "clause_excerpt": "Any disputes arising out of or relating to this Agreement, including to its execution, performance or enforcement, shall be governed by, and construed in accordance with, the Laws of the State of New York, regardless of the Laws that might otherwise govern under applicable princ…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 2,
+          "label": "Governing Law",
+          "score": 0.5269473697745126,
+          "document_id": null,
+          "clause_excerpt": "This Agreement and any dispute or claim arising out of or in connection with it or its subject matter shall be governed by, and construed in accordance with, the laws of the People's Republic of China (without regard to its conflicts of laws rules that would mandate the applicat…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 3,
+          "label": "Governing Law",
+          "score": 0.5269361543817408,
+          "document_id": null,
+          "clause_excerpt": "This Agreement and any dispute or claim arising out of or in connection with it or its subject matter shall be governed by, and construed in accordance with, the laws of the People's Republic of China (without regard to its conflicts of laws rules that would mandate the applicat…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 4,
+          "label": "Governing Law",
+          "score": 0.5220726344556645,
+          "document_id": null,
+          "clause_excerpt": "The execution, effect, interpretation and performance of this Agreement and resolution of any dispute arising from this Agreement will be governed by PRC Laws.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 5,
+          "label": "Anti-Assignment",
+          "score": 0.5204623825147582,
+          "document_id": null,
+          "clause_excerpt": "Subject to Section 12.2, neither party shall assign its rights or obligations hereunder, in whole or in part, except with the prior written consent of the other party, except to a party acquiring all of the business of the assigning party to which this Agreement relates.",
+          "selected_by_ollama": false
+        }
+      ],
+      "qdrant_top1_label": "Governing Law",
+      "qdrant_top1_score": 0.531984645929346,
+      "raw_ollama_response": "{\"clause_type\": \"Governing Law\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"12. Any dispute arising out of the execution of this Agreement, which cannot be negotiated and settled by both Parties, shall be subject to the jurisdiction of the People's Court where this Agreement is signed.\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Governing Law\n   Retrieval score: 0.5320\n   Clause: \"Any disputes arising out of or relating to this Agreement, including to its execution, performance or enforcement, shall be governed by, and construed in accordance with, the Laws of the State of New York, regardless of the Laws that might otherwise govern under applicable principles of conflicts of Laws thereof.\"\n\n2. Label: Governing Law\n   Retrieval score: 0.5269\n   Clause: \"This Agreement and any dispute or claim arising out of or in connection with it or its subject matter shall be governed by, and construed in accordance with, the laws of the People's Republic of China (without regard to its conflicts of laws rules that would mandate the application of the laws of another jurisdiction).\"\n\n3. Label: Governing Law\n   Retrieval score: 0.5269\n   Clause: \"This Agreement and any dispute or claim arising out of or in connection with it or its subject matter shall be governed by,  and construed in accordance with, the laws of the People's Republic of China (without regard to its conflicts of laws rules that would mandate the  application of the laws of another jurisdiction).\"\n\n4. Label: Governing Law\n   Retrieval score: 0.5221\n   Clause: \"The execution, effect, interpretation and performance of this Agreement and resolution of any dispute arising from this Agreement will be governed by PRC Laws.\"\n\n5. Label: Anti-Assignment\n   Retrieval score: 0.5205\n   Clause: \"Subject to Section 12.2, neither party shall assign its rights or obligations hereunder, in whole or in part, except with the prior written consent of the other party, except to a party acquiring all of the business of the assigning party to which this Agreement relates.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"shall\",\n    \"subject to\"\n  ],\n  \"legal_concepts\": [],\n  \"legal_actions\": [],\n  \"rights\": [],\n  \"obligations\": [\n    \"shall\"\n  ],\n  \"restrictions\": [],\n  \"conditions\": [\n    \"subject to\"\n  ],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"12\"\n  ]\n}\n",
+      "parsed_prediction": "Governing Law",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": true,
+      "correct_label_in_top5": false,
+      "correct_label_rank": null,
+      "retrieval_top1_correct": false,
+      "decision_relationship": "RETRIEVAL_TOP1_MATCH",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "13.",
+      "clause_number": "13.",
+      "page_start": 4,
+      "page_end": 4,
+      "query_characters": 175,
+      "clause_preview": "13. The annex of this Agreement constitutes a part of this Agreement and has the same effect as this Agreement. Any undealt matter can be negotiated and added by both Parties.",
+      "ground_truth_label": null,
+      "ground_truth_available": false,
+      "ground_truth_reason": "No CUAD annotation was identified for this target clause.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Covenant Not To Sue",
+          "score": 0.5066150163222621,
+          "document_id": null,
+          "clause_excerpt": "The parties desire to resolve disputes arising out of this Agreement without litigation.",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 2,
+          "label": "Anti-Assignment",
+          "score": 0.49990855702461445,
+          "document_id": null,
+          "clause_excerpt": "Except as otherwise provided in Paragraph 12 and Subparagraphs 22.2, 22.3, 22.4 and 22.5, during the term of this Agreement, no Party may assign, sell, transfer or dispose of the whole or any parts of its rights or obligations under this Agreement",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 3,
+          "label": "Anti-Assignment",
+          "score": 0.49924673697657423,
+          "document_id": null,
+          "clause_excerpt": "This Agreement and the rights and obligations specified herein shall be binding upon the Parties and their respective legal successors and neither Party shall sell, transfer or assign this Agreement or any part, interest, right or obligation hereunder except that a Party shall h…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 4,
+          "label": "Anti-Assignment",
+          "score": 0.49644386153257386,
+          "document_id": null,
+          "clause_excerpt": "This Agreement is binding upon and enures to the benefit of the parties and their respective successors and assigns, and no party shall have the right to assign its rights hereunder or any interest herein without the prior written consent of the other parties.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 5,
+          "label": "Anti-Assignment",
+          "score": 0.496369731248244,
+          "document_id": null,
+          "clause_excerpt": "This Agreement shall be binding on the parties and their respective successors and assigns, but neither party may, or shall have the power to, assign this Agreement without the prior written consent of the other, which consent shall not be unreasonably withheld.",
+          "selected_by_ollama": true
+        }
+      ],
+      "qdrant_top1_label": "Covenant Not To Sue",
+      "qdrant_top1_score": 0.5066150163222621,
+      "raw_ollama_response": "{\"clause_type\": \"Anti-Assignment\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"13. The annex of this Agreement constitutes a part of this Agreement and has the same effect as this Agreement. Any undealt matter can be negotiated and added by both Parties.\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Covenant Not To Sue\n   Retrieval score: 0.5066\n   Clause: \"The parties desire to resolve disputes arising out of this                Agreement without litigation.\"\n\n2. Label: Anti-Assignment\n   Retrieval score: 0.4999\n   Clause: \"Except as otherwise provided in Paragraph 12 and Subparagraphs 22.2, 22.3, 22.4 and 22.5, during the term of this Agreement, no Party may assign, sell, transfer or dispose of the whole or any parts of its rights or obligations under this Agreement\"\n\n3. Label: Anti-Assignment\n   Retrieval score: 0.4992\n   Clause: \"This Agreement and the rights and obligations specified herein shall be binding upon the Parties and their respective legal successors and neither Party shall sell, transfer or assign this Agreement or any part, interest, right or obligation hereunder except that a Party shall have the right to transfer or assign this Agreement in whole (but not in part) to an Affiliated Company provided that:<omitted>a) such Affiliated Company expressly assumes, by written instrument, all of the obligations of the Party under this Agreement and thereby becomes a Party to this Agreement, and   b) such Affiliated Company has adequate financial strength, resources and experience in the reasonable opinion of the other Party (such opinion to be obtained in writing in advance of any assignment), to comply with its obligations under this Agreement. Such assignment shall not release the assigning Party of its obligations under article 11 of this Agreement.\"\n\n4. Label: Anti-Assignment\n   Retrieval score: 0.4964\n   Clause: \"This  Agreement  is binding  upon and enures to the  benefit of the  parties and their  respective  successors and assigns,  and no party shall have the right to assign its rights  hereunder or any interest  herein  without the prior  written consent of the other parties.\"\n\n5. Label: Anti-Assignment\n   Retrieval score: 0.4964\n   Clause: \"This Agreement shall be binding on the parties and their respective successors and assigns, but neither party may, or shall have the power to, assign this Agreement without the prior written consent of the other, which consent shall not be unreasonably withheld.\"\n\nExtracted legal information:\n{\n  \"keywords\": [],\n  \"legal_concepts\": [],\n  \"legal_actions\": [],\n  \"rights\": [],\n  \"obligations\": [],\n  \"restrictions\": [],\n  \"conditions\": [],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"13\"\n  ]\n}\n",
+      "parsed_prediction": "Anti-Assignment",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": false,
+      "correct_label_in_top5": false,
+      "correct_label_rank": null,
+      "retrieval_top1_correct": false,
+      "decision_relationship": "OLLAMA_SELECTED_RETRIEVED_LABEL",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "14.",
+      "clause_number": "14.",
+      "page_start": 4,
+      "page_end": 4,
+      "query_characters": 155,
+      "clause_preview": "14. This Agreement takes effect upon the signatures and seals of both Parties in triplicate. Party A shall have two copies and Party B shall have one copy.",
+      "ground_truth_label": null,
+      "ground_truth_available": false,
+      "ground_truth_reason": "No CUAD annotation was identified for this target clause.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Anti-Assignment",
+          "score": 0.4949521647860077,
+          "document_id": null,
+          "clause_excerpt": "This Agreement shall be binding on the parties and their respective successors and assigns, but neither party may, or shall have the power to, assign this Agreement without the prior written consent of the other, which consent shall not be unreasonably withheld.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 2,
+          "label": "Anti-Assignment",
+          "score": 0.48410685536116366,
+          "document_id": null,
+          "clause_excerpt": "This Agreement shall bind the Parties hereto and their successors and assigns, provided that neither party shall have the right to assign this Agreement or any part thereof to a third party without the prior written consent of the other party, however such consent will not be un…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 3,
+          "label": "Anti-Assignment",
+          "score": 0.47714252437551785,
+          "document_id": null,
+          "clause_excerpt": "Party B may not assign its rights and obligations hereunder without Party A's consent in writing and the successors and permitted assigns of the Parties shall be bound by this Agreement.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 4,
+          "label": "Anti-Assignment",
+          "score": 0.47584179257815007,
+          "document_id": null,
+          "clause_excerpt": "This Agreement shall be binding on the respective transferees and successors of the parties hereto, except that neither this Agreement nor either party's rights or obligations hereunder shall be assigned or transferred by either party without the prior written consent of the oth…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 5,
+          "label": "Joint Ip Ownership",
+          "score": 0.4739865704126125,
+          "document_id": null,
+          "clause_excerpt": "Copyright Materials that are jointly created by the Parties shall be jointly owned.",
+          "selected_by_ollama": false
+        }
+      ],
+      "qdrant_top1_label": "Anti-Assignment",
+      "qdrant_top1_score": 0.4949521647860077,
+      "raw_ollama_response": "{\"clause_type\": \"Anti-Assignment\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"14. This Agreement takes effect upon the signatures and seals of both Parties in triplicate. Party A shall have two copies and Party B shall have one copy.\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Anti-Assignment\n   Retrieval score: 0.4950\n   Clause: \"This Agreement shall be binding on the parties and their respective successors and assigns, but neither party may, or shall have the power to, assign this Agreement without the prior written consent of the other, which consent shall not be unreasonably withheld.\"\n\n2. Label: Anti-Assignment\n   Retrieval score: 0.4841\n   Clause: \"This Agreement shall bind the Parties hereto and their successors and assigns, provided that neither party shall have  the right to assign this Agreement or any part thereof to a third party without the prior written consent of the other party,  however such consent will not be unreasonably withheld.\"\n\n3. Label: Anti-Assignment\n   Retrieval score: 0.4771\n   Clause: \"Party B may not assign its rights and obligations hereunder without Party A's consent in writing and the successors and permitted assigns of  the Parties shall be bound by this Agreement.\"\n\n4. Label: Anti-Assignment\n   Retrieval score: 0.4758\n   Clause: \"This Agreement shall be binding on the respective transferees and successors of the parties hereto, except that neither this Agreement nor either party's rights or obligations hereunder shall be assigned or transferred by either party without the prior written consent of the other party.\"\n\n5. Label: Joint Ip Ownership\n   Retrieval score: 0.4740\n   Clause: \"Copyright Materials that are jointly created by the Parties shall be jointly owned.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"shall\",\n    \"upon\"\n  ],\n  \"legal_concepts\": [],\n  \"legal_actions\": [],\n  \"rights\": [],\n  \"obligations\": [\n    \"shall\"\n  ],\n  \"restrictions\": [],\n  \"conditions\": [\n    \"upon\"\n  ],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"14\"\n  ]\n}\n",
+      "parsed_prediction": "Anti-Assignment",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": true,
+      "correct_label_in_top5": false,
+      "correct_label_rank": null,
+      "retrieval_top1_correct": false,
+      "decision_relationship": "RETRIEVAL_TOP1_MATCH",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "5(e)",
+      "clause_number": "(e)",
+      "page_start": 2,
+      "page_end": 2,
+      "query_characters": 870,
+      "clause_preview": "(e) Party B shall arrive at the network partners determined by Party A according to the time and route stipulated in this Agreement, and strictly comply with the start time and end time. Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehic…",
+      "ground_truth_label": "Liquidated Damages",
+      "ground_truth_available": true,
+      "ground_truth_reason": "ZTO CUAD annotations identify liquidated-damages spans in clause 5(e) and clause 10.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Liquidated Damages",
+          "score": 0.8183981719704212,
+          "document_id": null,
+          "clause_excerpt": "Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB1,000 per trip on the second working day and RMB2,000 per tr…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 2,
+          "label": "Liquidated Damages",
+          "score": 0.6031205306127828,
+          "document_id": null,
+          "clause_excerpt": "Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB…",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 3,
+          "label": "Liquidated Damages",
+          "score": 0.5880357384566852,
+          "document_id": null,
+          "clause_excerpt": "In such case, Party A is entitled to immediately terminate the Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB50,000 (RMB FIFTY THOUSAND) and indemnify for all losses incurred to Party A thereby.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 4,
+          "label": "Liquidated Damages",
+          "score": 0.5697349506654474,
+          "document_id": null,
+          "clause_excerpt": "For example, if Party B shall pay liquidated damages as much as RMB N, it shall pay additional RMB N to increase the deposit paid in accordance with Article 4.2 after it pays the liquidated damages or Party A deducts the liquidated damages from the deposit.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 5,
+          "label": "Liquidated Damages",
+          "score": 0.5617647674915964,
+          "document_id": null,
+          "clause_excerpt": "Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent.",
+          "selected_by_ollama": true
+        }
+      ],
+      "qdrant_top1_label": "Liquidated Damages",
+      "qdrant_top1_score": 0.8183981719704212,
+      "raw_ollama_response": "{\"clause_type\": \"Liquidated Damages\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"(e) Party B shall arrive at the network partners determined by Party A according to the time and route stipulated in this Agreement, and strictly comply with the start time and end time. Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB1,000 per trip on the second working day and RMB2,000 per trip on the third working day (based on the time records on the parcel transfer documents) and such liquidated damages will be deducted from the current month's freight. In the special event of changes to route and time and severe weather (or other force majeure events), Party B shall be in touch with Party A in time and record such special event on the parcel transfer documents with Party A's approval.\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Liquidated Damages\n   Retrieval score: 0.8184\n   Clause: \"Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB1,000 per trip on the second working day and RMB2,000 per trip on the third working day (based on the time records on the parcel transfer documents) and such liquidated damages will be deducted from the current month's freight.\"\n\n2. Label: Liquidated Damages\n   Retrieval score: 0.6031\n   Clause: \"Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB 50,000 (RMB FIFTY THOUSAND) and indemnify for all losses incurred to Party A thereby.\"\n\n3. Label: Liquidated Damages\n   Retrieval score: 0.5880\n   Clause: \"In such case, Party A is entitled to immediately terminate the Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB50,000 (RMB FIFTY THOUSAND) and indemnify for all losses incurred to Party A thereby.\"\n\n4. Label: Liquidated Damages\n   Retrieval score: 0.5697\n   Clause: \"For example, if Party B shall pay liquidated damages as much as RMB N, it shall pay additional RMB N to increase the deposit paid in accordance with Article 4.2 after it pays the liquidated damages or Party A deducts the liquidated damages from the deposit.\"\n\n5. Label: Liquidated Damages\n   Retrieval score: 0.5618\n   Clause: \"Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"transfer\",\n    \"liquidated damages\",\n    \"pay\",\n    \"shall\",\n    \"unless\",\n    \"in the event\"\n  ],\n  \"legal_concepts\": [\n    \"transfer\",\n    \"liquidated damages\"\n  ],\n  \"legal_actions\": [\n    \"transfer\",\n    \"pay\"\n  ],\n  \"rights\": [],\n  \"obligations\": [\n    \"shall\"\n  ],\n  \"restrictions\": [],\n  \"conditions\": [\n    \"unless\",\n    \"in the event\"\n  ],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"000\"\n  ]\n}\n",
+      "parsed_prediction": "Liquidated Damages",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": true,
+      "correct_label_in_top5": true,
+      "correct_label_rank": 1,
+      "retrieval_top1_correct": true,
+      "decision_relationship": "RETRIEVAL_TOP1_MATCH",
+      "classifier_error": false
+    },
+    {
+      "clause_id": "10.",
+      "clause_number": "10.",
+      "page_start": 3,
+      "page_end": 3,
+      "query_characters": 385,
+      "clause_preview": "10. Party B shall obtain Party A's written consent in the case the early termination of the Agreement. Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent. Within the contract period, Party B shall not charge the frei…",
+      "ground_truth_label": "Liquidated Damages",
+      "ground_truth_available": true,
+      "ground_truth_reason": "ZTO CUAD annotations identify liquidated-damages spans in clause 5(e) and clause 10.",
+      "retrieved": [
+        {
+          "rank": 1,
+          "label": "Liquidated Damages",
+          "score": 0.707168526626664,
+          "document_id": null,
+          "clause_excerpt": "Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 2,
+          "label": "Liquidated Damages",
+          "score": 0.5921693122598463,
+          "document_id": null,
+          "clause_excerpt": "In the event that Party B breaches this covenant, Party A has the right to terminate this Agreement at any time and require Party B to pay 30% of Party A's share of revenues as liquidated damages.",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 3,
+          "label": "Liquidated Damages",
+          "score": 0.5796041444868311,
+          "document_id": null,
+          "clause_excerpt": "In case that the Driver User unilaterally terminates the Financial Leasing Agreement in advance, Party B shall collect the liquidated damages from the Driver User within 30% of the \"down payment + total monthly rent + last payment\" stipulated in the Financial Leasing Agreement;",
+          "selected_by_ollama": true
+        },
+        {
+          "rank": 4,
+          "label": "Termination For Convenience",
+          "score": 0.5674255847263071,
+          "document_id": null,
+          "clause_excerpt": "Party B shall have the right to terminate this Agreement in advance without the prior written consent from Party A, bysending a written notice to Party A but Party A may not terminate or rescind this Agreement;",
+          "selected_by_ollama": false
+        },
+        {
+          "rank": 5,
+          "label": "Liquidated Damages",
+          "score": 0.5542765665959375,
+          "document_id": null,
+          "clause_excerpt": "Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB…",
+          "selected_by_ollama": true
+        }
+      ],
+      "qdrant_top1_label": "Liquidated Damages",
+      "qdrant_top1_score": 0.707168526626664,
+      "raw_ollama_response": "{\"clause_type\": \"Liquidated Damages\"}",
+      "prompt": "You are a legal contract clause classifier for CUAD.\n\nTask:\nIdentify the MAIN LEGAL FUNCTION of the clause and return exactly one valid CUAD label.\n\nDecision rules:\n- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.\n- Use retrieved examples as evidence, not as automatic answers.\n- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.\n- Prefer the primary contractual function when several concepts appear.\n- Do not rely on keyword matching alone.\n- Do not invent facts.\n- Do not invent labels.\n- Return exactly one label from the allowed list.\n- Return ONLY a JSON object in this exact format:\n  {\"clause_type\": \"<one allowed CUAD label>\"}\n\nOriginal clause:\n\"10. Party B shall obtain Party A's written consent in the case the early termination of the Agreement. Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent. Within the contract period, Party B shall not charge the freight difference if Party A rents same-level vehicles. Party B shall also compensate Party A's other losses.\"\n\nAllowed CUAD labels:\n- Affiliate License-Licensee\n- Affiliate License-Licensor\n- Anti-Assignment\n- Audit Rights\n- Cap On Liability\n- Change Of Control\n- Competitive Restriction Exception\n- Covenant Not To Sue\n- Exclusivity\n- Governing Law\n- Insurance\n- Ip Ownership Assignment\n- Irrevocable Or Perpetual License\n- Joint Ip Ownership\n- License Grant\n- Liquidated Damages\n- Minimum Commitment\n- Most Favored Nation\n- No-Solicit Of Customers\n- No-Solicit Of Employees\n- Non-Compete\n- Non-Disparagement\n- Non-Transferable License\n- Notice Period To Terminate Renewal\n- Post-Termination Services\n- Price Restrictions\n- Renewal Term\n- Revenue/Profit Sharing\n- Rofr/Rofo/Rofn\n- Source Code Escrow\n- Termination For Convenience\n- Third Party Beneficiary\n- Uncapped Liability\n- Unlimited/All-You-Can-Eat-License\n- Volume Restriction\n- Warranty Duration\n\nCUAD label definitions:\n- Affiliate License-Licensee: License rights are granted to the licensee's affiliates, subsidiaries, parent companies, or related entities.\n- Affiliate License-Licensor: License rights are granted to, reserved for, or shared with the licensor's affiliates, subsidiaries, parent companies, or related entities.\n- Anti-Assignment: A clause restricting assignment, delegation, transfer, or subcontracting of the agreement or its rights and duties.\n- Audit Rights: A clause giving one party the right to inspect, audit, or review books, records, systems, or compliance.\n- Cap On Liability: A clause setting an express maximum amount or formula that limits liability exposure.\n- Change Of Control: A clause triggered by a merger, acquisition, ownership change, or similar change in control.\n- Competitive Restriction Exception: A clause that carves out permitted competitive activity from an otherwise restrictive non-compete or exclusivity provision.\n- Covenant Not To Sue: A clause where a party promises not to sue, assert claims, or bring infringement actions.\n- Exclusivity: A clause making a relationship exclusive, sole, or restricted to one counterparty, channel, product, or territory.\n- Governing Law: A clause specifying the law, jurisdiction, or venue that governs interpretation or disputes.\n- Insurance: A clause requiring insurance coverage, policy types, limits, certificates, or proof of insurance.\n- Ip Ownership Assignment: A clause assigning or transferring intellectual property ownership or future IP rights to a party.\n- Irrevocable Or Perpetual License: A clause granting a license that is irrevocable, perpetual, permanent, or continuing indefinitely.\n- Joint Ip Ownership: A clause stating that intellectual property is jointly owned by two or more parties.\n- License Grant: A clause that grants a license, right, permission, or authorization to use specified IP, data, or materials.\n- Liquidated Damages: A clause setting a pre-agreed damages amount or formula for a specified breach or delay.\n- Minimum Commitment: A clause requiring a minimum purchase, spend, volume, output, or other contractual commitment.\n- Most Favored Nation: A clause requiring parity with the best price, terms, or treatment given to another counterparty.\n- No-Solicit Of Customers: A clause prohibiting solicitation of customers, clients, or accounts.\n- No-Solicit Of Employees: A clause prohibiting solicitation, hiring, or recruitment of employees, contractors, or personnel.\n- Non-Compete: A clause prohibiting competing business activity, products, services, or market participation.\n- Non-Disparagement: A clause prohibiting disparaging, defamatory, or derogatory statements about a party or its products, services, or personnel.\n- Non-Transferable License: A clause stating that a license may not be assigned, transferred, or sublicensed.\n- Notice Period To Terminate Renewal: A clause requiring advance notice to stop automatic renewal or to terminate at the end of a renewal period.\n- Post-Termination Services: A clause requiring transition assistance, wind-down support, or continuing services after termination.\n- Price Restrictions: A clause limiting pricing, discounts, resale price, or price changes.\n- Renewal Term: A clause defining an automatic or optional renewal period or extension term.\n- Revenue/Profit Sharing: A clause allocating revenue, profit, royalties, commissions, or similar proceeds between parties.\n- Rofr/Rofo/Rofn: A clause giving a right of first refusal, right of first offer, or right of first negotiation.\n- Source Code Escrow: A clause requiring source code or related materials to be placed in escrow and released on defined triggers.\n- Termination For Convenience: A clause allowing a party to terminate without cause, often on notice and at its discretion.\n- Third Party Beneficiary: A clause giving enforceable rights to a non-party beneficiary.\n- Uncapped Liability: A clause stating that liability is uncapped, unlimited, or not subject to a monetary limit.\n- Unlimited/All-You-Can-Eat-License: A clause granting unlimited, broad, or uncapped usage rights without a usage cap or quantity limit.\n- Volume Restriction: A clause limiting quantity, volume, usage, production, or throughput.\n- Warranty Duration: A clause stating the duration or period of a warranty or warranty coverage.\n\nRetrieved Top-K TRAIN examples:\n1. Label: Liquidated Damages\n   Retrieval score: 0.7072\n   Clause: \"Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent.\"\n\n2. Label: Liquidated Damages\n   Retrieval score: 0.5922\n   Clause: \"In the event that Party B breaches this covenant, Party A has the right to terminate this Agreement at any time and require Party B to pay 30% of Party A's share of revenues as liquidated damages.\"\n\n3. Label: Liquidated Damages\n   Retrieval score: 0.5796\n   Clause: \"In case that the Driver User unilaterally terminates the Financial Leasing Agreement in advance, Party B shall collect the liquidated damages from the Driver User within 30% of the \"down payment + total monthly rent + last payment\" stipulated in the Financial Leasing Agreement;\"\n\n4. Label: Termination For Convenience\n   Retrieval score: 0.5674\n   Clause: \"Party B shall have the right to terminate this Agreement in advance without the prior written consent from Party A, bysending a written notice to Party A but Party A may not terminate or rescind this Agreement;\"\n\n5. Label: Liquidated Damages\n   Retrieval score: 0.5543\n   Clause: \"Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB 50,000 (RMB FIFTY THOUSAND) and indemnify for all losses incurred to Party A thereby.\"\n\nExtracted legal information:\n{\n  \"keywords\": [\n    \"termination\",\n    \"liquidated damages\",\n    \"terminate\",\n    \"pay\",\n    \"shall\",\n    \"shall not\",\n    \"not\",\n    \"without\",\n    \"if\"\n  ],\n  \"legal_concepts\": [\n    \"termination\",\n    \"liquidated damages\"\n  ],\n  \"legal_actions\": [\n    \"terminate\",\n    \"pay\"\n  ],\n  \"rights\": [],\n  \"obligations\": [\n    \"shall\"\n  ],\n  \"restrictions\": [\n    \"shall not\",\n    \"not\",\n    \"without\"\n  ],\n  \"conditions\": [\n    \"if\"\n  ],\n  \"dates\": [],\n  \"durations\": [],\n  \"monetary_values\": [],\n  \"percentages\": [],\n  \"numeric_values\": [\n    \"10\"\n  ]\n}\n",
+      "parsed_prediction": "Liquidated Damages",
+      "prediction_allowed_label": true,
+      "prediction_in_top_k": true,
+      "prediction_in_retrieved_evidence": true,
+      "ollama_selected_top1": true,
+      "correct_label_in_top5": true,
+      "correct_label_rank": 1,
+      "retrieval_top1_correct": true,
+      "decision_relationship": "RETRIEVAL_TOP1_MATCH",
+      "classifier_error": false
+    }
+  ],
+  "ground_truth_metrics": {
+    "evaluated_clauses": 3,
+    "retrieval_top1_correct": 1.0,
+    "retrieval_correct_in_top5": 1.0,
+    "ollama_final_correct": 1.0
+  },
+  "ollama_behavior": {
+    "selected_qdrant_top1": 6,
+    "selected_another_retrieved_label": 5,
+    "selected_label_absent_from_top_k": 1,
+    "unknown": 0,
+    "classifier_errors": 0
+  },
+  "safety": {
+    "production_files_modified": false,
+    "env_modified": false,
+    "qdrant_modified": false,
+    "embedding_artifacts_modified": false,
+    "segmentation_code_modified": false,
+    "production_prompt_modified": false,
+    "ollama_configuration_modified": false,
+    "git_commit_created": false
+  }
+}

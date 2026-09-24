@@ -1,0 +1,768 @@
+{
+  "source": "/workspace/ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+  "parser_requested": "docling",
+  "top_level_count": 16,
+  "total_node_count": 32,
+  "validation_issues": [],
+  "nodes": [
+    {
+      "clause_id": "clause-1",
+      "clause_number": null,
+      "heading": null,
+      "text": "Party A (Shipper): ZTO Express Co., Ltd. Address: Building 1, No. 1685, Huazhi Road, Huaxin Twon, Qingpu District, Shanghai Party B (Carrier): Tonglu Tongze Logistics Ltd. Address: 12 Floor, HSBC Tower, Yinchun South Road, Tonglu County, Zhejiang Province Due to the need for logistics business, Party A and Party B enter into this Road Transportation Agreement (this 'Agreement'), in which Party A pays the freight and Party B provides parcel transportation services to Party A. In accordance with relevant laws and regulations, Party A and Party B have sufficiently negotiated the specific matters and voluntarily reached the following Agreement based on equality, reciprocity and integrity. This Agreement is to be complied by both Parties.",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": false,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "NONE",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "1.",
+      "clause_number": "1.",
+      "heading": null,
+      "text": "1. Party B shall provide parcel transportation services on highway line-haul routes based on the needs of Party A.",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        6
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "2.",
+      "clause_number": "2.",
+      "heading": null,
+      "text": "2. Period of transportation services: this Agreement is valid for an indefinite term. Subsequent contracts might be entered in case of special business.",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        7
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "3.",
+      "clause_number": "3.",
+      "heading": null,
+      "text": "3. Freight and payment method:",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        8
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "3(a)",
+      "clause_number": "(a)",
+      "heading": null,
+      "text": "(a) Verification of freight: Party A pays freight based on carload rate (such freight includes pick-up charges, door-to-door delivery charges and tax fees).",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": "3.",
+      "depth": 1,
+      "source_blocks": [
+        9
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "3(b)",
+      "clause_number": "(b)",
+      "heading": null,
+      "text": "(b) Party A shall not pay any other charges other than the freight.",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": "3.",
+      "depth": 1,
+      "source_blocks": [
+        10
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "3(c)",
+      "clause_number": "(c)",
+      "heading": null,
+      "text": "(c) Clearance of freight: the clearance method is based on both Parties' fund clearance arrangement and the final clearance amount is subject to actual carriage amount and EX-warehouse ('EXW') weight determined by Party A. Party B shall attach Party A's parcel EXW originals or copies for Party A's verification for clearance of freight.",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": "3.",
+      "depth": 1,
+      "source_blocks": [
+        11
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "4.",
+      "clause_number": "4.",
+      "heading": null,
+      "text": "4. Transportation route, time and relevant rules",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        12
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "4(a)",
+      "clause_number": "(a)",
+      "heading": null,
+      "text": "(a) Transportation time:",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": "4.",
+      "depth": 1,
+      "source_blocks": [
+        13
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "4(b)",
+      "clause_number": "(b)",
+      "heading": null,
+      "text": "(b) Any changes to the line-haul route and time are subject to both Parties' negotiation and written supplemental clauses.",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": "4.",
+      "depth": 1,
+      "source_blocks": [
+        14
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "4(c)",
+      "clause_number": "(c)",
+      "heading": null,
+      "text": "(c) Party B shall have its own loading crews and the parcel shall be loaded by Party B's loading crews.",
+      "page_start": 1,
+      "page_end": 1,
+      "parent_clause": "4.",
+      "depth": 1,
+      "source_blocks": [
+        15
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "4(d)",
+      "clause_number": "(d)",
+      "heading": null,
+      "text": "(d) Drivers, loading crews and attendant crews shall be employed and remunerated by Party B. Party A shall not interfere such matter.",
+      "page_start": 2,
+      "page_end": 2,
+      "parent_clause": "4.",
+      "depth": 1,
+      "source_blocks": [
+        18
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "5.",
+      "clause_number": "5.",
+      "heading": null,
+      "text": "5. In order to guarantee rapid transfer of Party A's parcel, Party B shall strictly comply with the following obligations:",
+      "page_start": 2,
+      "page_end": 2,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        19
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "5(a)",
+      "clause_number": "(a)",
+      "heading": null,
+      "text": "(a) During the transportation, Part B shall completely comply with Party A's transportation arrangement and relevant systems. Party B shall bear any consequences and legal liability arising out of Party B's non-compliance, and Party A shall have no liability. Party A has the right to terminate this Agreement without further legal liability in the case that Party B does not comply with Party A's management and arrangement.",
+      "page_start": 2,
+      "page_end": 2,
+      "parent_clause": "5.",
+      "depth": 1,
+      "source_blocks": [
+        20
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "5(b)",
+      "clause_number": "(b)",
+      "heading": null,
+      "text": "(b) Based on the business needs, Party A can negotiate with Party B to modify the transportation route and time whenever necessary, which shall be executed by signing supplemental agreements upon consensus of both Parties.",
+      "page_start": 2,
+      "page_end": 2,
+      "parent_clause": "5.",
+      "depth": 1,
+      "source_blocks": [
+        21
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "5(c)",
+      "clause_number": "(c)",
+      "heading": null,
+      "text": "(c) Party B shall ensure the vehicles are in good conditions, the compartments are properly sealed without leakage and the vehicles are equipped with fire-fighting equipment. In the event of parcel damage resulting from leakage or fire, Party B shall indemnify at the standard rate of RMB200 per parcel, and indemnify the actual price for high-end insured parcel (or indemnify by the value of the parcel provided by arbitration department determined by Party A).",
+      "page_start": 2,
+      "page_end": 2,
+      "parent_clause": "5.",
+      "depth": 1,
+      "source_blocks": [
+        22
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "5(d)",
+      "clause_number": "(d)",
+      "heading": null,
+      "text": "(d) Party B shall have valid and legal licenses for national road transportation. In the event of loss caused to Party A by delivery delay due to vehicles detention for the lack of license, Party B shall compensate for any loss to Party A.",
+      "page_start": 2,
+      "page_end": 2,
+      "parent_clause": "5.",
+      "depth": 1,
+      "source_blocks": [
+        23
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "5(e)",
+      "clause_number": "(e)",
+      "heading": null,
+      "text": "(e) Party B shall arrive at the network partners determined by Party A according to the time and route stipulated in this Agreement, and strictly comply with the start time and end time. Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB1,000 per trip on the second working day and RMB2,000 per trip on the third working day (based on the time records on the parcel transfer documents) and such liquidated damages will be deducted from the current month's freight. In the special event of changes to route and time and severe weather (or other force majeure events), Party B shall be in touch with Party A in time and record such special event on the parcel transfer documents with Party A's approval.",
+      "page_start": 2,
+      "page_end": 2,
+      "parent_clause": "5.",
+      "depth": 1,
+      "source_blocks": [
+        24
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "5(f)",
+      "clause_number": "(f)",
+      "heading": null,
+      "text": "(f) In the event of delay by vehicle malfunction or traffic accidents, Party B shall settle such malfunction or accidents within half an hour. In the event of vehicle operation failure, Party B shall notify Party A within two hours and shall manage to deliver Party A's parcel to the destination designated by the contract.",
+      "page_start": 2,
+      "page_end": 2,
+      "parent_clause": "5.",
+      "depth": 1,
+      "source_blocks": [
+        25
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "5(g)",
+      "clause_number": "(g)",
+      "heading": null,
+      "text": "(g) Party B shall provide copies of driver licenses, working licenses, occupation licenses, insurance documents, operation licenses, outsourcing contracts, tax certificates, business licenses, road transportation permits and business code licenses to Party A, and guarantee the authenticity, completeness, legality and validity of such licenses and materials. Party B's drivers shall have at least two years driving experience in large trucks and have relevant licenses. Party B shall bear any consequences and legal liability arising out of Party B's non-compliance, and Party A shall have no liability.",
+      "page_start": 2,
+      "page_end": 3,
+      "parent_clause": "5.",
+      "depth": 1,
+      "source_blocks": [
+        26,
+        29
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "5(h)",
+      "clause_number": "(h)",
+      "heading": null,
+      "text": "(h) Party B shall bear any consequences and economic punishments arising out of the breach of traffic rules by Party B's drivers and other staff, and Party A shall have no liability.",
+      "page_start": 3,
+      "page_end": 3,
+      "parent_clause": "5.",
+      "depth": 1,
+      "source_blocks": [
+        30
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "LETTER_CHILD"
+      }
+    },
+    {
+      "clause_id": "5(h)(i)",
+      "clause_number": "(i)",
+      "heading": null,
+      "text": "(i) Party B shall be responsible for driving safety. Party B shall bear any legal liability arising out of severe traffic accidents causing vehicle damage and personnel casualties, and Party A shall have no liability. Party B shall be responsible for any damages resulting from severe accidents causing Party A's personnel casualties. Party A has the right to indemnify from Party B upon advance payment of damages.",
+      "page_start": 3,
+      "page_end": 3,
+      "parent_clause": "5(h)",
+      "depth": 2,
+      "source_blocks": [
+        31
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "ROMAN_CHILD"
+      }
+    },
+    {
+      "clause_id": "6.",
+      "clause_number": "6.",
+      "heading": null,
+      "text": "6. Party B shall purchase sufficient insurance for the transportation vehicles. The coverage of third-party liability insurance shall not be lower than RMB1 million. In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with coverage not lower than RMB500,000 per person. Party B shall bear any consequence arising out of the non-compliance of insurance purchase, and Party A shall have no liability.",
+      "page_start": 3,
+      "page_end": 3,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        32
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "7.",
+      "clause_number": "7.",
+      "heading": null,
+      "text": "7. Any parcel damage resulting from the fault of Party B's employees shall be compensated by Party B in accordance with Party A's relevant rules. Party B shall be responsible for all of Party A's economic loss and relevant liquidated damages arising out of any theft and disposal of stolen goods conducted by Party B's personnel. Such payment shall be deducted from the current month's freight and be topped up by Party B in case of inadequacy. The personnel breaching the rules shall be dismissed by Party B.",
+      "page_start": 3,
+      "page_end": 3,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        33
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "8.",
+      "clause_number": "8.",
+      "heading": null,
+      "text": "8. In the event the vehicle space insufficiency which causes Party A's need unable to be satisfied nor can it be adjusted to satisfy Party A's need, Party A can terminate this Agreement without any compensation.",
+      "page_start": 3,
+      "page_end": 3,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        34
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "9.",
+      "clause_number": "9.",
+      "heading": null,
+      "text": "9. Party A has the right to terminate this Agreement if Party B has breached the above articles in this Agreement. The termination of this Agreement shall not prejudice Party A's right to hold Party B responsible for breach of contract.",
+      "page_start": 3,
+      "page_end": 3,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        35
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "10.",
+      "clause_number": "10.",
+      "heading": null,
+      "text": "10. Party B shall obtain Party A's written consent in the case the early termination of the Agreement. Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent. Within the contract period, Party B shall not charge the freight difference if Party A rents same-level vehicles. Party B shall also compensate Party A's other losses.",
+      "page_start": 3,
+      "page_end": 3,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        36
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "11.",
+      "clause_number": "11.",
+      "heading": null,
+      "text": "11. Without Party A's approval, Party B shall not transfer the carriage of goods to any third party in the designated route. Otherwise, Party A has the right to terminate this Agreement directly.",
+      "page_start": 3,
+      "page_end": 3,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        37
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "12.",
+      "clause_number": "12.",
+      "heading": null,
+      "text": "12. Any dispute arising out of the execution of this Agreement, which cannot be negotiated and settled by both Parties, shall be subject to the jurisdiction of the People's Court where this Agreement is signed.",
+      "page_start": 4,
+      "page_end": 4,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        40
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "13.",
+      "clause_number": "13.",
+      "heading": null,
+      "text": "13. The annex of this Agreement constitutes a part of this Agreement and has the same effect as this Agreement. Any undealt matter can be negotiated and added by both Parties.",
+      "page_start": 4,
+      "page_end": 4,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        41
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "14.",
+      "clause_number": "14.",
+      "heading": null,
+      "text": "14. This Agreement takes effect upon the signatures and seals of both Parties in triplicate. Party A shall have two copies and Party B shall have one copy.",
+      "page_start": 4,
+      "page_end": 4,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        42
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": false,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    },
+    {
+      "clause_id": "15.",
+      "clause_number": "15.",
+      "heading": null,
+      "text": "15. Any different interpretation of this Agreement by both Parties is subject to final interpretation by Party A. | Party A: ZTO Express Co., Ltd. | Party B:Tonglu Tongze Logistics Ltd. | |-----------------------------------------|------------------------------------------------| | Company seal: /s/ ZTO Express Co., Ltd. | Company seal: /s/ Tonglu Tongze Logistics Ltd. | | Date: December 22, 2014 | Date: December 22, 2014 4 |",
+      "page_start": 4,
+      "page_end": 4,
+      "parent_clause": null,
+      "depth": 0,
+      "source_blocks": [
+        43,
+        45
+      ],
+      "metadata": {
+        "is_definition": false,
+        "is_signature_metadata": true,
+        "has_structural_marker": true,
+        "parser_fallback_reason": null,
+        "source_kinds": [
+          "text",
+          "table"
+        ],
+        "marker_kind": "TOP_LEVEL",
+        "validation_diagnostics": []
+      }
+    }
+  ]
+}

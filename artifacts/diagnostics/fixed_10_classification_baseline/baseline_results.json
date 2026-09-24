@@ -1,0 +1,670 @@
+{
+  "status": "COMPLETE",
+  "benchmark_id": "fixed_10_classification_baseline",
+  "timestamp_utc": "2026-09-10T11:51:26.527456+00:00",
+  "selection": {
+    "seed": 20260910,
+    "source_test_csv": "data/splits/test/master_clauses_test.csv",
+    "row_count": 10
+  },
+  "environment": {
+    "python_version": "3.12.14",
+    "embedding_model": "embed-english-v3.0",
+    "embedding_dimension": 1024,
+    "qdrant_collection": "cuad_train",
+    "qdrant_path": "/workspace/diagnostics/zto_retrieval_test/qdrant_snapshot",
+    "qdrant_distance": "Cosine",
+    "retrieval_top_k": 5,
+    "ollama_url": "http://host.docker.internal:11434",
+    "ollama_model": "llama3.2:3b",
+    "ollama_timeout_seconds": 60,
+    "ollama_max_retry_attempts": 3,
+    "generation_options": {
+      "temperature": 0,
+      "num_gpu": 0,
+      "use_mmap": true,
+      "num_ctx": 4096
+    },
+    "package_versions": {
+      "torch": "2.14.0+cpu",
+      "qdrant-client": "1.19.0",
+      "cohere": "7.1.1"
+    }
+  },
+  "metrics": {
+    "recall_at_1": 0.5,
+    "recall_at_3": 0.6,
+    "recall_at_5": 0.6,
+    "mrr": 0.55,
+    "classification_accuracy": 0.4,
+    "ground_truth_in_top5_count": 6,
+    "ground_truth_in_top5_ollama_selected_another_count": 2,
+    "ollama_selected_label_absent_from_top5_count": 1,
+    "retrieval_miss_count": 4,
+    "classification_error_count": 2,
+    "pipeline_error_count": 0,
+    "correct_count": 4
+  },
+  "results": [
+    {
+      "benchmark_row_id": "fixed-10-01",
+      "selection_rank": 1,
+      "original_row_index": 1906,
+      "document_id": "LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf",
+      "clause_type": "Warranty Duration",
+      "clause_text": "Unless Liquidmetal notifies Eutectix that the Liquidmetal Product does not meet the Specifications within thirty (30) calendar days after receipt of the Liquidmetal Product, then the Liquidmetal Product shall be deemed Accepted.",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.5308362171548238,
+          "document_id": null,
+          "clause_type": "Warranty Duration",
+          "clause_text": "If during the acceptance period described in Section 6, the Software has failed to perform in accordance with the Specifications and Garman has been unable to correct the deficiency within 45 business days of written notice being provided to Garman of such failure then Sparkling shall have the option, exercisable on 15 business days written notice to Garman, in lieu of any other remedy, to reject the Software."
+        },
+        {
+          "rank": 2,
+          "score": 0.5282448666269166,
+          "document_id": null,
+          "clause_type": "Warranty Duration",
+          "clause_text": "FCC shall promptly, but in no event later than three (3) days after the date of such purchase order, confirm its acceptance or rejection of such purchase order by written notice to Flotek."
+        },
+        {
+          "rank": 3,
+          "score": 0.5141861601492452,
+          "document_id": null,
+          "clause_type": "Warranty Duration",
+          "clause_text": "Any rejection or revocation of acceptance by Buyer (a) must be made within thirty (30) days of the products being made available for shipment to Buyer, (b) any attempted rejection or revocation of acceptance made thereafter shall be null and void, and (c) any rejection or revocation of acceptance shall comply with Seller's return protocol."
+        },
+        {
+          "rank": 4,
+          "score": 0.5141014627047438,
+          "document_id": null,
+          "clause_type": "Warranty Duration",
+          "clause_text": "If IBM has not notified MSL of any defects in a unit of Product             within [*] Days of receipt, such unit shall<omitted>be deemed to be accepted."
+        },
+        {
+          "rank": 5,
+          "score": 0.5081236638216311,
+          "document_id": null,
+          "clause_type": "Warranty Duration",
+          "clause_text": "In the event that Magenta does not inform Bachem within the [***] period that the Product does not meet the Specifications, Magenta shall be deemed to have accepted the Product."
+        }
+      ],
+      "ground_truth_rank": 1,
+      "ground_truth_in_top5": true,
+      "qdrant_top1_label": "Warranty Duration",
+      "qdrant_top1_score": 0.5308362171548238,
+      "raw_ollama_response": "{\"clause_type\": \"Warranty Duration\"}",
+      "ollama_prediction": "Warranty Duration",
+      "prediction_equals_ground_truth": true,
+      "ollama_selected_top1": true,
+      "ollama_selected_another_topk_category": false,
+      "ollama_selected_label_absent_from_top5": false,
+      "unsupported_or_ambiguous_behavior": false,
+      "error_category": "CORRECT",
+      "classifier_error": false
+    },
+    {
+      "benchmark_row_id": "fixed-10-02",
+      "selection_rank": 2,
+      "original_row_index": 669,
+      "document_id": "ENTERPRISEPRODUCTSPARTNERSLP_07_08_1998-EX-10.3-TRANSPORTATION CONTRACT.PDF",
+      "clause_type": "Price Restrictions",
+      "clause_text": "When for Shipper's convenience a trailer is set out at the facilities of the    Consignor or Consignee or any other site designated, a charge of $10.00 per    hour or fraction thereof will apply, subject to a maximum charge of $100.00    per trailer in any consecutive twenty-four (24) hour period.",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.46957713159429293,
+          "document_id": null,
+          "clause_type": "Revenue/Profit Sharing",
+          "clause_text": "The Principal shall pay the Company a fee of $1.00 (one dollar), inclusive      of VAT, per one net tonne of Commodity shipped pursuant to this Contract."
+        },
+        {
+          "rank": 2,
+          "score": 0.46945284486923355,
+          "document_id": null,
+          "clause_type": "Notice Period To Terminate Renewal",
+          "clause_text": "Thereafter, this\n\n\n\n\n\n                  Agreement shall be effective month to month, until terminated                   by Transporter or Shipper upon the following written notice to                   the other specifying a termination date: sixty (60) days for\n\n                  interruptible transportation under Rate Schedule ITS and 180                   days for firm transportation under Rate Schedule FTS."
+        },
+        {
+          "rank": 3,
+          "score": 0.46945284486923355,
+          "document_id": null,
+          "clause_type": "Renewal Term",
+          "clause_text": "Thereafter, this\n\n\n\n\n\n                  Agreement shall be effective month to month, until terminated                   by Transporter or Shipper upon the following written notice to                   the other specifying a termination date: sixty (60) days for\n\n                  interruptible transportation under Rate Schedule ITS and 180                   days for firm transportation under Rate Schedule FTS."
+        },
+        {
+          "rank": 4,
+          "score": 0.4488184613639321,
+          "document_id": null,
+          "clause_type": "Minimum Commitment",
+          "clause_text": "Sender with Contracted Capacity in Firm:     22.2.1 If by any reason the delivery is less than 95% or more than 105% of their Scheduled Capacity, the Sender shall Pay:     22.2.1.1.1 The Transportation fee for volumes delivered when they are higher than the Contracted Capacity in firm. When they are equal or less the  Sender shall Pay Transportation fee on the Contracted Capacity in firm.     22.2.1.1.2 The Transporter may decide to charge the Sender a sanction equivalent to 5% of the Transportation Fee of the Scheduled Capacity.\n\n\n\n   22.2.1.2 If by any reason, delivery is between 95% and up to 105% of its scheduled Capacity, the Transporter shall charge the Transportation fee  for volumes delivered when these are above the Contracted Capacity in firm. When they are equal or less the Sender shall pay the Transportation  fee on the Contracted Capacity in firm. In this case there shall not be any sanction, without prejudice of the application of other types of sanctions.     22.2.2 Sender without Contracted Capacity in firm:     22.2.2.1 If by any reason, the delivery is less than 95% or more than 105% of its scheduled Capacity, the Sender shall Pay:     22.2.2.1.1 The Transportation fee for volumes delivered     22.2.2.1.1 The Transporter may decide to charge the Sender a sanction equivalent to 5% of the Transportation Fee of the Scheduled Capacity.     22.2.2.2 If by any reason, delivery is between 95% and up to 105% of its scheduled Capacity, the Transporter shall charge the Transportation fee  for volumes delivered. In this case there shall not be any sanction, without prejudice of the application of other types of sanctions."
+        },
+        {
+          "rank": 5,
+          "score": 0.44197067307246923,
+          "document_id": null,
+          "clause_type": "Volume Restriction",
+          "clause_text": "In addition to any other responsibilities stated in this Agreement, Company will: (a) Provide, at Distributor's reasonable request and without charge, up to 10 hours of training with regard to any characteristics of the Products that Distributor deems reasonably necessary for Distributor and its employees and agents to fulfill the purposes of Distributor's appointment,"
+        }
+      ],
+      "ground_truth_rank": null,
+      "ground_truth_in_top5": false,
+      "qdrant_top1_label": "Revenue/Profit Sharing",
+      "qdrant_top1_score": 0.46957713159429293,
+      "raw_ollama_response": "{\"clause_type\": \"Volume Restriction\"}",
+      "ollama_prediction": "Volume Restriction",
+      "prediction_equals_ground_truth": false,
+      "ollama_selected_top1": false,
+      "ollama_selected_another_topk_category": true,
+      "ollama_selected_label_absent_from_top5": false,
+      "unsupported_or_ambiguous_behavior": false,
+      "error_category": "RETRIEVAL_MISS",
+      "classifier_error": false
+    },
+    {
+      "benchmark_row_id": "fixed-10-03",
+      "selection_rank": 3,
+      "original_row_index": 1086,
+      "document_id": "HYPERIONSOFTWARECORP_09_28_1994-EX-10.47-EXCLUSIVE DISTRIBUTOR AGREEMENT.PDF",
+      "clause_type": "Non-Compete",
+      "clause_text": "During the term of this Agreement and for a period of two (2) years after the termination hereof for any reason, Distributor will not market, or attempt to market, a computer program which competes in any way with the Products in the areas of consolidation, financial information, financial transaction processing, reporting, data collection, or modeling, including but not limited to the use of personal computers, nor which competes with any modification, alteration or enhancement to the Products which is developed during the term of this Agreement.",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.633409935031183,
+          "document_id": null,
+          "clause_type": "Non-Compete",
+          "clause_text": "During the Term, of this Agreement and for an additional period of two (2) years from the date of termination of this Agreement, the Contractor undertakes not to develop on its own account any Product."
+        },
+        {
+          "rank": 2,
+          "score": 0.5851492453752084,
+          "document_id": null,
+          "clause_type": "Non-Compete",
+          "clause_text": "In the event that Distributor terminates this Agreement, then for one year thereafter, Distributor shall not sell, promote, advertise or market in the Territory products which are competitive with the Products."
+        },
+        {
+          "rank": 3,
+          "score": 0.5698642642908489,
+          "document_id": null,
+          "clause_type": "Covenant Not To Sue",
+          "clause_text": "During the Term of this Agreement and                   for three  years  thereafter,  the  Distributor  (on behalf of                   itself and each of its affiliates) agrees not to commence,  or                   provide any  information to or otherwise  assist any person or                   entity in  connection  with,  any suit,  action or  proceeding                   contesting the ownership,  validity or  enforceability  of any                   patent,  copyright,  trademark,  trade name or other propriety                   right owned by or licensed to the Company,  whether  currently                   existing or hereinafter invented, developed or acquired unless                   required to by court order."
+        },
+        {
+          "rank": 4,
+          "score": 0.5694479760331564,
+          "document_id": null,
+          "clause_type": "No-Solicit Of Customers",
+          "clause_text": "Distributor further agrees that it will not interfere                            with or  otherwise  disrupt  the  business  relations                            between the Company or nay of its  affiliates and any                            of their current or prospective customers,  suppliers                            or distributors, during the<omitted>Term of the  Agreement  and for a period of  eighteen\n\n\n\n\n\n                           (18) months thereafter,  nor will Distributor solicit                            any  customer  or  potential  customer  of Company to                            purchase a competitive product during that period."
+        },
+        {
+          "rank": 5,
+          "score": 0.5552649518324806,
+          "document_id": null,
+          "clause_type": "Non-Compete",
+          "clause_text": "Unless accepted by the Principal, the Distributor agrees that during the term of this Agreement, the Distributor, either directly or indirectly, shall handle no products that are competitive with the Products within the Territory."
+        }
+      ],
+      "ground_truth_rank": 1,
+      "ground_truth_in_top5": true,
+      "qdrant_top1_label": "Non-Compete",
+      "qdrant_top1_score": 0.633409935031183,
+      "raw_ollama_response": "{\"clause_type\": \"Non-Compete\"}",
+      "ollama_prediction": "Non-Compete",
+      "prediction_equals_ground_truth": true,
+      "ollama_selected_top1": true,
+      "ollama_selected_another_topk_category": false,
+      "ollama_selected_label_absent_from_top5": false,
+      "unsupported_or_ambiguous_behavior": false,
+      "error_category": "CORRECT",
+      "classifier_error": false
+    },
+    {
+      "benchmark_row_id": "fixed-10-04",
+      "selection_rank": 4,
+      "original_row_index": 147,
+      "document_id": "ANIXABIOSCIENCESINC_06_09_2020-EX-10.1-COLLABORATION AGREEMENT.PDF",
+      "clause_type": "Rofr/Rofo/Rofn",
+      "clause_text": "If Anixa decides to not license those uses or compounds for this novel antiviral use, OntoChem is free to develop those molecules further as its own intellectual property without any further restrictions.",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.5051844134138099,
+          "document_id": null,
+          "clause_type": "Non-Transferable License",
+          "clause_text": "Such usage may not be sold or transferred."
+        },
+        {
+          "rank": 2,
+          "score": 0.5050858907942908,
+          "document_id": null,
+          "clause_type": "Non-Transferable License",
+          "clause_text": "Such usage may not be sold or transferred."
+        },
+        {
+          "rank": 3,
+          "score": 0.5049359537900305,
+          "document_id": null,
+          "clause_type": "Non-Transferable License",
+          "clause_text": "Such usage may not be sold or transferred."
+        },
+        {
+          "rank": 4,
+          "score": 0.4761263140236487,
+          "document_id": null,
+          "clause_type": "License Grant",
+          "clause_text": "In the event that CAPSUGEL reasonably determines that the development of the Compound Formulation is not feasible with Commercially Reasonable Efforts in accordance with the Development Plan, with such changes as reasonably requested by CAPSUGEL, then CAPSUGEL may discontinue the development of the Compound Formulation and Product and terminate this Agreement, in which case, CARDAX shall have the right to license the Intellectual Property Rights as provided in Section 4."
+        },
+        {
+          "rank": 5,
+          "score": 0.47009620184818884,
+          "document_id": null,
+          "clause_type": "License Grant",
+          "clause_text": "During the Term, and without limiting Section 4.2, Achaogen hereby grants to Microgenics a royalty-free, exclusive, worldwide license to use the Achaogen<omitted>Know-How, Achaogen Patents, and Achaogen Materials to research, develop, manufacture, use, market and sell the Assay in the Territory. [***]."
+        }
+      ],
+      "ground_truth_rank": null,
+      "ground_truth_in_top5": false,
+      "qdrant_top1_label": "Non-Transferable License",
+      "qdrant_top1_score": 0.5051844134138099,
+      "raw_ollama_response": "{\"clause_type\": \"Non-Transferable License\"}",
+      "ollama_prediction": "Non-Transferable License",
+      "prediction_equals_ground_truth": false,
+      "ollama_selected_top1": true,
+      "ollama_selected_another_topk_category": false,
+      "ollama_selected_label_absent_from_top5": false,
+      "unsupported_or_ambiguous_behavior": false,
+      "error_category": "RETRIEVAL_MISS",
+      "classifier_error": false
+    },
+    {
+      "benchmark_row_id": "fixed-10-05",
+      "selection_rank": 5,
+      "original_row_index": 432,
+      "document_id": "RandWorldwideInc_20010402_8-KA_EX-10.2_2102464_EX-10.2_Co-Branding Agreement.pdf",
+      "clause_type": "Competitive Restriction Exception",
+      "clause_text": "During the Term of this Agreement, PlanetCAD shall be permitted to market new functions and services relating to the Co-Branded Service directly to Dassault Systemes Customers with Dassault Systemes prior written approval, but only to the extent such functions and services are offered by PlanetCAD on the PlanetCAD Web site(s).",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.5115715945822772,
+          "document_id": null,
+          "clause_type": "Ip Ownership Assignment",
+          "clause_text": "In particular, Company agrees that, notwithstanding anything to the contrary set forth herein: (i) as part of Contractor's provision of the Services hereunder, Contractor may utilize its own proprietary works of authorship, that have not been created specifically for Company, including without limitation software, methodologies, tools, specifications, drawings, sketches, models, samples, records and documentation, as well as copyrights, trademarks, servicemarks, ideas, concepts, know-how, techniques, knowledge or data, which have been originated, developed or purchased by Contractor or by third parties under contract to Contractor, and, (ii) Contractor's Information and Contractor's administrative communications and records relating to the Services shall not be deemed to be Works and are and shall remain the sole and exclusive property of Contractor and Company shall not resell or make use of said property in any other manner other than in connection with the software Company receives under this Agreement."
+        },
+        {
+          "rank": 2,
+          "score": 0.5064111321938236,
+          "document_id": null,
+          "clause_type": "License Grant",
+          "clause_text": "The NFLA agrees to license such rights to the Company."
+        },
+        {
+          "rank": 3,
+          "score": 0.4920703219575783,
+          "document_id": null,
+          "clause_type": "Affiliate License-Licensor",
+          "clause_text": "Customer hereby grants to Manufacturer a non-exclusive license during the Term to use any Customer Property and Customer-Owned Improvements and Developments solely in connection with Manufacturer performing its obligations under this Agreement or the Facility Addendum in accordance with the terms hereof or thereof, as applicable"
+        },
+        {
+          "rank": 4,
+          "score": 0.4869419267496983,
+          "document_id": null,
+          "clause_type": "License Grant",
+          "clause_text": "Customer hereby grants to Manufacturer a non-exclusive license during the Term to use any Customer Property and Customer-Owned Improvements and Developments solely in connection with Manufacturer performing its obligations under this Agreement or the Facility Addendum in accordance with the terms hereof or thereof, as applicable."
+        },
+        {
+          "rank": 5,
+          "score": 0.48434984191605046,
+          "document_id": null,
+          "clause_type": "Exclusivity",
+          "clause_text": "Bosch hereby grants to Client the exclusive rights to sell and distribute the Product, subject to the Territory as set forth below, to certain select companies in the Automotive Industry, each of which shall be approved by Bosch in writing as requested by the Client on a case by case basis."
+        }
+      ],
+      "ground_truth_rank": null,
+      "ground_truth_in_top5": false,
+      "qdrant_top1_label": "Ip Ownership Assignment",
+      "qdrant_top1_score": 0.5115715945822772,
+      "raw_ollama_response": "{\"clause_type\": \"License Grant\"}",
+      "ollama_prediction": "License Grant",
+      "prediction_equals_ground_truth": false,
+      "ollama_selected_top1": false,
+      "ollama_selected_another_topk_category": true,
+      "ollama_selected_label_absent_from_top5": false,
+      "unsupported_or_ambiguous_behavior": false,
+      "error_category": "RETRIEVAL_MISS",
+      "classifier_error": false
+    },
+    {
+      "benchmark_row_id": "fixed-10-06",
+      "selection_rank": 6,
+      "original_row_index": 1883,
+      "document_id": "LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf",
+      "clause_type": "Joint Ip Ownership",
+      "clause_text": "To the extent that the Parties have jointly developed any New Amorphous Alloy Technology and they have agreed that such New Amorphous Alloy Technology will be jointly owned, as set forth in Section 8.2 above, each Party hereby assigns to the other, and will cause its employees, contractors, representatives, successors, assigns, Affiliates, parents, subsidiaries, officers and directors to assign to the other, a co-equal right, title and interest in and to any such jointly developed New Amorphous Alloy Technology.",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.5879264592318811,
+          "document_id": null,
+          "clause_type": "Ip Ownership Assignment",
+          "clause_text": "Except with regard to the foregoing joint Inventions or methods, each party hereby assigns to the other, by way of present and future assignment, all of the right, title and interest (including all Intellectual Property Rights therein) that it has or may have in any such Invention that is jointly Derived and that is subject to ownership by the other party."
+        },
+        {
+          "rank": 2,
+          "score": 0.5879264592318811,
+          "document_id": null,
+          "clause_type": "Joint Ip Ownership",
+          "clause_text": "Except with regard to the foregoing joint Inventions or methods, each party hereby assigns to the other, by way of present and future assignment, all of the right, title and interest (including all Intellectual Property Rights therein) that it has or may have in any such Invention that is jointly Derived and that is subject to ownership by the other party."
+        },
+        {
+          "rank": 3,
+          "score": 0.5854090663587928,
+          "document_id": null,
+          "clause_type": "Ip Ownership Assignment",
+          "clause_text": "Each Party to whom ownership is to vest in Joint IP by operation of law or by assignment by its employees or Agents agrees   to assign and hereby assigns to the other Party an undivided one-half right, title and interest in and to all Joint IP; and to facilitate   such assignment, the Party possessing such ownership agrees (i) to regularly ensure that its employees and consultants timely make   any appropriate assignments to it; and (ii) at the other Party's reasonable request, to execute and have its employees and   consultants execute, as necessary, all assignments and any other documentation to perfect the undivided one-half right, title and   interest in and to the other Party of such Joint IP."
+        },
+        {
+          "rank": 4,
+          "score": 0.5854090663587928,
+          "document_id": null,
+          "clause_type": "Joint Ip Ownership",
+          "clause_text": "Each Party to whom ownership is to vest in Joint IP by operation of law or by assignment by its employees or Agents agrees   to assign and hereby assigns to the other Party an undivided one-half right, title and interest in and to all Joint IP; and to facilitate   such assignment, the Party possessing such ownership agrees (i) to regularly ensure that its employees and consultants timely make   any appropriate assignments to it; and (ii) at the other Party's reasonable request, to execute and have its employees and   consultants execute, as necessary, all assignments and any other documentation to perfect the undivided one-half right, title and   interest in and to the other Party of such Joint IP."
+        },
+        {
+          "rank": 5,
+          "score": 0.5740504371623514,
+          "document_id": null,
+          "clause_type": "Joint Ip Ownership",
+          "clause_text": "Copyright Materials that are jointly created by the Parties shall be jointly owned."
+        }
+      ],
+      "ground_truth_rank": 2,
+      "ground_truth_in_top5": true,
+      "qdrant_top1_label": "Ip Ownership Assignment",
+      "qdrant_top1_score": 0.5879264592318811,
+      "raw_ollama_response": "{\"clause_type\": \"Ip Ownership Assignment\"}",
+      "ollama_prediction": "Ip Ownership Assignment",
+      "prediction_equals_ground_truth": false,
+      "ollama_selected_top1": true,
+      "ollama_selected_another_topk_category": false,
+      "ollama_selected_label_absent_from_top5": false,
+      "unsupported_or_ambiguous_behavior": false,
+      "error_category": "CLASSIFICATION_ERROR",
+      "classifier_error": false
+    },
+    {
+      "benchmark_row_id": "fixed-10-07",
+      "selection_rank": 7,
+      "original_row_index": 2096,
+      "document_id": "CYBERIANOUTPOSTINC_07_09_1998-EX-10.13-PROMOTION AGREEMENT.PDF",
+      "clause_type": "Revenue/Profit Sharing",
+      "clause_text": "For each month during the Term, the Company will pay CNET a                  minimum of [XXXX] in cash, plus [XXX] of CNET Sales.",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.5094500136175841,
+          "document_id": null,
+          "clause_type": "Revenue/Profit Sharing",
+          "clause_text": "For monthly Cash Sales above [$●]the Base Royalty paid to T&B by LEA shall be [●%] of the LEA's Cash Sales."
+        },
+        {
+          "rank": 2,
+          "score": 0.503446194348961,
+          "document_id": null,
+          "clause_type": "Revenue/Profit Sharing",
+          "clause_text": "For monthly Cash Sales above [$●] and up to [$●] the Base Royalty paid to T&B by LEA shall be [●%] of the LEA's Cash Sales"
+        },
+        {
+          "rank": 3,
+          "score": 0.5010036831552175,
+          "document_id": null,
+          "clause_type": "Revenue/Profit Sharing",
+          "clause_text": "For monthly Cash Sales above [$●] and up to [$●] , the Base Royalty paid to T&B by LEA shall be [●%]of the LEA's Cash Sales"
+        },
+        {
+          "rank": 4,
+          "score": 0.5010036831552175,
+          "document_id": null,
+          "clause_type": "Revenue/Profit Sharing",
+          "clause_text": "For monthly Cash Sales above [$●] and up to [$●], the Base Royalty paid to T&B by LEA shall be [●%] of the LEA's Cash Sales"
+        },
+        {
+          "rank": 5,
+          "score": 0.46971860691239553,
+          "document_id": null,
+          "clause_type": "Minimum Commitment",
+          "clause_text": "The \"Special Pricing\" is contingent on a minimum order size of [***] users."
+        }
+      ],
+      "ground_truth_rank": 1,
+      "ground_truth_in_top5": true,
+      "qdrant_top1_label": "Revenue/Profit Sharing",
+      "qdrant_top1_score": 0.5094500136175841,
+      "raw_ollama_response": "{\"clause_type\": \"License Grant\"}",
+      "ollama_prediction": "License Grant",
+      "prediction_equals_ground_truth": false,
+      "ollama_selected_top1": false,
+      "ollama_selected_another_topk_category": false,
+      "ollama_selected_label_absent_from_top5": true,
+      "unsupported_or_ambiguous_behavior": true,
+      "error_category": "CLASSIFICATION_ERROR",
+      "classifier_error": false
+    },
+    {
+      "benchmark_row_id": "fixed-10-08",
+      "selection_rank": 8,
+      "original_row_index": 1238,
+      "document_id": "THERAVANCEBIOPHARMA,INC_05_08_2020-EX-10.2-SERVICE AGREEMENT.PDF",
+      "clause_type": "Termination For Convenience",
+      "clause_text": "The Company may, in its sole and absolute discretion, terminate the Executive's employment under this Agreement at any time and with immediate effect by notifying the Executive that the Company is exercising its right under this clause 17 and that it will make a payment in l ieu of  not ice (\"PILON\") to the Executive.",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.6531603173611444,
+          "document_id": null,
+          "clause_type": "Termination For Convenience",
+          "clause_text": "15.2 The Company may in its sole and absolute discretion (whether or not any notice of termination has been given under sub clause 15.1) terminate this Agreement at any time and with immediate effect by giving notice in writing to the Executive that the Company is exercising its rights pursuant to this clause 15."
+        },
+        {
+          "rank": 2,
+          "score": 0.5622209286372518,
+          "document_id": null,
+          "clause_type": "No-Solicit Of Employees",
+          "clause_text": "You agree that during the term of this Agreement, you will not, without our prior written consent, either directly or indirectly through any other person or entity:<omitted>17.1.3. Induce any person to leave his or her employment with us."
+        },
+        {
+          "rank": 3,
+          "score": 0.5561123045438798,
+          "document_id": null,
+          "clause_type": "Termination For Convenience",
+          "clause_text": "This Agreement may be terminated at any time while the Employee is living by written notice thereof by either the Employer or the Employee to the other; and, in any event, this Agreement will terminate upon termination of the Employee's employment."
+        },
+        {
+          "rank": 4,
+          "score": 0.549438693406223,
+          "document_id": null,
+          "clause_type": "Termination For Convenience",
+          "clause_text": "The Company reserves the right in its sole and absolute discretion to give written notice to<omitted>terminate your employment forthwith and to make a payment to you in lieu of salary and the benefits set out in paragraph 5 of this Agreement for all or any unexpired part of the notice period."
+        },
+        {
+          "rank": 5,
+          "score": 0.5444349875542374,
+          "document_id": null,
+          "clause_type": "Termination For Convenience",
+          "clause_text": "This Agreement may be terminated by Company at any time upon written notice to FIIOC."
+        }
+      ],
+      "ground_truth_rank": 1,
+      "ground_truth_in_top5": true,
+      "qdrant_top1_label": "Termination For Convenience",
+      "qdrant_top1_score": 0.6531603173611444,
+      "raw_ollama_response": "{\"clause_type\": \"Termination For Convenience\"}",
+      "ollama_prediction": "Termination For Convenience",
+      "prediction_equals_ground_truth": true,
+      "ollama_selected_top1": true,
+      "ollama_selected_another_topk_category": false,
+      "ollama_selected_label_absent_from_top5": false,
+      "unsupported_or_ambiguous_behavior": false,
+      "error_category": "CORRECT",
+      "classifier_error": false
+    },
+    {
+      "benchmark_row_id": "fixed-10-09",
+      "selection_rank": 9,
+      "original_row_index": 2157,
+      "document_id": "PHREESIA,INC_05_28_2019-EX-10.18-STRATEGIC ALLIANCE AGREEMENT.PDF",
+      "clause_type": "Audit Rights",
+      "clause_text": "Each Party will bear all costs and expenses it incurs in connection with preparing for, conducting, or complying with any such audit including, in the case of the auditing Party, the costs and expenses of conducting the audit.",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.6683676755096908,
+          "document_id": null,
+          "clause_type": "Audit Rights",
+          "clause_text": "The cost of the audit will be borne by the Joint Venture."
+        },
+        {
+          "rank": 2,
+          "score": 0.6561390940332597,
+          "document_id": null,
+          "clause_type": "Audit Rights",
+          "clause_text": "The auditing Party shall bear the full cost of such audit unless such audit reveals an underpayment by the audited Party that resulted from a discrepancy in the financial report provided by the audited Party for the audited period, which underpayment was more than [***] percent of the amount set forth in such report, in which case the audited Party shall reimburse the auditing Party for the costs for such audit."
+        },
+        {
+          "rank": 3,
+          "score": 0.6493333403110276,
+          "document_id": null,
+          "clause_type": "Audit Rights",
+          "clause_text": "The audit will be performed by an accounting firm acceptable to all the Participants."
+        },
+        {
+          "rank": 4,
+          "score": 0.6329504143440918,
+          "document_id": null,
+          "clause_type": "Audit Rights",
+          "clause_text": "Costs incurred by Ehave in connection with any audit or inspection conducted shall be borne by Ehave."
+        },
+        {
+          "rank": 5,
+          "score": 0.6273417080089584,
+          "document_id": null,
+          "clause_type": "Audit Rights",
+          "clause_text": "In the case of an audit initiated by the Management Committee and exercised by the F&ASC, the audited Party or Parties shall be permitted to recover the entire costs of the review or audit from the Parties in the proportions specified in Schedule B."
+        }
+      ],
+      "ground_truth_rank": 1,
+      "ground_truth_in_top5": true,
+      "qdrant_top1_label": "Audit Rights",
+      "qdrant_top1_score": 0.6683676755096908,
+      "raw_ollama_response": "{\"clause_type\": \"Audit Rights\"}",
+      "ollama_prediction": "Audit Rights",
+      "prediction_equals_ground_truth": true,
+      "ollama_selected_top1": true,
+      "ollama_selected_another_topk_category": false,
+      "ollama_selected_label_absent_from_top5": false,
+      "unsupported_or_ambiguous_behavior": false,
+      "error_category": "CORRECT",
+      "classifier_error": false
+    },
+    {
+      "benchmark_row_id": "fixed-10-10",
+      "selection_rank": 10,
+      "original_row_index": 2246,
+      "document_id": "ArmstrongFlooringInc_20190107_8-K_EX-10.2_11471795_EX-10.2_Intellectual Property Agreement.pdf",
+      "clause_type": "Affiliate License-Licensor",
+      "clause_text": "\"Arizona Licensed Patents\" means the Patents set forth on Schedule 1.1(l) and all other Patents owned by Licensing or Seller or their respective Affiliates as of the Effective Date and used or held for use in the Company Field during the five (5) years prior to the Effective Date (other than the Arizona Assigned Patents).<omitted>Subject to the terms and conditions of this Agreement, Arizona hereby grants to the Company a perpetual, non-exclusive, royalty-free license in, to and under the Arizona Licensed Patents for use in the Company Field throughout the world.",
+      "answer": "Yes",
+      "is_metadata": "False",
+      "query_embedding_dimension": 1024,
+      "retrieved": [
+        {
+          "rank": 1,
+          "score": 0.7531917245393152,
+          "document_id": null,
+          "clause_type": "Irrevocable Or Perpetual License",
+          "clause_text": "Subject to the terms and conditions of this Agreement, Arizona hereby grants to the Company a perpetual, non-exclusive, royalty-free license in, to and under the Arizona Licensed Patents for use in the Company Field throughout the world."
+        },
+        {
+          "rank": 2,
+          "score": 0.7531917245393152,
+          "document_id": null,
+          "clause_type": "License Grant",
+          "clause_text": "Subject to the terms and conditions of this Agreement, Arizona hereby grants to the Company a perpetual, non-exclusive, royalty-free license in, to and under the Arizona Licensed Patents for use in the Company Field throughout the world."
+        },
+        {
+          "rank": 3,
+          "score": 0.7247591186884841,
+          "document_id": null,
+          "clause_type": "License Grant",
+          "clause_text": "Subject to the terms and conditions of this Agreement, the Company hereby grants to Seller a perpetual, non-exclusive, royalty-free license in, to and under the Company Licensed Patents for use in the Arizona Field throughout the world."
+        },
+        {
+          "rank": 4,
+          "score": 0.7247591186884841,
+          "document_id": null,
+          "clause_type": "Irrevocable Or Perpetual License",
+          "clause_text": "Subject to the terms and conditions of this Agreement, the Company hereby grants to Seller a perpetual, non-exclusive, royalty-free license in, to and under the Company Licensed Patents for use in the Arizona Field throughout the world."
+        },
+        {
+          "rank": 5,
+          "score": 0.7120843711646171,
+          "document_id": null,
+          "clause_type": "License Grant",
+          "clause_text": "Subject to the terms and conditions of this Agreement, Arizona hereby grants to the Company a perpetual, non- exclusive, royalty-free license in, to and under the Arizona Licensed Know-How for use in the Company Field throughout the world."
+        }
+      ],
+      "ground_truth_rank": null,
+      "ground_truth_in_top5": false,
+      "qdrant_top1_label": "Irrevocable Or Perpetual License",
+      "qdrant_top1_score": 0.7531917245393152,
+      "raw_ollama_response": "{\"clause_type\": \"License Grant\"}",
+      "ollama_prediction": "License Grant",
+      "prediction_equals_ground_truth": false,
+      "ollama_selected_top1": false,
+      "ollama_selected_another_topk_category": true,
+      "ollama_selected_label_absent_from_top5": false,
+      "unsupported_or_ambiguous_behavior": false,
+      "error_category": "RETRIEVAL_MISS",
+      "classifier_error": false
+    }
+  ],
+  "safety": {
+    "production_files_modified": false,
+    "segmentation_modified": false,
+    "embedding_artifacts_modified": false,
+    "qdrant_modified": false,
+    "env_modified": false,
+    "ollama_modified": false,
+    "risk_analysis_modified": false,
+    "git_commit_created": false
+  }
+}

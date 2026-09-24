@@ -1,0 +1,670 @@
+{
+  "paths": {
+    "raw_master_csv": "data/raw/cuad/CUAD_v1/master_clauses.csv",
+    "raw_cuad_json": "data/raw/cuad/CUAD_v1/CUAD_v1.json",
+    "train_wide": "data/splits/train/master_clauses_train_wide.csv",
+    "test_wide": "data/splits/test/master_clauses_test_wide.csv",
+    "train_long": "data/splits/train/master_clauses_train.csv",
+    "test_long": "data/splits/test/master_clauses_test.csv",
+    "train_embeddings": "data/embeddings/train_embeddings.json",
+    "train_metadata": "data/embeddings/train_metadata.jsonl",
+    "fixed_selection": "diagnostics/fixed_10_classification_baseline/selected_10_rows.json",
+    "split_script": "data/scripts/dataset/split_cuad.py",
+    "embedding_script": "data/scripts/embedding/embed_train.py"
+  },
+  "raw_dataset": {
+    "master_contract_rows": 510,
+    "master_unique_document_ids": 510,
+    "cuad_json_data_items": 510,
+    "cuad_json_unique_titles": 510,
+    "wide_columns": 83,
+    "text_columns": 41,
+    "answer_columns": 41,
+    "substantive_categories": 36,
+    "metadata_categories": [
+      "Agreement Date",
+      "Document Name",
+      "Effective Date",
+      "Expiration Date",
+      "Parties"
+    ],
+    "unmatched_answer_columns": [],
+    "text_columns_without_answer": []
+  },
+  "split": {
+    "train_wide_rows": 410,
+    "test_wide_rows": 100,
+    "train_unique_documents": 410,
+    "test_unique_documents": 100,
+    "train_test_document_overlap": [],
+    "split_contract_count_matches_raw": true,
+    "split_script_declares_train_size": 410,
+    "split_script_declares_test_size": 100,
+    "split_script_declares_random_state": 42
+  },
+  "rows": {
+    "train_long_rows": 10545,
+    "test_long_rows": 2556,
+    "train_metadata_rows": 3541,
+    "test_metadata_rows": 877,
+    "train_non_metadata_rows": 7004,
+    "test_non_metadata_rows": 1679,
+    "train_empty_clause_text_rows": 0,
+    "test_empty_clause_text_rows": 0,
+    "train_invalid_after_cleaning": 0,
+    "train_expected_embedding_records": 7004,
+    "persisted_embedding_vectors": 7004,
+    "persisted_metadata_records": 7004
+  },
+  "embedding": {
+    "persisted_count_field": 7004,
+    "persisted_model": "embed-english-v3.0",
+    "dimensions": [
+      1024
+    ],
+    "finite_values": true,
+    "duplicate_ids": [],
+    "duplicate_text_count": 625,
+    "expected_id_missing_from_metadata": 0,
+    "unexpected_metadata_ids": 0,
+    "metadata_field_mismatches": 0,
+    "embedding_documents": 383,
+    "embedding_test_document_overlap": [],
+    "embedding_test_clause_count": 0,
+    "qdrant_local_collection": {
+      "status": "green",
+      "points_count": 7004,
+      "vector_size": 1024,
+      "distance": "Cosine"
+    }
+  },
+  "duplicates": {
+    "exact_unique_text_overlap_count": 20,
+    "exact_train_rows_with_overlap": 29,
+    "exact_test_rows_with_overlap": 29,
+    "normalized_unique_text_overlap_count": 30,
+    "normalized_train_rows_with_overlap": 30,
+    "normalized_test_rows_with_overlap": 30,
+    "exact_examples": [
+      "Arizona agrees to assign and hereby assigns its entire right, title and interest in and to the Arizona Assigned IP to the Company.",
+      "Arizona may sublicense the licenses granted herein to its Affiliates and Third Parties in the ordinary course of business in support of its and its Affiliates' business, but not fo",
+      "Subject to the terms and conditions of this Agreement, Arizona hereby grants to the Company a limited, non- exclusive, royalty-free, non-sublicensable (except as set forth in Secti",
+      "Subject to the terms and conditions of this Agreement, Arizona hereby grants to the Company a limited, non- exclusive, royalty-free, non-sublicensable (except as set forth in Secti",
+      "Subject to the terms and conditions of this Agreement, Arizona hereby grants to the Company a perpetual, non- exclusive, royalty-free license in, to and under the Arizona Licensed "
+    ],
+    "normalized_examples": [
+      "any assignment in violation of this section 14.1 shall be null and void.",
+      "arizona agrees to assign and hereby assigns its entire right, title and interest in and to the arizona assigned ip to the company.",
+      "arizona may sublicense the licenses granted herein to its affiliates and third parties in the ordinary course of business in support of its and its affiliates' business, but not fo",
+      "corio shall bear all fees, expenses and other charges to open and maintain such escrow account.",
+      "except as otherwise set forth herein, neither party shall transfer, assign or cede any rights or delegate any obligations hereunder, in whole or in part, whether voluntarily or by "
+    ],
+    "fixed_exact_train_matches": [],
+    "fixed_normalized_train_matches": [],
+    "near_duplicate_method": "maximum token 3-gram Jaccard similarity for each fixed row against all substantive train rows",
+    "near_duplicate_threshold": 0.9,
+    "fixed_rows_at_or_above_threshold": [],
+    "fixed_row_nearest_neighbors": [
+      {
+        "benchmark_row_id": "fixed-10-01",
+        "best_train_jaccard_3gram": 0.1,
+        "best_train_document_id": "Magenta Therapeutics, Inc. - Master Development and Manufacturing Agreement.PDF",
+        "best_train_clause_type": "Warranty Duration",
+        "strong_near_duplicate_at_0_90": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-02",
+        "best_train_jaccard_3gram": 0.016129,
+        "best_train_document_id": "IMAGEWARESYSTEMSINC_12_20_1999-EX-10.22-MAINTENANCE AGREEMENT.PDF",
+        "best_train_clause_type": "Minimum Commitment",
+        "strong_near_duplicate_at_0_90": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-03",
+        "best_train_jaccard_3gram": 0.12,
+        "best_train_document_id": "SCOUTCAMINC_05_12_2020-EX-10.22-SERVICES AGREEMENT.PDF",
+        "best_train_clause_type": "Non-Compete",
+        "strong_near_duplicate_at_0_90": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-04",
+        "best_train_jaccard_3gram": 0.014925,
+        "best_train_document_id": "MRSFIELDSORIGINALCOOKIESINC_01_29_1998-EX-10-FRANCHISE AGREEMENT.PDF",
+        "best_train_clause_type": "Ip Ownership Assignment",
+        "strong_near_duplicate_at_0_90": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-05",
+        "best_train_jaccard_3gram": 0.1,
+        "best_train_document_id": "InvendaCorp_20000828_S-1A_EX-10.2_2588206_EX-10.2_Co-Branding Agreement.pdf",
+        "best_train_clause_type": "Non-Compete",
+        "strong_near_duplicate_at_0_90": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-06",
+        "best_train_jaccard_3gram": 0.080808,
+        "best_train_document_id": "ClickstreamCorp_20200330_1-A_EX1A-6 MAT CTRCT_12089935_EX1A-6 MAT CTRCT_Development Agreement.pdf",
+        "best_train_clause_type": "Ip Ownership Assignment",
+        "strong_near_duplicate_at_0_90": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-07",
+        "best_train_jaccard_3gram": 0.072727,
+        "best_train_document_id": "JOINTCORP_09_19_2014-EX-10.15-FRANCHISE AGREEMENT.PDF",
+        "best_train_clause_type": "Revenue/Profit Sharing",
+        "strong_near_duplicate_at_0_90": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-08",
+        "best_train_jaccard_3gram": 0.255814,
+        "best_train_document_id": "WPPPLC_04_30_2020-EX-4.28-SERVICE AGREEMENT.PDF",
+        "best_train_clause_type": "Termination For Convenience",
+        "strong_near_duplicate_at_0_90": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-09",
+        "best_train_jaccard_3gram": 0.067568,
+        "best_train_document_id": "INNOVIVA,INC_08_07_2014-EX-10.1-COLLABORATION AGREEMENT.PDF",
+        "best_train_clause_type": "Audit Rights",
+        "strong_near_duplicate_at_0_90": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-10",
+        "best_train_jaccard_3gram": 0.41573,
+        "best_train_document_id": "ARMSTRONGFLOORING,INC_01_07_2019-EX-10.2-INTELLECTUAL PROPERTY AGREEMENT.PDF",
+        "best_train_clause_type": "License Grant",
+        "strong_near_duplicate_at_0_90": false
+      }
+    ]
+  },
+  "fixed_10": {
+    "row_count": 10,
+    "ids": [
+      "fixed-10-01",
+      "fixed-10-02",
+      "fixed-10-03",
+      "fixed-10-04",
+      "fixed-10-05",
+      "fixed-10-06",
+      "fixed-10-07",
+      "fixed-10-08",
+      "fixed-10-09",
+      "fixed-10-10"
+    ],
+    "source_test_csv": "data/splits/test/master_clauses_test.csv",
+    "selection_matches_test_rows": true,
+    "unique_documents": 9,
+    "rows": [
+      {
+        "benchmark_row_id": "fixed-10-01",
+        "original_row_index": 1906,
+        "document_id": "LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf",
+        "clause_type": "Warranty Duration",
+        "clause_text_length": 228,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 143,
+        "embedded_examples": 143,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-02",
+        "original_row_index": 669,
+        "document_id": "ENTERPRISEPRODUCTSPARTNERSLP_07_08_1998-EX-10.3-TRANSPORTATION CONTRACT.PDF",
+        "clause_type": "Price Restrictions",
+        "clause_text_length": 298,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 25,
+        "embedded_examples": 25,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-03",
+        "original_row_index": 1086,
+        "document_id": "HYPERIONSOFTWARECORP_09_28_1994-EX-10.47-EXCLUSIVE DISTRIBUTOR AGREEMENT.PDF",
+        "clause_type": "Non-Compete",
+        "clause_text_length": 553,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 189,
+        "embedded_examples": 189,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-04",
+        "original_row_index": 147,
+        "document_id": "ANIXABIOSCIENCESINC_06_09_2020-EX-10.1-COLLABORATION AGREEMENT.PDF",
+        "clause_type": "Rofr/Rofo/Rofn",
+        "clause_text_length": 204,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 283,
+        "embedded_examples": 283,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-05",
+        "original_row_index": 432,
+        "document_id": "RandWorldwideInc_20010402_8-KA_EX-10.2_2102464_EX-10.2_Co-Branding Agreement.pdf",
+        "clause_type": "Competitive Restriction Exception",
+        "clause_text_length": 328,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 92,
+        "embedded_examples": 92,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-06",
+        "original_row_index": 1883,
+        "document_id": "LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf",
+        "clause_type": "Joint Ip Ownership",
+        "clause_text_length": 517,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 83,
+        "embedded_examples": 83,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-07",
+        "original_row_index": 2096,
+        "document_id": "CYBERIANOUTPOSTINC_07_09_1998-EX-10.13-PROMOTION AGREEMENT.PDF",
+        "clause_type": "Revenue/Profit Sharing",
+        "clause_text_length": 129,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 304,
+        "embedded_examples": 304,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-08",
+        "original_row_index": 1238,
+        "document_id": "THERAVANCEBIOPHARMA,INC_05_08_2020-EX-10.2-SERVICE AGREEMENT.PDF",
+        "clause_type": "Termination For Convenience",
+        "clause_text_length": 319,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 186,
+        "embedded_examples": 186,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-09",
+        "original_row_index": 2157,
+        "document_id": "PHREESIA,INC_05_28_2019-EX-10.18-STRATEGIC ALLIANCE AGREEMENT.PDF",
+        "clause_type": "Audit Rights",
+        "clause_text_length": 226,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 485,
+        "embedded_examples": 485,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      },
+      {
+        "benchmark_row_id": "fixed-10-10",
+        "original_row_index": 2246,
+        "document_id": "ArmstrongFlooringInc_20190107_8-K_EX-10.2_11471795_EX-10.2_Intellectual Property Agreement.pdf",
+        "clause_type": "Affiliate License-Licensor",
+        "clause_text_length": 569,
+        "document_in_test": true,
+        "selection_matches_test_row": true,
+        "train_examples": 39,
+        "embedded_examples": 39,
+        "exact_train_text_match": false,
+        "normalized_train_text_match": false
+      }
+    ]
+  },
+  "category_coverage": [
+    {
+      "category": "Affiliate License-Licensee",
+      "train_clauses": 88,
+      "test_clauses": 16,
+      "embedded_train_clauses": 88,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Affiliate License-Licensor",
+      "train_clauses": 39,
+      "test_clauses": 8,
+      "embedded_train_clauses": 39,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    },
+    {
+      "category": "Anti-Assignment",
+      "train_clauses": 498,
+      "test_clauses": 114,
+      "embedded_train_clauses": 498,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Audit Rights",
+      "train_clauses": 485,
+      "test_clauses": 128,
+      "embedded_train_clauses": 485,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    },
+    {
+      "category": "Cap On Liability",
+      "train_clauses": 522,
+      "test_clauses": 110,
+      "embedded_train_clauses": 522,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Change Of Control",
+      "train_clauses": 170,
+      "test_clauses": 43,
+      "embedded_train_clauses": 170,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Competitive Restriction Exception",
+      "train_clauses": 92,
+      "test_clauses": 22,
+      "embedded_train_clauses": 92,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    },
+    {
+      "category": "Covenant Not To Sue",
+      "train_clauses": 131,
+      "test_clauses": 28,
+      "embedded_train_clauses": 131,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Exclusivity",
+      "train_clauses": 314,
+      "test_clauses": 74,
+      "embedded_train_clauses": 314,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Governing Law",
+      "train_clauses": 369,
+      "test_clauses": 88,
+      "embedded_train_clauses": 369,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Insurance",
+      "train_clauses": 413,
+      "test_clauses": 118,
+      "embedded_train_clauses": 413,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Ip Ownership Assignment",
+      "train_clauses": 247,
+      "test_clauses": 49,
+      "embedded_train_clauses": 247,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Irrevocable Or Perpetual License",
+      "train_clauses": 116,
+      "test_clauses": 34,
+      "embedded_train_clauses": 116,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Joint Ip Ownership",
+      "train_clauses": 83,
+      "test_clauses": 17,
+      "embedded_train_clauses": 83,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    },
+    {
+      "category": "License Grant",
+      "train_clauses": 566,
+      "test_clauses": 150,
+      "embedded_train_clauses": 566,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Liquidated Damages",
+      "train_clauses": 105,
+      "test_clauses": 8,
+      "embedded_train_clauses": 105,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Minimum Commitment",
+      "train_clauses": 330,
+      "test_clauses": 62,
+      "embedded_train_clauses": 330,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Most Favored Nation",
+      "train_clauses": 29,
+      "test_clauses": 7,
+      "embedded_train_clauses": 29,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "No-Solicit Of Customers",
+      "train_clauses": 38,
+      "test_clauses": 7,
+      "embedded_train_clauses": 38,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "No-Solicit Of Employees",
+      "train_clauses": 65,
+      "test_clauses": 10,
+      "embedded_train_clauses": 65,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Non-Compete",
+      "train_clauses": 189,
+      "test_clauses": 37,
+      "embedded_train_clauses": 189,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    },
+    {
+      "category": "Non-Disparagement",
+      "train_clauses": 43,
+      "test_clauses": 11,
+      "embedded_train_clauses": 43,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Non-Transferable License",
+      "train_clauses": 223,
+      "test_clauses": 59,
+      "embedded_train_clauses": 223,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Notice Period To Terminate Renewal",
+      "train_clauses": 86,
+      "test_clauses": 31,
+      "embedded_train_clauses": 86,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Post-Termination Services",
+      "train_clauses": 327,
+      "test_clauses": 82,
+      "embedded_train_clauses": 327,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Price Restrictions",
+      "train_clauses": 25,
+      "test_clauses": 1,
+      "embedded_train_clauses": 25,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    },
+    {
+      "category": "Renewal Term",
+      "train_clauses": 155,
+      "test_clauses": 44,
+      "embedded_train_clauses": 155,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Revenue/Profit Sharing",
+      "train_clauses": 304,
+      "test_clauses": 91,
+      "embedded_train_clauses": 304,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    },
+    {
+      "category": "Rofr/Rofo/Rofn",
+      "train_clauses": 283,
+      "test_clauses": 67,
+      "embedded_train_clauses": 283,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    },
+    {
+      "category": "Source Code Escrow",
+      "train_clauses": 47,
+      "test_clauses": 16,
+      "embedded_train_clauses": 47,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Termination For Convenience",
+      "train_clauses": 186,
+      "test_clauses": 37,
+      "embedded_train_clauses": 186,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    },
+    {
+      "category": "Third Party Beneficiary",
+      "train_clauses": 31,
+      "test_clauses": 8,
+      "embedded_train_clauses": 31,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Uncapped Liability",
+      "train_clauses": 123,
+      "test_clauses": 28,
+      "embedded_train_clauses": 123,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Unlimited/All-You-Can-Eat-License",
+      "train_clauses": 18,
+      "test_clauses": 9,
+      "embedded_train_clauses": 18,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Volume Restriction",
+      "train_clauses": 121,
+      "test_clauses": 44,
+      "embedded_train_clauses": 121,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 0
+    },
+    {
+      "category": "Warranty Duration",
+      "train_clauses": 143,
+      "test_clauses": 21,
+      "embedded_train_clauses": 143,
+      "exists_in_train": true,
+      "retention_percent": 100.0,
+      "fixed_pilot_rows": 1
+    }
+  ],
+  "configuration": {
+    "configured_model_from_data_scripts_env": "embed-english-v3.0",
+    "configured_model_from_backend_env_example": "embed-english-v3.0",
+    "model_matches_persisted": true,
+    "embedding_dimension_expected": 1024
+  },
+  "current_results_context": {
+    "classification_fix_recall_at_5": 0.6,
+    "classification_fix_accuracy": 0.4,
+    "hybrid_recall_at_5": 0.6,
+    "hybrid_accuracy": 0.5,
+    "hybrid_retrieval_misses": 4,
+    "hybrid_previous_misses_recovered": "0/4"
+  }
+}

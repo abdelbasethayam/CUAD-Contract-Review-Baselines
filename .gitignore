@@ -1,0 +1,33 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Large artifacts & Checkpoints
+output/eval_1495/checkpoints/
+output/embeddings/
+data/CUAD_v1/
+data/raw/
+models/
+mlruns/
+*.safetensors
+*.bin
+
+# Generated vector databases
+chroma_db/
+qdrant_db/
+
+# Logs
+*.log
+logs/

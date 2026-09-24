@@ -1,0 +1,11 @@
+benchmark_row_id,clause_type,baseline_prediction,ollama_prediction,ground_truth_rank,ground_truth_in_top5,baseline_correct,prediction_equals_ground_truth,result_category,prediction_status,ollama_selected_top1,ollama_selected_another_topk_category,ollama_selected_label_absent_from_top5,retrieval_matches_baseline
+fixed-10-01,Warranty Duration,Warranty Duration,Warranty Duration,1,True,True,True,CORRECT,VALID_CANDIDATE,True,False,False,True
+fixed-10-02,Price Restrictions,Volume Restriction,Volume Restriction,,False,False,False,RETRIEVAL_MISS,VALID_CANDIDATE,False,True,False,True
+fixed-10-03,Non-Compete,Non-Compete,Non-Compete,1,True,True,True,CORRECT,VALID_CANDIDATE,True,False,False,True
+fixed-10-04,Rofr/Rofo/Rofn,Non-Transferable License,Non-Transferable License,,False,False,False,RETRIEVAL_MISS,VALID_CANDIDATE,True,False,False,True
+fixed-10-05,Competitive Restriction Exception,License Grant,License Grant,,False,False,False,RETRIEVAL_MISS,VALID_CANDIDATE,False,True,False,True
+fixed-10-06,Joint Ip Ownership,Ip Ownership Assignment,Joint Ip Ownership,2,True,False,True,CORRECT,VALID_CANDIDATE,False,True,False,True
+fixed-10-07,Revenue/Profit Sharing,License Grant,Minimum Commitment,1,True,False,False,CLASSIFICATION_ERROR,VALID_CANDIDATE,False,True,False,True
+fixed-10-08,Termination For Convenience,Termination For Convenience,Termination For Convenience,1,True,True,True,CORRECT,VALID_CANDIDATE,True,False,False,True
+fixed-10-09,Audit Rights,Audit Rights,UNKNOWN,1,True,True,False,INVALID_OUT_OF_CANDIDATE,OUT_OF_CANDIDATE,False,False,False,True
+fixed-10-10,Affiliate License-Licensor,License Grant,License Grant,,False,False,False,RETRIEVAL_MISS,VALID_CANDIDATE,False,True,False,True

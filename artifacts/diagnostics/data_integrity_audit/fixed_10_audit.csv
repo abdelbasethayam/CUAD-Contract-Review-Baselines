@@ -1,0 +1,11 @@
+benchmark_row_id,original_row_index,document_id,clause_type,clause_text_length,document_in_test,selection_matches_test_row,train_examples,embedded_examples,exact_train_text_match,normalized_train_text_match
+fixed-10-01,1906,LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf,Warranty Duration,228,True,True,143,143,False,False
+fixed-10-02,669,ENTERPRISEPRODUCTSPARTNERSLP_07_08_1998-EX-10.3-TRANSPORTATION CONTRACT.PDF,Price Restrictions,298,True,True,25,25,False,False
+fixed-10-03,1086,HYPERIONSOFTWARECORP_09_28_1994-EX-10.47-EXCLUSIVE DISTRIBUTOR AGREEMENT.PDF,Non-Compete,553,True,True,189,189,False,False
+fixed-10-04,147,ANIXABIOSCIENCESINC_06_09_2020-EX-10.1-COLLABORATION AGREEMENT.PDF,Rofr/Rofo/Rofn,204,True,True,283,283,False,False
+fixed-10-05,432,RandWorldwideInc_20010402_8-KA_EX-10.2_2102464_EX-10.2_Co-Branding Agreement.pdf,Competitive Restriction Exception,328,True,True,92,92,False,False
+fixed-10-06,1883,LiquidmetalTechnologiesInc_20200205_8-K_EX-10.1_11968198_EX-10.1_Development Agreement.pdf,Joint Ip Ownership,517,True,True,83,83,False,False
+fixed-10-07,2096,CYBERIANOUTPOSTINC_07_09_1998-EX-10.13-PROMOTION AGREEMENT.PDF,Revenue/Profit Sharing,129,True,True,304,304,False,False
+fixed-10-08,1238,"THERAVANCEBIOPHARMA,INC_05_08_2020-EX-10.2-SERVICE AGREEMENT.PDF",Termination For Convenience,319,True,True,186,186,False,False
+fixed-10-09,2157,"PHREESIA,INC_05_28_2019-EX-10.18-STRATEGIC ALLIANCE AGREEMENT.PDF",Audit Rights,226,True,True,485,485,False,False
+fixed-10-10,2246,ArmstrongFlooringInc_20190107_8-K_EX-10.2_11471795_EX-10.2_Intellectual Property Agreement.pdf,Affiliate License-Licensor,569,True,True,39,39,False,False

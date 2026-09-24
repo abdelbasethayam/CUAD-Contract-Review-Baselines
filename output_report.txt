@@ -1,0 +1,28 @@
+2026/09/23 14:08:35 INFO mlflow.agent.hint: Load the `instrumenting-with-mlflow-tracing` skill at C:\Users\free lap\AppData\Local\Programs\Python\Python312\Lib\site-packages\mlflow\assistant\skills\instrumenting-with-mlflow-tracing\SKILL.md before writing any tracing code; it ships with this MLflow install. Set MLFLOW_DISABLE_AGENT_HINT=1 to silence this.
+Loaded 1679 results for 'Baseline A (Zero-Shot)'
+Loaded 1679 results for 'Baseline B (Randomized Few-Shot)'
+Loaded 1679 results for 'Baseline C (RAG Few-Shot)'
+Loaded 1679 results for 'Baseline D (Pure kNN Top-1)'
+Loaded 1679 results for 'Baseline E (Pure kNN Majority)'
+Loaded 1679 results for 'Baseline F (Weighted kNN)'
+Loaded 1679 results for 'Baseline G (BERT)'
+Loaded 1679 results for 'Baseline G (Legal-BERT)'
+
+--- Computing Metrics & 95% CIs ---
+
+--- McNemar Paired Significance Tests ---
+RAG vs Zero-Shot p-value: 1.1503e-85, Cohen's h: 0.6224
+RAG vs kNN Majority p-value: 1.3590e-03, Cohen's h: 0.0624
+
+--- Reviewer 3: Training Frequency vs Test Recall Correlation ---
+Pearson (log train freq vs test recall): r = 0.5698 (p = 2.8634e-04)
+Spearman (train freq vs test recall):     r = 0.5976 (p = 1.1877e-04)
+Saved figure: D:\downloads_\AI-Contract-Review-App-baseline-json-risk-generation\output\figures\frequency_vs_recall.png
+MLflow logging skipped: The filesystem tracking backend (e.g., './mlruns') is in maintenance mode and will not receive further updates. Please migrate to a database backend (e.g., 'sqlite:///mlflow.db') to access the latest MLflow features. The `mlflow migrate-filestore` tool migrates your existing data losslessly. See https://mlflow.org/docs/latest/self-hosting/migrate-from-file-store for migration guidance. If the filesystem backend is required for your workflow, set `MLFLOW_ALLOW_FILE_STORE=true` to opt out of this exception.
+Traceback (most recent call last):
+  File "D:\downloads_\AI-Contract-Review-App-baseline-json-risk-generation\scripts\05_analyze_and_report.py", line 330, in <module>
+    
+  File "D:\downloads_\AI-Contract-Review-App-baseline-json-risk-generation\scripts\05_analyze_and_report.py", line 291, in run_full_analysis
+    h_zero = f"{mcnemar_rag_vs_zero[1]:.4f}" if mcnemar_rag_vs_zero[1] is not None else 'N/A'
+                                                                                              
+ValueError: Invalid format specifier '.4f if mcnemar_rag_vs_zero[1] is not None else 'N/A'' for object of type 'float'

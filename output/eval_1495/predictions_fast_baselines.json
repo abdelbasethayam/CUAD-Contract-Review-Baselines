@@ -1,0 +1,9 @@
+{
+  "duration_seconds": 91.60498070716858,
+  "total_test_clauses": 1679,
+  "metrics": {
+    "baseline_D_knn_top1_accuracy": 0.6033353186420488,
+    "baseline_E_knn_majority_accuracy": 0.6343061346039309,
+    "baseline_F_weighted_knn_accuracy": 0.6343061346039309
+  }
+}

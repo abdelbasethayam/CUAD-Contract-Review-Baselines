@@ -1,0 +1,212 @@
+{
+  "status": "COMPLETE",
+  "benchmark_id": "fixed_10_fewshot_comparative_experiment",
+  "total_evaluated": 10,
+  "metrics": {
+    "knn_top1_accuracy": 0.5,
+    "knn_majority_accuracy": 0.6,
+    "rag_llm_accuracy": 0.4
+  },
+  "rows": [
+    {
+      "benchmark_row_id": "fixed-10-01",
+      "ground_truth": "Warranty Duration",
+      "knn_top1_prediction": "Warranty Duration",
+      "knn_top1_correct": true,
+      "knn_majority_prediction": "Warranty Duration",
+      "knn_majority_correct": true,
+      "rag_llm_prediction": "Warranty Duration",
+      "rag_llm_correct": true,
+      "random_demonstration_labels": [
+        "Audit Rights",
+        "Audit Rights",
+        "Anti-Assignment",
+        "Anti-Assignment",
+        "Minimum Commitment"
+      ],
+      "zero_shot_prompt_length": 7089,
+      "random_fewshot_prompt_length": 8769,
+      "retrieval_fewshot_prompt_length": 8705
+    },
+    {
+      "benchmark_row_id": "fixed-10-02",
+      "ground_truth": "Price Restrictions",
+      "knn_top1_prediction": "Revenue/Profit Sharing",
+      "knn_top1_correct": false,
+      "knn_majority_prediction": "Revenue/Profit Sharing",
+      "knn_majority_correct": false,
+      "rag_llm_prediction": "Volume Restriction",
+      "rag_llm_correct": false,
+      "random_demonstration_labels": [
+        "License Grant",
+        "Renewal Term",
+        "Cap On Liability",
+        "Post-Termination Services",
+        "Volume Restriction"
+      ],
+      "zero_shot_prompt_length": 7143,
+      "random_fewshot_prompt_length": 9577,
+      "retrieval_fewshot_prompt_length": 10512
+    },
+    {
+      "benchmark_row_id": "fixed-10-03",
+      "ground_truth": "Non-Compete",
+      "knn_top1_prediction": "Non-Compete",
+      "knn_top1_correct": true,
+      "knn_majority_prediction": "Non-Compete",
+      "knn_majority_correct": true,
+      "rag_llm_prediction": "Non-Compete",
+      "rag_llm_correct": true,
+      "random_demonstration_labels": [
+        "Minimum Commitment",
+        "License Grant",
+        "Non-Disparagement",
+        "Change Of Control",
+        "Insurance"
+      ],
+      "zero_shot_prompt_length": 7453,
+      "random_fewshot_prompt_length": 9506,
+      "retrieval_fewshot_prompt_length": 9817
+    },
+    {
+      "benchmark_row_id": "fixed-10-04",
+      "ground_truth": "Rofr/Rofo/Rofn",
+      "knn_top1_prediction": "Non-Transferable License",
+      "knn_top1_correct": false,
+      "knn_majority_prediction": "Non-Transferable License",
+      "knn_majority_correct": false,
+      "rag_llm_prediction": "Non-Transferable License",
+      "rag_llm_correct": false,
+      "random_demonstration_labels": [
+        "Termination For Convenience",
+        "Change Of Control",
+        "Renewal Term",
+        "Non-Transferable License",
+        "Minimum Commitment"
+      ],
+      "zero_shot_prompt_length": 7088,
+      "random_fewshot_prompt_length": 8682,
+      "retrieval_fewshot_prompt_length": 8349
+    },
+    {
+      "benchmark_row_id": "fixed-10-05",
+      "ground_truth": "Competitive Restriction Exception",
+      "knn_top1_prediction": "Ip Ownership Assignment",
+      "knn_top1_correct": false,
+      "knn_majority_prediction": "License Grant",
+      "knn_majority_correct": false,
+      "rag_llm_prediction": "License Grant",
+      "rag_llm_correct": false,
+      "random_demonstration_labels": [
+        "Competitive Restriction Exception",
+        "Competitive Restriction Exception",
+        "Ip Ownership Assignment",
+        "Renewal Term",
+        "Governing Law"
+      ],
+      "zero_shot_prompt_length": 7161,
+      "random_fewshot_prompt_length": 10210,
+      "retrieval_fewshot_prompt_length": 9533
+    },
+    {
+      "benchmark_row_id": "fixed-10-06",
+      "ground_truth": "Joint Ip Ownership",
+      "knn_top1_prediction": "Ip Ownership Assignment",
+      "knn_top1_correct": false,
+      "knn_majority_prediction": "Joint Ip Ownership",
+      "knn_majority_correct": true,
+      "rag_llm_prediction": "Ip Ownership Assignment",
+      "rag_llm_correct": false,
+      "random_demonstration_labels": [
+        "License Grant",
+        "Cap On Liability",
+        "Ip Ownership Assignment",
+        "Non-Compete",
+        "Irrevocable Or Perpetual License"
+      ],
+      "zero_shot_prompt_length": 7335,
+      "random_fewshot_prompt_length": 9813,
+      "retrieval_fewshot_prompt_length": 9907
+    },
+    {
+      "benchmark_row_id": "fixed-10-07",
+      "ground_truth": "Revenue/Profit Sharing",
+      "knn_top1_prediction": "Revenue/Profit Sharing",
+      "knn_top1_correct": true,
+      "knn_majority_prediction": "Revenue/Profit Sharing",
+      "knn_majority_correct": true,
+      "rag_llm_prediction": "License Grant",
+      "rag_llm_correct": false,
+      "random_demonstration_labels": [
+        "Exclusivity",
+        "Ip Ownership Assignment",
+        "Audit Rights",
+        "Cap On Liability",
+        "Governing Law"
+      ],
+      "zero_shot_prompt_length": 6890,
+      "random_fewshot_prompt_length": 8521,
+      "retrieval_fewshot_prompt_length": 7805
+    },
+    {
+      "benchmark_row_id": "fixed-10-08",
+      "ground_truth": "Termination For Convenience",
+      "knn_top1_prediction": "Termination For Convenience",
+      "knn_top1_correct": true,
+      "knn_majority_prediction": "Termination For Convenience",
+      "knn_majority_correct": true,
+      "rag_llm_prediction": "Termination For Convenience",
+      "rag_llm_correct": true,
+      "random_demonstration_labels": [
+        "Post-Termination Services",
+        "Joint Ip Ownership",
+        "Insurance",
+        "Liquidated Damages",
+        "Volume Restriction"
+      ],
+      "zero_shot_prompt_length": 7214,
+      "random_fewshot_prompt_length": 10741,
+      "retrieval_fewshot_prompt_length": 8782
+    },
+    {
+      "benchmark_row_id": "fixed-10-09",
+      "ground_truth": "Audit Rights",
+      "knn_top1_prediction": "Audit Rights",
+      "knn_top1_correct": true,
+      "knn_majority_prediction": "Audit Rights",
+      "knn_majority_correct": true,
+      "rag_llm_prediction": "Audit Rights",
+      "rag_llm_correct": true,
+      "random_demonstration_labels": [
+        "Ip Ownership Assignment",
+        "Cap On Liability",
+        "Exclusivity",
+        "Competitive Restriction Exception",
+        "Non-Transferable License"
+      ],
+      "zero_shot_prompt_length": 7006,
+      "random_fewshot_prompt_length": 10290,
+      "retrieval_fewshot_prompt_length": 8232
+    },
+    {
+      "benchmark_row_id": "fixed-10-10",
+      "ground_truth": "Affiliate License-Licensor",
+      "knn_top1_prediction": "Irrevocable Or Perpetual License",
+      "knn_top1_correct": false,
+      "knn_majority_prediction": "License Grant",
+      "knn_majority_correct": false,
+      "rag_llm_prediction": "License Grant",
+      "rag_llm_correct": false,
+      "random_demonstration_labels": [
+        "Insurance",
+        "Cap On Liability",
+        "Anti-Assignment",
+        "Post-Termination Services",
+        "Minimum Commitment"
+      ],
+      "zero_shot_prompt_length": 7670,
+      "random_fewshot_prompt_length": 10123,
+      "retrieval_fewshot_prompt_length": 9217
+    }
+  ]
+}

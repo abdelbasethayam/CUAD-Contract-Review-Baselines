@@ -1,0 +1,82 @@
+[
+  {
+    "config": "Baseline A (Zero-Shot)",
+    "total_clauses": 1679,
+    "accuracy": 0.3579511614055986,
+    "macro_f1": 0.3228557057275552,
+    "macro_precision": 0.5707242654860949,
+    "macro_recall": 0.27154626165468115,
+    "ci_95_lower": 0.2862996085325101,
+    "ci_95_upper": 0.34822962746816133
+  },
+  {
+    "config": "Baseline B (Randomized Few-Shot)",
+    "total_clauses": 1679,
+    "accuracy": 0.509827278141751,
+    "macro_f1": 0.4206959735483332,
+    "macro_precision": 0.5431523481136276,
+    "macro_recall": 0.4479712938477383,
+    "ci_95_lower": 0.3878520400983624,
+    "ci_95_upper": 0.44150968188039813
+  },
+  {
+    "config": "Baseline C (RAG Few-Shot)",
+    "total_clauses": 1679,
+    "accuracy": 0.6640857653365099,
+    "macro_f1": 0.5172488142580812,
+    "macro_precision": 0.6061899530147542,
+    "macro_recall": 0.5102680205065075,
+    "ci_95_lower": 0.4853302690049508,
+    "ci_95_upper": 0.5415794667192576
+  },
+  {
+    "config": "Baseline D (Pure kNN Top-1)",
+    "total_clauses": 1679,
+    "accuracy": 0.6033353186420488,
+    "macro_f1": 0.47482814092868136,
+    "macro_precision": 0.4905469440084643,
+    "macro_recall": 0.4811476736467377,
+    "ci_95_lower": 0.44179803762819764,
+    "ci_95_upper": 0.4991471705684763
+  },
+  {
+    "config": "Baseline E (Pure kNN Majority)",
+    "total_clauses": 1679,
+    "accuracy": 0.6343061346039309,
+    "macro_f1": 0.47516843486617855,
+    "macro_precision": 0.5144542827707539,
+    "macro_recall": 0.4809529440444133,
+    "ci_95_lower": 0.4435412723401165,
+    "ci_95_upper": 0.496704542748238
+  },
+  {
+    "config": "Baseline F (Weighted kNN)",
+    "total_clauses": 1679,
+    "accuracy": 0.6343061346039309,
+    "macro_f1": 0.47815278716772397,
+    "macro_precision": 0.5224725924326782,
+    "macro_recall": 0.48113538169119185,
+    "ci_95_lower": 0.4458933041031463,
+    "ci_95_upper": 0.5001524182662243
+  },
+  {
+    "config": "Baseline G (BERT)",
+    "total_clauses": 1679,
+    "accuracy": 0.714711137581894,
+    "macro_f1": 0.640803262989745,
+    "macro_precision": 0.6358566736230914,
+    "macro_recall": 0.6861319374938858,
+    "ci_95_lower": 0.6106919415780254,
+    "ci_95_upper": 0.6611235406483049
+  },
+  {
+    "config": "Baseline G (Legal-BERT)",
+    "total_clauses": 1679,
+    "accuracy": 0.7599761762954139,
+    "macro_f1": 0.6817988773578934,
+    "macro_precision": 0.6729825249870707,
+    "macro_recall": 0.7218538741854073,
+    "ci_95_lower": 0.6515397842128458,
+    "ci_95_upper": 0.7023055140527417
+  }
+]

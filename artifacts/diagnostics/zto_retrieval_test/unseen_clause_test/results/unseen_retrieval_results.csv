@@ -1,0 +1,2 @@
+status,reason
+INCOMPLETE,"Latest Docling-based ZTO segmentation unavailable: torch is not installed"

@@ -1,0 +1,270 @@
+:root {
+  --ink: #1b2430;
+  --paper: #f7f6f3;
+  --line: #d8d4cb;
+  --accent: #2f6f5e;
+  --accent-soft: #e5efe9;
+  font-family: "Iowan Old Style", "Georgia", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.header p {
+  margin: 0 0 32px;
+  color: #5a6472;
+  font-family: system-ui, sans-serif;
+}
+
+.upload-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+  font-family: system-ui, sans-serif;
+}
+
+.upload-form input[type="file"] {
+  flex: 1;
+  font-family: system-ui, sans-serif;
+}
+
+.upload-form button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.upload-form button:disabled {
+  background: #a8b3ac;
+  cursor: not-allowed;
+}
+
+.status,
+.error {
+  font-family: system-ui, sans-serif;
+  margin-top: 16px;
+  font-size: 0.9rem;
+}
+
+.error {
+  color: #a33;
+  background: #fbeaea;
+  border: 1px solid #e6b8b8;
+  padding: 10px 14px;
+  border-radius: 4px;
+}
+
+.results {
+  margin-top: 40px;
+}
+
+.results h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #5a6472;
+  font-family: system-ui, sans-serif;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+
+.clause-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.clause-card {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.clause-label {
+  display: inline-block;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+
+.trace {
+  margin-top: 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  font-family: system-ui, sans-serif;
+}
+
+.trace-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+
+.trace-header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.trace-header span {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.trace-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.trace-item {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 7px 0;
+  color: #45515f;
+  font-size: 0.86rem;
+  border-bottom: 1px solid #f0eee9;
+}
+
+.trace-stage {
+  min-width: 112px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.trace-item--error,
+.trace-item--error .trace-stage {
+  color: #a33;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 16px 0 4px;
+  color: #45515f;
+  font-family: system-ui, sans-serif;
+  font-size: 0.85rem;
+}
+
+.risk-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-family: system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.risk-badge--risk {
+  background: #fbeaea;
+  color: #a33;
+}
+
+.risk-badge--clear {
+  background: #eef4f1;
+  color: #47645a;
+}
+
+.risk-badge--unsupported {
+  background: #f1eee8;
+  color: #756b5c;
+}
+
+.risk-type {
+  margin: 0 0 10px;
+  color: #a33;
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.clause-text {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.risk-detail {
+  margin-top: 10px;
+  color: #45515f;
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.risk-detail a {
+  color: var(--accent);
+}
+
+details {
+  margin-top: 10px;
+  font-family: system-ui, sans-serif;
+  font-size: 0.85rem;
+}
+
+summary {
+  cursor: pointer;
+  color: #5a6472;
+}
+
+.evidence-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: #5a6472;
+}
+
+.guidance-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: #5a6472;
+  line-height: 1.45;
+}
+
+.guidance-list li {
+  margin-bottom: 10px;
+}

@@ -1,0 +1,362 @@
+{
+  "status": "LEAKAGE_AFFECTED",
+  "timestamp_utc": "2026-09-09T23:18:22.567803+00:00",
+  "embedding_model": "embed-english-v3.0",
+  "embedding_dimension": 1024,
+  "qdrant_collection": "cuad_train",
+  "qdrant_vector_dimension": 1024,
+  "retrieval_top_k": 5,
+  "label_mapping": "Qdrant payload field 'clause_type' is the CUAD label/category.",
+  "ground_truth_source": "data/embeddings/train_metadata.jsonl, filtered to the ZTO document",
+  "zto_document": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+  "results": [
+    {
+      "clause_id": "liquidated_damages_termination",
+      "ground_truth": "Liquidated Damages",
+      "query_text": "Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent.",
+      "source_record_id": "03e081e7-e381-5705-8496-23f2179935e3",
+      "query_excerpt": "Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent.",
+      "top_k": 5,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.8777505131856371,
+          "label": "Liquidated Damages",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent."
+        },
+        {
+          "rank": 2,
+          "score": 0.6732781715695795,
+          "label": "Liquidated Damages",
+          "document_id": "CHEETAHMOBILEINC_04_22_2014-EX-10.43-Cooperation Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "In the event that Party B breaches this covenant, Party A has the right to terminate this Agreement at any time and require Party B to pay 30% of Party A's share of revenues as liquidated damages."
+        },
+        {
+          "rank": 3,
+          "score": 0.6508689733140897,
+          "label": "Liquidated Damages",
+          "document_id": "SENMIAOTECHNOLOGYLTD_02_19_2019-EX-10.5-Collaboration Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parti…"
+        },
+        {
+          "rank": 4,
+          "score": 0.650715454295349,
+          "label": "Liquidated Damages",
+          "document_id": "SENMIAOTECHNOLOGYLTD_02_19_2019-EX-10.5-Collaboration Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "If Party B shall pay liquidated damages for breach of this Agreement or violation of the platform rules, Party A is entitled to request Party B to pay the liquidated damages."
+        },
+        {
+          "rank": 5,
+          "score": 0.6427244280147483,
+          "label": "Liquidated Damages",
+          "document_id": "SENMIAOTECHNOLOGYLTD_02_19_2019-EX-10.5-Collaboration Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "In such case, Party A is entitled to immediately terminate the Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB50,000 (RMB FIFTY THOUSAND) and inde…"
+        }
+      ],
+      "correct_rank": 1,
+      "correct_score": 0.8777505131856371,
+      "top1_score": 0.8777505131856371,
+      "top2_score": 0.6732781715695795,
+      "top1_label": "Liquidated Damages",
+      "top1_to_top2_margin": 0.20447234161605765,
+      "top1_is_correct": true,
+      "correct_in_top3": true,
+      "correct_in_top5": true,
+      "top1_to_correct_margin": 0.0,
+      "same_zto_document": true,
+      "top1_same_zto_document": true
+    },
+    {
+      "clause_id": "liquidated_damages_vehicle_delay",
+      "ground_truth": "Liquidated Damages",
+      "query_text": "Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB1,000 per trip on the second working day and RMB2,000 per trip on the third working day (based on the time records on the parcel transfer documents) and such liquidated damages will be deducted from the current month's freight.",
+      "source_record_id": "af48d613-d543-541d-978f-c3e93cbde713",
+      "query_excerpt": "Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB…",
+      "top_k": 5,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.8742383663795943,
+          "label": "Liquidated Damages",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "Unless otherwise approved by Party A, in the event of parcel transfer due to Party B's vehicle delay, Party B shall pay liquidated damages to Party A at the standard rate of RMB500 per trip on the first working day, RMB…"
+        },
+        {
+          "rank": 2,
+          "score": 0.5863979941747367,
+          "label": "Liquidated Damages",
+          "document_id": "SENMIAOTECHNOLOGYLTD_02_19_2019-EX-10.5-Collaboration Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "For example, if Party B shall pay liquidated damages as much as RMB N, it shall pay additional RMB N to increase the deposit paid in accordance with Article 4.2 after it pays the liquidated damages or Party A deducts th…"
+        },
+        {
+          "rank": 3,
+          "score": 0.5782329409918004,
+          "label": "Liquidated Damages",
+          "document_id": "SENMIAOTECHNOLOGYLTD_02_19_2019-EX-10.5-Collaboration Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parti…"
+        },
+        {
+          "rank": 4,
+          "score": 0.574389011569834,
+          "label": "Liquidated Damages",
+          "document_id": "SENMIAOTECHNOLOGYLTD_02_19_2019-EX-10.5-Collaboration Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "In such case, Party A is entitled to immediately terminate the Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB50,000 (RMB FIFTY THOUSAND) and inde…"
+        },
+        {
+          "rank": 5,
+          "score": 0.5601935174864705,
+          "label": "Liquidated Damages",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "Party B shall pay one-month freight as liquidated damages in case of termination of the Agreement without consent."
+        }
+      ],
+      "correct_rank": 1,
+      "correct_score": 0.8742383663795943,
+      "top1_score": 0.8742383663795943,
+      "top2_score": 0.5863979941747367,
+      "top1_label": "Liquidated Damages",
+      "top1_to_top2_margin": 0.2878403722048576,
+      "top1_is_correct": true,
+      "correct_in_top3": true,
+      "correct_in_top5": true,
+      "top1_to_correct_margin": 0.0,
+      "same_zto_document": true,
+      "top1_same_zto_document": true
+    },
+    {
+      "clause_id": "insurance_vehicle_personnel",
+      "ground_truth": "Insurance",
+      "query_text": "In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with coverage not lower than RMB500,000 per person.",
+      "source_record_id": "7ca7c709-bbd2-550a-8464-36b06f61ee94",
+      "query_excerpt": "In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with coverage not lower than RMB500,000 per person.",
+      "top_k": 5,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.8885817761656665,
+          "label": "Insurance",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with coverage not lower than RMB500,000 per person."
+        },
+        {
+          "rank": 2,
+          "score": 0.5821872429170529,
+          "label": "Insurance",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "The coverage of third-party liability insurance shall not be lower than RMB1 million."
+        },
+        {
+          "rank": 3,
+          "score": 0.5764026962643052,
+          "label": "Insurance",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "Party B shall purchase sufficient insurance for the transportation vehicles."
+        },
+        {
+          "rank": 4,
+          "score": 0.5615510504074852,
+          "label": "Insurance",
+          "document_id": "DYNAMEXINC_06_06_1996-EX-10.4-TRANSPORTATION SERVICES AGREEMENT.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "Each Party shall purchase and maintain, at its own expense, the following insurance coverages: (a) cargo liability insurance, subject to a combined single limit of not less than One Hundred Thousand dollars ($100,000.00…"
+        },
+        {
+          "rank": 5,
+          "score": 0.5555908900216693,
+          "label": "Liquidated Damages",
+          "document_id": "SENMIAOTECHNOLOGYLTD_02_19_2019-EX-10.5-Collaboration Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parti…"
+        }
+      ],
+      "correct_rank": 1,
+      "correct_score": 0.8885817761656665,
+      "top1_score": 0.8885817761656665,
+      "top2_score": 0.5821872429170529,
+      "top1_label": "Insurance",
+      "top1_to_top2_margin": 0.30639453324861354,
+      "top1_is_correct": true,
+      "correct_in_top3": true,
+      "correct_in_top5": true,
+      "top1_to_correct_margin": 0.0,
+      "same_zto_document": true,
+      "top1_same_zto_document": true
+    },
+    {
+      "clause_id": "insurance_third_party",
+      "ground_truth": "Insurance",
+      "query_text": "The coverage of third-party liability insurance shall not be lower than RMB1 million.",
+      "source_record_id": "1a8291d8-ff69-595e-84a9-c67e8ec4fcb5",
+      "query_excerpt": "The coverage of third-party liability insurance shall not be lower than RMB1 million.",
+      "top_k": 5,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.8406711722757251,
+          "label": "Insurance",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "The coverage of third-party liability insurance shall not be lower than RMB1 million."
+        },
+        {
+          "rank": 2,
+          "score": 0.6208914888560061,
+          "label": "Insurance",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with coverage not lower than RMB500,000 per person."
+        },
+        {
+          "rank": 3,
+          "score": 0.5704154114477092,
+          "label": "Insurance",
+          "document_id": "GOOSEHEADINSURANCE,INC_04_02_2018-EX-10.6-Franchise Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "Business automobile liability insurance, including owned, non-owned and hired car coverage providing third party liability insurance, covering all licensed vehicles owned or operated by or on behalf of you, with limits …"
+        },
+        {
+          "rank": 4,
+          "score": 0.5518308257444584,
+          "label": "Insurance",
+          "document_id": "HERTZGLOBALHOLDINGS,INC_07_07_2016-EX-10.4-INTELLECTUAL PROPERTY AGREEMENT.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "The amount of coverage shall be a minimum of three million dollars ($3,000,000) combined single limit, with no deductible amount for each single occurrence for bodily injury and/or property damage."
+        },
+        {
+          "rank": 5,
+          "score": 0.5518237688965568,
+          "label": "Insurance",
+          "document_id": "UAGHINC_04_14_2004-EX-10.18-MAINTENANCE AGREEMENT.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "The Provider will obtain and maintain appropriate liability insurance in an amount of not less than $1,000,000 combined single limit for accidents or occurrences which cause bodily injury, death or property damage relat…"
+        }
+      ],
+      "correct_rank": 1,
+      "correct_score": 0.8406711722757251,
+      "top1_score": 0.8406711722757251,
+      "top2_score": 0.6208914888560061,
+      "top1_label": "Insurance",
+      "top1_to_top2_margin": 0.21977968341971899,
+      "top1_is_correct": true,
+      "correct_in_top3": true,
+      "correct_in_top5": true,
+      "top1_to_correct_margin": 0.0,
+      "same_zto_document": true,
+      "top1_same_zto_document": true
+    },
+    {
+      "clause_id": "insurance_vehicle",
+      "ground_truth": "Insurance",
+      "query_text": "Party B shall purchase sufficient insurance for the transportation vehicles.",
+      "source_record_id": "b2dea822-0fe5-56ab-8a9a-a68e7bd7b219",
+      "query_excerpt": "Party B shall purchase sufficient insurance for the transportation vehicles.",
+      "top_k": 5,
+      "hits": [
+        {
+          "rank": 1,
+          "score": 0.8318225727452667,
+          "label": "Insurance",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "Party B shall purchase sufficient insurance for the transportation vehicles."
+        },
+        {
+          "rank": 2,
+          "score": 0.6595348382146802,
+          "label": "Insurance",
+          "document_id": "ZtoExpressCaymanInc_20160930_F-1_EX-10.10_9752871_EX-10.10_Transportation Agreement.pdf",
+          "same_zto_document": true,
+          "clause_excerpt": "In addition to vehicle personnel insurance, Party B shall at least purchase injury insurance for two persons with coverage not lower than RMB500,000 per person."
+        },
+        {
+          "rank": 3,
+          "score": 0.6136091572067899,
+          "label": "Most Favored Nation",
+          "document_id": "SENMIAOTECHNOLOGYLTD_02_19_2019-EX-10.5-Collaboration Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "Party B shall provide the Driver User with long-term and stable rental sources and the most favorable financial leasing scheme, complete the vehicle leasing transactions with the Driver User through the Platform, and pr…"
+        },
+        {
+          "rank": 4,
+          "score": 0.5911812471071551,
+          "label": "Most Favored Nation",
+          "document_id": "SENMIAOTECHNOLOGYLTD_02_19_2019-EX-10.5-Collaboration Agreement.PDF",
+          "same_zto_document": false,
+          "clause_excerpt": "Party B guarantees that the Driver User will enjoy the most favorable treatment in accordance with the terms and conditions stipulated in This Agreement during the Period of Cooperation."
+        },
+        {
+          "rank": 5,
+          "score": 0.5847667519400525,
+          "label": "Insurance",
+          "document_id": "TodosMedicalLtd_20190328_20-F_EX-4.10_11587157_EX-4.10_Marketing Agreement_ Reseller Agreement.pdf",
+          "same_zto_document": false,
+          "clause_excerpt": "Each party shall carry appropriate and commercially reasonable amounts of insurance adequate for the activities detailed in this Agreement, as well as sufficient levels of all legally mandated insurance, if any."
+        }
+      ],
+      "correct_rank": 1,
+      "correct_score": 0.8318225727452667,
+      "top1_score": 0.8318225727452667,
+      "top2_score": 0.6595348382146802,
+      "top1_label": "Insurance",
+      "top1_to_top2_margin": 0.17228773453058654,
+      "top1_is_correct": true,
+      "correct_in_top3": true,
+      "correct_in_top5": true,
+      "top1_to_correct_margin": 0.0,
+      "same_zto_document": true,
+      "top1_same_zto_document": true
+    }
+  ],
+  "aggregate": {
+    "tested_clauses": 5,
+    "top1_hit_rate": 1.0,
+    "top3_hit_rate": 1.0,
+    "top5_hit_rate": 1.0,
+    "same_document_retrieval_count": 5,
+    "same_document_retrieval_rate": 1.0,
+    "top1_same_document_count": 5,
+    "top1_same_document_rate": 1.0,
+    "other_document_retrieval_count": 0
+  },
+  "label_summary": {
+    "Insurance": {
+      "tested_clauses": 3,
+      "top1_hit_rate": 1.0,
+      "top3_hit_rate": 1.0,
+      "top5_hit_rate": 1.0,
+      "main_competitors": [
+        "Most Favored Nation",
+        "Liquidated Damages"
+      ]
+    },
+    "Liquidated Damages": {
+      "tested_clauses": 2,
+      "top1_hit_rate": 1.0,
+      "top3_hit_rate": 1.0,
+      "top5_hit_rate": 1.0,
+      "main_competitors": []
+    }
+  },
+  "safety": {
+    "production_files_modified": false,
+    "env_modified": false,
+    "qdrant_original_modified": false,
+    "embedding_artifacts_modified": false,
+    "ollama_called": false,
+    "git_commit_created": false
+  }
+}

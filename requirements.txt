@@ -1,0 +1,25 @@
+# --- Web framework / API ---
+fastapi
+uvicorn[standard]
+python-multipart      # required by FastAPI for UploadFile (file uploads)
+
+# --- RAG pipeline: embedding, vector DB, local LLM ---
+cohere                 # embed-v4.0 / embed-english-v3.0 embeddings
+qdrant-client          # vector search (local or remote)
+requests               # calls to Ollama's /api/generate
+
+# --- Contract text extraction ---
+pdfplumber             # PDF -> text extraction (segmenter.py)
+
+# Local PDF structure extraction for the production hybrid parser. The
+# deterministic clause boundary layer remains in app/core/rag/segmenter.py.
+docling-slim==2.126.0
+docling-parse==7.18.0
+rtree==1.4.1
+
+# --- Config / environment ---
+python-dotenv           # loads .env (COHERE_API_KEY, QDRANT_URL, etc.)
+
+# --- Data pipeline (split_cuad.py, embed_train.py, build_qdrant.py) ---
+pandas                  # CSV loading/reshaping, config.load_labels()
+scikit-learn             # train_test_split in split_cuad.py

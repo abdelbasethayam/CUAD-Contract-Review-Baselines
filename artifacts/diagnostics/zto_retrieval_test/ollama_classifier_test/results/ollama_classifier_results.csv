@@ -1,0 +1,13 @@
+clause_id,clause_number,ground_truth_label,ground_truth_available,qdrant_top1_label,qdrant_top1_score,parsed_prediction,prediction_in_top_k,ollama_selected_top1,correct_label_in_top5,decision_relationship,classifier_error
+1.,1.,,False,Rofr/Rofo/Rofn,0.5638601034595816,License Grant,True,False,False,OLLAMA_SELECTED_RETRIEVED_LABEL,False
+3.,3.,,False,Revenue/Profit Sharing,0.5123864974618589,License Grant,False,False,False,OLLAMA_SELECTED_LABEL_NOT_RETRIEVED,False
+4.,4.,,False,Notice Period To Terminate Renewal,0.4799134427119086,Renewal Term,True,False,False,OLLAMA_SELECTED_RETRIEVED_LABEL,False
+5.,5.,,False,Exclusivity,0.5255886423226489,Exclusivity,True,True,False,RETRIEVAL_TOP1_MATCH,False
+6.,6.,Insurance,True,Insurance,0.7654467867011041,Insurance,True,True,True,RETRIEVAL_TOP1_MATCH,False
+9.,9.,,False,Liquidated Damages,0.6474151265481198,Termination For Convenience,True,False,False,OLLAMA_SELECTED_RETRIEVED_LABEL,False
+11.,11.,,False,Termination For Convenience,0.6030398783129638,Anti-Assignment,True,False,False,OLLAMA_SELECTED_RETRIEVED_LABEL,False
+12.,12.,,False,Governing Law,0.531984645929346,Governing Law,True,True,False,RETRIEVAL_TOP1_MATCH,False
+13.,13.,,False,Covenant Not To Sue,0.5066150163222621,Anti-Assignment,True,False,False,OLLAMA_SELECTED_RETRIEVED_LABEL,False
+14.,14.,,False,Anti-Assignment,0.4949521647860077,Anti-Assignment,True,True,False,RETRIEVAL_TOP1_MATCH,False
+5(e),(e),Liquidated Damages,True,Liquidated Damages,0.8183981719704212,Liquidated Damages,True,True,True,RETRIEVAL_TOP1_MATCH,False
+10.,10.,Liquidated Damages,True,Liquidated Damages,0.707168526626664,Liquidated Damages,True,True,True,RETRIEVAL_TOP1_MATCH,False
