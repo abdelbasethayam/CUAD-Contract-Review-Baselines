@@ -1,25 +1,20 @@
 """
 Prompt construction for the Qwen/Ollama clause classifier.
 
-Kept separate from generator.py so prompt wording, instructions, and
-label definitions can be tuned without touching the Ollama call, response
-parsing, or pipeline orchestration.
-
-Location: app/core/rag/prompt.py
+Improvements vs original:
+- Stronger candidate constraint language for small/medium models.
+- Explicit ordered decision rules that favor evidence over keyword matching.
+- Clear abstention path (NO_APPLICABLE_LABEL) instead of forced labels.
+- Keeps retrieved examples framed as evidence, not automatic answers.
 """
-
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from ..config import LABEL_DEFINITIONS_PATH
 
 
-# --------------------------------------------------------------------------
-# Label definitions (the CUAD labels the model is allowed to choose from,
-# with a human-readable definition of each -- injected into the prompt so
-# the model isn't guessing from the label name alone)
-# --------------------------------------------------------------------------
 DEFAULT_LABEL_DEFINITIONS: dict[str, str] = {
     "Affiliate License-Licensee": (
         "License rights are granted to the licensee's affiliates, "
@@ -95,8 +90,7 @@ DEFAULT_LABEL_DEFINITIONS: dict[str, str] = {
         "given to another counterparty."
     ),
     "No-Solicit Of Customers": (
-        "A clause prohibiting solicitation of customers, clients, or "
-        "accounts."
+        "A clause prohibiting solicitation of customers, clients, or accounts."
     ),
     "No-Solicit Of Employees": (
         "A clause prohibiting solicitation, hiring, or recruitment of "
@@ -119,8 +113,7 @@ DEFAULT_LABEL_DEFINITIONS: dict[str, str] = {
         "continuing services after termination."
     ),
     "Price Restrictions": (
-        "A clause limiting pricing, discounts, resale price, or price "
-        "changes."
+        "A clause limiting pricing, discounts, resale price, or price changes."
     ),
     "Renewal Term": (
         "A clause defining an automatic or optional renewal period or "
@@ -164,14 +157,8 @@ DEFAULT_LABEL_DEFINITIONS: dict[str, str] = {
 
 
 def load_label_definitions(labels: list[str]) -> dict[str, str]:
-    """Load label definitions from disk, filling in any missing ones from
-    DEFAULT_LABEL_DEFINITIONS and persisting the repaired file. Raises if a
-    label has no definition anywhere, or if the file contains stale labels
-    no longer in config.load_labels().
-    """
-    path = LABEL_DEFINITIONS_PATH
-    path.parent.mkdir(parents=True, exist_ok=True)
-
+    """Load (and if needed repair) the label → definition mapping."""
+    path = Path(LABEL_DEFINITIONS_PATH)
     existing: dict[str, str] = {}
     if path.exists():
         loaded = json.loads(path.read_text(encoding="utf-8"))
@@ -182,8 +169,6 @@ def load_label_definitions(labels: list[str]) -> dict[str, str]:
         existing = {str(k): str(v) for k, v in loaded.items()}
 
     missing = [label for label in labels if label not in existing]
-    extra = [label for label in existing if label not in labels]
-
     if missing:
         for label in missing:
             definition = DEFAULT_LABEL_DEFINITIONS.get(label)
@@ -192,52 +177,38 @@ def load_label_definitions(labels: list[str]) -> dict[str, str]:
                     f"Missing definition for label '{label}' and no fallback was provided."
                 )
             existing[label] = definition
-
         ordered = {label: existing[label] for label in labels}
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(
             json.dumps(ordered, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
         existing = ordered
 
-    if extra:
-        raise ValueError(
-            f"{path} contains unexpected labels not present in config.load_labels(): "
-            + ", ".join(sorted(extra))
-        )
-
-    missing_after = [label for label in labels if label not in existing]
-    if missing_after:
-        raise ValueError(
-            "Label-definition coverage is incomplete after repair: "
-            + ", ".join(missing_after)
-        )
-
-    return {label: existing[label] for label in labels}
+    return {label: existing[label] for label in labels if label in existing}
 
 
-# --------------------------------------------------------------------------
-# Prompt template
-# --------------------------------------------------------------------------
 def _format_examples(examples: list[dict]) -> str:
     blocks: list[str] = []
     for index, example in enumerate(examples, start=1):
-        score = example["score"]
-        clause_type = example["clause_type"]
-        clause_text = example["clause_text"]
+        score = float(example.get("score") or 0.0)
+        clause_type = example.get("clause_type") or ""
+        clause_text = example.get("clause_text") or ""
+        if len(clause_text) > 900:
+            clause_text = clause_text[:900] + "…"
         blocks.append(
             f"{index}. Label: {clause_type}\n"
             f"   Retrieval score: {score:.4f}\n"
             f"   Clause: \"{clause_text}\""
         )
-    return "\n\n".join(blocks)
+    return "\n\n".join(blocks) if blocks else "None"
 
 
 def _format_label_definitions(label_definitions: dict[str, str]) -> str:
-    blocks: list[str] = []
-    for label in label_definitions:
-        blocks.append(f"- {label}: {label_definitions[label]}")
-    return "\n".join(blocks)
+    return "\n".join(
+        f"- {label}: {definition}"
+        for label, definition in label_definitions.items()
+    )
 
 
 def build_prompt(
@@ -248,59 +219,50 @@ def build_prompt(
     extracted_features: dict[str, list[str]],
     candidate_labels: list[str] | None = None,
 ) -> str:
-    """
-    Prompt-tuning notes:
-    - Decision rules are stated explicitly and ordered by priority for the
-      configured local Ollama model.
-    - "Return ONLY a JSON object" is paired with local validation because
-      local Ollama is instructed to return the response schema as JSON.
-    - Retrieved examples are framed as "evidence, not automatic answers"
-      to discourage the model from just copying the top-1 retrieval hit's
-      label without reasoning about the actual clause text.
-    - If you change the section headers below, also check
-      parse_prediction() in generator.py -- it does NOT depend on this
-      exact wording, but keep the final JSON-format instruction intact,
-      since that's what response parsing relies on.
-    """
+    """Build a candidate-constrained classification prompt for Qwen/Ollama."""
     allowed_labels = candidate_labels or labels
     label_list = "\n".join(f"- {label}" for label in allowed_labels)
-    example_block = _format_examples(examples) if examples else "None"
-    label_definition_block = _format_label_definitions(label_definitions)
+    example_block = _format_examples(examples)
+    defs_for_prompt = {
+        label: label_definitions[label]
+        for label in allowed_labels
+        if label in label_definitions
+    }
+    label_definition_block = _format_label_definitions(defs_for_prompt)
     extracted_features_json = json.dumps(
-        extracted_features,
-        indent=2,
-        ensure_ascii=False,
+        extracted_features, indent=2, ensure_ascii=False
     )
 
-    return f"""You are a legal contract clause classifier for CUAD.
+    return f"""You are a precise legal contract clause classifier for the CUAD taxonomy.
 
 Task:
-Identify the MAIN LEGAL FUNCTION of the clause and select exactly one label from the allowed CUAD candidates.
+Identify the MAIN LEGAL FUNCTION of the clause and select exactly one label from the Allowed candidate list below.
 
-Decision rules:
-- Use the clause text, the extracted legal information, the label definitions, and the retrieved training examples together.
-- Use retrieved examples as evidence, not as automatic answers.
-- Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.
-- Prefer the primary contractual function when several concepts appear.
-- Do not rely on keyword matching alone.
-- Do not invent facts.
-- Select exactly one allowed CUAD label only when the clause and retrieval evidence support it.
-- If the clause is metadata or the evidence is weak, return {{"clause_type":"NO_APPLICABLE_LABEL"}}.
-- Do not force a label when retrieval confidence is low or the classifier cannot support a candidate.
-- UNKNOWN, OTHER, NONE, UNCLASSIFIED, NO_MATCH, and NO_LABEL are forbidden outputs; use NO_APPLICABLE_LABEL for a safe abstention.
-- Return ONLY a JSON object in this exact format:
-  {{"clause_type": "<one allowed candidate category>"}}
+Strict decision rules (follow in order):
+1. Read the original clause carefully. Prefer the primary contractual function when several concepts appear.
+2. Use retrieved training examples only as evidence. Do NOT automatically copy the top-1 label.
+3. Compare the clause against the label definitions of the Allowed candidates.
+4. Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.
+5. Do not rely on keyword matching alone.
+6. Do not invent facts that are not supported by the clause text.
+7. If the clause is metadata, boilerplate, or the evidence is weak / conflicting, return NO_APPLICABLE_LABEL.
+8. UNKNOWN, OTHER, NONE, UNCLASSIFIED, NO_MATCH, and NO_LABEL are forbidden. Use NO_APPLICABLE_LABEL for safe abstention.
+
+Output requirements:
+- Return ONLY a single JSON object.
+- Schema: {{"clause_type": "<one Allowed candidate or NO_APPLICABLE_LABEL>"}}
+- No markdown, no explanation, no extra keys.
 
 Original clause:
-"{clause_text}"
+\"{clause_text}\"
 
 Allowed candidate CUAD categories:
 {label_list}
 
-CUAD label definitions:
+CUAD label definitions (for Allowed candidates only):
 {label_definition_block}
 
-Retrieved Top-K TRAIN examples:
+Retrieved Top-K TRAIN examples (evidence, not automatic answers):
 {example_block}
 
 Extracted legal information:
