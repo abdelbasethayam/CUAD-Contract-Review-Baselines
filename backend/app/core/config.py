@@ -1,4 +1,13 @@
-#config.py
+# config.py
+"""Central configuration for the CUAD classification + risk pipeline.
+
+Key changes for higher Qwen accuracy:
+- Default OLLAMA_MODEL raised to qwen2.5:7b (still overridable via env).
+- Default TOP_K raised to 10 so the candidate set is richer.
+- Explicit MIN_RETRIEVAL_CONFIDENCE kept for safe abstention.
+"""
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
@@ -17,9 +26,8 @@ for dotenv_path in (
         break
 
 
-# The workspace shell is configured with a dead localhost proxy. Clear it
-# here so Cohere/httpx can reach the real API while keeping localhost
-# requests for Ollama and Qdrant unaffected.
+# Clear a common dead local proxy that breaks outbound Cohere calls while
+# leaving localhost (Ollama / Qdrant) alone.
 for proxy_var in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY"):
     proxy_value = os.getenv(proxy_var, "")
     if proxy_value.startswith("http://127.0.0.1:9") or proxy_value.startswith(
@@ -51,8 +59,7 @@ CONFUSION_MATRIX_CSV_PATH = RESULTS_DIR / "confusion_matrix.csv"
 
 
 # --------------------------------------------------------------------------
-# Cohere (must match the model used to build the Qdrant index in
-# embed_train.py, or retrieval similarity will be meaningless)
+# Cohere (must match the model used to build the Qdrant index)
 # --------------------------------------------------------------------------
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 COHERE_MODEL = os.getenv(
@@ -64,7 +71,7 @@ COHERE_MAX_RETRY_ATTEMPTS = int(os.getenv("COHERE_MAX_RETRY_ATTEMPTS", "8"))
 
 
 # --------------------------------------------------------------------------
-# Qdrant (same collection built by build_qdrant_collection.py)
+# Qdrant
 # --------------------------------------------------------------------------
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
@@ -88,9 +95,14 @@ if not LEGAL_KNOWLEDGE_PATH.is_absolute():
 # --------------------------------------------------------------------------
 # Retrieval + model providers
 # --------------------------------------------------------------------------
-TOP_K = int(os.getenv("TOP_K", "5"))
+# Higher Top-K gives the small/medium Qwen a richer candidate set and
+# materially reduces retrieval-miss failures observed in the 10-row pilot.
+TOP_K = int(os.getenv("TOP_K", "10"))
 
 CONTRACT_CONTEXT_TOP_K = int(os.getenv("CONTRACT_CONTEXT_TOP_K", "5"))
+
+# Minimum cosine score below which we prefer abstention over a forced label.
+MIN_RETRIEVAL_CONFIDENCE = float(os.getenv("MIN_RETRIEVAL_CONFIDENCE", "0.35"))
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.getenv(
@@ -125,25 +137,31 @@ def validate_openrouter_configuration(api_key: str | None = None) -> None:
             "or in backend/.env before running classification or risk analysis."
         )
 
+
 OLLAMA_URL = os.getenv(
     "OLLAMA_URL",
     os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
 )
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:1.5b")
+# 7B-class model is the practical minimum for reliable multi-class CUAD
+# classification with retrieval-augmented prompts. Override with env if needed.
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 OLLAMA_TIMEOUT_SECONDS = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "300"))
 OLLAMA_MAX_RETRY_ATTEMPTS = int(os.getenv("OLLAMA_MAX_RETRY_ATTEMPTS", "3"))
 
 
 def load_labels() -> list[str]:
-    """The fixed set of substantive clause-type labels the model is allowed
-    to choose from -- derived from the TRAIN split so it always matches
-    exactly what's indexed in Qdrant (metadata fields like Document Name /
-    Parties / dates are excluded, same as in embed_train.py).
+    """Return the fixed set of substantive CUAD clause-type labels.
+
+    Derived from the TRAIN split so it always matches what is indexed in
+    Qdrant (metadata fields such as Document Name / Parties / dates are
+    excluded).
     """
     import pandas as pd
 
     df = pd.read_csv(TRAIN_DATA_PATH)
     if "is_metadata" not in df.columns:
         df["is_metadata"] = False
-    labels = sorted(df.loc[~df["is_metadata"].astype(bool), "clause_type"].unique())
+    labels = sorted(
+        df.loc[~df["is_metadata"].astype(bool), "clause_type"].unique()
+    )
     return labels
