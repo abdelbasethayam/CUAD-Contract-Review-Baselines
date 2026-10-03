@@ -1,0 +1,7 @@
+[
+  {"clause_text": "Either party may terminate this Agreement for any reason upon thirty (30) days prior written notice to the other party.", "ground_truth": "Termination For Convenience", "document_id": "demo-1"},
+  {"clause_text": "This Agreement shall be governed by and construed in accordance with the laws of the State of New York, without regard to conflicts of law principles.", "ground_truth": "Governing Law", "document_id": "demo-2"},
+  {"clause_text": "Distributor will not market a competing computer program in the areas of consolidation or financial reporting for two (2) years after termination.", "ground_truth": "Non-Compete", "document_id": "demo-3"},
+  {"clause_text": "Party B shall purchase sufficient insurance for the transportation vehicles. Third-party liability coverage shall not be lower than RMB 1 million.", "ground_truth": "Insurance", "document_id": "demo-4"},
+  {"clause_text": "Unless Buyer notifies Seller of non-conformity within thirty (30) days after receipt, the products shall be deemed accepted.", "ground_truth": "Warranty Duration", "document_id": "demo-5"}
+]
