@@ -22,20 +22,35 @@ from .hybrid_retrieval import Hit, HybridIndex
 LETTERS = string.ascii_uppercase
 EPS = 1e-4
 
-PROMPT_TEMPLATE = """You are an expert contract analyst assigning a clause to one CUAD category.
+# Improved MCQ prompt: function-first, evidence as non-authoritative,
+# explicit disambiguation cues, strict single-letter output.
+PROMPT_TEMPLATE = """You are a senior commercial-contracts analyst performing CUAD clause typing.
 
-Pick the single category whose definition best matches the MAIN legal function of the clause. Decide by what the clause does (grants, restricts, requires, limits, allocates), not by isolated keywords. The labeled examples come from other contracts and are evidence only; check each against the clause before relying on it. Exactly one option is correct.
+Task: Choose exactly ONE category letter. Base the decision on the clause's MAIN legal function (what it grants, restricts, requires, limits, terminates, or allocates)—not on isolated keywords.
+
+Method:
+1. Read the clause and state its primary function mentally.
+2. Compare that function to each category definition.
+3. Treat labeled examples as evidence from other contracts only; do not copy a label merely because wording overlaps.
+4. Prefer the more specific category when two options both seem plausible.
+5. Common confusions:
+   - Cap On Liability = monetary ceiling; Uncapped Liability = no ceiling / unlimited.
+   - Non-Compete = ban on competing activity; Exclusivity = sole dealing with a counterparty.
+   - License Grant = permission to use; Ip Ownership Assignment = transfer of ownership.
+   - Termination For Convenience = end for any reason; Notice Period To Terminate Renewal = opt out of auto-renewal only.
 
 Categories:
 {options}
 
-Labeled examples from other contracts (least to most similar):
+Labeled examples from other contracts (least → most similar; evidence only):
 {examples}
 
 Clause to classify:
 "{clause}"
 
-Answer with only the letter of the correct category."""
+Output rules:
+- Reply with exactly one letter ({letter_range}).
+- No punctuation, no explanation, no label name—only the letter."""
 
 
 @dataclass
@@ -87,10 +102,13 @@ def build_mcq_prompt(
         f'[Label: {hit.label}]\n"{_clip(hit.text, example_chars)}"'
         for hit in evidence
     ) or "None"
+    n = len(candidates)
+    letter_range = ", ".join(LETTERS[:n]) if n else "A"
     return PROMPT_TEMPLATE.format(
         options=options,
         examples=examples,
         clause=_clip(clause_text, clause_chars),
+        letter_range=letter_range,
     )
 
 
