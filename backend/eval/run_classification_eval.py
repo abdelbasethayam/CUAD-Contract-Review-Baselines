@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -62,6 +62,8 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=100)
     parser.add_argument("--seed", type=int, default=20260910)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--report-json", type=str, default=None,
+                        help="Write full metrics JSON to this path")
     args = parser.parse_args()
 
     rows = _load_rows(args)
@@ -74,6 +76,7 @@ def main() -> None:
     from backend.app.core.config import OLLAMA_MODEL, TOP_K, load_labels
     from backend.app.core.rag.prompt import load_label_definitions
     from backend.app.core.rag.text_preprocessor import preprocess_clause
+    from backend.app.core.rag.postprocess import refine_prediction
 
     labels = load_labels()
     label_defs = load_label_definitions(labels)
@@ -82,6 +85,7 @@ def main() -> None:
     try:
         from backend.app.core.rag.generator import classify_clause
         from backend.app.core.rag.embedder import embed_queries  # type: ignore
+        from backend.app.core.rag.embed_preprocess import text_for_embedding
         from qdrant_client import QdrantClient
         from backend.app.core.config import QDRANT_PATH, QDRANT_URL, QDRANT_API_KEY
 
@@ -96,38 +100,109 @@ def main() -> None:
             print(f"  GT={r['ground_truth']!r} len={len(preprocess_clause(r['clause_text']))}")
         return
 
-    stats = {"n": 0, "correct": 0, "recall_at_1": 0.0, "recall_at_5": 0.0, "mrr": 0.0,
-             "retrieval_miss": 0, "classification_error": 0, "abstention": 0}
+    stats = {
+        "n": 0, "correct": 0,
+        "recall_at_1": 0.0, "recall_at_5": 0.0, "mrr": 0.0,
+        "retrieval_miss": 0, "classification_error": 0, "abstention": 0,
+        "confusion_resolves": 0,
+    }
+    per_label = defaultdict(lambda: {"tp": 0, "fp": 0, "fn": 0, "support": 0})
+    rows_out: list[dict[str, Any]] = []
+
     for row in rows:
-        clause = preprocess_clause(row["clause_text"])
+        raw = row["clause_text"]
+        clause = preprocess_clause(raw)
+        embed_text = text_for_embedding(raw)
         gt = row["ground_truth"]
         result = classify_clause(
             clause_text=clause,
-            query_vector=embed_queries([clause])[0],
+            query_vector=embed_queries([embed_text])[0],
             qdrant_client=client,
             labels=labels,
             label_definitions=label_defs,
             top_k=TOP_K,
         )
-        pred = result.get("predicted_label") or ""
         candidates = result.get("candidate_labels") or result.get("retrieved_labels") or []
+        refined = refine_prediction(
+            clause, result.get("predicted_label"), candidate_labels=list(candidates)
+        )
+        pred = refined["predicted_label"] or ""
+        if refined.get("confusion_resolved"):
+            stats["confusion_resolves"] += 1
+
         stats["n"] += 1
         stats["recall_at_1"] += _recall_at_k(gt, candidates, 1)
         stats["recall_at_5"] += _recall_at_k(gt, candidates, 5)
         stats["mrr"] += _mrr(gt, candidates)
+
+        per_label[gt]["support"] += 1
         if pred == gt:
             stats["correct"] += 1
-        elif gt not in candidates:
-            stats["retrieval_miss"] += 1
-        elif pred in ("NO_APPLICABLE_LABEL", "", None):
-            stats["abstention"] += 1
+            per_label[gt]["tp"] += 1
         else:
-            stats["classification_error"] += 1
+            if pred and pred != "NO_APPLICABLE_LABEL":
+                per_label[pred]["fp"] += 1
+            per_label[gt]["fn"] += 1
+            if gt not in candidates:
+                stats["retrieval_miss"] += 1
+            elif pred in ("NO_APPLICABLE_LABEL", "", None):
+                stats["abstention"] += 1
+            else:
+                stats["classification_error"] += 1
+
+        rows_out.append({
+            "ground_truth": gt,
+            "predicted": pred,
+            "source": result.get("classification_source"),
+            "confidence": result.get("classification_confidence"),
+            "confusion_reason": refined.get("confusion_reason"),
+            "candidates": candidates[:12],
+        })
 
     n = max(stats["n"], 1)
     print(f"Accuracy: {stats['correct']/n:.4f} ({stats['correct']}/{stats['n']})")
     print(f"Recall@1: {stats['recall_at_1']/n:.4f}  Recall@5: {stats['recall_at_5']/n:.4f}")
     print(f"MRR: {stats['mrr']/n:.4f}")
+    print(
+        f"Errors: retrieval_miss={stats['retrieval_miss']} "
+        f"clf_err={stats['classification_error']} "
+        f"abstention={stats['abstention']} "
+        f"confusion_resolves={stats['confusion_resolves']}"
+    )
+
+    print("\nPer-label (support>=1):")
+    label_report = {}
+    for lab, s in sorted(per_label.items(), key=lambda x: -x[1]["support"]):
+        tp, fp, fn, sup = s["tp"], s["fp"], s["fn"], s["support"]
+        prec = tp / (tp + fp) if (tp + fp) else 0.0
+        rec = tp / (tp + fn) if (tp + fn) else 0.0
+        f1 = 2 * prec * rec / (prec + rec) if (prec + rec) else 0.0
+        label_report[lab] = {"support": sup, "precision": prec, "recall": rec, "f1": f1}
+        if sup >= 1:
+            print(f"  {lab}: support={sup} P={prec:.2f} R={rec:.2f} F1={f1:.2f}")
+
+    if args.report_json:
+        out = {
+            "summary": {
+                "n": stats["n"],
+                "accuracy": stats["correct"] / n,
+                "recall_at_1": stats["recall_at_1"] / n,
+                "recall_at_5": stats["recall_at_5"] / n,
+                "mrr": stats["mrr"] / n,
+                "retrieval_miss": stats["retrieval_miss"],
+                "classification_error": stats["classification_error"],
+                "abstention": stats["abstention"],
+                "confusion_resolves": stats["confusion_resolves"],
+                "model": OLLAMA_MODEL,
+                "top_k": TOP_K,
+            },
+            "per_label": label_report,
+            "rows": rows_out,
+        }
+        path = Path(args.report_json)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(out, indent=2), encoding="utf-8")
+        print(f"\nWrote report -> {path}")
 
 
 if __name__ == "__main__":

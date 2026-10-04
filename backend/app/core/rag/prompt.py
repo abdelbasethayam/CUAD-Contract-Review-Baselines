@@ -45,6 +45,22 @@ DEFAULT_LABEL_DEFINITIONS: dict[str, str] = {
     "Warranty Duration": "A clause stating the duration or period of a warranty or warranty coverage.",
 }
 
+# Hard negatives: if A is a candidate, remind the model how it differs from B.
+CONTRASTIVE_HINTS: list[tuple[str, str, str]] = [
+    ("Cap On Liability", "Uncapped Liability",
+     "Cap sets a maximum; Uncapped explicitly removes or rejects a monetary limit."),
+    ("Non-Compete", "Exclusivity",
+     "Non-Compete restricts competing activity; Exclusivity restricts dealing with other counterparties."),
+    ("License Grant", "Ip Ownership Assignment",
+     "License Grant allows use; Ip Ownership Assignment transfers ownership."),
+    ("Termination For Convenience", "Notice Period To Terminate Renewal",
+     "Convenience is terminate for any reason; Notice-to-stop-renewal only blocks auto-renewal."),
+    ("No-Solicit Of Employees", "No-Solicit Of Customers",
+     "Employees/personnel vs customers/clients/accounts."),
+    ("Renewal Term", "Notice Period To Terminate Renewal",
+     "Renewal Term defines the extension; Notice Period is the opt-out timing."),
+]
+
 
 def load_label_definitions(labels: list[str]) -> dict[str, str]:
     path = Path(LABEL_DEFINITIONS_PATH)
@@ -90,6 +106,17 @@ def _format_label_definitions(label_definitions: dict[str, str]) -> str:
     return "\n".join(f"- {label}: {definition}" for label, definition in label_definitions.items())
 
 
+def _contrastive_block(allowed_labels: list[str]) -> str:
+    allowed = {a.lower() for a in allowed_labels}
+    lines: list[str] = []
+    for a, b, hint in CONTRASTIVE_HINTS:
+        if a.lower() in allowed and b.lower() in allowed:
+            lines.append(f"- {a} vs {b}: {hint}")
+    if not lines:
+        return "None (no known hard pairs both present in candidates)."
+    return "\n".join(lines)
+
+
 def build_prompt(
     clause_text: str,
     examples: list[dict],
@@ -108,6 +135,7 @@ def build_prompt(
     }
     label_definition_block = _format_label_definitions(defs_for_prompt)
     extracted_features_json = json.dumps(extracted_features, indent=2, ensure_ascii=False)
+    contrastive = _contrastive_block(allowed_labels)
 
     return f"""You are a precise legal contract clause classifier for the CUAD taxonomy.
 
@@ -118,11 +146,12 @@ Strict decision rules (follow in order):
 1. Read the original clause carefully. Prefer the primary contractual function when several concepts appear.
 2. Use retrieved training examples only as evidence. Do NOT automatically copy the top-1 label.
 3. Compare the clause against the label definitions of the Allowed candidates.
-4. Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.
-5. Do not rely on keyword matching alone.
-6. Do not invent facts that are not supported by the clause text.
-7. If the clause is metadata, boilerplate, or the evidence is weak / conflicting, return NO_APPLICABLE_LABEL.
-8. UNKNOWN, OTHER, NONE, UNCLASSIFIED, NO_MATCH, and NO_LABEL are forbidden. Use NO_APPLICABLE_LABEL for safe abstention.
+4. When two similar labels appear, use the Hard-negative contrasts section.
+5. Distinguish rights, obligations, restrictions, permissions, conditions, limitations, termination mechanisms, and financial commitments.
+6. Do not rely on keyword matching alone.
+7. Do not invent facts that are not supported by the clause text.
+8. If the clause is metadata, boilerplate, or the evidence is weak / conflicting, return NO_APPLICABLE_LABEL.
+9. UNKNOWN, OTHER, NONE, UNCLASSIFIED, NO_MATCH, and NO_LABEL are forbidden. Use NO_APPLICABLE_LABEL for safe abstention.
 
 Output requirements:
 - Return ONLY a single JSON object.
@@ -137,6 +166,9 @@ Allowed candidate CUAD categories:
 
 CUAD label definitions (for Allowed candidates only):
 {label_definition_block}
+
+Hard-negative contrasts (only for pairs both in Allowed):
+{contrastive}
 
 Retrieved Top-K TRAIN examples (evidence, not automatic answers):
 {example_block}
