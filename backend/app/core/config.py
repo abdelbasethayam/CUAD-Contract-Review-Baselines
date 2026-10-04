@@ -1,10 +1,10 @@
 # config.py
 """Central configuration for the CUAD classification + risk pipeline.
 
-Key changes for higher Qwen accuracy:
-- Default OLLAMA_MODEL raised to qwen2.5:7b (still overridable via env).
-- Default TOP_K raised to 10 so the candidate set is richer.
-- Explicit MIN_RETRIEVAL_CONFIDENCE kept for safe abstention.
+World-class defaults:
+- Classifier: Qwen3-4B-Thinking-2507 (reasoning + long context)
+- TOP_K=12 for richer candidate sets
+- MIN_RETRIEVAL_CONFIDENCE for abstention
 """
 from __future__ import annotations
 
@@ -78,9 +78,9 @@ LEGAL_KNOWLEDGE_PATH = Path(_LEGAL_KNOWLEDGE_PATH_VALUE)
 if not LEGAL_KNOWLEDGE_PATH.is_absolute():
     LEGAL_KNOWLEDGE_PATH = PROJECT_ROOT / LEGAL_KNOWLEDGE_PATH
 
-TOP_K = int(os.getenv("TOP_K", "10"))
+TOP_K = int(os.getenv("TOP_K", "12"))
 CONTRACT_CONTEXT_TOP_K = int(os.getenv("CONTRACT_CONTEXT_TOP_K", "5"))
-MIN_RETRIEVAL_CONFIDENCE = float(os.getenv("MIN_RETRIEVAL_CONFIDENCE", "0.35"))
+MIN_RETRIEVAL_CONFIDENCE = float(os.getenv("MIN_RETRIEVAL_CONFIDENCE", "0.32"))
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.getenv(
@@ -118,9 +118,18 @@ OLLAMA_URL = os.getenv(
     "OLLAMA_URL",
     os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
 )
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
-OLLAMA_TIMEOUT_SECONDS = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "300"))
+# HF: Qwen/Qwen3-4B-Thinking-2507
+# Ollama tag varies by library; override with OLLAMA_MODEL if needed.
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:4b-thinking-2507")
+OLLAMA_TIMEOUT_SECONDS = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "600"))
 OLLAMA_MAX_RETRY_ATTEMPTS = int(os.getenv("OLLAMA_MAX_RETRY_ATTEMPTS", "3"))
+OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "8192"))
+CLASSIFIER_TEMPERATURE = float(os.getenv("CLASSIFIER_TEMPERATURE", "0.1"))
+
+# HuggingFace id for docs / vLLM / fine-tune
+HF_CLASSIFIER_MODEL = os.getenv(
+    "HF_CLASSIFIER_MODEL", "Qwen/Qwen3-4B-Thinking-2507"
+)
 
 
 def load_labels() -> list[str]:
