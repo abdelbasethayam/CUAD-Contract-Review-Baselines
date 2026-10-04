@@ -1,10 +1,8 @@
 # config.py
 """Central configuration for the CUAD classification + risk pipeline.
 
-World-class defaults:
-- Classifier: Qwen3-4B-Thinking-2507 (reasoning + long context)
-- TOP_K=12 for richer candidate sets
-- MIN_RETRIEVAL_CONFIDENCE for abstention
+Includes hybrid retrieval (dense + TF-IDF RRF) settings for the improved
+Qwen shortlist + letter-logprob path.
 """
 from __future__ import annotations
 
@@ -82,6 +80,15 @@ TOP_K = int(os.getenv("TOP_K", "12"))
 CONTRACT_CONTEXT_TOP_K = int(os.getenv("CONTRACT_CONTEXT_TOP_K", "5"))
 MIN_RETRIEVAL_CONFIDENCE = float(os.getenv("MIN_RETRIEVAL_CONFIDENCE", "0.32"))
 
+# Hybrid dense + TF-IDF RRF (Claude / measured path)
+HYBRID_COLLECTION = os.getenv("HYBRID_COLLECTION", QDRANT_COLLECTION)
+HYBRID_INDEX_CACHE = os.getenv(
+    "HYBRID_INDEX_CACHE",
+    str(PROJECT_ROOT / "output" / "cache" / "hybrid_train_index.npz"),
+)
+HYBRID_K = int(os.getenv("HYBRID_K", "30"))
+HYBRID_SHORTLIST = int(os.getenv("HYBRID_SHORTLIST", "8"))
+
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.getenv(
     "OPENROUTER_MODEL", "nvidia/nemotron-3-ultra-550b-a55b:free"
@@ -118,17 +125,15 @@ OLLAMA_URL = os.getenv(
     "OLLAMA_URL",
     os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
 )
-# HF: Qwen/Qwen3-4B-Thinking-2507
-# Ollama tag varies by library; override with OLLAMA_MODEL if needed.
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:4b-thinking-2507")
+# Prefer Instruct-style 7B for letter-logprob MCQ; override as needed.
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 OLLAMA_TIMEOUT_SECONDS = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "600"))
 OLLAMA_MAX_RETRY_ATTEMPTS = int(os.getenv("OLLAMA_MAX_RETRY_ATTEMPTS", "3"))
 OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "8192"))
-CLASSIFIER_TEMPERATURE = float(os.getenv("CLASSIFIER_TEMPERATURE", "0.1"))
+CLASSIFIER_TEMPERATURE = float(os.getenv("CLASSIFIER_TEMPERATURE", "0.0"))
 
-# HuggingFace id for docs / vLLM / fine-tune
 HF_CLASSIFIER_MODEL = os.getenv(
-    "HF_CLASSIFIER_MODEL", "Qwen/Qwen3-4B-Thinking-2507"
+    "HF_CLASSIFIER_MODEL", "Qwen/Qwen2.5-7B-Instruct"
 )
 
 
