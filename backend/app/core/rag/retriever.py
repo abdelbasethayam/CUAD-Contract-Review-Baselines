@@ -2,6 +2,9 @@
 Qdrant retrieval for the RAG pipeline: given a query embedding, fetch the
 top-K most similar TRAIN clauses from the cuad_train collection, excluding
 contract-metadata rows (Document Name, Parties, dates, etc.).
+
+Also supports over-fetch + label diversification so the candidate set is not
+dominated by a single clause_type.
 """
 
 from __future__ import annotations
@@ -17,6 +20,7 @@ from ..config import (
     QDRANT_COLLECTION,
     TOP_K,
 )
+from .candidate_utils import diversify_by_label
 
 _LOCAL_CLIENT: QdrantClient | None = None
 _CLIENT_LOCK = Lock()
@@ -30,9 +34,6 @@ def make_qdrant_client() -> QdrantClient:
             return QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
         return QdrantClient(url=QDRANT_URL)
 
-    # Qdrant local mode places a lock on its storage directory. Reusing one
-    # client prevents concurrent requests from opening the same directory
-    # through separate local-storage instances.
     with _CLIENT_LOCK:
         if _LOCAL_CLIENT is None:
             _LOCAL_CLIENT = QdrantClient(path=QDRANT_PATH)
@@ -43,15 +44,21 @@ def retrieve_similar(
     qdrant_client: QdrantClient,
     query_vector: list[float],
     top_k: int = TOP_K,
+    *,
+    diversify: bool = True,
+    fetch_multiplier: int = 3,
+    max_per_label: int = 2,
 ) -> list[dict]:
-    """Top-K most similar TRAIN clauses. The is_metadata filter is kept
-    here (not just at embedding time) in case the collection was ever
-    rebuilt with INCLUDE_METADATA_CLAUSES=true.
+    """Top-K similar TRAIN clauses with optional label diversification.
+
+    Fetches up to top_k * fetch_multiplier hits, then keeps a diverse subset
+    so prompts see multiple clause types when the neighborhood is mixed.
     """
+    fetch_k = max(top_k, top_k * max(1, fetch_multiplier)) if diversify else top_k
     response = qdrant_client.query_points(
         collection_name=QDRANT_COLLECTION,
         query=query_vector,
-        limit=top_k,
+        limit=fetch_k,
         query_filter=models.Filter(
             must_not=[
                 models.FieldCondition(
@@ -62,7 +69,7 @@ def retrieve_similar(
         ),
     )
     hits = getattr(response, "points", response)
-    return [
+    results = [
         {
             "source_id": str(hit.id),
             "score": hit.score,
@@ -71,3 +78,6 @@ def retrieve_similar(
         }
         for hit in hits
     ]
+    if diversify:
+        return diversify_by_label(results, max_per_label=max_per_label, limit=top_k)
+    return results[:top_k]
