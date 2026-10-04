@@ -34,6 +34,8 @@ from .retriever import retrieve_similar
 from .prompt import build_prompt, load_label_definitions  # re-exported for callers
 from .thinking_client import call_thinking_ollama, extract_json_object, strip_thinking
 from .advanced_preprocess import advanced_preprocess
+from .high_precision_rules import high_precision_rule_label
+from .candidate_utils import fuse_confidence
 
 __all__ = [
     "extract_legal_information",
@@ -252,7 +254,6 @@ def extract_legal_information(clause_text: str) -> dict[str, list[str]]:
 
 
 def call_ollama(prompt: str, *, model: str | None = None) -> str:
-    """Call the configured Ollama model (Thinking-aware)."""
     return call_thinking_ollama(
         prompt,
         model=model or OLLAMA_MODEL,
@@ -402,40 +403,6 @@ def _retrieve_with_retry(
     return [], "empty_after_retry", str(first_error) if first_error else None
 
 
-_HIGH_PRECISION_RULES: list[tuple[str, re.Pattern[str]]] = [
-    ("Governing Law", re.compile(
-        r"\b(governed by|governing law|laws? of (the )?(state of )?[A-Z][a-z]+|without regard to (its )?conflicts?)\b", re.I)),
-    ("Insurance", re.compile(
-        r"\b(insurance|insured|insurer|certificate of insurance|liability coverage|policy limits?)\b", re.I)),
-    ("Termination For Convenience", re.compile(
-        r"\bterminat\w*\b.*\b(for any reason|without cause|for convenience|at (its|their) (sole )?discretion)\b"
-        r"|\b(for any reason|without cause|for convenience)\b.*\bterminat\w*\b", re.I)),
-    ("Non-Compete", re.compile(
-        r"\b(non-?compete|not (to )?compete|refrain from compet|competing (business|product|service))\b", re.I)),
-    ("Anti-Assignment", re.compile(
-        r"\b(shall not assign|may not assign|anti-?assignment|without (prior )?written consent.*assign)\b", re.I)),
-    ("Audit Rights", re.compile(
-        r"\b(audit rights?|right to audit|inspect (the )?(books|records)|examination of records)\b", re.I)),
-    ("Cap On Liability", re.compile(
-        r"\b(aggregate liability|liability.*shall not exceed|maximum liability|cap(ped)? (on )?liability)\b", re.I)),
-    ("Uncapped Liability", re.compile(
-        r"\b(unlimited liability|uncapped|without (any )?limitation of liability)\b", re.I)),
-    ("Liquidated Damages", re.compile(r"\bliquidated damages\b", re.I)),
-    ("Source Code Escrow", re.compile(
-        r"\b(source code escrow|escrow agent|deposit.*source code)\b", re.I)),
-]
-
-
-def high_precision_rule_label(clause_text: str, allowed: list[str] | None = None) -> str | None:
-    allowed_set = {a.lower() for a in (allowed or [])} if allowed else None
-    for label, pattern in _HIGH_PRECISION_RULES:
-        if allowed_set is not None and label.lower() not in allowed_set:
-            continue
-        if pattern.search(clause_text or ""):
-            return label
-    return None
-
-
 def classify_clause(
     clause_text: str,
     query_vector: list[float],
@@ -517,7 +484,6 @@ def classify_clause(
     fallback_reason = None
     classifier_source = "ollama_thinking"
     _, top_score = _highest_scoring_retrieved_label(retrieved_examples, valid_labels)
-    classification_confidence = top_score
     rule_for_allowed = high_precision_rule_label(clause_text, allowed=allowed_labels)
 
     if rule_for_allowed and prediction_result.get("status") != "VALID_CANDIDATE":
@@ -569,6 +535,18 @@ def classify_clause(
         prediction_status = "VALID_CANDIDATE"
         if rule_for_allowed and valid_labels.get(rule_for_allowed.lower()) == predicted_label:
             classifier_source = "model_plus_rule_agree"
+
+    rule_agrees = bool(
+        rule_for_allowed
+        and predicted_label
+        and valid_labels.get(str(rule_for_allowed).lower()) == predicted_label
+    )
+    classification_confidence = fuse_confidence(
+        retrieval_score=top_score,
+        rule_agrees=rule_agrees or classifier_source == "high_precision_rule",
+        model_valid=prediction_status == "VALID_CANDIDATE",
+        min_retrieval=MIN_RETRIEVAL_CONFIDENCE,
+    )
 
     _emit(
         progress_callback, "classification",
