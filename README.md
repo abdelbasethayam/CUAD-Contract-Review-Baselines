@@ -2,7 +2,15 @@
 
 **Student project:** classify commercial contract clauses into CUAD categories using retrieval and large language models.
 
-**Repository:** https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines
+### GitHub links
+
+| | URL |
+|--|-----|
+| **This repository** | https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines |
+| **GitHub profile** | https://github.com/abdelbasethayam |
+| **Clone** | `git clone https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines.git` |
+| **Fine-tune guide** | https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/FINETUNE.md |
+| **Hybrid / Qwen notes** | https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/QWEN_IMPROVEMENTS.md |
 
 ---
 
@@ -98,7 +106,7 @@ python scripts/finetune/train_lora.py \
   --out output/ft_qwen25_7b_cuad
 ```
 
-Details: `docs/FINETUNE.md`, `docs/QWEN_IMPROVEMENTS.md`.
+Details: [docs/FINETUNE.md](https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/FINETUNE.md), [docs/QWEN_IMPROVEMENTS.md](https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/QWEN_IMPROVEMENTS.md).
 
 ---
 
@@ -126,6 +134,8 @@ data/splits/              # train/test clause CSVs
 docs/                     # design and fine-tune notes
 ```
 
+Browse on GitHub: https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/tree/main
+
 ---
 
 ## 7. Limitations
@@ -144,5 +154,10 @@ docs/                     # design and fine-tune notes
 - Hybrid retrieval via reciprocal rank fusion (dense + lexical)
 
 ---
+
+## 9. Author
+
+- **GitHub:** [abdelbasethayam](https://github.com/abdelbasethayam)  
+- **Project repo:** [CUAD-Contract-Review-Baselines](https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines)
 
 *For course submission: report test-set accuracy and macro-F1 after running evaluation on your split; attach hybrid `--no-llm` shortlist recall as an ablation.*
