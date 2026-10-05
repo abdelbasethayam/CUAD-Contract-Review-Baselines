@@ -1,92 +1,148 @@
-# CUAD-Contract-Review-Baselines
+# CUAD Contract Clause Classification
 
-AI contract clause classification (CUAD) with RAG, hybrid retrieval, and optional LoRA fine-tuning.
+**Student project:** classify commercial contract clauses into CUAD categories using retrieval and large language models.
 
-## Quick start
+**Repository:** https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines
+
+---
+
+## 1. Problem
+
+Given a clause from a commercial contract, predict its **CUAD clause type** (e.g. Governing Law, Non-Compete, Cap On Liability).
+
+CUAD is a standard benchmark for contract understanding. The task is difficult because:
+
+- Many labels are rare (class imbalance)
+- Some labels are easily confused (e.g. Cap vs Uncapped Liability)
+- Zero-shot LLMs alone are often weak without good retrieval
+
+---
+
+## 2. Approach (summary)
+
+```
+Clause text
+    → preprocess (normalize, expand abbreviations)
+    → retrieve similar training clauses
+         • dense embeddings (Cohere) and/or
+         • hybrid dense + TF-IDF (RRF)
+    → shortlist candidate labels
+    → classify with Qwen (local via Ollama)
+         • multiple-choice + letter probabilities, or
+         • JSON classification
+    → optional rules / confusion-pair fixes
+    → predicted label
+```
+
+**Main stack recommended in this repo:**
+
+1. **Hybrid retrieval** (dense + TF-IDF, reciprocal rank fusion)  
+2. **Fine-tuned Qwen2.5-7B-Instruct** (LoRA) for classification  
+
+A pure RAG + untrained small model is a baseline; fine-tuning is what improves accuracy and macro-F1 the most.
+
+---
+
+## 3. What was implemented
+
+| Component | Description |
+|-----------|-------------|
+| Preprocessing | Text cleanup, legal abbreviation expansion |
+| Dense retrieval | Cohere embeddings + Qdrant |
+| Hybrid retrieval | Dense + TF-IDF fused with RRF (raises label shortlist recall) |
+| LLM classifier | Qwen via Ollama (letter-MCQ + score fusion, or JSON path) |
+| High-precision rules | Regex priors for clear classes (e.g. Governing Law) |
+| Confusion handling | Tie-break for known hard label pairs |
+| Evaluation | Accuracy, Recall@K, per-label metrics, error types |
+| Fine-tuning | LoRA scripts for Qwen2.5-7B-Instruct on master clause CSVs |
+
+---
+
+## 4. How to run (short)
+
+**Requirements:** Python 3.10+, Ollama, Cohere API key (for embeddings), local or remote Qdrant index.
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
+git clone https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines.git
+cd CUAD-Contract-Review-Baselines
+
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp backend/.env.example backend/.env   # set COHERE_API_KEY, OLLAMA_MODEL
+
+cp backend/.env.example backend/.env
+# Edit .env: set COHERE_API_KEY, OLLAMA_MODEL=qwen2.5:7b
+
 ollama pull qwen2.5:7b
 ```
 
-## Classification paths
+**Hybrid retrieval only (no LLM):**
 
-1. **Legacy / API path** — preprocess → dense retrieval → rules → Ollama (`classify_clause`)
-2. **Hybrid path (recommended)** — dense + TF-IDF RRF shortlist → letter-logprob Qwen → fusion  
-   See `docs/QWEN_IMPROVEMENTS.md` and `scripts/06_run_qwen_improved.py`
+```bash
+python scripts/06_run_qwen_improved.py run --split test --no-llm
+```
 
-## Qwen fine-tuning
-
-Fine-tuning is the main lever for **accuracy** and **macro-F1** beyond RAG/hybrid alone.
-
-| Choice | Model |
-|--------|--------|
-| **Primary** | `Qwen/Qwen2.5-7B-Instruct` → `ollama pull qwen2.5:7b` |
-| Lighter | `Qwen/Qwen3-4B-Instruct` (if available) |
-| Avoid as FT base | `Qwen/Qwen3-4B-Thinking-2507` (thinking traces hurt clean label JSON) |
-
-**Data:** `master_clauses_train.csv` is enough (clause text + `clause_type`; ideally `document_id` for document-level validation).
-
-### 1. Install fine-tune dependencies
+**Fine-tune Qwen (optional, improves accuracy / macro-F1):**
 
 ```bash
 pip install -r requirements-finetune.txt
-# torch, transformers, datasets, peft, trl, accelerate, bitsandbytes
-```
 
-### 2. Build SFT JSONL from master clauses
-
-```bash
 python scripts/finetune/prepare_sft_data.py \
   --train data/splits/train/master_clauses_train.csv \
-  --test data/splits/test/master_clauses_test.csv \
+  --test  data/splits/test/master_clauses_test.csv \
   --out-dir data/finetune
-```
 
-Writes `data/finetune/train.jsonl`, `val.jsonl`, and `labels.json`.
-
-### 3. LoRA train
-
-```bash
 python scripts/finetune/train_lora.py \
   --base Qwen/Qwen2.5-7B-Instruct \
   --data-dir data/finetune \
   --out output/ft_qwen25_7b_cuad
 ```
 
-Uses LoRA (r=16, α=32) by default. Needs a GPU for practical runtime (~12–16GB VRAM with small batch / 4-bit setups).
+Details: `docs/FINETUNE.md`, `docs/QWEN_IMPROVEMENTS.md`.
 
-### 4. Evaluate (accuracy + macro-F1)
+---
 
-```bash
-python scripts/finetune/eval_sft.py \
-  --base Qwen/Qwen2.5-7B-Instruct \
-  --adapter output/ft_qwen25_7b_cuad/adapter \
-  --jsonl data/finetune/val.jsonl
+## 5. Expected performance (order of magnitude)
+
+| Method | Rough accuracy | Notes |
+|--------|----------------|--------|
+| Dense top-5 + constrained LLM | ~60–66% | Limited by shortlist recall (~84%) |
+| Hybrid kNN only (no LLM) | ~70% | Strong free baseline |
+| Hybrid + Qwen (no FT) | often above old RAG baseline | Depends on model/size |
+| **LoRA fine-tuned Qwen2.5-7B** | **~75–85%** | Macro-F1 often ~0.55–0.70 (rare labels hurt macro) |
+
+These are approximate; final numbers should be measured on the held-out test split.
+
+---
+
+## 6. Project structure (main folders)
+
+```
+backend/app/core/rag/     # retrieval, prompts, classifier, rules
+backend/eval/             # evaluation scripts
+scripts/                  # hybrid runner, analysis
+scripts/finetune/         # prepare data, LoRA train, eval
+data/splits/              # train/test clause CSVs
+docs/                     # design and fine-tune notes
 ```
 
-**Rough expectations after a solid run:** ~75–85% accuracy; macro-F1 often ~0.55–0.70 (rare CUAD labels limit macro-F1).
+---
 
-### 5. Serve with Ollama
+## 7. Limitations
 
-Merge or convert the adapter to a GGUF / Modelfile, then:
+- Output is **decision support**, not legal advice.
+- Rare CUAD labels keep **macro-F1** lower than overall accuracy.
+- Quality depends on a correct train index (Qdrant) and consistent embedding model.
+- Fine-tuning needs a GPU for practical runtime.
 
-```bash
-export OLLAMA_MODEL=cuad-qwen25-7b   # your custom tag
-# use with hybrid runner:
-python scripts/06_run_qwen_improved.py run --split test
-```
+---
 
-More detail: [`docs/FINETUNE.md`](docs/FINETUNE.md) · [`scripts/finetune/README.md`](scripts/finetune/README.md)
+## 8. References
 
-## Docs
+- CUAD dataset (Atticus Project) — contract understanding benchmark  
+- Qwen2.5 / Qwen3 models (Alibaba) — local LLM via Ollama  
+- Hybrid retrieval via reciprocal rank fusion (dense + lexical)
 
-| Doc | Topic |
-|-----|--------|
-| [`docs/FINETUNE.md`](docs/FINETUNE.md) | LoRA, metrics, Ollama, Muffakir note |
-| [`docs/QWEN_IMPROVEMENTS.md`](docs/QWEN_IMPROVEMENTS.md) | Hybrid RRF + letter MCQ |
-| [`docs/WORLD_CLASS_PIPELINE.md`](docs/WORLD_CLASS_PIPELINE.md) | Accuracy roadmap |
+---
 
-Not legal advice — review support only.
+*For course submission: report test-set accuracy and macro-F1 after running evaluation on your split; attach hybrid `--no-llm` shortlist recall as an ablation.*
