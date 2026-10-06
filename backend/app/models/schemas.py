@@ -76,6 +76,22 @@ class ContractMetadata(BaseModel):
 class ClauseResult(BaseModel):
     clause_index: int
     clause_text: str
+    section_path: str | None = None
+    page_start: int | None = None
+    page_end: int | None = None
+    defined_terms_used: list[str] = Field(default_factory=list)
+    linked_sections: list[str] = Field(default_factory=list)
+    parties_affected: list[str] = Field(default_factory=list)
+    beneficiary: str | None = None
+    direction_of_obligation: str | None = None
+    transaction_role: str | None = None
+    commercial_purpose: str | None = None
+    operational_trigger: str | None = None
+    scope: dict[str, Any] = Field(default_factory=dict)
+    rights_and_duties: list[str] = Field(default_factory=list)
+    exceptions_carveouts: list[str] = Field(default_factory=list)
+    economic_effect: dict[str, Any] = Field(default_factory=dict)
+    dependencies: list[str] = Field(default_factory=list)
     predicted_label: str = "NO_APPLICABLE_LABEL"
     clause_type: str | None = None
     retrieved_labels: list[str] = Field(default_factory=list)
