@@ -88,8 +88,17 @@ def _prompt(
     checklist = [
         {
             "id": item["id"],
+            "risk_domain": item.get("risk_domain"),
+            "risk_type": item.get("risk_type"),
+            "perspective": item.get("perspective"),
+            "applies_when": item.get("applies_when", []),
             "question": item["question"],
             "flag_if": item["flag_if"],
+            "do_not_flag_if": item.get("do_not_flag_if", []),
+            "required_evidence": item.get("required_evidence", []),
+            "evidence_location": item.get("evidence_location", "clause"),
+            "dependencies": item.get("dependencies", []),
+            "jurisdiction_scope": item.get("jurisdiction_scope", ["unspecified"]),
             "sources": item.get("sources", []),
         }
         for item in checks
