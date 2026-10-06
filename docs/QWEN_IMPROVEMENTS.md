@@ -1,75 +1,103 @@
-# Hybrid retrieval + Qwen letter-logprob path (integrated)
+# Qwen + RAG classification pipeline
 
-## Why
+This classifier now uses a leakage-safe train/validation/test protocol.
 
-Dense-only top-5 candidate sets only contain the gold label ~83.6% of the time
-(leave-one-document-out on train). That **caps** any candidate-constrained LLM.
+## Recommended architecture
 
-Hybrid dense + TF-IDF (RRF) shortlist of 8 from top-30 hits measured:
+```text
+clause
+  -> validated text
+  -> MPNet dense retrieval + TF-IDF RRF (top 30)
+  -> optional BGE cross-encoder reranking
+  -> 8 candidate labels
+  -> Qwen3-8B, non-thinking mode, MCQ/logprobs
+  -> validation-tuned fusion with retrieval votes
+  -> final CUAD-derived single label
+```
 
-| Retrieval | kNN top-1 | Gold in shortlist |
-|-----------|-----------|-------------------|
-| Dense top-5 labels | 63.5% | 83.6% |
-| Hybrid RRF k=30 → 8 | 71.7% | **96.8%** |
+The original CUAD annotations remain untouched. Repeated cross-category spans are retained because CUAD categories are independently annotated.
 
-## Files
-
-| Path | Role |
-|------|------|
-| `backend/app/core/rag/hybrid_retrieval.py` | Dense + TF-IDF RRF index |
-| `backend/app/core/rag/qwen_classifier.py` | MCQ letters, logprobs, fusion |
-| `backend/app/core/rag/hybrid_path.py` | API bridge `classify_with_hybrid_qwen` |
-| `scripts/06_run_qwen_improved.py` | Eval runner |
-
-Existing `classify_clause()` (preprocess, rules, thinking client) is **unchanged**.
-Use the hybrid path when you want the measured shortlist + fusion approach.
-
-## Config
+## Default configuration
 
 ```env
-OLLAMA_MODEL=qwen2.5:7b
+OLLAMA_MODEL=qwen3:8b
+CLASSIFIER_THINK=false
+CLASSIFIER_TEMPERATURE=0.0
+CLASSIFIER_TOP_LOGPROBS=20
 OLLAMA_NUM_CTX=8192
-HYBRID_COLLECTION=cuad_train          # or cuad_train_mpnet if that is your collection
-HYBRID_INDEX_CACHE=./output/cache/hybrid_train_index.npz
+
+HYBRID_COLLECTION=cuad_train_mpnet
+HYBRID_EMBEDDING_MODEL=sentence-transformers/all-mpnet-base-v2
 HYBRID_K=30
 HYBRID_SHORTLIST=8
-QDRANT_PATH=./data/qdrant_local
+HYBRID_RERANK=true
+HYBRID_RERANKER_MODEL=BAAI/bge-reranker-v2-m3
+HYBRID_RERANK_TOP_K=30
+HYBRID_INDEX_CACHE=./output/cache/hybrid_train_index.npz
 ```
 
-Prefer **Instruct** 7B for letter logprobs; thinking models are weaker for single-token MCQ.
+Qwen3 has an explicit non-thinking mode, which is used here because the classifier expects a short answer token. Ollama exposes logprobs as a boolean plus a separate top_logprobs parameter.
 
-## Run
+## Evaluation
+
+Build the MPNet train/test index first:
 
 ```bash
-ollama pull qwen2.5:7b
-
-# Hybrid kNN only (no LLM) — strong free baseline
-python scripts/06_run_qwen_improved.py run --split test --no-llm
-
-# Full hybrid + Qwen + fusion (needs val then test)
-python scripts/06_run_qwen_improved.py run --split val
-python scripts/06_run_qwen_improved.py run --split test
-python scripts/06_run_qwen_improved.py fuse
-
-# Average two option orders (cancels position bias; 2x cost)
-python scripts/06_run_qwen_improved.py run --split test --perms 2
+python scripts/01_reembed_local.py
 ```
 
-## API usage
+Run the explicit shot baselines on the untouched held-out test set:
 
-```python
-from backend.app.core.rag.hybrid_path import classify_with_hybrid_qwen
-from backend.app.core.rag.prompt import load_label_definitions
-from backend.app.core.config import load_labels
-
-labels = load_labels()
-defs = load_label_definitions(labels)
-result = classify_with_hybrid_qwen(clause_text, query_vector, definitions=defs)
-print(result["predicted_label"], result["classification_source"])
+```bash
+python scripts/07_run_shot_baselines.py
 ```
 
-## Note on paths
+Run the main hybrid experiment on validation, tune fusion, then run the frozen configuration on test:
 
-The runner expects embeddings/metadata under `output/` when using the original
-eval_1495 layout. If your paths differ, edit constants at the top of
-`scripts/06_run_qwen_improved.py` or call `HybridIndex.from_qdrant` + `classify_clause_hybrid` directly.
+```bash
+python scripts/06_run_qwen_improved.py run --split val --experiment hybrid-rerank-1
+python scripts/06_run_qwen_improved.py tune --experiment hybrid-rerank-1
+python scripts/06_run_qwen_improved.py run --split test --experiment hybrid-rerank-1
+```
+
+A test run without frozen validation fusion parameters is rejected unless alpha is supplied explicitly. The test split is never used to tune retrieval, examples, fusion, or prompt settings.
+
+## Experiments
+
+| Experiment | Meaning |
+|---|---|
+| zero-shot | all substantive labels, no demonstrations |
+| random-1 / random-5 | full label set + 1 / 5 random demonstrations |
+| retrieval-1 / retrieval-5 | dense retrieval + 1 / 5 retrieved demonstrations |
+| hybrid-1 | hybrid shortlist + 1 retrieved example per candidate |
+| hybrid-2 | hybrid shortlist + 2 retrieved examples per candidate |
+| hybrid-rerank-1 | hybrid top-30, BGE reranking, 1 example per candidate |
+| hybrid-rerank-2 | hybrid top-30, BGE reranking, 2 examples per candidate |
+
+The hybrid path uses letter probabilities only with a small candidate set. Full 36-label MCQ is intentionally avoided because the letter space and top-logprob list are bounded.
+
+## Fusion
+
+Alpha is tuned on the validation set using macro-F1. The previous fixed alpha=0.6 is only a validation fallback.
+
+Beta remains zero until a separate calibrated per-label-prior experiment is implemented.
+
+## Embedding consistency
+
+The Qdrant collection and query encoder must use the same embedding model. The repository now defaults to sentence-transformers/all-mpnet-base-v2 with the cuad_train_mpnet collection.
+
+## Fine-tuning
+
+```bash
+python scripts/finetune/prepare_sft_data.py \
+  --train data/splits/train/master_clauses_train.csv \
+  --test data/splits/test/master_clauses_test.csv \
+  --out-dir data/finetune
+
+python scripts/finetune/train_lora.py \
+  --base Qwen/Qwen3-8B \
+  --data-dir data/finetune \
+  --out output/ft_qwen3_8b_cuad
+```
+
+The fine-tuning template disables Qwen3 thinking when the tokenizer supports that switch.
