@@ -35,7 +35,8 @@ SYSTEM = (
 
 def _load_csv(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    text_col = "clause_text" if "clause_text" in df.columns else "text"
+    text_col = ("clause_text_clean" if "clause_text_clean" in df.columns else
+                ("clause_text" if "clause_text" in df.columns else "text"))
     label_col = "clause_type" if "clause_type" in df.columns else "label"
     if text_col not in df.columns or label_col not in df.columns:
         raise SystemExit(f"Need text+label columns in {path}")
@@ -45,7 +46,6 @@ def _load_csv(path: Path) -> pd.DataFrame:
     df = df[~df["clause_type"].isin(METADATA)]
     df["clause_text"] = df["clause_text"].astype(str).str.strip()
     df["clause_type"] = df["clause_type"].astype(str).str.strip()
-    df = df[df["clause_text"].str.len() > 20]
     return df
 
 

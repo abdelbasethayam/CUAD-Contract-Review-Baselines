@@ -54,14 +54,14 @@ from sklearn.model_selection import train_test_split
 # --------------------------------------------------------------------------
 # Paths -- adjust to your repo layout
 # --------------------------------------------------------------------------
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 MASTER_PATH = (
-    PROJECT_ROOT / "dataset" / "raw" / "cuad" / "CUAD_v1" / "master_clauses.csv"
+    PROJECT_ROOT / "data" / "raw" / "cuad" / "CUAD_v1" / "master_clauses.csv"
 )
 
-TRAIN_DIR = PROJECT_ROOT / "dataset" / "splits" / "train"
-TEST_DIR = PROJECT_ROOT / "dataset" / "splits" / "test"
+TRAIN_DIR = PROJECT_ROOT / "data" / "splits" / "train"
+TEST_DIR = PROJECT_ROOT / "data" / "splits" / "test"
 
 # Original wide files (1 row = 1 contract), kept for reference so you can
 # re-derive other views later without re-running the split.

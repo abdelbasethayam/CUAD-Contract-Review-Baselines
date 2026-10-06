@@ -10,7 +10,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 for dotenv_path in (
     PROJECT_ROOT / ".env",
@@ -23,13 +23,13 @@ for dotenv_path in (
 
 TRAIN_DATA_PATH = (
     PROJECT_ROOT
-    / "dataset"
+    / "data"
     / "splits"
     / "train"
     / "master_clauses_train.csv"
 )
 
-EMBEDDINGS_DIR = PROJECT_ROOT / "dataset" / "embeddings"
+EMBEDDINGS_DIR = PROJECT_ROOT / "output" / "embeddings"
 EMBEDDINGS_FILE = EMBEDDINGS_DIR / "train_embeddings.json"
 METADATA_FILE = EMBEDDINGS_DIR / "train_metadata.jsonl"
 
