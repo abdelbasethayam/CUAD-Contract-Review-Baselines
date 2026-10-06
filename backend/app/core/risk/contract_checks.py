@@ -4,13 +4,15 @@ from __future__ import annotations
 import json
 import re
 from collections import Counter, defaultdict
+from datetime import datetime, timezone
 
 from ..config import RISK_MAX_TOKENS, RISK_MODEL, RISK_NUM_CTX, RISK_SELF_CONSISTENCY_PASSES, RISK_TEMPERATURE
 from ..rag.generator import call_ollama
 from .calibration import calibrate_risk_probability, calibrate_severity, load_calibration
-from .risk_engine import _evidence_valid, _majority, _severity_signal, _support_score
+from .risk_engine import RISK_PROMPT_VERSION, _evidence_valid, _majority, _severity_signal, _support_score
 from .risk_playbook import load_playbook, source_records
 from .risk_scoring import score_finding
+from .evidence_policy import legal_claim_supported, normalize_source_record
 
 
 def _candidate_clauses(clauses: list[dict], pair: list[str]) -> list[dict]:
@@ -152,6 +154,8 @@ def analyze_contract_checks(
     progress_callback=None,
     passes: int | None = None,
     deterministic_signals: list[dict] | None = None,
+    contract_type: str | None = None,
+    jurisdiction: str | None = None,
 ) -> tuple[list[dict], list[dict]]:
     playbook = playbook or load_playbook()
     cross_checks = playbook.get("cross_clause_checks") or []
@@ -232,16 +236,44 @@ def analyze_contract_checks(
             severity_score = float(score_details["final_score"]) if score_details and score_details.get("final_score") is not None else None
             severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
             calibrated_confidence = (
-                calibrate_risk_probability(raw_support, calibration)
+                calibrate_risk_probability(severity_score, calibration)
                 if status == "POTENTIAL_RISK" else None
             )
             calibrated_severity = calibrate_severity(severity_score, calibration)
             check = by_source[check_id]
-            supporting_sources = source_records(playbook, check.get("sources", []))
+            source_claim_ok = legal_claim_supported(
+                f"{rep.get('risk_type') or ''} {rep.get('why_flagged') or ''}",
+                supporting_sources,
+                jurisdiction=jurisdiction,
+                contract_type=contract_type,
+            )
+            calibrated_review_escalation = (
+                score_details["escalation"] if score_details else "HIGH_REVIEW"
+            )
+            if calibrated_confidence is not None and calibrated_confidence < 0.75:
+                calibrated_review_escalation = "HIGH_REVIEW"
+            if not source_claim_ok:
+                status = "INSUFFICIENT_EVIDENCE"
+                calibrated_review_escalation = "HIGH_REVIEW"
+                severity_score = None
+                calibrated_confidence = None
+                calibrated_severity = None
+            supporting_sources = [
+                normalize_source_record(
+                    str(source.get("id") or source.get("source_id") or "playbook-source"),
+                    source,
+                    default_tier="D",
+                    retrieval_date=datetime.now(timezone.utc).isoformat(),
+                )
+                for source in source_records(playbook, check.get("sources", []))
+            ]
             primary_source = supporting_sources[0] if supporting_sources else {}
             results.append({
                 "scope": kind,
                 "check_id": check_id,
+                "finding_status": "PRESENT" if status == "POTENTIAL_RISK" else ("NOT_FOUND" if status == "NO_RISK" else "UNCERTAIN"),
+                "evidence_status": "SUPPORTED" if status == "POTENTIAL_RISK" and evidence_ok else ("NOT_FOUND" if status == "NO_RISK" else "UNCERTAIN"),
+                "unsupported_legal_claim": not source_claim_ok,
                 "question": check.get("question", ""),
                 "answer": answer,
                 "risk_status": status,
@@ -257,7 +289,7 @@ def analyze_contract_checks(
                 "final_score": score_details["final_score"] if score_details else None,
                 "score_override_reason": score_details["override_reason"] if score_details else None,
                 "human_review_required": score_details["human_review_required"] if score_details else True,
-                "review_escalation": score_details["escalation"] if score_details else "LEGAL_REVIEW",
+                "review_escalation": calibrated_review_escalation,
                 "confidence": calibrated_confidence,
                 "confidence_status": "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED",
                 "severity_status": "CALIBRATED" if calibrated_severity else ("RULE_BASED_TRIAGE" if severity_score is not None else ("INCOMPLETE" if score_details else "UNCALIBRATED")),
@@ -274,17 +306,25 @@ def analyze_contract_checks(
                     "playbook_hash": playbook.get("playbook_hash"),
                     "source_ids": check.get("sources", []),
                     "model": RISK_MODEL,
+                    "model_id": RISK_MODEL,
+                    "model_version": RISK_MODEL,
+                    "prompt_version": RISK_PROMPT_VERSION,
                     "passes": len(records),
                     "agreement": agreement,
+                    "retrieval_timestamp": datetime.now(timezone.utc).isoformat(),
+                    "score_version": score_details["score_version"] if score_details else None,
+                    "calibration_input": severity_score,
                 },
                 "supporting_sources": supporting_sources,
                 "source_tier": primary_source.get("source_tier"),
-                "jurisdiction": primary_source.get("jurisdiction"),
-                "effective_date": primary_source.get("effective_date"),
-                "contract_type": primary_source.get("contract_type"),
+                "jurisdiction": jurisdiction,
+                "contract_type": contract_type,
+                "source_jurisdiction": primary_source.get("jurisdiction"),
+                "source_effective_date": primary_source.get("effective_date"),
+                "source_contract_type": primary_source.get("contract_type"),
                 "source_url": primary_source.get("source_url"),
                 "source_title": primary_source.get("source_title"),
-                "retrieval_date": primary_source.get("retrieval_date"),
+                "retrieval_date": datetime.now(timezone.utc).isoformat(),
                 "supporting_quote_or_paraphrase": primary_source.get("supporting_quote_or_paraphrase"),
                 "transferability": primary_source.get("transferability"),
                 "severity_factors": rep.get("severity_factors") or rep.get("score_components") or {},
