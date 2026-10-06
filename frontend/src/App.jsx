@@ -67,6 +67,7 @@ function RiskCard({ finding }) {
           <span>Self-consistency: {Math.round(finding.provenance.agreement * 100)}%</span>
         )}
         {finding.review_escalation && <span>Escalation: {finding.review_escalation}</span>}
+        {finding.human_review_status && <span>Review: {finding.human_review_status}</span>}
         {finding.source_tier && <span>Source tier: {finding.source_tier}</span>}
         {finding.provenance?.playbook_hash && (
           <span>Playbook: {finding.provenance.playbook_hash.slice(0, 12)}…</span>
