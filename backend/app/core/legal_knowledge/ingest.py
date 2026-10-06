@@ -50,7 +50,8 @@ def load_source_registry(path: Path = LEGAL_KNOWLEDGE_REGISTRY_PATH) -> dict[str
     }
 
 
-def parse_knowledge_document(path: Path, registry: dict[str, dict] | None = None) -> dict:    text = path.read_text(encoding="utf-8")
+def parse_knowledge_document(path: Path, registry: dict[str, dict] | None = None) -> dict:
+    text = path.read_text(encoding="utf-8")
     metadata: dict[str, str] = {}
     body = text
 
