@@ -604,7 +604,13 @@ def _classify_contract(
                 "total_clauses": len(segments_json),
                 "clauses": clauses_out,
                 "contract_risk_assessment": assessment,
-                "contract_metadata": extract_contract_metadata(filename, clauses_out),
+                "contract_coverage": contract_coverage,
+                "deterministic_cross_checks": deterministic_signals,
+                "contract_metadata": {
+                    **extract_contract_metadata(filename, clauses_out),
+                    "document_hash": _file_hash(file_path),
+                    "document_version": _file_hash(file_path),
+                },
             },
         )
         mark_run_complete(
