@@ -32,4 +32,6 @@ jobs:
           PY
 
       - name: Run Phase 2 scientific hardening tests
+        env:
+          PYTHONPATH: .
         run: pytest -q backend/tests/test_phase2_scientific_hardening.py
