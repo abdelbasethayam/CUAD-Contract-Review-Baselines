@@ -20,8 +20,9 @@ from backend.app.core.rag.eval_data import load_clauses
 from backend.app.core.risk.risk_playbook import applicable_checks, load_playbook
 
 
-def annotation_partition(sample_id: str) -> str:
-    value = int(sample_id[:8], 16) % 100
+def annotation_partition(contract_id: str) -> str:
+    digest = hashlib.sha256(str(contract_id).encode("utf-8")).hexdigest()
+    value = int(digest[:8], 16) % 100
     if value < 25:
         return "calibration"
     if value < 50:
@@ -42,7 +43,7 @@ def sample_rows(source: Path, n: int, seed: int) -> list[dict]:
             ).hexdigest()[:16]
             pool.append({
                 "sample_id": sample_id,
-                "annotation_partition": annotation_partition(sample_id),
+                "annotation_partition": annotation_partition(str(row["document_id"])),
                 "document_id": row["document_id"],
                 "clause_index": clause_index,
                 "clause_type": row["clause_type"],
