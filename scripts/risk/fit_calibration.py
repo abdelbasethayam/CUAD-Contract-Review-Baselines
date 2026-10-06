@@ -60,14 +60,17 @@ def main() -> None:
         "method": "isotonic",
         "n_risk_calibration": int(len(x)),
         "risk_probability": risk_curve,
+        "calibration_partition": args.partition,
+        "severity_score_column": args.severity_score_column,
         "risk_brier": float(brier_score_loss(y, risk_pred)),
     }
 
     if args.gold_severity_column in df.columns:
-        sev = df.dropna(subset=[args.score_column, args.gold_severity_column]).copy()
+        severity_input = args.severity_score_column if args.severity_score_column in df.columns else args.score_column
+        sev = df.dropna(subset=[severity_input, args.gold_severity_column]).copy()
         sev = sev[sev[args.gold_severity_column].isin(["LOW", "MEDIUM", "HIGH"])]
         if len(sev) >= 30 and sev[args.gold_severity_column].nunique() >= 2:
-            xs = sev[args.score_column].astype(float).to_numpy()
+            xs = sev[severity_input].astype(float).to_numpy()
             levels = sev[args.gold_severity_column].to_numpy()
             p_med = np.array([1.0 if level in {"MEDIUM", "HIGH"} else 0.0 for level in levels])
             p_high = np.array([1.0 if level == "HIGH" else 0.0 for level in levels])
