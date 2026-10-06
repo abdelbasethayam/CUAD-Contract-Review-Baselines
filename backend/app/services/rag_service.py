@@ -18,6 +18,7 @@ from ..core.config import (
     RISK_CALIBRATION_PATH,
     RISK_ENABLE_CROSS_CLAUSE,
     RISK_ENABLE_DOCUMENT_CHECKS,
+    RUNS_DIR,
     RISK_USE_CONTEXT,
     RISK_USE_LEGAL_GUIDANCE,
     RISK_USE_PLAYBOOK,
@@ -38,7 +39,7 @@ from ..core.risk.contract_metadata import extract_contract_metadata
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
 from ..core.risk.risk_engine import analyze_clause_risk
 from ..core.risk.risk_playbook import load_playbook
-from ..core.risk.run_store import create_or_resume_run, mark_run_complete, mark_run_failed
+from ..core.risk.run_store import AnalysisRun, create_or_resume_run, mark_run_complete, mark_run_failed
 from ..core.rag.evidence_compressor import compress_cuad_evidence
 
 ProgressCallback = Callable[[dict], None]
@@ -135,19 +136,46 @@ def classify_contract(
             filename=filename or file_path.name,
         )
 
+def resume_contract(
+    analysis_id: str,
+    progress_callback: ProgressCallback | None = None,
+) -> dict:
+    root = Path(RUNS_DIR) / analysis_id
+    manifest_path = root / "manifest.json"
+    if not root.exists() or not manifest_path.exists():
+        raise FileNotFoundError(f"Analysis run not found: {analysis_id}")
+    source_candidates = list(root.glob("source.*"))
+    if not source_candidates:
+        raise FileNotFoundError(f"Persistent source missing for run: {analysis_id}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    filename = manifest.get("source", {}).get("filename") or source_candidates[0].name
+    with _CLASSIFICATION_LOCK:
+        return _classify_contract(
+            source_candidates[0],
+            top_k=int(manifest.get("pipeline", {}).get("top_k", TOP_K)),
+            progress_callback=progress_callback,
+            filename=filename,
+            run_id=analysis_id,
+        )
 
 def _classify_contract(
     file_path: Path,
     top_k: int,
     progress_callback: ProgressCallback | None,
     filename: str,
+    run_id: str | None = None,
 ) -> dict:
     playbook = load_playbook()
-    run = create_or_resume_run(
-        file_path,
-        filename=filename,
-        config=_pipeline_config(top_k, playbook),
-    )
+    if run_id:
+        run = AnalysisRun(run_id, Path(RUNS_DIR) / run_id)
+        manifest = run.read_json("manifest.json", {}) or {}
+        top_k = int(manifest.get("pipeline", {}).get("top_k", top_k))
+    else:
+        run = create_or_resume_run(
+            file_path,
+            filename=filename,
+            config=_pipeline_config(top_k, playbook),
+        )
     trace = _trace_callback(run, progress_callback)
 
     try:
