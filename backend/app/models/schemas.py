@@ -11,6 +11,8 @@ class RiskFinding(BaseModel):
     check_id: str | None = None
     question: str | None = None
     answer: str | None = None
+    finding_status: str = "UNCERTAIN"
+    evidence_status: str = "UNCERTAIN"
     risk_status: str = "INSUFFICIENT_EVIDENCE"
     risk: bool = False
     risk_type: str | None = None
@@ -46,6 +48,14 @@ class RiskFinding(BaseModel):
     supporting_quote_or_paraphrase: str | None = None
     transferability: str | None = None
     legal_guidance_sources: list[dict[str, Any]] = Field(default_factory=list)
+    control_assessments: dict[str, Any] = Field(default_factory=dict)
+    override_flags: dict[str, bool] = Field(default_factory=dict)
+    economic_effect: dict[str, Any] = Field(default_factory=dict)
+    jurisdiction_sensitive: bool = False
+    unsupported_legal_claim: bool = False
+    source_conflict: bool = False
+    evidence_span: str = ""
+    evidence_source: str = "none"
 
 
 class ContractRiskAssessment(BaseModel):
@@ -69,6 +79,12 @@ class ContractRiskAssessment(BaseModel):
     overall_severity: str | None = None
     aggregation_adjustments: list[dict[str, Any]] = Field(default_factory=list)
     human_review_required: bool = False
+    legal_review_required: bool = False
+    business_owner_review_required: bool = False
+    privacy_security_review_required: bool = False
+    exposure_concentration: list[dict[str, Any]] = Field(default_factory=list)
+    control_gap_count: int = 0
+    unreviewed_assumption_count: int = 0
     high_count: int = 0
     critical_count: int = 0
 
@@ -84,6 +100,11 @@ class ContractMetadata(BaseModel):
     effective_date: str | None = None
     expiration_date: str | None = None
     governing_law: str | None = None
+    contract_type_candidates: list[str] = Field(default_factory=list)
+    contract_type_status: str = "HEURISTIC_CANDIDATE"
+    metadata_status: str = "PARTIAL_HEURISTIC"
+    evidence: dict[str, Any] = Field(default_factory=dict)
+    provenance: str | None = None
     source_filename: str | None = None
 
 
