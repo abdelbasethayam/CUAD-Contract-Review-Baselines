@@ -24,7 +24,8 @@ def sample_rows(source: Path, n: int, seed: int) -> list[dict]:
     df = load_clauses(source)
     playbook = load_playbook()
     pool = []
-    for clause_index, row in enumerate(df.to_dict("records")):
+    for row in df.to_dict("records"):
+        clause_index = int(row["clause_index"])
         checks = applicable_checks(playbook, row["clause_type"])
         for check in checks:
             sample_id = hashlib.sha256(
