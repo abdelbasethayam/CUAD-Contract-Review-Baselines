@@ -195,7 +195,7 @@ def add_overlap_flags(rows: list[dict[str, object]]) -> None:
         ).hexdigest()[:16]
         row["same_text_label_count"] = len(labels)
         row["same_text_labels"] = " | ".join(labels)
-        row["multi_label_overlap"] = len(labels) > 1
+        row["cross_category_span_reuse"] = len(labels) > 1
 
 
 def make_report(
@@ -440,7 +440,7 @@ def main() -> int:
         "normalized_text_hash",
         "same_text_label_count",
         "same_text_labels",
-        "multi_label_overlap",
+        "cross_category_span_reuse",
         "cleaning_actions",
         "split",
     ]
