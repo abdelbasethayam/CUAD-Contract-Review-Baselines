@@ -441,6 +441,7 @@ def _classify_contract(
                 progress_callback=trace,
                 playbook=playbook,
                 qdrant_client=qdrant_client,
+                extraction_confidence=row.get("classification_confidence"),
             )
             # Idempotent checkpoint: replace only the clause's prior rows.
             existing_lines = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
