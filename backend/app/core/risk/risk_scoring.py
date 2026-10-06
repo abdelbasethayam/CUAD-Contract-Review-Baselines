@@ -38,8 +38,8 @@ CRITICAL_TERMS = (
 )
 
 HIGH_TERMS = (
-    "missing ownership chain", "security obligation", "warranty", "perpetual", "irrevocable",
-    "confidentiality", "indemnity", "business-critical",
+    "missing ownership chain", "no practical remedy", "perpetual", "irrevocable",
+    "business-critical", "security obligation without remedy",
 )
 
 
