@@ -65,14 +65,16 @@ def main() -> None:
     playbook = load_playbook()
     cohere = make_cohere_client()
 
-    # Build one vector per unique gold clause, then reuse it for all checks.
+    # Embed every clause in the contracts represented by the gold queue so
+    # same-contract context retrieval remains meaningful.
     clause_keys = []
     clause_texts = []
-    for row in queue_rows:
-        key = (str(row["document_id"]), str(row["clause_index"]))
-        if key not in clause_keys:
-            clause_keys.append(key)
-            clause_texts.append(str(row["clause_text"]))
+    for document_id in sorted({str(row["document_id"]) for row in queue_rows}):
+        for item in source_by_doc.get(document_id, []):
+            key = (document_id, str(item["clause_index"]))
+            if key not in clause_keys and str(item.get("clause_text") or "").strip():
+                clause_keys.append(key)
+                clause_texts.append(str(item["clause_text"]))
     vectors = embed_queries(cohere, clause_texts)
     vector_map = {key: vector for key, vector in zip(clause_keys, vectors)}
 
