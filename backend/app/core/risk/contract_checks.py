@@ -217,8 +217,13 @@ def analyze_contract_checks(
                 agreement=agreement,
                 indicator_match=False,
             )
-            score_details = score_finding({
-                "risk_status": status,
+            confidence_values = [
+                float(contract_lookup[int(cid)].get("classification_confidence"))
+                for cid in rep.get("clause_ids", [])
+                if int(cid) in contract_lookup and contract_lookup[int(cid)].get("classification_confidence") is not None
+            ]
+            extraction_confidence = min(confidence_values) if confidence_values else None
+            score_details = score_finding({                "risk_status": status,
                 "risk": status == "POTENTIAL_RISK",
                 "risk_type": rep.get("risk_type"),
                 "question": by_source[check_id].get("question", ""),
@@ -228,7 +233,7 @@ def analyze_contract_checks(
                 "why_flagged": rep.get("why_flagged"),
                 "score_components": rep.get("score_components") or {},
                 "deterministic_cross_check": bool(deterministic_signals and any(x.get("id") == check_id for x in deterministic_signals)),
-            }) if status == "POTENTIAL_RISK" else None
+            }, extraction_confidence=extraction_confidence) if status == "POTENTIAL_RISK" else None
             severity_score = float(score_details["final_score"]) if score_details and score_details.get("final_score") is not None else None
             severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
             calibrated_confidence = (
