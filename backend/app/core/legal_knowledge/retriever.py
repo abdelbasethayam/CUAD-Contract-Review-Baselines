@@ -179,14 +179,27 @@ def retrieve_legal_guidance(
         })
     query_vector = embed_queries(cohere_client, [query])[0]
 
-    category_filter = models.Filter(
-        must=[
+    must_filters = [
+        models.FieldCondition(
+            key="clause_category",
+            match=models.MatchValue(value=category),
+        )
+    ]
+    if allowed_source_tiers:
+        must_filters.append(
             models.FieldCondition(
-                key="clause_category",
-                match=models.MatchValue(value=category),
+                key="source_tier",
+                match=models.MatchAny(any=list(allowed_source_tiers)),
             )
-        ]
-    )
+        )
+    if jurisdiction:
+        must_filters.append(
+            models.FieldCondition(
+                key="jurisdiction",
+                match=models.MatchValue(value=jurisdiction),
+            )
+        )
+    category_filter = models.Filter(must=must_filters)
     if progress_callback:
         progress_callback({
             "type": "progress",
@@ -201,7 +214,7 @@ def retrieve_legal_guidance(
     )
     hits = getattr(response, "points", response)
 
-    results = [_payload_to_result(hit) for hit in hits]
+    results = [_payload_to_result(hit, contract_type=contract_type) for hit in hits]
     if progress_callback:
         progress_callback({
             "type": "progress",
