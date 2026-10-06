@@ -21,10 +21,12 @@ from backend.app.core.rag import embed_queries, make_cohere_client
 from backend.app.core.config import RISK_SELF_CONSISTENCY_PASSES
 
 
-def load_queue(path: Path) -> list[dict]:
+def load_queue(path: Path, partition: str | None = None) -> list[dict]:
     rows = []
     with path.open("r", encoding="utf-8", newline="") as handle:
         for row in csv.DictReader(handle):
+            if partition and str(row.get("annotation_partition") or "") != partition:
+                continue
             if str(row.get("adjudicated_risk") or "").strip().upper() not in {"YES", "NO"}:
                 continue
             rows.append(row)
@@ -46,6 +48,7 @@ def main() -> None:
     parser.add_argument(
         "--passes", type=int, default=RISK_SELF_CONSISTENCY_PASSES,
     )
+    parser.add_argument("--partition", choices=["calibration", "development", "locked_test"], default="locked_test")
     parser.add_argument(
         "--out",
         type=Path,
@@ -53,7 +56,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    queue_rows = load_queue(args.queue)
+    queue_rows = load_queue(args.queue, args.partition)
     if not queue_rows:
         raise SystemExit("No adjudicated rows found in queue.")
 
