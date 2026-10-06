@@ -18,6 +18,7 @@ from ..config import (
     OLLAMA_MODEL,
     OLLAMA_TIMEOUT_SECONDS,
     OLLAMA_URL,
+    CLASSIFIER_THINK,
 )
 
 logger = logging.getLogger(__name__)
