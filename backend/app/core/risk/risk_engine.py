@@ -718,6 +718,12 @@ def analyze_clause_risk(
             "human_review_required": bool(
                 score_details["human_review_required"] if score_details else True
             ),
+            "human_review_status": (
+                "REVIEW_REQUIRED"
+                if (score_details and score_details.get("human_review_required"))
+                or review_escalation in REVIEW_STATUSES
+                else "NOT_REVIEWED"
+            ),
             "review_escalation": review_escalation,
             "confidence": calibrated_confidence,
             "confidence_status": (
@@ -811,6 +817,7 @@ def analyze_clause_risk(
                 "final_score": None,
                 "score_override_reason": None,
                 "human_review_required": True,
+                "human_review_status": "REVIEW_REQUIRED",
                 "review_escalation": "HIGH_REVIEW",
                 "confidence": None,
                 "confidence_status": "UNCALIBRATED",
