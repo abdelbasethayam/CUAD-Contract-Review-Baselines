@@ -84,7 +84,7 @@ Return:
       "clause_ids": [1],
       "evidence": [{{"clause_id": 1, "quote": "exact quote"}}],
       "why_flagged": "concise explanation",
-      "severity_factors": {{"impact": 0, "scope": 0, "asymmetry": 0, "duration": 0, "reversibility": 0}}
+      "score_components": {{"exposure_magnitude": 0, "likelihood_uncertainty": 0, "scope_duration": 0, "control_weakness": 0}}
     }}
   ]
 }}
@@ -213,12 +213,24 @@ def analyze_contract_checks(
                 agreement=agreement,
                 indicator_match=False,
             )
-            severity_signal = _severity_signal(rep.get("severity_factors") or {})
+            score_details = score_finding({
+                "risk_status": status,
+                "risk": status == "POTENTIAL_RISK",
+                "risk_type": rep.get("risk_type"),
+                "question": by_source[check_id].get("question", ""),
+                "check_id": check_id,
+                "scope": kind,
+                "evidence": " ".join(str(x.get("quote") or "") for x in rep.get("evidence") or []),
+                "why_flagged": rep.get("why_flagged"),
+                "score_components": rep.get("score_components") or {},
+            }) if status == "POTENTIAL_RISK" else None
+            severity_score = float(score_details["final_score"]) if score_details else None
+            severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
             calibrated_confidence = (
                 calibrate_risk_probability(raw_support, calibration)
                 if status == "POTENTIAL_RISK" else None
             )
-            calibrated_severity = calibrate_severity(severity_signal, calibration)
+            calibrated_severity = calibrate_severity(severity_score, calibration)
             check = by_source[check_id]
             results.append({
                 "scope": kind,
@@ -228,9 +240,17 @@ def analyze_contract_checks(
                 "risk_status": status,
                 "risk": status == "POTENTIAL_RISK",
                 "risk_type": rep.get("risk_type") if status == "POTENTIAL_RISK" else None,
-                "risk_level": calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else None,
+                "risk_level": (calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else (score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None)),
                 "raw_support_score": raw_support,
+                "severity_score": severity_score,
                 "severity_signal": severity_signal,
+                "score_components": score_details["score_components"] if score_details else {},
+                "base_score": score_details["base_score"] if score_details else 0,
+                "score_modifiers": score_details["modifiers"] if score_details else [],
+                "final_score": score_details["final_score"] if score_details else 0,
+                "score_override_reason": score_details["override_reason"] if score_details else None,
+                "human_review_required": score_details["human_review_required"] if score_details else True,
+                "review_escalation": score_details["escalation"] if score_details else "LEGAL_REVIEW",
                 "confidence": calibrated_confidence,
                 "confidence_status": "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED",
                 "severity_status": "CALIBRATED" if calibrated_severity else "UNCALIBRATED",
@@ -251,7 +271,8 @@ def analyze_contract_checks(
                     "agreement": agreement,
                 },
                 "supporting_sources": source_records(playbook, check.get("sources", [])),
-                "severity_factors": rep.get("severity_factors") or {},
+                "severity_factors": rep.get("severity_factors") or rep.get("score_components") or {},
+                "score_components_raw": rep.get("score_components") or {},
             })
         # Missing outputs are unresolved rather than silently marked NO_RISK.
         returned = {x["check_id"] for x in results}
