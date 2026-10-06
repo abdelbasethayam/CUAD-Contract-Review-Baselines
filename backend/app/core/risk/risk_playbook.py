@@ -175,8 +175,10 @@ def load_playbook(path: Path | None = None) -> dict:
     if path.exists():
         try:
             return normalize_playbook(json.loads(path.read_text(encoding="utf-8")))
-        except (OSError, json.JSONDecodeError, TypeError):
-            pass
+        except (OSError, json.JSONDecodeError, TypeError) as exc:
+            raise RuntimeError(
+                f"Configured risk playbook is present but invalid: {path}: {exc}"
+            ) from exc
     return starter_playbook()
 
 
