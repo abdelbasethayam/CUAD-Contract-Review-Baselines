@@ -77,17 +77,15 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
 
     if positive:
         status = "POTENTIAL_RISK"
-        overall_raw_score = round(
-            max(float(item.get("raw_support_score") or 0.0) for item in positive),
-            4,
-        )
+        overall_raw_score = triage["overall_score"]
         overall_confidence = None
         confidence_status = "UNCALIBRATED"
-        overall_risk = None
+        overall_risk = triage["overall_severity"]
         reason = (
             "One or more contract provisions contain evidence-supported "
-            "playbook findings. Severity and probability are intentionally "
-            "uncalibrated until a manual gold set is used."
+            "review findings. Contract severity is a deterministic triage "
+            "score with explicit interaction overrides; it is not legal advice "
+            "or a probability."
         )
     elif insufficient:
         status = "INSUFFICIENT_EVIDENCE"
