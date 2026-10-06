@@ -30,6 +30,8 @@ SAFE_ARTIFACTS = {
     "contract_risk.json",
     "result.json",
     "trace.jsonl",
+    "clauses.csv",
+    "risk_findings.csv",
 }
 
 
@@ -56,7 +58,7 @@ def _response(pipeline: dict) -> ContractClassificationResponse:
         contract_metadata=pipeline.get("contract_metadata") or {"source_filename": pipeline["filename"], "name": pipeline["filename"]},
         downloads={
             name.replace(".", "_"): f"/documents/runs/{analysis_id}/artifact/{name}"
-            for name in ("result.json", "contract_risk.json", "risk_findings.jsonl", "classification.jsonl", "manifest.json")
+            for name in ("result.json", "contract_risk.json", "risk_findings.jsonl", "risk_findings.csv", "clauses.csv", "classification.jsonl", "manifest.json")
         } if analysis_id else {},
     )
 
