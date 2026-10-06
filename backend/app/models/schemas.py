@@ -28,6 +28,24 @@ class RiskFinding(BaseModel):
     supporting_sources: list[dict[str, Any]] = Field(default_factory=list)
     related_contract_context: list[dict[str, Any]] = Field(default_factory=list)
     severity_factors: dict[str, Any] = Field(default_factory=dict)
+    score_components: dict[str, Any] = Field(default_factory=dict)
+    base_score: int | None = None
+    score_modifiers: list[dict[str, Any]] = Field(default_factory=list)
+    final_score: int | None = None
+    score_override_reason: str | None = None
+    human_review_required: bool = True
+    review_escalation: str = "STANDARD_REVIEW"
+    severity_score: float | None = None
+    source_tier: str | None = None
+    jurisdiction: str | None = None
+    effective_date: str | None = None
+    contract_type: str | None = None
+    source_url: str | None = None
+    source_title: str | None = None
+    retrieval_date: str | None = None
+    supporting_quote_or_paraphrase: str | None = None
+    transferability: str | None = None
+    legal_guidance_sources: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ContractRiskAssessment(BaseModel):
@@ -47,10 +65,20 @@ class ContractRiskAssessment(BaseModel):
     cross_clause_findings: list[dict[str, Any]] = Field(default_factory=list)
     document_findings: list[dict[str, Any]] = Field(default_factory=list)
     unresolved_check_count: int = 0
+    overall_score: int | None = None
+    overall_severity: str | None = None
+    aggregation_adjustments: list[dict[str, Any]] = Field(default_factory=list)
+    human_review_required: bool = False
+    high_count: int = 0
+    critical_count: int = 0
 
 
 class ContractMetadata(BaseModel):
     name: str | None = None
+    document_hash: str | None = None
+    document_version: str | None = None
+    contract_type: str | None = None
+    jurisdiction_candidates: list[str] = Field(default_factory=list)
     parties: list[str] = Field(default_factory=list)
     agreement_date: str | None = None
     effective_date: str | None = None
@@ -62,6 +90,22 @@ class ContractMetadata(BaseModel):
 class ClauseResult(BaseModel):
     clause_index: int
     clause_text: str
+    section_path: str | None = None
+    page_start: int | None = None
+    page_end: int | None = None
+    defined_terms_used: list[str] = Field(default_factory=list)
+    linked_sections: list[str] = Field(default_factory=list)
+    parties_affected: list[str] = Field(default_factory=list)
+    beneficiary: str | None = None
+    direction_of_obligation: str | None = None
+    transaction_role: str | None = None
+    commercial_purpose: str | None = None
+    operational_trigger: str | None = None
+    scope: dict[str, Any] = Field(default_factory=dict)
+    rights_and_duties: list[str] = Field(default_factory=list)
+    exceptions_carveouts: list[str] = Field(default_factory=list)
+    economic_effect: dict[str, Any] = Field(default_factory=dict)
+    dependencies: list[str] = Field(default_factory=list)
     predicted_label: str = "NO_APPLICABLE_LABEL"
     clause_type: str | None = None
     retrieved_labels: list[str] = Field(default_factory=list)

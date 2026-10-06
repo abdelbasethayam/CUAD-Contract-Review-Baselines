@@ -10,6 +10,7 @@ from ..rag.generator import call_ollama
 from .calibration import calibrate_risk_probability, calibrate_severity, load_calibration
 from .risk_engine import _evidence_valid, _majority, _severity_signal, _support_score
 from .risk_playbook import load_playbook, source_records
+from .risk_scoring import score_finding
 
 
 def _candidate_clauses(clauses: list[dict], pair: list[str]) -> list[dict]:
@@ -30,7 +31,7 @@ def _candidate_clauses(clauses: list[dict], pair: list[str]) -> list[dict]:
     ][:20]
 
 
-def _prompt(clauses: list[dict], cross_checks: list[dict], doc_checks: list[dict]) -> str:
+def _prompt(clauses: list[dict], cross_checks: list[dict], doc_checks: list[dict], deterministic_signals: list[dict] | None = None) -> str:
     compact = [
         {
             "clause_id": item.get("clause_index"),
@@ -60,6 +61,9 @@ CROSS-CLAUSE CHECKS
 DOCUMENT CHECKS
 {json.dumps(doc_checks, ensure_ascii=False)}
 
+DETERMINISTIC INTERACTION SIGNALS (candidate signals, not legal conclusions)
+{json.dumps(deterministic_signals or [], ensure_ascii=False)}
+
 Return:
 {{
   "cross_clause_findings": [
@@ -71,7 +75,7 @@ Return:
       "clause_ids": [1, 2],
       "evidence": [{{"clause_id": 1, "quote": "exact quote"}}],
       "why_flagged": "concise explanation",
-      "severity_factors": {{"impact": 0, "scope": 0, "asymmetry": 0, "duration": 0, "reversibility": 0}}
+      "score_components": {{"exposure_magnitude": 0, "likelihood_uncertainty": 0, "scope_duration": 0, "control_weakness": 0}}
     }}
   ],
   "document_findings": [
@@ -83,7 +87,7 @@ Return:
       "clause_ids": [1],
       "evidence": [{{"clause_id": 1, "quote": "exact quote"}}],
       "why_flagged": "concise explanation",
-      "severity_factors": {{"impact": 0, "scope": 0, "asymmetry": 0, "duration": 0, "reversibility": 0}}
+      "score_components": {{"exposure_magnitude": 0, "likelihood_uncertainty": 0, "scope_duration": 0, "control_weakness": 0}}
     }}
   ]
 }}
@@ -119,7 +123,7 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
             for ev in item.get("evidence") or []:
                 if isinstance(ev, dict) and str(ev.get("quote") or "").strip():
                     evidence.append({"clause_id": ev.get("clause_id"), "quote": str(ev["quote"]).strip()})
-            factors = item.get("severity_factors") if isinstance(item.get("severity_factors"), dict) else {}
+            factors = item.get("score_components") if isinstance(item.get("score_components"), dict) else (item.get("severity_factors") if isinstance(item.get("severity_factors"), dict) else {})
             out.append({
                 "check_id": check_id,
                 "answer": answer,
@@ -128,12 +132,9 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
                 "clause_ids": ids,
                 "evidence": evidence,
                 "why_flagged": str(item.get("why_flagged") or "").strip(),
-                "severity_factors": {
-                    key: (
-                        float(factors[key]) if str(factors.get(key)).replace(".", "", 1).isdigit()
-                        and 0 <= float(factors[key]) <= 3 else None
-                    )
-                    for key in ("impact", "scope", "asymmetry", "duration", "reversibility")
+                "score_components": {
+                    key: (float(factors[key]) if str(factors.get(key)).replace(".", "", 1).isdigit() and 0 <= float(factors[key]) <= 5 else None)
+                    for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")
                 },
             })
         return out
@@ -150,6 +151,7 @@ def analyze_contract_checks(
     playbook: dict | None = None,
     progress_callback=None,
     passes: int | None = None,
+    deterministic_signals: list[dict] | None = None,
 ) -> tuple[list[dict], list[dict]]:
     playbook = playbook or load_playbook()
     cross_checks = playbook.get("cross_clause_checks") or []
@@ -159,7 +161,7 @@ def analyze_contract_checks(
 
     calibration = load_calibration()
     contract_lookup = {int(x["clause_index"]): x for x in clauses if x.get("clause_index") is not None}
-    prompts = _prompt(clauses, cross_checks, doc_checks)
+    prompts = _prompt(clauses, cross_checks, doc_checks, deterministic_signals)
     n_passes = max(1, int(passes or RISK_SELF_CONSISTENCY_PASSES))
     cross_outputs: list[list[dict]] = []
     doc_outputs: list[list[dict]] = []
@@ -215,13 +217,28 @@ def analyze_contract_checks(
                 agreement=agreement,
                 indicator_match=False,
             )
-            severity_signal = _severity_signal(rep.get("severity_factors") or {})
+            score_details = score_finding({
+                "risk_status": status,
+                "risk": status == "POTENTIAL_RISK",
+                "risk_type": rep.get("risk_type"),
+                "question": by_source[check_id].get("question", ""),
+                "check_id": check_id,
+                "scope": kind,
+                "evidence": " ".join(str(x.get("quote") or "") for x in rep.get("evidence") or []),
+                "why_flagged": rep.get("why_flagged"),
+                "score_components": rep.get("score_components") or {},
+                "deterministic_cross_check": bool(deterministic_signals and any(x.get("id") == check_id for x in deterministic_signals)),
+            }) if status == "POTENTIAL_RISK" else None
+            severity_score = float(score_details["final_score"]) if score_details and score_details.get("final_score") is not None else None
+            severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
             calibrated_confidence = (
                 calibrate_risk_probability(raw_support, calibration)
                 if status == "POTENTIAL_RISK" else None
             )
-            calibrated_severity = calibrate_severity(severity_signal, calibration)
+            calibrated_severity = calibrate_severity(severity_score, calibration)
             check = by_source[check_id]
+            supporting_sources = source_records(playbook, check.get("sources", []))
+            primary_source = supporting_sources[0] if supporting_sources else {}
             results.append({
                 "scope": kind,
                 "check_id": check_id,
@@ -230,12 +247,20 @@ def analyze_contract_checks(
                 "risk_status": status,
                 "risk": status == "POTENTIAL_RISK",
                 "risk_type": rep.get("risk_type") if status == "POTENTIAL_RISK" else None,
-                "risk_level": calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else None,
+                "risk_level": (calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else (score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None)),
                 "raw_support_score": raw_support,
+                "severity_score": severity_score,
                 "severity_signal": severity_signal,
+                "score_components": score_details["score_components"] if score_details else {},
+                "base_score": score_details["base_score"] if score_details else None,
+                "score_modifiers": score_details["modifiers"] if score_details else [],
+                "final_score": score_details["final_score"] if score_details else None,
+                "score_override_reason": score_details["override_reason"] if score_details else None,
+                "human_review_required": score_details["human_review_required"] if score_details else True,
+                "review_escalation": score_details["escalation"] if score_details else "LEGAL_REVIEW",
                 "confidence": calibrated_confidence,
                 "confidence_status": "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED",
-                "severity_status": "CALIBRATED" if calibrated_severity else "UNCALIBRATED",
+                "severity_status": "CALIBRATED" if calibrated_severity else ("RULE_BASED_TRIAGE" if severity_score is not None else ("INCOMPLETE" if score_details else "UNCALIBRATED")),
                 "severity_probabilities": calibrated_severity["probabilities"] if calibrated_severity else {},
                 "ground_truth_status": "PLAYBOOK_DERIVED",
                 "clause_ids": [i for i in rep["clause_ids"] if i in contract_lookup],
@@ -252,8 +277,18 @@ def analyze_contract_checks(
                     "passes": len(records),
                     "agreement": agreement,
                 },
-                "supporting_sources": source_records(playbook, check.get("sources", [])),
-                "severity_factors": rep.get("severity_factors") or {},
+                "supporting_sources": supporting_sources,
+                "source_tier": primary_source.get("source_tier"),
+                "jurisdiction": primary_source.get("jurisdiction"),
+                "effective_date": primary_source.get("effective_date"),
+                "contract_type": primary_source.get("contract_type"),
+                "source_url": primary_source.get("source_url"),
+                "source_title": primary_source.get("source_title"),
+                "retrieval_date": primary_source.get("retrieval_date"),
+                "supporting_quote_or_paraphrase": primary_source.get("supporting_quote_or_paraphrase"),
+                "transferability": primary_source.get("transferability"),
+                "severity_factors": rep.get("severity_factors") or rep.get("score_components") or {},
+                "score_components_raw": rep.get("score_components") or {},
             })
         # Missing outputs are unresolved rather than silently marked NO_RISK.
         returned = {x["check_id"] for x in results}

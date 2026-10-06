@@ -26,11 +26,18 @@ def main() -> None:
     parser.add_argument("--csv", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=Path("data/risk/gold/calibration.json"))
     parser.add_argument("--score-column", default="raw_support_score")
+    parser.add_argument("--partition", default="calibration", choices=["calibration", "development"])
+    parser.add_argument("--severity-score-column", default="final_score")
     parser.add_argument("--gold-risk-column", default="adjudicated_risk")
     parser.add_argument("--gold-severity-column", default="adjudicated_severity")
     args = parser.parse_args()
 
     df = pd.read_csv(args.csv)
+    if "annotation_partition" not in df.columns:
+        raise SystemExit("Calibration requires annotation_partition metadata.")
+    df = df[df["annotation_partition"].astype(str) == args.partition].copy()
+    if not len(df):
+        raise SystemExit(f"No adjudicated rows found in partition {args.partition!r}.")
     required = {args.score_column, args.gold_risk_column}
     missing = required - set(df.columns)
     if missing:
@@ -53,19 +60,26 @@ def main() -> None:
         "method": "isotonic",
         "n_risk_calibration": int(len(x)),
         "risk_probability": risk_curve,
+        "calibration_partition": args.partition,
+        "severity_score_column": args.severity_score_column,
         "risk_brier": float(brier_score_loss(y, risk_pred)),
     }
 
     if args.gold_severity_column in df.columns:
-        sev = df.dropna(subset=[args.score_column, args.gold_severity_column]).copy()
-        sev = sev[sev[args.gold_severity_column].isin(["LOW", "MEDIUM", "HIGH"])]
+        severity_input = args.severity_score_column if args.severity_score_column in df.columns else args.score_column
+        sev = df.dropna(subset=[severity_input, args.gold_severity_column]).copy()
+        sev = sev[sev[args.gold_severity_column].isin(["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"])]
         if len(sev) >= 30 and sev[args.gold_severity_column].nunique() >= 2:
-            xs = sev[args.score_column].astype(float).to_numpy()
+            xs = sev[severity_input].astype(float).to_numpy()
             levels = sev[args.gold_severity_column].to_numpy()
-            p_med = np.array([1.0 if level in {"MEDIUM", "HIGH"} else 0.0 for level in levels])
-            p_high = np.array([1.0 if level == "HIGH" else 0.0 for level in levels])
+            p_low = np.array([1.0 if level in {"LOW", "MEDIUM", "HIGH", "CRITICAL"} else 0.0 for level in levels])
+            p_med = np.array([1.0 if level in {"MEDIUM", "HIGH", "CRITICAL"} else 0.0 for level in levels])
+            p_high = np.array([1.0 if level in {"HIGH", "CRITICAL"} else 0.0 for level in levels])
+            p_critical = np.array([1.0 if level == "CRITICAL" else 0.0 for level in levels])
+            result["p_ge_low"] = fit_curve(xs, p_low)
             result["p_ge_medium"] = fit_curve(xs, p_med)
             result["p_ge_high"] = fit_curve(xs, p_high)
+            result["p_ge_critical"] = fit_curve(xs, p_critical)
             result["n_severity_calibration"] = int(len(sev))
 
     args.out.parent.mkdir(parents=True, exist_ok=True)

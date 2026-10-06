@@ -35,7 +35,9 @@ from ..core.rag.clause_segmenter import segment_document
 from ..core.rag.segmenter import is_definition
 from ..core.rag.validator import is_real_clause
 from ..core.risk.contract_checks import analyze_contract_checks
+from ..core.risk.deterministic_cross_checks import run_deterministic_cross_checks
 from ..core.risk.contract_metadata import extract_contract_metadata
+from ..core.risk.contract_coverage import build_contract_coverage
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
 from ..core.risk.risk_engine import analyze_clause_risk
 from ..core.risk.risk_playbook import load_playbook
@@ -199,8 +201,15 @@ def _classify_contract(
             segments_json = [
                 {
                     "clause_index": i,
+                    "clause_id": segment.clause_id,
                     "text": segment.text,
                     "parser": segment.parser,
+                    "page_start": segment.page_start,
+                    "page_end": segment.page_end,
+                    "parent_clause": segment.parent_clause,
+                    "depth": segment.depth,
+                    "source_blocks": segment.source_blocks,
+                    "heading": segment.heading,
                     "metadata": segment.metadata or {},
                 }
                 for i, segment in enumerate(segments)
@@ -215,6 +224,8 @@ def _classify_contract(
             })
         else:
             segments = None
+
+        segment_by_index = {int(item["clause_index"]): item for item in segments_json}
 
         if not segments_json:
             raise ValueError(
@@ -344,9 +355,18 @@ def _classify_contract(
                 progress_callback=progress_callback,
             )
 
+            segment_info = segment_by_index.get(idx, {})
             row = {
                 "clause_index": idx,
+                "clause_id": segment_info.get("clause_id"),
                 "clause_text": item["clause_text"],
+                "section_path": segment_info.get("clause_id"),
+                "page_start": segment_info.get("page_start"),
+                "page_end": segment_info.get("page_end"),
+                "parent_clause": segment_info.get("parent_clause"),
+                "depth": segment_info.get("depth"),
+                "source_blocks": segment_info.get("source_blocks", []),
+                "heading": segment_info.get("heading"),
                 "predicted_label": result["predicted_label"],
                 "clause_type": result["predicted_label"],
                 "retrieved_labels": result.get("retrieved_labels", []),
@@ -384,6 +404,15 @@ def _classify_contract(
                 "current": pos + 1,
                 "total": total_valid,
             })
+
+        # Deterministic clause-family coverage is stored separately from risk truth.
+        clause_rows_for_coverage = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
+        coverage_path = run.root / "contract_coverage.json"
+        if coverage_path.exists():
+            contract_coverage = run.read_json("contract_coverage.json", []) or []
+        else:
+            contract_coverage = build_contract_coverage(clause_rows_for_coverage, playbook)
+            run.write_json("contract_coverage.json", contract_coverage)
 
         # Phase 2 clause risk: each clause is checkpointed separately.
         risk_index = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
@@ -474,6 +503,13 @@ def _classify_contract(
             results_by_index[idx] = row
 
         all_risk_findings = list(run.read_jsonl_index("risk_findings.jsonl", "finding_id").values())
+        clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
+
+        deterministic_signals = run.read_json("deterministic_cross_checks.json", None)
+        if deterministic_signals is None:
+            deterministic_signals = run_deterministic_cross_checks(clause_rows)
+            run.write_json("deterministic_cross_checks.json", deterministic_signals)
+
         contract_checks_path = run.root / "contract_checks.json"
         if contract_checks_path.exists():
             contract_checks = run.read_json("contract_checks.json", {}) or {}
@@ -486,7 +522,6 @@ def _classify_contract(
                 "message": "Running configured cross-clause/document checks",
                 "total": 1,
             })
-            clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
             effective_playbook = dict(playbook)
             if not RISK_ENABLE_CROSS_CLAUSE:
                 effective_playbook["cross_clause_checks"] = []
@@ -496,12 +531,14 @@ def _classify_contract(
                 clause_rows,
                 playbook=effective_playbook,
                 progress_callback=trace,
+                deterministic_signals=deterministic_signals,
             )
             run.write_json(
                 "contract_checks.json",
                 {
                     "cross_clause_findings": cross_findings,
                     "document_findings": document_findings,
+                    "deterministic_cross_checks": deterministic_signals,
                     "playbook_hash": playbook.get("playbook_hash"),
                     "model": RISK_MODEL,
                     "cross_clause_enabled": RISK_ENABLE_CROSS_CLAUSE,
@@ -513,7 +550,6 @@ def _classify_contract(
         if aggregate_path.exists():
             assessment = run.read_json("contract_risk.json", {}) or {}
         else:
-            clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
             assessment = aggregate_clause_risks(
                 all_risk_findings + cross_findings + document_findings,
                 playbook=playbook,
@@ -521,8 +557,8 @@ def _classify_contract(
             assessment["cross_clause_findings"] = cross_findings
             assessment["document_findings"] = document_findings
             assessment["risk_only"] = build_risk_only_view(all_risk_findings + cross_findings + document_findings)
+            assessment["deterministic_cross_checks"] = deterministic_signals
             run.write_json("contract_risk.json", assessment)
-
         # Export stable CSV views in addition to the raw JSON/JSONL audit artifacts.
         clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
         clause_csv = run.path("clauses.csv")
@@ -568,7 +604,13 @@ def _classify_contract(
                 "total_clauses": len(segments_json),
                 "clauses": clauses_out,
                 "contract_risk_assessment": assessment,
-                "contract_metadata": extract_contract_metadata(filename, clauses_out),
+                "contract_coverage": contract_coverage,
+                "deterministic_cross_checks": deterministic_signals,
+                "contract_metadata": {
+                    **extract_contract_metadata(filename, clauses_out),
+                    "document_hash": _file_hash(file_path),
+                    "document_version": _file_hash(file_path),
+                },
             },
         )
         mark_run_complete(
@@ -590,6 +632,8 @@ def _classify_contract(
             "clauses": clauses_out,
             "contract_risk_assessment": assessment,
             "contract_metadata": extract_contract_metadata(filename, clauses_out),
+            "contract_coverage": contract_coverage,
+            "deterministic_cross_checks": deterministic_signals,
             "run_dir": str(run.root),
         }
 

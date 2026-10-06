@@ -25,6 +25,7 @@ from .contract_context import retrieve_related_contract_context
 from .knowledge_base import match_risk_domains, risk_guidance_for_prompt
 from ..legal_knowledge.retriever import retrieve_legal_guidance
 from .risk_detector import detect_legal_indicators
+from .risk_scoring import score_finding
 
 ProgressCallback = Callable[[dict], None]
 
@@ -54,15 +55,15 @@ def _factor(value: object) -> float | None:
         number = float(value)
     except (TypeError, ValueError):
         return None
-    return number if 0.0 <= number <= 3.0 else None
+    return number if 0.0 <= number <= 5.0 else None
 
 
 def _severity_signal(factors: dict) -> float | None:
-    values = [_factor(factors.get(key)) for key in ("impact", "scope", "asymmetry", "duration", "reversibility")]
+    values = [_factor(factors.get(key)) for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")]
     values = [v for v in values if v is not None]
     if len(values) < 3:
         return None
-    return round(sum(values) / (3.0 * len(values)), 4)
+    return round(sum(values) / 20.0, 4) if all(v is not None for v in values) else None
 
 
 def _support_score(*, answer: str, evidence_ok: bool, agreement: float, indicator_match: bool) -> float:
@@ -87,8 +88,17 @@ def _prompt(
     checklist = [
         {
             "id": item["id"],
+            "risk_domain": item.get("risk_domain"),
+            "risk_type": item.get("risk_type"),
+            "perspective": item.get("perspective"),
+            "applies_when": item.get("applies_when", []),
             "question": item["question"],
             "flag_if": item["flag_if"],
+            "do_not_flag_if": item.get("do_not_flag_if", []),
+            "required_evidence": item.get("required_evidence", []),
+            "evidence_location": item.get("evidence_location", "clause"),
+            "dependencies": item.get("dependencies", []),
+            "jurisdiction_scope": item.get("jurisdiction_scope", ["unspecified"]),
             "sources": item.get("sources", []),
         }
         for item in checks
@@ -134,18 +144,17 @@ Return:
       "risk_type": "specific risk type or null",
       "evidence": "exact contiguous quote or empty string",
       "why_flagged": "concise explanation or empty string",
-      "severity_factors": {{
-        "impact": 0,
-        "scope": 0,
-        "asymmetry": 0,
-        "duration": 0,
-        "reversibility": 0
+      "score_components": {{
+        "exposure_magnitude": 0,
+        "likelihood_uncertainty": 0,
+        "scope_duration": 0,
+        "control_weakness": 0
       }}
     }}
   ]
 }}
 
-Factor scale: 0=none/minor, 1=limited, 2=material, 3=extreme/one-sided.
+Factor scale: 0=none/minor, 1=low, 2=bounded, 3=material, 4=very material, 5=extreme/unbounded.
 Use the factors only as raw signals. Do not turn them into a calibrated probability.
 """
     
@@ -176,7 +185,7 @@ def _parse(raw: str, valid_ids: set[str]) -> list[dict]:
             answer = "DON'T KNOW"
         if status not in VALID_STATUS:
             status = "POTENTIAL_RISK" if answer == "YES" else ("NO_RISK" if answer == "NO" else "INSUFFICIENT_EVIDENCE")
-        factors = item.get("severity_factors") if isinstance(item.get("severity_factors"), dict) else {}
+        factors = item.get("score_components") if isinstance(item.get("score_components"), dict) else (item.get("severity_factors") if isinstance(item.get("severity_factors"), dict) else {})
         out.append(
             {
                 "check_id": check_id,
@@ -185,9 +194,9 @@ def _parse(raw: str, valid_ids: set[str]) -> list[dict]:
                 "risk_type": str(item.get("risk_type") or "").strip() or None,
                 "evidence": str(item.get("evidence") or "").strip(),
                 "why_flagged": str(item.get("why_flagged") or "").strip(),
-                "severity_factors": {
+                "score_components": {
                     key: _factor(factors.get(key))
-                    for key in ("impact", "scope", "asymmetry", "duration", "reversibility")
+                    for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")
                 },
             }
         )
@@ -349,14 +358,18 @@ def analyze_clause_risk(
             agreement=agreement,
             indicator_match=indicator_match,
         )
-        severity_signal = _severity_signal(representative.get("severity_factors") or {})
+        score_details = score_finding({"risk_type": representative.get("risk_type"), "question": checks_by_id[check_id]["question"], "check_id": check_id, "clause_type": clause_type, "evidence": evidence, "why_flagged": representative.get("why_flagged"), "scope": "clause", "score_components": representative.get("score_components") or {}}) if status == "POTENTIAL_RISK" else None
+        severity_score = float(score_details["final_score"]) if score_details and score_details.get("final_score") is not None else None
+        severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
         calibrated_confidence = (
             calibrate_risk_probability(raw_support, calibration)
             if status == "POTENTIAL_RISK"
             else None
         )
-        calibrated_severity = calibrate_severity(severity_signal, calibration)
+        calibrated_severity = calibrate_severity(severity_score, calibration)
         source_ids = checks_by_id[check_id].get("sources", [])
+        supporting_sources = source_records(playbook, source_ids)
+        primary_source = supporting_sources[0] if supporting_sources else {}
         findings.append(
             {
                 "clause_index": clause_index,
@@ -368,12 +381,20 @@ def analyze_clause_risk(
                 "risk_status": status,
                 "risk_type": representative.get("risk_type") if status == "POTENTIAL_RISK" else None,
                 "risk": status == "POTENTIAL_RISK",
-                "risk_level": calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else None,
+                "risk_level": (calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else (score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None)),
                 "raw_support_score": raw_support,
+                "severity_score": severity_score,
                 "severity_signal": severity_signal,
+                "score_components": score_details["score_components"] if score_details else {},
+                "base_score": score_details["base_score"] if score_details else 0,
+                "score_modifiers": score_details["modifiers"] if score_details else [],
+                "final_score": score_details["final_score"] if score_details else 0,
+                "score_override_reason": score_details["override_reason"] if score_details else None,
+                "human_review_required": score_details["human_review_required"] if score_details else True,
+                "review_escalation": score_details["escalation"] if score_details else "LEGAL_REVIEW",
                 "confidence": calibrated_confidence,
                 "confidence_status": "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED",
-                "severity_status": "CALIBRATED" if calibrated_severity else "UNCALIBRATED",
+                "severity_status": "CALIBRATED" if calibrated_severity else ("RULE_BASED_TRIAGE" if severity_score is not None else ("INCOMPLETE" if score_details else "UNCALIBRATED")),
                 "severity_probabilities": (
                     calibrated_severity["probabilities"] if calibrated_severity else {}
                 ),
@@ -386,14 +407,25 @@ def analyze_clause_risk(
                     "passes": len(records),
                     "agreement": agreement,
                     "deterministic_indicators": indicators.get("matched_indicators", []),
+                    "score_version": score_details["score_version"] if score_details else None,
                 },
                 "why_flagged": representative.get("why_flagged") if status == "POTENTIAL_RISK" else (
                     representative.get("why_flagged") or "No evidence-supported issue identified by the check."
                 ),
                 "evidence": evidence if evidence_ok and status == "POTENTIAL_RISK" else "",
-                "supporting_sources": source_records(playbook, source_ids),
+                "supporting_sources": supporting_sources,
+                "legal_guidance_sources": guidance,
                 "related_contract_context": context,
-                "severity_factors": representative.get("severity_factors") or {},
+                "severity_factors": representative.get("severity_factors") or representative.get("score_components") or {},
+                "source_tier": primary_source.get("source_tier"),
+                "jurisdiction": primary_source.get("jurisdiction"),
+                "effective_date": primary_source.get("effective_date"),
+                "contract_type": primary_source.get("contract_type"),
+                "source_url": primary_source.get("source_url"),
+                "source_title": primary_source.get("source_title"),
+                "retrieval_date": primary_source.get("retrieval_date"),
+                "supporting_quote_or_paraphrase": primary_source.get("supporting_quote_or_paraphrase"),
+                "transferability": primary_source.get("transferability"),
             }
         )
 

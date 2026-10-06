@@ -7,6 +7,7 @@ from typing import Callable
 from .knowledge_base import match_risk_domains
 from .risk_playbook import load_playbook
 from .risk_engine import _evidence_valid, _emit
+from .risk_scoring import aggregate_contract_triage
 
 ProgressCallback = Callable[[dict], None]
 
@@ -32,6 +33,7 @@ def _valid_positive(findings: list[dict]) -> list[dict]:
 def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -> dict:
     playbook = playbook or load_playbook()
     positive = _valid_positive(findings)
+    triage = aggregate_contract_triage(positive)
     insufficient = [f for f in findings if f.get("risk_status") == "INSUFFICIENT_EVIDENCE"]
 
     domain_items = defaultdict(list)
@@ -75,17 +77,15 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
 
     if positive:
         status = "POTENTIAL_RISK"
-        overall_raw_score = round(
-            max(float(item.get("raw_support_score") or 0.0) for item in positive),
-            4,
-        )
+        overall_raw_score = triage["overall_score"]
         overall_confidence = None
         confidence_status = "UNCALIBRATED"
-        overall_risk = None
+        overall_risk = triage["overall_severity"]
         reason = (
             "One or more contract provisions contain evidence-supported "
-            "playbook findings. Severity and probability are intentionally "
-            "uncalibrated until a manual gold set is used."
+            "review findings. Contract severity is a deterministic triage "
+            "score with explicit interaction overrides; it is not legal advice "
+            "or a probability."
         )
     elif insufficient:
         status = "INSUFFICIENT_EVIDENCE"
@@ -134,8 +134,8 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         "overall_confidence": overall_confidence,
         "confidence_status": confidence_status,
         "overall_raw_risk_score": overall_raw_score,
-        "overall_raw_score_semantics": "maximum evidence-support diagnostic; not a probability",
-        "severity_status": "UNCALIBRATED",
+        "overall_raw_score_semantics": "deterministic 0-20 triage score; not a probability",
+        "severity_status": "RULE_BASED_TRIAGE",
         "risk_domains": domain_summary,
         "key_risks": key_risks,
         "affected_clauses": affected,
@@ -144,6 +144,13 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         "playbook_hash": playbook.get("playbook_hash"),
         "clause_findings": findings,
         "unresolved_check_count": len(insufficient),
+        "overall_score": triage["overall_score"],
+        "overall_severity": triage["overall_severity"],
+        "aggregation_adjustments": triage["aggregation_adjustments"],
+        "human_review_required": triage["human_review_required"],
+        "high_count": triage["high_count"],
+        "critical_count": triage["critical_count"],
+        "two_high_same_domain": triage["two_high_same_domain"],
     }
 
 

@@ -8,11 +8,13 @@ from __future__ import annotations
 
 import argparse
 import uuid
+import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from qdrant_client import models
 
-from ..config import LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_PATH
+from ..config import LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_PATH, LEGAL_KNOWLEDGE_REGISTRY_PATH
 from ..rag.embedder import embed_documents, make_cohere_client
 from ..rag.retriever import make_qdrant_client
 
@@ -22,6 +24,12 @@ REQUIRED_METADATA = {
     "title",
     "clause_category",
     "document_filename",
+    "source_tier",
+    "authority_status",
+    "jurisdiction",
+    "contract_type",
+    "access_type",
+    "license_status",
 }
 
 DOCUMENTATION_ONLY_FILES = {
@@ -31,7 +39,18 @@ DOCUMENTATION_ONLY_FILES = {
 }
 
 
-def parse_knowledge_document(path: Path) -> dict:
+def load_source_registry(path: Path = LEGAL_KNOWLEDGE_REGISTRY_PATH) -> dict[str, dict]:
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        str(item.get("source_name")): dict(item)
+        for item in (data.get("sources") or [])
+        if item.get("source_name")
+    }
+
+
+def parse_knowledge_document(path: Path, registry: dict[str, dict] | None = None) -> dict:
     text = path.read_text(encoding="utf-8")
     metadata: dict[str, str] = {}
     body = text
@@ -44,6 +63,9 @@ def parse_knowledge_document(path: Path) -> dict:
             key, value = line.split(":", 1)
             metadata[key.strip()] = value.strip()
 
+    registry = registry or {}
+    registry_record = registry.get(metadata.get("source_name"), {})
+    metadata = {**registry_record, **metadata}
     missing = REQUIRED_METADATA - set(metadata)
     if missing:
         raise ValueError(f"{path} is missing metadata fields: {sorted(missing)}")
@@ -68,12 +90,17 @@ def chunk_text(text: str, chunk_size: int = 1200, overlap: int = 150) -> list[st
     return [chunk for chunk in chunks if chunk]
 
 
-def load_curated_chunks(base_path: Path = LEGAL_KNOWLEDGE_PATH) -> list[dict]:
+def load_curated_chunks(
+    base_path: Path = LEGAL_KNOWLEDGE_PATH,
+    registry_path: Path = LEGAL_KNOWLEDGE_REGISTRY_PATH,
+) -> list[dict]:
     chunks: list[dict] = []
+    registry = load_source_registry(registry_path)
+    retrieval_date = datetime.now(timezone.utc).date().isoformat()
     for path in sorted(base_path.rglob("*.md")):
         if path.name in DOCUMENTATION_ONLY_FILES:
             continue
-        parsed = parse_knowledge_document(path)
+        parsed = parse_knowledge_document(path, registry)
         metadata = parsed["metadata"]
         for index, chunk in enumerate(chunk_text(parsed["text"])):
             chunk_key = f"{path.as_posix()}::{index}"
@@ -89,7 +116,15 @@ def load_curated_chunks(base_path: Path = LEGAL_KNOWLEDGE_PATH) -> list[dict]:
                         "clause_category": metadata["clause_category"],
                         "document_filename": metadata["document_filename"],
                         "chunk_id": chunk_id,
-                    },
+                        "source_tier": metadata["source_tier"],
+                        "authority_status": metadata["authority_status"],
+                        "jurisdiction": metadata["jurisdiction"],
+                        "contract_type": metadata["contract_type"],
+                        "access_type": metadata["access_type"],
+                        "license_status": metadata["license_status"],
+                        "effective_date": metadata.get("effective_date"),
+                        "retrieval_date": retrieval_date,
+                        "transferability": metadata.get("transferability", "same_contract_type_preferred"),                    },
                 }
             )
     return chunks
@@ -145,11 +180,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--collection", default=LEGAL_KNOWLEDGE_COLLECTION)
     parser.add_argument("--path", type=Path, default=LEGAL_KNOWLEDGE_PATH)
+    parser.add_argument("--registry", type=Path, default=LEGAL_KNOWLEDGE_REGISTRY_PATH)
     args = parser.parse_args()
 
     count = ingest_legal_knowledge(
         collection_name=args.collection,
         base_path=args.path,
+        registry_path=args.registry,
     )
     print(f"Ingested {count} legal knowledge chunks into {args.collection}.")
 

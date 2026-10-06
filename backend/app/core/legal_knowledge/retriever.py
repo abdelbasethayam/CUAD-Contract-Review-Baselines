@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 from typing import Callable
+from threading import Lock
+
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from qdrant_client import models
 
-from ..config import LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_TOP_K
+from ..config import LEGAL_ALLOWED_SOURCE_TIERS, LEGAL_CONTRACT_TYPE, LEGAL_JURISDICTION, LEGAL_HYBRID_CANDIDATES, LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_TOP_K, LEGAL_RRF_K
 from ..rag.embedder import embed_queries, make_cohere_client
 from ..rag.retriever import make_qdrant_client
 
@@ -67,6 +71,80 @@ CLAUSE_TYPE_TO_CATEGORY = {
     "Post-Termination Services": "Termination Assistance",
 }
 
+_LEXICAL_LOCK = Lock()
+_LEXICAL_CACHE: dict[str, tuple[TfidfVectorizer, object, list[dict]]] = {}
+
+
+def _load_lexical_index(qdrant_client, collection_name: str):
+    cached = _LEXICAL_CACHE.get(collection_name)
+    if cached is not None:
+        return cached
+    with _LEXICAL_LOCK:
+        cached = _LEXICAL_CACHE.get(collection_name)
+        if cached is not None:
+            return cached
+        records = []
+        offset = None
+        while True:
+            points, offset = qdrant_client.scroll(
+                collection_name=collection_name,
+                limit=256,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            for point in points:
+                payload = point.payload or {}
+                text = str(payload.get("retrieved_text") or "").strip()
+                if text:
+                    records.append({"id": str(point.id), "payload": payload, "text": text})
+            if offset is None:
+                break
+        vectorizer = TfidfVectorizer(lowercase=True, ngram_range=(1, 2), sublinear_tf=True)
+        matrix = vectorizer.fit_transform([item["text"] for item in records]) if records else None
+        cached = (vectorizer, matrix, records)
+        _LEXICAL_CACHE[collection_name] = cached
+        return cached
+
+
+def _filter_payload(payload: dict, allowed_source_tiers: tuple[str, ...], jurisdiction: str | None) -> bool:
+    if allowed_source_tiers and str(payload.get("source_tier") or "").upper() not in set(allowed_source_tiers):
+        return False
+    if jurisdiction and str(payload.get("jurisdiction") or "") not in {jurisdiction, "unspecified", "international"}:
+        return False
+    return True
+
+
+def _lexical_search(query: str, qdrant_client, collection_name: str, limit: int, allowed_source_tiers: tuple[str, ...], jurisdiction: str | None) -> list[dict]:
+    vectorizer, matrix, records = _load_lexical_index(qdrant_client, collection_name)
+    if matrix is None or not records:
+        return []
+    query_vector = vectorizer.transform([query])
+    scores = (matrix @ query_vector.T).toarray().ravel()
+    order = np.argsort(-scores)
+    results = []
+    for idx in order:
+        record = records[int(idx)]
+        if not _filter_payload(record["payload"], allowed_source_tiers, jurisdiction):
+            continue
+        results.append({"id": record["id"], "score": float(scores[int(idx)]), "payload": record["payload"]})
+        if len(results) >= limit:
+            break
+    return results
+
+
+def _rrf_merge(dense_hits: list, lexical_hits: list, rrf_k: int, limit: int) -> list:
+    merged = {}
+    for rank, hit in enumerate(dense_hits, start=1):
+        merged.setdefault(str(hit.id), {"id": str(hit.id), "dense_score": 0.0, "lexical_score": 0.0, "payload": hit.payload or {}})
+        merged[str(hit.id)]["dense_score"] = float(hit.score)
+        merged[str(hit.id)]["rrf"] = merged[str(hit.id)].get("rrf", 0.0) + 1.0 / (rrf_k + rank)
+    for rank, item in enumerate(lexical_hits, start=1):
+        key = str(item["id"])
+        merged.setdefault(key, {"id": key, "dense_score": 0.0, "lexical_score": 0.0, "payload": item["payload"]})
+        merged[key]["lexical_score"] = float(item["score"])
+        merged[key]["rrf"] = merged[key].get("rrf", 0.0) + 1.0 / (rrf_k + rank)
+    return sorted(merged.values(), key=lambda x: x.get("rrf", 0.0), reverse=True)[:limit]
 
 def map_clause_category(clause_type: str) -> str | None:
     normalized = str(clause_type or "").strip()
@@ -123,18 +201,34 @@ def build_guidance_query(clause_text: str, clause_type: str) -> tuple[str, str |
     return query, category
 
 
-def _payload_to_result(hit) -> dict:
+def _payload_to_result(hit, *, contract_type: str | None = None) -> dict:
     payload = hit.payload or {}
+    source_contract_type = payload.get("contract_type")
+    transferability = (
+        "direct"
+        if not contract_type or not source_contract_type or source_contract_type in {"commercial_general", contract_type}
+        else "limited_by_analogy"
+    )
     return {
         "rule_id": payload.get("rule_id") or payload.get("chunk_id"),
         "retrieved_text": payload.get("retrieved_text", ""),
         "source_name": payload.get("source_name"),
         "source_url": payload.get("source_url"),
         "title": payload.get("title"),
+        "source_title": payload.get("source_title") or payload.get("title"),
         "clause_category": payload.get("clause_category"),
+        "source_tier": payload.get("source_tier"),
+        "authority_status": payload.get("authority_status"),
+        "jurisdiction": payload.get("jurisdiction"),
+        "effective_date": payload.get("effective_date"),
+        "contract_type": source_contract_type,
+        "retrieval_date": payload.get("retrieval_date"),
+        "access_type": payload.get("access_type"),
+        "license_status": payload.get("license_status"),
+        "supporting_quote_or_paraphrase": payload.get("supporting_quote_or_paraphrase"),
+        "transferability": transferability,
         "relevance_score": round(float(hit.score), 4),
     }
-
 
 def retrieve_legal_guidance(
     clause_text: str,
@@ -145,6 +239,9 @@ def retrieve_legal_guidance(
     top_k: int = LEGAL_KNOWLEDGE_TOP_K,
     collection_name: str = LEGAL_KNOWLEDGE_COLLECTION,
     progress_callback: ProgressCallback | None = None,
+    allowed_source_tiers: tuple[str, ...] = LEGAL_ALLOWED_SOURCE_TIERS,
+    jurisdiction: str | None = LEGAL_JURISDICTION,
+    contract_type: str | None = LEGAL_CONTRACT_TYPE,
 ) -> list[dict]:
     query, category = build_guidance_query(clause_text, classified_clause_type)
     if not category:
@@ -160,29 +257,81 @@ def retrieve_legal_guidance(
         })
     query_vector = embed_queries(cohere_client, [query])[0]
 
-    category_filter = models.Filter(
-        must=[
+    must_filters = [
+        models.FieldCondition(
+            key="clause_category",
+            match=models.MatchValue(value=category),
+        )
+    ]
+    if allowed_source_tiers:
+        must_filters.append(
             models.FieldCondition(
-                key="clause_category",
-                match=models.MatchValue(value=category),
+                key="source_tier",
+                match=models.MatchAny(any=list(allowed_source_tiers)),
             )
-        ]
-    )
+        )
+    if jurisdiction:
+        must_filters.append(
+            models.FieldCondition(
+                key="jurisdiction",
+                match=models.MatchValue(value=jurisdiction),
+            )
+        )
+    category_filter = models.Filter(must=must_filters)
     if progress_callback:
         progress_callback({
             "type": "progress",
             "stage": "legal_search",
             "message": f"Searching legal guidance for {category}",
         })
+    candidate_k = max(int(top_k), int(LEGAL_HYBRID_CANDIDATES))
     response = qdrant_client.query_points(
         collection_name=collection_name,
         query=query_vector,
-        limit=top_k,
+        limit=candidate_k,
         query_filter=category_filter,
     )
-    hits = getattr(response, "points", response)
-
-    results = [_payload_to_result(hit) for hit in hits]
+    dense_hits = list(getattr(response, "points", response))
+    lexical_hits = _lexical_search(
+        query,
+        qdrant_client,
+        collection_name,
+        candidate_k,
+        allowed_source_tiers,
+        jurisdiction,
+    )
+    hybrid_hits = _rrf_merge(dense_hits, lexical_hits, int(LEGAL_RRF_K), int(top_k))
+    results = []
+    for hit in hybrid_hits:
+        payload = hit.get("payload") or {}
+        source_contract_type = payload.get("contract_type")
+        transferability = (
+            "direct"
+            if not contract_type or not source_contract_type or source_contract_type in {"commercial_general", contract_type}
+            else "limited_by_analogy"
+        )
+        results.append({
+            "rule_id": payload.get("rule_id") or payload.get("chunk_id") or hit.get("id"),
+            "retrieved_text": payload.get("retrieved_text", ""),
+            "source_name": payload.get("source_name"),
+            "source_url": payload.get("source_url"),
+            "title": payload.get("title"),
+            "source_title": payload.get("source_title") or payload.get("title"),
+            "clause_category": payload.get("clause_category"),
+            "source_tier": payload.get("source_tier"),
+            "authority_status": payload.get("authority_status"),
+            "jurisdiction": payload.get("jurisdiction"),
+            "effective_date": payload.get("effective_date"),
+            "contract_type": source_contract_type,
+            "retrieval_date": payload.get("retrieval_date"),
+            "access_type": payload.get("access_type"),
+            "license_status": payload.get("license_status"),
+            "supporting_quote_or_paraphrase": payload.get("supporting_quote_or_paraphrase"),
+            "transferability": transferability,
+            "dense_score": round(float(hit.get("dense_score") or 0.0), 6),
+            "lexical_score": round(float(hit.get("lexical_score") or 0.0), 6),
+            "rrf_score": round(float(hit.get("rrf") or 0.0), 6),
+        })
     if progress_callback:
         progress_callback({
             "type": "progress",

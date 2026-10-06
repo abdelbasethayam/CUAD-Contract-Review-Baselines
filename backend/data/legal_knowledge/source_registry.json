@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "notes": "Explicit source metadata for evidence-tier enforcement. Official does not mean binding; authority_status carries legal force.",
+  "sources": [
+    {
+      "source_name": "World Commerce & Contracting",
+      "source_tier": "B",
+      "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+      "jurisdiction": "international",
+      "contract_type": "commercial_general",
+      "access_type": "public",
+      "license_status": "reference_only"
+    },
+    {
+      "source_name": "American Bar Association",
+      "source_tier": "B",
+      "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+      "jurisdiction": "US/general",
+      "contract_type": "commercial_general",
+      "access_type": "public",
+      "license_status": "reference_only"
+    },
+    {
+      "source_name": "International Bar Association",
+      "source_tier": "B",
+      "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+      "jurisdiction": "international",
+      "contract_type": "commercial_general",
+      "access_type": "public",
+      "license_status": "reference_only"
+    },
+    {
+      "source_name": "World Intellectual Property Organization",
+      "source_tier": "A",
+      "authority_status": "OFFICIAL_NON_BINDING_GUIDANCE",
+      "jurisdiction": "international",
+      "contract_type": "technology_transfer",
+      "access_type": "public",
+      "license_status": "reference_only"
+    },
+    {
+      "source_name": "International Chamber of Commerce",
+      "source_tier": "B",
+      "authority_status": "NON_BINDING_MODEL_CLAUSE_GUIDANCE",
+      "jurisdiction": "international",
+      "contract_type": "international_commercial",
+      "access_type": "public",
+      "license_status": "reference_only"
+    },
+    {
+      "source_name": "United Nations Commission on International Trade Law",
+      "source_tier": "A",
+      "authority_status": "OFFICIAL_NON_BINDING_MODEL_LAW_MATERIAL",
+      "jurisdiction": "international",
+      "contract_type": "international_commercial",
+      "access_type": "public",
+      "license_status": "reference_only"
+    }
+  ]
+}

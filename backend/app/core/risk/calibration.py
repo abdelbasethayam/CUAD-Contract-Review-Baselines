@@ -39,16 +39,22 @@ def calibrate_severity(raw_score: float | None, calibration: dict | None = None)
     data = calibration if calibration is not None else load_calibration()
     if raw_score is None:
         return None
+    low = _interp(raw_score, data.get("p_ge_low"))
     med = _interp(raw_score, data.get("p_ge_medium"))
     high = _interp(raw_score, data.get("p_ge_high"))
-    if med is None or high is None:
+    critical = _interp(raw_score, data.get("p_ge_critical"))
+    if any(value is None for value in (low, med, high, critical)):
         return None
-    high = min(max(high, 0.0), 1.0)
-    med = min(max(med, high), 1.0)
+    low, med, high, critical = [min(max(float(v), 0.0), 1.0) for v in (low, med, high, critical)]
+    low = max(low, med)
+    med = max(med, high)
+    high = max(high, critical)
     probs = {
-        "LOW": round(1.0 - med, 6),
+        "INFORMATIONAL": round(1.0 - low, 6),
+        "LOW": round(low - med, 6),
         "MEDIUM": round(med - high, 6),
-        "HIGH": round(high, 6),
+        "HIGH": round(high - critical, 6),
+        "CRITICAL": round(critical, 6),
     }
     level = max(probs, key=probs.get)
     return {"level": level, "probabilities": probs}

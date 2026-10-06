@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from ..config import RISK_PLAYBOOK_PATH, RISK_PLAYBOOK_VERSION
+from .evidence_policy import normalize_source_record
 
 
 def canonical_json(value: Any) -> str:
@@ -30,8 +31,20 @@ def normalize_playbook(raw: dict) -> dict:
             checklist.append(
                 {
                     "id": str(item.get("id") or "").strip(),
+                    "risk_domain": str(item.get("risk_domain") or "").strip() or None,
+                    "risk_type": str(item.get("risk_type") or "").strip() or None,
+                    "perspective": str(item.get("perspective") or raw.get("perspective") or "customer_buyer"),
+                    "applies_when": item.get("applies_when") or [],
                     "question": str(item.get("question") or "").strip(),
                     "flag_if": str(item.get("flag_if") or "").strip(),
+                    "do_not_flag_if": item.get("do_not_flag_if") or [],
+                    "required_evidence": item.get("required_evidence") or [],
+                    "evidence_location": str(item.get("evidence_location") or "clause").strip(),
+                    "severity_factors": item.get("severity_factors") or [],
+                    "dependencies": item.get("dependencies") or [],
+                    "jurisdiction_scope": item.get("jurisdiction_scope") or ["unspecified"],
+                    "rationale": str(item.get("rationale") or "").strip() or None,
+                    "version": str(item.get("version") or raw.get("version") or RISK_PLAYBOOK_VERSION),
                     "sources": [str(x) for x in (item.get("sources") or [])],
                 }
             )
@@ -40,20 +53,41 @@ def normalize_playbook(raw: dict) -> dict:
             "checklist": [item for item in checklist if item["id"] and item["question"]],
         }
 
+    raw_sources = raw.get("sources") or {}
+    normalized_sources = {}
+    for source_id, source in raw_sources.items():
+        # Uploaded checklist references are conservatively treated as
+        # professional-practice sources until stronger authority metadata is
+        # supplied. This prevents accidental presentation as binding law.
+        normalized_sources[str(source_id)] = normalize_source_record(
+            str(source_id),
+            source,
+            default_tier="B",
+        )
+
     normalized = {
-        "schema_version": 2,
+        "schema_version": 3,
         "source_version": str(raw.get("version") or RISK_PLAYBOOK_VERSION),
         "title": str(raw.get("title") or "Commercial Contract Risk Playbook"),
         "perspective": str(raw.get("perspective") or "customer_buyer"),
+        "policy_tier": "D",
+        "owner": raw.get("owner"),
+        "effective_date": raw.get("effective_date"),
+        "approval_status": str(raw.get("approval_status") or "UNAPPROVED"),
         "disclaimer": str(raw.get("disclaimer") or ""),
-        "sources": raw.get("sources") or {},
+        "sources": normalized_sources,
         "clause_types": clause_types,
         "cross_clause_checks": [
             {
                 "id": str(item.get("id") or "").strip(),
                 "pair": [str(x) for x in (item.get("pair") or [])],
+                "risk_domain": str(item.get("risk_domain") or "").strip() or None,
+                "risk_type": str(item.get("risk_type") or "").strip() or None,
                 "question": str(item.get("question") or "").strip(),
                 "flag_if": str(item.get("flag_if") or "").strip(),
+                "do_not_flag_if": item.get("do_not_flag_if") or [],
+                "dependencies": item.get("dependencies") or [],
+                "jurisdiction_scope": item.get("jurisdiction_scope") or ["unspecified"],
                 "sources": [str(x) for x in (item.get("sources") or [])],
             }
             for item in (raw.get("cross_clause_checks") or [])
@@ -62,8 +96,12 @@ def normalize_playbook(raw: dict) -> dict:
         "document_level_checks": [
             {
                 "id": str(item.get("id") or "").strip(),
+                "risk_domain": str(item.get("risk_domain") or "").strip() or None,
+                "risk_type": str(item.get("risk_type") or "").strip() or None,
                 "question": str(item.get("question") or "").strip(),
                 "flag_if": str(item.get("flag_if") or "").strip(),
+                "dependencies": item.get("dependencies") or [],
+                "jurisdiction_scope": item.get("jurisdiction_scope") or ["unspecified"],
                 "sources": [str(x) for x in (item.get("sources") or [])],
             }
             for item in (raw.get("document_level_checks") or [])

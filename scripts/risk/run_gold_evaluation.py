@@ -21,10 +21,12 @@ from backend.app.core.rag import embed_queries, make_cohere_client
 from backend.app.core.config import RISK_SELF_CONSISTENCY_PASSES
 
 
-def load_queue(path: Path) -> list[dict]:
+def load_queue(path: Path, partition: str | None = None) -> list[dict]:
     rows = []
     with path.open("r", encoding="utf-8", newline="") as handle:
         for row in csv.DictReader(handle):
+            if partition and str(row.get("annotation_partition") or "") != partition:
+                continue
             if str(row.get("adjudicated_risk") or "").strip().upper() not in {"YES", "NO"}:
                 continue
             rows.append(row)
@@ -46,6 +48,7 @@ def main() -> None:
     parser.add_argument(
         "--passes", type=int, default=RISK_SELF_CONSISTENCY_PASSES,
     )
+    parser.add_argument("--partition", choices=["calibration", "development", "locked_test"], default="locked_test")
     parser.add_argument(
         "--out",
         type=Path,
@@ -53,7 +56,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    queue_rows = load_queue(args.queue)
+    queue_rows = load_queue(args.queue, args.partition)
     if not queue_rows:
         raise SystemExit("No adjudicated rows found in queue.")
 
@@ -95,14 +98,15 @@ def main() -> None:
 
             doc_rows = source_by_doc.get(str(gold["document_id"]), [])
             contract_clauses = []
-            for pos, item in enumerate(doc_rows):
+            for item in doc_rows:
+                stable_index = int(item["clause_index"])
                 contract_clauses.append({
-                    "clause_index": pos,
+                    "clause_index": stable_index,
                     "clause_text": item["clause_text"],
                     "vector": vector_map.get(
-                        (str(item["document_id"]), str(pos)),
+                        (str(item["document_id"]), str(stable_index)),
                         [],
-                    ).tolist() if isinstance(vector_map.get((str(item["document_id"]), str(pos))), np.ndarray) else [],
+                    ).tolist() if isinstance(vector_map.get((str(item["document_id"]), str(stable_index))), np.ndarray) else [],
                 })
 
             key = (str(gold["document_id"]), str(gold["clause_index"]))
@@ -137,6 +141,7 @@ def main() -> None:
 
             record = {
                 "sample_id": sample_id,
+                "annotation_partition": gold.get("annotation_partition", args.partition),
                 "contract_id": gold["document_id"],
                 "clause_index": int(gold["clause_index"]),
                 "check_id": gold["check_id"],
@@ -146,6 +151,9 @@ def main() -> None:
                 "pred_risk": "YES" if prediction.get("risk") else "NO",
                 "pred_probability": prediction.get("confidence"),
                 "raw_support_score": prediction.get("raw_support_score"),
+                "final_score": prediction.get("final_score"),
+                "score_components": json.dumps(prediction.get("score_components") or {}, ensure_ascii=False),
+                "human_review_required": prediction.get("human_review_required"),
                 "pred_severity": prediction.get("risk_level") or "",
                 "severity_signal": prediction.get("severity_signal"),
                 "evidence": prediction.get("evidence", ""),
@@ -162,10 +170,10 @@ def main() -> None:
 
     rows = list(done.values())
     fieldnames = [
-        "sample_id", "contract_id", "clause_index", "check_id",
+        "sample_id", "annotation_partition", "contract_id", "clause_index", "check_id",
         "gold_risk", "gold_severity", "gold_evidence",
         "pred_risk", "pred_probability", "raw_support_score",
-        "pred_severity", "severity_signal", "evidence",
+        "pred_severity", "severity_signal", "final_score", "score_components", "human_review_required", "evidence",
         "risk_status", "risk_type", "ground_truth_status",
         "playbook_ground_truth_status",
     ]
