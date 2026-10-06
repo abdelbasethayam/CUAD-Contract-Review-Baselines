@@ -359,7 +359,7 @@ def analyze_clause_risk(
             agreement=agreement,
             indicator_match=indicator_match,
         )
-        score_details = score_finding({"risk_type": representative.get("risk_type"), "question": checks_by_id[check_id]["question"], "check_id": check_id, "clause_type": clause_type, "evidence": evidence, "why_flagged": representative.get("why_flagged"), "scope": "clause", "score_components": representative.get("score_components") or {}}) if status == "POTENTIAL_RISK" else None
+        score_details = score_finding({"risk_type": representative.get("risk_type"), "question": checks_by_id[check_id]["question"], "check_id": check_id, "clause_type": clause_type, "evidence": evidence, "why_flagged": representative.get("why_flagged"), "scope": "clause", "score_components": representative.get("score_components") or {}}, extraction_confidence=extraction_confidence) if status == "POTENTIAL_RISK" else None
         severity_score = float(score_details["final_score"]) if score_details and score_details.get("final_score") is not None else None
         severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
         calibrated_confidence = (
