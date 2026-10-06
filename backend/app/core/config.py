@@ -81,13 +81,21 @@ CONTRACT_CONTEXT_TOP_K = int(os.getenv("CONTRACT_CONTEXT_TOP_K", "5"))
 MIN_RETRIEVAL_CONFIDENCE = float(os.getenv("MIN_RETRIEVAL_CONFIDENCE", "0.32"))
 
 # Hybrid dense + TF-IDF RRF (Claude / measured path)
-HYBRID_COLLECTION = os.getenv("HYBRID_COLLECTION", QDRANT_COLLECTION)
+HYBRID_COLLECTION = os.getenv("HYBRID_COLLECTION", "cuad_train_mpnet")
 HYBRID_INDEX_CACHE = os.getenv(
     "HYBRID_INDEX_CACHE",
     str(PROJECT_ROOT / "output" / "cache" / "hybrid_train_index.npz"),
 )
 HYBRID_K = int(os.getenv("HYBRID_K", "30"))
 HYBRID_SHORTLIST = int(os.getenv("HYBRID_SHORTLIST", "8"))
+HYBRID_EMBEDDING_MODEL = os.getenv(
+    "HYBRID_EMBEDDING_MODEL", "sentence-transformers/all-mpnet-base-v2"
+)
+HYBRID_RERANKER_MODEL = os.getenv(
+    "HYBRID_RERANKER_MODEL", "BAAI/bge-reranker-v2-m3"
+)
+HYBRID_RERANK = os.getenv("HYBRID_RERANK", "true").strip().lower() in {"1", "true", "yes"}
+HYBRID_RERANK_TOP_K = int(os.getenv("HYBRID_RERANK_TOP_K", "30"))
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.getenv(
@@ -126,11 +134,13 @@ OLLAMA_URL = os.getenv(
     os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
 )
 # Prefer Instruct-style 7B for letter-logprob MCQ; override as needed.
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:8b")
 OLLAMA_TIMEOUT_SECONDS = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "600"))
 OLLAMA_MAX_RETRY_ATTEMPTS = int(os.getenv("OLLAMA_MAX_RETRY_ATTEMPTS", "3"))
 OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "8192"))
 CLASSIFIER_TEMPERATURE = float(os.getenv("CLASSIFIER_TEMPERATURE", "0.0"))
+CLASSIFIER_TOP_LOGPROBS = int(os.getenv("CLASSIFIER_TOP_LOGPROBS", "20"))
+CLASSIFIER_THINK = os.getenv("CLASSIFIER_THINK", "false").strip().lower() in {"1", "true", "yes"}
 
 HF_CLASSIFIER_MODEL = os.getenv(
     "HF_CLASSIFIER_MODEL", "Qwen/Qwen2.5-7B-Instruct"
