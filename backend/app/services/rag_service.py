@@ -35,6 +35,7 @@ from ..core.rag.clause_segmenter import segment_document
 from ..core.rag.segmenter import is_definition
 from ..core.rag.validator import is_real_clause
 from ..core.risk.contract_checks import analyze_contract_checks
+from ..core.risk.deterministic_cross_checks import run_deterministic_cross_checks
 from ..core.risk.contract_metadata import extract_contract_metadata
 from ..core.risk.contract_coverage import build_contract_coverage
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
@@ -506,6 +507,7 @@ def _classify_contract(
                 clause_rows,
                 playbook=effective_playbook,
                 progress_callback=trace,
+                deterministic_signals=deterministic_signals,
             )
             run.write_json(
                 "contract_checks.json",
@@ -519,8 +521,12 @@ def _classify_contract(
                 },
             )
 
-        aggregate_path = run.root / "contract_risk.json"
-        if aggregate_path.exists():
+        deterministic_signals = run.read_json("deterministic_cross_checks.json", None)
+        if deterministic_signals is None:
+            deterministic_signals = run_deterministic_cross_checks(clause_rows)
+            run.write_json("deterministic_cross_checks.json", deterministic_signals)
+
+        aggregate_path = run.root / "contract_risk.json"        if aggregate_path.exists():
             assessment = run.read_json("contract_risk.json", {}) or {}
         else:
             clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
@@ -601,6 +607,7 @@ def _classify_contract(
             "contract_risk_assessment": assessment,
             "contract_metadata": extract_contract_metadata(filename, clauses_out),
             "contract_coverage": contract_coverage,
+            "deterministic_cross_checks": deterministic_signals,
             "run_dir": str(run.root),
         }
 
