@@ -33,6 +33,7 @@ def _valid_positive(findings: list[dict]) -> list[dict]:
 def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -> dict:
     playbook = playbook or load_playbook()
     positive = _valid_positive(findings)
+    triage = aggregate_contract_triage(positive)
     insufficient = [f for f in findings if f.get("risk_status") == "INSUFFICIENT_EVIDENCE"]
 
     domain_items = defaultdict(list)
