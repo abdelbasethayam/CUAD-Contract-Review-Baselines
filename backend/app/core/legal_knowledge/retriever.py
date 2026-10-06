@@ -6,7 +6,7 @@ from typing import Callable
 
 from qdrant_client import models
 
-from ..config import LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_TOP_K
+from ..config import LEGAL_ALLOWED_SOURCE_TIERS, LEGAL_CONTRACT_TYPE, LEGAL_JURISDICTION, LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_TOP_K
 from ..rag.embedder import embed_queries, make_cohere_client
 from ..rag.retriever import make_qdrant_client
 
