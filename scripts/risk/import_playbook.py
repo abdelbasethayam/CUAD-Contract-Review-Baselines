@@ -73,6 +73,10 @@ def normalize(raw: dict) -> dict:
     result = {
         "schema_version": 2,
         "source_version": str(raw.get("version") or "unknown"),
+        "owner": str(raw.get("owner") or "research-team"),
+        "effective_date": str(raw.get("effective_date") or "") or None,
+        "approval_status": str(raw.get("approval_status") or "DRAFT").upper(),
+        "approved_by": str(raw.get("approved_by") or "") or None,
         "title": str(raw.get("title") or "Commercial Contract Risk Playbook"),
         "perspective": str(raw.get("perspective") or "customer_buyer"),
         "disclaimer": str(raw.get("disclaimer") or ""),
