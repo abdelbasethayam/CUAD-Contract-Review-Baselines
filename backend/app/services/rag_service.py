@@ -355,9 +355,18 @@ def _classify_contract(
                 progress_callback=progress_callback,
             )
 
+            segment_info = segment_by_index.get(idx, {})
             row = {
                 "clause_index": idx,
+                "clause_id": segment_info.get("clause_id"),
                 "clause_text": item["clause_text"],
+                "section_path": segment_info.get("clause_id"),
+                "page_start": segment_info.get("page_start"),
+                "page_end": segment_info.get("page_end"),
+                "parent_clause": segment_info.get("parent_clause"),
+                "depth": segment_info.get("depth"),
+                "source_blocks": segment_info.get("source_blocks", []),
+                "heading": segment_info.get("heading"),
                 "predicted_label": result["predicted_label"],
                 "clause_type": result["predicted_label"],
                 "retrieved_labels": result.get("retrieved_labels", []),
