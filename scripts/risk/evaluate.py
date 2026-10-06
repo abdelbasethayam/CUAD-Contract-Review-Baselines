@@ -75,12 +75,12 @@ def ece(y, prob, bins=10) -> float:
 
 
 def severity_metrics(gold, pred) -> dict:
-    keep = [(g, p) for g, p in zip(gold, pred) if g in {"LOW", "MEDIUM", "HIGH"} and p in {"LOW", "MEDIUM", "HIGH"}]
+    labels = ["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
+    keep = [(g, p) for g, p in zip(gold, pred) if g in labels and p in labels]
     if not keep:
         return {}
     g = [x[0] for x in keep]
     p = [x[1] for x in keep]
-    labels = ["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
     encoded = {label: i for i, label in enumerate(labels)}
     mae = float(np.mean([abs(encoded[a] - encoded[b]) for a, b in zip(g, p)]))
     return {
