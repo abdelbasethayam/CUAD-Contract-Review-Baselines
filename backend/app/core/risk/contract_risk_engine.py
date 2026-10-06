@@ -7,6 +7,7 @@ from typing import Callable
 from .knowledge_base import match_risk_domains
 from .risk_playbook import load_playbook
 from .risk_engine import _evidence_valid, _emit
+from .risk_scoring import aggregate_contract_triage
 
 ProgressCallback = Callable[[dict], None]
 
