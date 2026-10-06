@@ -28,7 +28,7 @@ def main():
             if item["status"] != "NOT_FOUND_BY_SEARCH": continue
             checks=item.get("check_ids") or []
             for check_id in checks[:1]:
-                sample_id=hashlib.sha256(f"{doc_id}|{item[chr(34)+chr(99)+chr(108)+chr(97)+chr(117)+chr(115)+chr(101)+chr(95)+chr(116)+chr(121)+chr(112)+chr(101)+chr(34)]}|{check_id}".encode()).hexdigest()[:16]
+                sample_id=hashlib.sha256(f"{doc_id}|{item['clause_type']}|{check_id}".encode()).hexdigest()[:16]
                 contract_text="\n\n".join(str(x["clause_text"]) for x in sorted(clauses,key=lambda z:int(z["clause_index"])))
                 pool.append({"sample_id":sample_id,"annotation_partition":"calibration" if int(sample_id[:8],16)%100<25 else ("development" if int(sample_id[:8],16)%100<50 else "locked_test"),"contract_id":doc_id,"clause_type":item["clause_type"],"check_id":check_id,"contract_text":contract_text,"search_status":"NOT_FOUND_BY_SEARCH","adjudicated_presence":"","adjudicated_risk":"","adjudicated_risk_type":"","adjudicated_evidence":"","notes":""})
     rng=random.Random(args.seed); rng.shuffle(pool); rows=pool[:min(args.n,len(pool))]
