@@ -394,7 +394,7 @@ def _classify_contract(
             tmp_c.replace(target_c)
             results_by_index[idx] = row
 
-        all_risk_findings = list(run.read_jsonl_index("finding_id", "finding_id").values())
+        all_risk_findings = list(run.read_jsonl_index("risk_findings.jsonl", "finding_id").values())
         contract_checks_path = run.root / "contract_checks.json"
         if contract_checks_path.exists():
             contract_checks = run.read_json("contract_checks.json", {}) or {}
