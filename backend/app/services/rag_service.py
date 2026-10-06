@@ -503,6 +503,13 @@ def _classify_contract(
             results_by_index[idx] = row
 
         all_risk_findings = list(run.read_jsonl_index("risk_findings.jsonl", "finding_id").values())
+        clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
+
+        deterministic_signals = run.read_json("deterministic_cross_checks.json", None)
+        if deterministic_signals is None:
+            deterministic_signals = run_deterministic_cross_checks(clause_rows)
+            run.write_json("deterministic_cross_checks.json", deterministic_signals)
+
         contract_checks_path = run.root / "contract_checks.json"
         if contract_checks_path.exists():
             contract_checks = run.read_json("contract_checks.json", {}) or {}
@@ -515,7 +522,6 @@ def _classify_contract(
                 "message": "Running configured cross-clause/document checks",
                 "total": 1,
             })
-            clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
             effective_playbook = dict(playbook)
             if not RISK_ENABLE_CROSS_CLAUSE:
                 effective_playbook["cross_clause_checks"] = []
@@ -532,6 +538,7 @@ def _classify_contract(
                 {
                     "cross_clause_findings": cross_findings,
                     "document_findings": document_findings,
+                    "deterministic_cross_checks": deterministic_signals,
                     "playbook_hash": playbook.get("playbook_hash"),
                     "model": RISK_MODEL,
                     "cross_clause_enabled": RISK_ENABLE_CROSS_CLAUSE,
@@ -539,15 +546,10 @@ def _classify_contract(
                 },
             )
 
-        deterministic_signals = run.read_json("deterministic_cross_checks.json", None)
-        if deterministic_signals is None:
-            deterministic_signals = run_deterministic_cross_checks(clause_rows)
-            run.write_json("deterministic_cross_checks.json", deterministic_signals)
-
-        aggregate_path = run.root / "contract_risk.json"        if aggregate_path.exists():
+        aggregate_path = run.root / "contract_risk.json"
+        if aggregate_path.exists():
             assessment = run.read_json("contract_risk.json", {}) or {}
         else:
-            clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
             assessment = aggregate_clause_risks(
                 all_risk_findings + cross_findings + document_findings,
                 playbook=playbook,
@@ -555,8 +557,8 @@ def _classify_contract(
             assessment["cross_clause_findings"] = cross_findings
             assessment["document_findings"] = document_findings
             assessment["risk_only"] = build_risk_only_view(all_risk_findings + cross_findings + document_findings)
+            assessment["deterministic_cross_checks"] = deterministic_signals
             run.write_json("contract_risk.json", assessment)
-
         # Export stable CSV views in addition to the raw JSON/JSONL audit artifacts.
         clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
         clause_csv = run.path("clauses.csv")
