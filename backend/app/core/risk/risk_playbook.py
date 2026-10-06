@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from ..config import RISK_PLAYBOOK_PATH, RISK_PLAYBOOK_VERSION
+from .evidence_policy import normalize_source_record
 
 
 def canonical_json(value: Any) -> str:
@@ -40,13 +41,29 @@ def normalize_playbook(raw: dict) -> dict:
             "checklist": [item for item in checklist if item["id"] and item["question"]],
         }
 
+    raw_sources = raw.get("sources") or {}
+    normalized_sources = {}
+    for source_id, source in raw_sources.items():
+        # Uploaded checklist references are conservatively treated as
+        # professional-practice sources until stronger authority metadata is
+        # supplied. This prevents accidental presentation as binding law.
+        normalized_sources[str(source_id)] = normalize_source_record(
+            str(source_id),
+            source,
+            default_tier="B",
+        )
+
     normalized = {
-        "schema_version": 2,
+        "schema_version": 3,
         "source_version": str(raw.get("version") or RISK_PLAYBOOK_VERSION),
         "title": str(raw.get("title") or "Commercial Contract Risk Playbook"),
         "perspective": str(raw.get("perspective") or "customer_buyer"),
+        "policy_tier": "D",
+        "owner": raw.get("owner"),
+        "effective_date": raw.get("effective_date"),
+        "approval_status": str(raw.get("approval_status") or "UNAPPROVED"),
         "disclaimer": str(raw.get("disclaimer") or ""),
-        "sources": raw.get("sources") or {},
+        "sources": normalized_sources,
         "clause_types": clause_types,
         "cross_clause_checks": [
             {
