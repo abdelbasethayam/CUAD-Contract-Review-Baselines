@@ -171,6 +171,24 @@ class HybridIndex:
                 break
         return hits
 
+    def excluding_documents(self, document_ids: set[str]) -> "HybridIndex":
+        """Return an index fit only on documents not in document_ids.
+
+        This is important for validation: filtering hits at search time would
+        still let validation documents influence TF-IDF vocabulary/IDF.
+        """
+        excluded = {str(x) for x in document_ids}
+        keep = [
+            i for i, doc_id in enumerate(self.document_ids)
+            if str(doc_id) not in excluded
+        ]
+        return HybridIndex(
+            [self.texts[i] for i in keep],
+            [self.labels[i] for i in keep],
+            [str(self.document_ids[i]) for i in keep],
+            self.dense[keep],
+        )
+
     @staticmethod
     def label_votes(hits: list[Hit]) -> dict[str, float]:
         scores: dict[str, float] = {}
