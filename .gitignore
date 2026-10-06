@@ -33,3 +33,10 @@ qdrant_db/
 logs/
 # Deterministic, generated CUAD model-ready derivatives
 data/processed/classification/
+
+
+# Phase 2 runtime outputs and human-annotation artifacts
+data/runs/
+data/risk/gold/*.csv
+data/risk/gold/*.json
+data/risk/results/
