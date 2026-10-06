@@ -118,6 +118,7 @@ def create_or_resume_run(
         "pipeline": config,
         "pipeline_fingerprint": fingerprint,
         "playbook_path": str(RISK_PLAYBOOK_PATH),
+        "artifact_format": "json/jsonl/npy",
         "created_or_resumed_at": datetime.now(timezone.utc).isoformat(),
         "environment": {
             "python": platform.python_version(),
@@ -138,7 +139,7 @@ def create_or_resume_run(
         except (OSError, json.JSONDecodeError) as exc:
             raise RuntimeError(f"Cannot resume corrupted analysis manifest: {exc}") from exc
     else:
-        source_copy = root / "source"
+        source_copy = root / ("source" + source_path.suffix.lower())
         source_copy.parent.mkdir(parents=True, exist_ok=True)
         source_copy.write_bytes(source_path.read_bytes())
 
