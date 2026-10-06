@@ -223,6 +223,7 @@ def analyze_clause_risk(
     playbook: dict | None = None,
     passes: int | None = None,
     qdrant_client=None,
+    extraction_confidence: float | None = None,
 ) -> list[dict]:
     playbook = playbook or load_playbook()
     calibration = load_calibration()
