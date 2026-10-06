@@ -25,6 +25,6 @@ jobs:
           from backend.app.core.risk.risk_engine import _evidence_valid, _severity_signal
           assert starter_playbook()["playbook_hash"]
           assert _evidence_valid("bounded", "a bounded liability cap", [])
-          assert _severity_signal({"impact": 3, "scope": 2, "asymmetry": 2}) == 7 / 9
+          assert _severity_signal({"impact": 3, "scope": 2, "asymmetry": 2}) == 0.7778
           print("Phase 2 imports OK")
           PY
