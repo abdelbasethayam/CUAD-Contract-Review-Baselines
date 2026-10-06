@@ -241,6 +241,16 @@ def analyze_contract_checks(
             )
             calibrated_severity = calibrate_severity(severity_score, calibration)
             check = by_source[check_id]
+            supporting_sources = [
+                normalize_source_record(
+                    str(source.get("id") or source.get("source_id") or "playbook-source"),
+                    source,
+                    default_tier="D",
+                    retrieval_date=datetime.now(timezone.utc).isoformat(),
+                )
+                for source in source_records(playbook, check.get("sources", []))
+            ]
+            primary_source = supporting_sources[0] if supporting_sources else {}
             source_claim_ok = legal_claim_supported(
                 f"{rep.get('risk_type') or ''} {rep.get('why_flagged') or ''}",
                 supporting_sources,
@@ -258,16 +268,6 @@ def analyze_contract_checks(
                 severity_score = None
                 calibrated_confidence = None
                 calibrated_severity = None
-            supporting_sources = [
-                normalize_source_record(
-                    str(source.get("id") or source.get("source_id") or "playbook-source"),
-                    source,
-                    default_tier="D",
-                    retrieval_date=datetime.now(timezone.utc).isoformat(),
-                )
-                for source in source_records(playbook, check.get("sources", []))
-            ]
-            primary_source = supporting_sources[0] if supporting_sources else {}
             results.append({
                 "scope": kind,
                 "check_id": check_id,
