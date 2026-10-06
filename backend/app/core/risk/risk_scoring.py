@@ -90,8 +90,8 @@ def deterministic_modifiers(
     modifiers: list[dict[str, Any]] = []
     scope = str(finding.get("scope") or "").lower()
 
-    if scope == "cross_clause":
-        modifiers.append({"name": "cross_clause_conflict", "delta": 2, "reason": "cross-clause interaction"})
+    if scope == "cross_clause" and bool(finding.get("deterministic_cross_check")):
+        modifiers.append({"name": "cross_clause_conflict", "delta": 2, "reason": "deterministic interaction signal"})
     if any(term in blob for term in JURISDICTION_SENSITIVE_TERMS):
         modifiers.append({"name": "jurisdiction_sensitive", "delta": 2, "reason": "jurisdiction/competition-sensitive topic"})
     if extraction_confidence is not None and extraction_confidence < 0.75:
