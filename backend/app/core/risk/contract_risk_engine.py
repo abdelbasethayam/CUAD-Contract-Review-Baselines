@@ -39,17 +39,6 @@ def aggregate_clause_risks(
 ) -> dict:
     playbook = playbook or load_playbook()
     positive = _valid_positive(findings)
-    triage = aggregate_contract_triage(
-        positive,
-        contract_metadata=contract_metadata,
-        deterministic_signals=deterministic_signals,
-    )
-    calibration = load_calibration()
-    overall_confidence = (
-        calibrate_risk_probability(triage.get("overall_score"), calibration)
-        if triage.get("overall_score") is not None
-        else None
-    )
     insufficient = [f for f in findings if f.get("risk_status") == "INSUFFICIENT_EVIDENCE"]
 
     domain_items = defaultdict(list)
@@ -64,6 +53,18 @@ def aggregate_clause_risks(
 
         for domain in finding["risk_domains"]:
             domain_items[domain].append(finding)
+
+    triage = aggregate_contract_triage(
+        positive,
+        contract_metadata=contract_metadata,
+        deterministic_signals=deterministic_signals,
+    )
+    calibration = load_calibration()
+    overall_confidence = (
+        calibrate_risk_probability(triage.get("overall_score"), calibration)
+        if triage.get("overall_score") is not None
+        else None
+    )
 
     key_risks = [
         {
