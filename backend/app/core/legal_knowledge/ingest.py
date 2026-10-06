@@ -8,11 +8,13 @@ from __future__ import annotations
 
 import argparse
 import uuid
+import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from qdrant_client import models
 
-from ..config import LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_PATH
+from ..config import LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_PATH, LEGAL_KNOWLEDGE_REGISTRY_PATH
 from ..rag.embedder import embed_documents, make_cohere_client
 from ..rag.retriever import make_qdrant_client
 
