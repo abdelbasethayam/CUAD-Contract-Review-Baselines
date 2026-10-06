@@ -31,8 +31,9 @@ JURISDICTION_SENSITIVE_TERMS = (
 )
 
 CRITICAL_TERMS = (
-    "uncapped", "unlimited liability", "without limitation", "perpetual",
-    "irrevocable", "core intellectual property", "core ip", "data ownership",
+    "uncapped", "unlimited liability", "without limitation",
+    "loss of core intellectual property", "loss of core ip",
+    "loss of core data rights", "perpetual transfer of all data rights",
     "defeats the central bargain", "cannot terminate", "cannot transition",
     "existential",
 )
