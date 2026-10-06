@@ -134,8 +134,8 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         "overall_confidence": overall_confidence,
         "confidence_status": confidence_status,
         "overall_raw_risk_score": overall_raw_score,
-        "overall_raw_score_semantics": "maximum evidence-support diagnostic; not a probability",
-        "severity_status": "UNCALIBRATED",
+        "overall_raw_score_semantics": "deterministic 0-20 triage score; not a probability",
+        "severity_status": "RULE_BASED_TRIAGE",
         "risk_domains": domain_summary,
         "key_risks": key_risks,
         "affected_clauses": affected,
@@ -144,6 +144,13 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         "playbook_hash": playbook.get("playbook_hash"),
         "clause_findings": findings,
         "unresolved_check_count": len(insufficient),
+        "overall_score": triage["overall_score"],
+        "overall_severity": triage["overall_severity"],
+        "aggregation_adjustments": triage["aggregation_adjustments"],
+        "human_review_required": triage["human_review_required"],
+        "high_count": triage["high_count"],
+        "critical_count": triage["critical_count"],
+        "two_high_same_domain": triage["two_high_same_domain"],
     }
 
 
