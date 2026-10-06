@@ -38,6 +38,7 @@ def load_clauses(path: Path) -> pd.DataFrame:
     text = clean.where(clean.ne(""), raw_col)
 
     result = pd.DataFrame({
+        "clause_index": df.index.astype(int),
         "document_id": df["document_id"].fillna("").astype(str).str.strip(),
         "clause_type": df["clause_type"].fillna("").astype(str).str.strip(),
         "clause_text": text,

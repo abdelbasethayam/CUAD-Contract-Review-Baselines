@@ -1,0 +1,10 @@
+{
+  "source_file": "commercial_clause_risk_checklists (2).json",
+  "source_sha256": "a7092198e8267d8ee119f27bea76f33b28a7dbc6a44e8aaec2cb71f52b3dfebd",
+  "source_version": 1.0,
+  "title": "Commercial Clause Risk Checklists",
+  "perspective": "customer_buyer",
+  "stats": {"clause_types": 24, "clause_checklist_items": 63, "cross_clause_checks": 10, "document_level_checks": 3, "sources": 7},
+  "classification": "PLAYBOOK_DERIVED_POLICY",
+  "note": "This source is not a human gold dataset. Import it with scripts/risk/import_playbook.py and calibrate against adjudicated annotations before reporting probability or severity."
+}

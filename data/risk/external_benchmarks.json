@@ -1,0 +1,34 @@
+{
+  "benchmarks": [
+    {
+      "id": "litigation_disputed_clause",
+      "repository": "ye-sylvette-sun/contract-risk",
+      "url": "https://github.com/ye-sylvette-sun/contract-risk",
+      "task": "Clause risk framed as whether a U.S. federal court construed the clause.",
+      "use": "secondary benchmark only",
+      "ground_truth_relation": "different target from customer/buyer playbook",
+      "license_status": "UNVERIFIED",
+      "do_not_bundle_data": true
+    },
+    {
+      "id": "synthetic_legal_risk",
+      "dataset": "Mr-Dintov/Legal-Contract-Clause-Risk-Corpus",
+      "url": "https://huggingface.co/datasets/Mr-Dintov/Legal-Contract-Clause-Risk-Corpus",
+      "task": "Synthetic clause-level risk, severity, and phrase-level danger annotations.",
+      "use": "synthetic robustness / prompt-development benchmark",
+      "ground_truth_relation": "not a substitute for human-adjudicated gold",
+      "license_status": "CC BY 4.0 for the public sample; verify full access/licensing before redistribution",
+      "do_not_bundle_data": true
+    },
+    {
+      "id": "cuad",
+      "dataset": "CUAD",
+      "url": "https://huggingface.co/datasets/theatticusproject/cuad",
+      "task": "Contract understanding / clause-category extraction.",
+      "use": "Phase 1 classification and evidence retrieval",
+      "ground_truth_relation": "not a risk-label dataset",
+      "license_status": "CC BY 4.0",
+      "do_not_treat_as_risk_gold": true
+    }
+  ]
+}
