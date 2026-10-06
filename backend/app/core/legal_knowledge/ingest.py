@@ -24,6 +24,12 @@ REQUIRED_METADATA = {
     "title",
     "clause_category",
     "document_filename",
+    "source_tier",
+    "authority_status",
+    "jurisdiction",
+    "contract_type",
+    "access_type",
+    "license_status",
 }
 
 DOCUMENTATION_ONLY_FILES = {
