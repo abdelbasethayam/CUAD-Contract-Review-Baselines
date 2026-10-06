@@ -201,6 +201,7 @@ def _classify_contract(
             segments_json = [
                 {
                     "clause_index": i,
+                    "clause_id": segment.clause_id,
                     "text": segment.text,
                     "parser": segment.parser,
                     "metadata": segment.metadata or {},
