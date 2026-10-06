@@ -331,7 +331,8 @@ def retrieve_legal_guidance(
             "dense_score": round(float(hit.get("dense_score") or 0.0), 6),
             "lexical_score": round(float(hit.get("lexical_score") or 0.0), 6),
             "rrf_score": round(float(hit.get("rrf") or 0.0), 6),
-        })    if progress_callback:
+        })
+    if progress_callback:
         progress_callback({
             "type": "progress",
             "stage": "legal_search",
