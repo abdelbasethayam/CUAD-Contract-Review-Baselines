@@ -28,6 +28,7 @@ class RiskFinding(BaseModel):
     supporting_sources: list[dict[str, Any]] = Field(default_factory=list)
     related_contract_context: list[dict[str, Any]] = Field(default_factory=list)
     severity_factors: dict[str, Any] = Field(default_factory=dict)
+    score_components: dict[str, Any] = Field(default_factory=dict)
 
 
 class ContractRiskAssessment(BaseModel):
