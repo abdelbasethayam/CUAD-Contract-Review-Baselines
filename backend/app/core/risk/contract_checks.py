@@ -237,6 +237,8 @@ def analyze_contract_checks(
             )
             calibrated_severity = calibrate_severity(severity_score, calibration)
             check = by_source[check_id]
+            supporting_sources = source_records(playbook, check.get("sources", []))
+            primary_source = supporting_sources[0] if supporting_sources else {}
             results.append({
                 "scope": kind,
                 "check_id": check_id,
@@ -250,9 +252,9 @@ def analyze_contract_checks(
                 "severity_score": severity_score,
                 "severity_signal": severity_signal,
                 "score_components": score_details["score_components"] if score_details else {},
-                "base_score": score_details["base_score"] if score_details else 0,
+                "base_score": score_details["base_score"] if score_details else None,
                 "score_modifiers": score_details["modifiers"] if score_details else [],
-                "final_score": score_details["final_score"] if score_details else 0,
+                "final_score": score_details["final_score"] if score_details else None,
                 "score_override_reason": score_details["override_reason"] if score_details else None,
                 "human_review_required": score_details["human_review_required"] if score_details else True,
                 "review_escalation": score_details["escalation"] if score_details else "LEGAL_REVIEW",
@@ -275,7 +277,16 @@ def analyze_contract_checks(
                     "passes": len(records),
                     "agreement": agreement,
                 },
-                "supporting_sources": source_records(playbook, check.get("sources", [])),
+                "supporting_sources": supporting_sources,
+                "source_tier": primary_source.get("source_tier"),
+                "jurisdiction": primary_source.get("jurisdiction"),
+                "effective_date": primary_source.get("effective_date"),
+                "contract_type": primary_source.get("contract_type"),
+                "source_url": primary_source.get("source_url"),
+                "source_title": primary_source.get("source_title"),
+                "retrieval_date": primary_source.get("retrieval_date"),
+                "supporting_quote_or_paraphrase": primary_source.get("supporting_quote_or_paraphrase"),
+                "transferability": primary_source.get("transferability"),
                 "severity_factors": rep.get("severity_factors") or rep.get("score_components") or {},
                 "score_components_raw": rep.get("score_components") or {},
             })
