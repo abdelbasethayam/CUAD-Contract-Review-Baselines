@@ -25,6 +25,7 @@ from .contract_context import retrieve_related_contract_context
 from .knowledge_base import match_risk_domains, risk_guidance_for_prompt
 from ..legal_knowledge.retriever import retrieve_legal_guidance
 from .risk_detector import detect_legal_indicators
+from .risk_scoring import score_finding
 
 ProgressCallback = Callable[[dict], None]
 
@@ -54,15 +55,15 @@ def _factor(value: object) -> float | None:
         number = float(value)
     except (TypeError, ValueError):
         return None
-    return number if 0.0 <= number <= 3.0 else None
+    return number if 0.0 <= number <= 5.0 else None
 
 
 def _severity_signal(factors: dict) -> float | None:
-    values = [_factor(factors.get(key)) for key in ("impact", "scope", "asymmetry", "duration", "reversibility")]
+    values = [_factor(factors.get(key)) for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")]
     values = [v for v in values if v is not None]
     if len(values) < 3:
         return None
-    return round(sum(values) / (3.0 * len(values)), 4)
+    return round(sum(values) / 20.0, 4) if all(v is not None for v in values) else None
 
 
 def _support_score(*, answer: str, evidence_ok: bool, agreement: float, indicator_match: bool) -> float:
