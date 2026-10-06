@@ -129,6 +129,7 @@ class HybridIndex:
         query_vector,
         k: int = 30,
         exclude_document_id: str | None = None,
+        exclude_document_ids: set[str] | None = None,
     ) -> list[Hit]:
         qv = np.asarray(query_vector, dtype=np.float32).reshape(-1)
         qv = qv / max(float(np.linalg.norm(qv)), 1e-9)
@@ -148,9 +149,12 @@ class HybridIndex:
 
         order = np.argsort(-rrf)
         hits: list[Hit] = []
+        excluded = set(exclude_document_ids or ())
+        if exclude_document_id:
+            excluded.add(str(exclude_document_id))
         for idx in order:
             doc_id = str(self.document_ids[idx])
-            if exclude_document_id and doc_id and doc_id == exclude_document_id:
+            if doc_id and doc_id in excluded:
                 continue
             hits.append(
                 Hit(
