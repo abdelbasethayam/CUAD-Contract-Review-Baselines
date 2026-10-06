@@ -14,3 +14,15 @@ jobs:
           python-version: "3.11"
       - name: Compile Python sources
         run: python -m compileall -q backend scripts data/scripts
+      - name: Import Phase 2 modules
+        run: |
+          python - <<'PY'
+          from backend.app.models.schemas import ContractClassificationResponse, RiskFinding
+          from backend.app.core.risk.risk_playbook import starter_playbook
+          from backend.app.core.risk.contract_risk_engine import aggregate_clause_risks
+          from backend.app.core.risk.risk_engine import _evidence_valid, _severity_signal
+          assert starter_playbook()["playbook_hash"]
+          assert _evidence_valid("bounded", "a bounded liability cap", [])
+          assert _severity_signal({"impact": 3, "scope": 2, "asymmetry": 2}) == 7 / 9
+          print("Phase 2 imports OK")
+          PY
