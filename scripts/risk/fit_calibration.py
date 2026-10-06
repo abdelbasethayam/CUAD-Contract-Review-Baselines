@@ -54,6 +54,8 @@ def main() -> None:
     y = risk_df[args.gold_risk_column].map(
         {"0": 0, "1": 1, "YES": 1, "NO": 0, "TRUE": 1, "FALSE": 0}
     ).astype(float).to_numpy()
+    if np.unique(y).size < 2:
+        raise SystemExit("Calibration partition must contain both YES and NO adjudicated risk cases.")
     risk_curve = fit_curve(x, y)
     risk_pred = np.interp(x, risk_curve["x"], risk_curve["y"])
 
@@ -62,6 +64,8 @@ def main() -> None:
         "method": "isotonic",
         "calibration_input": "calibration_score_0_to_20_with_zero_for_nonpositive_or_unscored",
         "n_risk_calibration": int(len(x)),
+        "n_positive": int(y.sum()),
+        "n_negative": int(len(y) - y.sum()),
         "risk_probability": risk_curve,
         "calibration_partition": args.partition,
         "severity_score_column": args.severity_score_column,
