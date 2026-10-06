@@ -89,12 +89,17 @@ def chunk_text(text: str, chunk_size: int = 1200, overlap: int = 150) -> list[st
     return [chunk for chunk in chunks if chunk]
 
 
-def load_curated_chunks(base_path: Path = LEGAL_KNOWLEDGE_PATH) -> list[dict]:
+def load_curated_chunks(
+    base_path: Path = LEGAL_KNOWLEDGE_PATH,
+    registry_path: Path = LEGAL_KNOWLEDGE_REGISTRY_PATH,
+) -> list[dict]:
     chunks: list[dict] = []
+    registry = load_source_registry(registry_path)
+    retrieval_date = datetime.now(timezone.utc).date().isoformat()
     for path in sorted(base_path.rglob("*.md")):
         if path.name in DOCUMENTATION_ONLY_FILES:
             continue
-        parsed = parse_knowledge_document(path)
+        parsed = parse_knowledge_document(path, registry)
         metadata = parsed["metadata"]
         for index, chunk in enumerate(chunk_text(parsed["text"])):
             chunk_key = f"{path.as_posix()}::{index}"
@@ -110,7 +115,15 @@ def load_curated_chunks(base_path: Path = LEGAL_KNOWLEDGE_PATH) -> list[dict]:
                         "clause_category": metadata["clause_category"],
                         "document_filename": metadata["document_filename"],
                         "chunk_id": chunk_id,
-                    },
+                        "source_tier": metadata["source_tier"],
+                        "authority_status": metadata["authority_status"],
+                        "jurisdiction": metadata["jurisdiction"],
+                        "contract_type": metadata["contract_type"],
+                        "access_type": metadata["access_type"],
+                        "license_status": metadata["license_status"],
+                        "effective_date": metadata.get("effective_date"),
+                        "retrieval_date": retrieval_date,
+                        "transferability": metadata.get("transferability", "same_contract_type_preferred"),                    },
                 }
             )
     return chunks
