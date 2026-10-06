@@ -50,6 +50,25 @@ CLASSIFICATION_REPORT_PATH = RESULTS_DIR / "classification_report.csv"
 CONFUSION_MATRIX_PNG_PATH = RESULTS_DIR / "confusion_matrix.png"
 CONFUSION_MATRIX_CSV_PATH = RESULTS_DIR / "confusion_matrix.csv"
 
+RUNS_DIR = PROJECT_ROOT / "data" / "runs"
+RISK_DATA_DIR = PROJECT_ROOT / "data" / "risk"
+RISK_PLAYBOOK_PATH = Path(
+    os.getenv(
+        "RISK_PLAYBOOK_PATH",
+        str(RISK_DATA_DIR / "commercial_clause_risk_playbook.json"),
+    )
+)
+RISK_PLAYBOOK_VERSION = os.getenv("RISK_PLAYBOOK_VERSION", "starter-v1")
+RISK_MODEL = os.getenv("RISK_MODEL", os.getenv("OLLAMA_MODEL", "qwen3:8b"))
+RISK_NUM_CTX = int(os.getenv("RISK_NUM_CTX", "16384"))
+RISK_TEMPERATURE = float(os.getenv("RISK_TEMPERATURE", "0.0"))
+RISK_MAX_TOKENS = int(os.getenv("RISK_MAX_TOKENS", "1800"))
+RISK_SELF_CONSISTENCY_PASSES = int(os.getenv("RISK_SELF_CONSISTENCY_PASSES", "3"))
+RISK_CONTEXT_TOP_K = int(os.getenv("RISK_CONTEXT_TOP_K", "5"))
+RISK_GOLD_PATH = RISK_DATA_DIR / "gold" / "gold_annotations.csv"
+RISK_CALIBRATION_PATH = RISK_DATA_DIR / "gold" / "calibration.json"
+RISK_EXTERNAL_BENCHMARKS_PATH = RISK_DATA_DIR / "external_benchmarks.json"
+
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 COHERE_MODEL = os.getenv(
     "COHERE_MODEL",
