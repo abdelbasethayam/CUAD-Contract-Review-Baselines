@@ -33,7 +33,7 @@ HYBRID_SHORTLIST=8
 HYBRID_RERANK=true
 HYBRID_RERANKER_MODEL=BAAI/bge-reranker-v2-m3
 HYBRID_RERANK_TOP_K=30
-HYBRID_INDEX_CACHE=./output/cache/hybrid_train_index.npz
+HYBRID_INDEX_CACHE=./output/cache/cuad_train_mpnet_hybrid.npz
 ```
 
 Qwen3 has an explicit non-thinking mode, which is used here because the classifier expects a short answer token. Ollama exposes logprobs as a boolean plus a separate top_logprobs parameter.
