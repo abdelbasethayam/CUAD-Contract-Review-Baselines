@@ -16,6 +16,11 @@ from ..core.config import (
     RISK_SELF_CONSISTENCY_PASSES,
     RISK_PLAYBOOK_PATH,
     RISK_CALIBRATION_PATH,
+    RISK_ENABLE_CROSS_CLAUSE,
+    RISK_ENABLE_DOCUMENT_CHECKS,
+    RISK_USE_CONTEXT,
+    RISK_USE_LEGAL_GUIDANCE,
+    RISK_USE_PLAYBOOK,
     TOP_K,
 )
 from ..core.rag import (
@@ -101,6 +106,11 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
         "playbook_hash": playbook.get("playbook_hash"),
         "playbook_path": str(RISK_PLAYBOOK_PATH),
         "calibration_hash": _file_hash(RISK_CALIBRATION_PATH),
+        "use_playbook": RISK_USE_PLAYBOOK,
+        "use_context": RISK_USE_CONTEXT,
+        "use_legal_guidance": RISK_USE_LEGAL_GUIDANCE,
+        "enable_cross_clause": RISK_ENABLE_CROSS_CLAUSE,
+        "enable_document_checks": RISK_ENABLE_DOCUMENT_CHECKS,
     }
 
 
@@ -431,13 +441,18 @@ def _classify_contract(
             trace({
                 "type": "progress",
                 "stage": "cross_clause",
-                "message": "Running cross-clause and document-level checks",
+                "message": "Running configured cross-clause/document checks",
                 "total": 1,
             })
             clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
+            effective_playbook = dict(playbook)
+            if not RISK_ENABLE_CROSS_CLAUSE:
+                effective_playbook["cross_clause_checks"] = []
+            if not RISK_ENABLE_DOCUMENT_CHECKS:
+                effective_playbook["document_level_checks"] = []
             cross_findings, document_findings = analyze_contract_checks(
                 clause_rows,
-                playbook=playbook,
+                playbook=effective_playbook,
                 progress_callback=trace,
             )
             run.write_json(
@@ -447,6 +462,8 @@ def _classify_contract(
                     "document_findings": document_findings,
                     "playbook_hash": playbook.get("playbook_hash"),
                     "model": RISK_MODEL,
+                    "cross_clause_enabled": RISK_ENABLE_CROSS_CLAUSE,
+                    "document_checks_enabled": RISK_ENABLE_DOCUMENT_CHECKS,
                 },
             )
 
