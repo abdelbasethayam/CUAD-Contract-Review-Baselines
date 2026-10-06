@@ -113,10 +113,23 @@ def score_finding(
 ) -> dict[str, Any]:
     components = normalize_components(finding.get("score_components") or finding.get("severity_factors"))
     missing = [name for name, value in components.items() if value is None]
-    for name in missing:
-        components[name] = 0.0
+    if missing:
+        return {
+            "score_version": SCORE_VERSION,
+            "score_components": components,
+            "base_score": None,
+            "modifiers": [],
+            "modifier_total": 0,
+            "final_score": None,
+            "default_severity": None,
+            "severity": None,
+            "override_reason": None,
+            "human_review_required": True,
+            "escalation": "HIGH_REVIEW",
+            "missing_score_components": missing,
+        }
 
-    base_score = int(round(sum(float(components[name] or 0.0) for name in DIMENSIONS)))
+    base_score = int(round(sum(float(components[name]) for name in DIMENSIONS)))
     delta, modifiers = deterministic_modifiers(
         finding,
         extraction_confidence=extraction_confidence,
@@ -175,7 +188,7 @@ def aggregate_contract_triage(findings: list[dict[str, Any]]) -> dict[str, Any]:
         }
 
     scored = sorted(
-        [(int(f.get("final_score") or 0), f) for f in positive],
+        [(int(f["final_score"]), f) for f in positive if f.get("final_score") is not None],
         key=lambda x: x[0],
         reverse=True,
     )
@@ -214,9 +227,14 @@ def aggregate_contract_triage(findings: list[dict[str, Any]]) -> dict[str, Any]:
     if high_domain:
         adjustments.append({"name": "high_domain_cluster", "delta": 2, "reason": "two or more high findings in one risk domain", "domains": high_domain})
 
-    overall = min(20, max(0, scored[0][0] + sum(int(x["delta"]) for x in adjustments)))
-    severity = "CRITICAL" if critical_count else default_severity(overall)
-    human = severity in {"HIGH", "CRITICAL"} or any(item.get("human_review_required") for item in positive)
+    incomplete_scores = len(scored) < len(positive)
+    if not scored:
+        overall = None
+        severity = None
+    else:
+        overall = min(20, max(0, scored[0][0] + sum(int(x["delta"]) for x in adjustments)))
+        severity = "CRITICAL" if critical_count else default_severity(overall)
+    human = incomplete_scores or severity in {"HIGH", "CRITICAL"} or any(item.get("human_review_required") for item in positive)
 
     return {
         "overall_score": overall,
