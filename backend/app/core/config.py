@@ -98,6 +98,7 @@ LEGAL_JURISDICTION = os.getenv("LEGAL_JURISDICTION") or None
 LEGAL_CONTRACT_TYPE = os.getenv("LEGAL_CONTRACT_TYPE") or None
 LEGAL_HYBRID_CANDIDATES = int(os.getenv("LEGAL_HYBRID_CANDIDATES", "20"))
 LEGAL_RRF_K = int(os.getenv("LEGAL_RRF_K", "60"))
+LEGAL_KNOWLEDGE_CORPUS_VERSION = os.getenv("LEGAL_KNOWLEDGE_CORPUS_VERSION", "curated-legal-v2")
 LEGAL_KNOWLEDGE_REGISTRY_PATH = Path(os.getenv("LEGAL_KNOWLEDGE_REGISTRY_PATH", str(PROJECT_ROOT / "backend" / "data" / "legal_knowledge" / "source_registry.json")))
 _LEGAL_KNOWLEDGE_PATH_VALUE = os.getenv(
     "LEGAL_KNOWLEDGE_PATH",
