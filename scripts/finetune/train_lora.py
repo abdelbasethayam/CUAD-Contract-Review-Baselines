@@ -80,18 +80,17 @@ def main() -> None:
         # Chat template when available
         messages = example["messages"]
         if hasattr(tokenizer, "apply_chat_template"):
-            text = tokenizer.apply_chat_template(
-                try:
-                    text = tokenizer.apply_chat_template(
-                        messages,
-                        tokenize=False,
-                        add_generation_prompt=False,
-                        enable_thinking=False,
-                    )
-                except TypeError:
-                    text = tokenizer.apply_chat_template(
-                        messages, tokenize=False, add_generation_prompt=False
-                    )
+            try:
+                text = tokenizer.apply_chat_template(
+                    messages,
+                    tokenize=False,
+                    add_generation_prompt=False,
+                    enable_thinking=False,
+                )
+            except TypeError:
+                text = tokenizer.apply_chat_template(
+                    messages, tokenize=False, add_generation_prompt=False
+                )
         else:
             parts = []
             for m in messages:
