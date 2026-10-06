@@ -4,9 +4,9 @@
 
 | Model | Role |
 |-------|------|
-| **`Qwen/Qwen2.5-7B-Instruct`** | **Primary choice** — best balance for classification accuracy + macro-F1, stable JSON, works with Ollama |
-| `Qwen/Qwen3-4B-Instruct` (or Instruct-2507) | Lighter GPU; good if 7B does not fit |
-| `Qwen/Qwen3-4B-Thinking-2507` | **Not primary for FT classification** — thinking traces hurt clean JSON/letter training; use only for research |
+| **`Qwen/Qwen3-8B`** | **Primary experiment** — newer Qwen generation; use non-thinking mode for structured classification |
+| `Qwen/Qwen2.5-7B-Instruct` | Historical baseline for comparison |
+| `Qwen3 Thinking variants` | Not primary for this MCQ/JSON classifier; disable thinking for the final classification path |
 
 ## Data
 
@@ -25,9 +25,9 @@ python scripts/finetune/prepare_sft_data.py \
 pip install torch transformers datasets peft trl accelerate bitsandbytes
 
 python scripts/finetune/train_lora.py \
-  --base Qwen/Qwen2.5-7B-Instruct \
+  --base Qwen/Qwen3-8B \
   --data-dir data/finetune \
-  --out output/ft_qwen25_7b_cuad
+  --out output/ft_qwen3_8b_cuad
 ```
 
 GPU: ~12–16GB VRAM with 4-bit / small batch (adjust batch/grad_accum). CPU is possible but very slow.
@@ -36,12 +36,12 @@ GPU: ~12–16GB VRAM with 4-bit / small batch (adjust batch/grad_accum). CPU is 
 
 ```bash
 python scripts/finetune/eval_sft.py \
-  --base Qwen/Qwen2.5-7B-Instruct \
-  --adapter output/ft_qwen25_7b_cuad/adapter \
+  --base Qwen/Qwen3-8B \
+  --adapter output/ft_qwen3_8b_cuad/adapter \
   --jsonl data/finetune/val.jsonl
 ```
 
-Expect roughly **~75–85% accuracy** and **macro-F1 often ~0.55–0.70** after a solid run (depends on label balance). Rare labels limit macro-F1.
+Do not hard-code an expected score. Select the checkpoint by document-disjoint validation macro-F1, then report accuracy and macro-F1 once on the untouched test split.
 
 ## Serve with Ollama
 
