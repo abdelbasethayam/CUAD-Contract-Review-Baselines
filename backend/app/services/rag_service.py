@@ -480,6 +480,23 @@ def _classify_contract(
                 jurisdiction=contract_jurisdiction,
                 clause_structure=results_by_index[idx],
             )
+            for finding in findings:
+                finding.setdefault("provenance", {}).update(
+                    {
+                        "contract_id": contract_metadata.get("document_hash"),
+                        "document_version": contract_metadata.get("document_version"),
+                        "model_id": RISK_MODEL,
+                        "model_version": RISK_MODEL,
+                        "prompt_version": RISK_PROMPT_VERSION,
+                        "retrieval_corpus_version": LEGAL_KNOWLEDGE_CORPUS_VERSION,
+                        "parser_version": segment_info.get("parser"),
+                        "policy_version": playbook.get("source_version"),
+                        "reviewer_id": None,
+                        "review_timestamp": None,
+                        "override_reason": finding.get("score_override_reason"),
+                    }
+                )
+
             # Idempotent checkpoint: replace only the clause's prior rows.
             existing_lines = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
             existing_for_clause = [
@@ -591,6 +608,8 @@ def _classify_contract(
             assessment = aggregate_clause_risks(
                 all_risk_findings + cross_findings + document_findings,
                 playbook=playbook,
+                contract_metadata=contract_metadata,
+                deterministic_signals=deterministic_signals,
             )
             assessment["cross_clause_findings"] = cross_findings
             assessment["document_findings"] = document_findings
@@ -644,11 +663,7 @@ def _classify_contract(
                 "contract_risk_assessment": assessment,
                 "contract_coverage": contract_coverage,
                 "deterministic_cross_checks": deterministic_signals,
-                "contract_metadata": {
-                    **extract_contract_metadata(filename, clauses_out),
-                    "document_hash": _file_hash(file_path),
-                    "document_version": _file_hash(file_path),
-                },
+                "contract_metadata": contract_metadata,
             },
         )
         mark_run_complete(
@@ -669,7 +684,7 @@ def _classify_contract(
             "filename": filename,
             "clauses": clauses_out,
             "contract_risk_assessment": assessment,
-            "contract_metadata": extract_contract_metadata(filename, clauses_out),
+            "contract_metadata": contract_metadata,
             "contract_coverage": contract_coverage,
             "deterministic_cross_checks": deterministic_signals,
             "run_dir": str(run.root),
