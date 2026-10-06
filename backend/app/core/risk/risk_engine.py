@@ -675,6 +675,22 @@ def analyze_clause_risk(
             else ("RULE_BASED_TRIAGE" if severity_score is not None else "INCOMPLETE")
         )
 
+        if risk_status == "POTENTIAL_RISK":
+            effective_human_review_required = bool(
+                score_details["human_review_required"] if score_details else True
+            )
+            effective_review_escalation = review_escalation
+        elif finding_status in {"UNCERTAIN", "CONFLICT"} or risk_status == "INSUFFICIENT_EVIDENCE":
+            effective_human_review_required = True
+            effective_review_escalation = "HIGH_REVIEW"
+        else:
+            effective_human_review_required = bool(
+                unsupported_legal_claim or bool(representative.get("jurisdiction_sensitive"))
+            )
+            effective_review_escalation = (
+                "HIGH_REVIEW" if effective_human_review_required else "STANDARD_REVIEW"
+            )
+
         finding: dict[str, Any] = {
             "clause_index": clause_index,
             "clause_text": clause_text,
@@ -715,16 +731,11 @@ def analyze_clause_risk(
             "score_modifiers": score_details["modifiers"] if score_details else [],
             "final_score": severity_score,
             "score_override_reason": score_details["override_reason"] if score_details else None,
-            "human_review_required": bool(
-                score_details["human_review_required"] if score_details else True
-            ),
+            "human_review_required": effective_human_review_required,
             "human_review_status": (
-                "REVIEW_REQUIRED"
-                if (score_details and score_details.get("human_review_required"))
-                or review_escalation in REVIEW_STATUSES
-                else "NOT_REVIEWED"
+                "REVIEW_REQUIRED" if effective_human_review_required else "NOT_REVIEWED"
             ),
-            "review_escalation": review_escalation,
+            "review_escalation": effective_review_escalation,
             "confidence": calibrated_confidence,
             "confidence_status": (
                 "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED"
