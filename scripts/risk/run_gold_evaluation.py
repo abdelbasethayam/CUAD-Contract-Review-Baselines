@@ -18,6 +18,7 @@ from backend.app.core.risk.risk_engine import analyze_clause_risk
 from backend.app.core.risk.risk_playbook import load_playbook
 from backend.app.core.risk.run_store import create_or_resume_run
 from backend.app.core.rag import embed_queries, make_cohere_client
+from backend.app.core.config import RISK_SELF_CONSISTENCY_PASSES
 
 
 def load_queue(path: Path) -> list[dict]:
@@ -41,6 +42,9 @@ def main() -> None:
         "--source",
         type=Path,
         default=ROOT / "data" / "splits" / "train" / "master_clauses_train.csv",
+    )
+    parser.add_argument(
+        "--passes", type=int, default=RISK_SELF_CONSISTENCY_PASSES,
     )
     parser.add_argument(
         "--out",
@@ -111,7 +115,7 @@ def main() -> None:
                 query_vector=vector.tolist(),
                 contract_clauses=contract_clauses,
                 playbook=playbook,
-                passes=1,
+                passes=args.passes,
             )
             finding = next(
                 (item for item in findings if item["check_id"] == gold["check_id"]),
