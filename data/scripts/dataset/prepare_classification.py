@@ -134,12 +134,12 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def build_long(contract_rows: list[dict[str, str]], text_columns: list[str],
+def build_long(contract_rows: list[tuple[int, dict[str, str]]], text_columns: list[str],
                answer_columns: dict[str, str]) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
     rows: list[dict[str, object]] = []
     parse_errors: list[dict[str, object]] = []
 
-    for source_row, record in enumerate(contract_rows, start=2):
+    for source_row, record in contract_rows:
         for clause_type in text_columns:
             raw = record.get(clause_type, "")
             if raw is None or str(raw).strip() == "":
@@ -410,10 +410,10 @@ def main() -> int:
         random_state=RANDOM_STATE,
         shuffle=True,
     )
-    train_source = [source_rows[index] for index in train_idx]
-    test_source = [source_rows[index] for index in test_idx]
-    train_docs = {row["Filename"] for row in train_source}
-    test_docs = {row["Filename"] for row in test_source}
+    train_source = [(index + 2, source_rows[index]) for index in train_idx]
+    test_source = [(index + 2, source_rows[index]) for index in test_idx]
+    train_docs = {row["Filename"] for _, row in train_source}
+    test_docs = {row["Filename"] for _, row in test_source}
     if train_docs & test_docs:
         raise AssertionError("Contract leakage detected between train and test.")
 
