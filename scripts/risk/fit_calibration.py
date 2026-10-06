@@ -33,6 +33,11 @@ def main() -> None:
     args = parser.parse_args()
 
     df = pd.read_csv(args.csv)
+    if "annotation_partition" not in df.columns:
+        raise SystemExit("Calibration requires annotation_partition metadata.")
+    df = df[df["annotation_partition"].astype(str) == args.partition].copy()
+    if not len(df):
+        raise SystemExit(f"No adjudicated rows found in partition {args.partition!r}.")
     required = {args.score_column, args.gold_risk_column}
     missing = required - set(df.columns)
     if missing:
