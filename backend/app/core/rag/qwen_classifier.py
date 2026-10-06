@@ -18,6 +18,7 @@ from pathlib import Path
 import requests
 
 from .hybrid_retrieval import Hit, HybridIndex
+from .reranker import rerank_hits
 
 LETTERS = string.ascii_uppercase
 EPS = 1e-4
@@ -288,10 +289,20 @@ def classify_clause_hybrid(
     permutations: int = 1,
     examples_per_candidate: int = 1,
     seed: int = 42,
+    rerank: bool = False,
+    reranker_model: str = "BAAI/bge-reranker-v2-m3",
+    rerank_top_k: int = 30,
 ) -> dict:
-    """Hybrid shortlist + Qwen letter probs + fusion."""
+    """Hybrid shortlist + optional cross-encoder reranking + Qwen fusion."""
     cfg = cfg or OllamaSettings()
     hits = index.search(clause_text, query_vector, k=k)
+    if rerank and hits:
+        hits = rerank_hits(
+            clause_text,
+            hits,
+            model_name=reranker_model,
+            top_k=rerank_top_k,
+        )
     votes = index.label_votes(hits)
     candidates = index.shortlist(hits, size=shortlist_size)
     scored = score_candidates(
