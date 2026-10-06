@@ -148,6 +148,10 @@ def resume_contract(
     if not source_candidates:
         raise FileNotFoundError(f"Persistent source missing for run: {analysis_id}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("status") == "COMPLETED":
+        result_path = root / "result.json"
+        if result_path.exists():
+            return json.loads(result_path.read_text(encoding="utf-8"))
     filename = manifest.get("source", {}).get("filename") or source_candidates[0].name
     with _CLASSIFICATION_LOCK:
         return _classify_contract(
