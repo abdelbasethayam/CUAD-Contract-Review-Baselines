@@ -30,18 +30,22 @@ def load_calibration(path: Path | None = None) -> dict:
         return {}
 
 
-def calibrate_risk_probability(raw_score: float | None, calibration: dict | None = None) -> float | None:
+def calibrate_risk_probability(final_score: float | None, calibration: dict | None = None) -> float | None:
     data = calibration if calibration is not None else load_calibration()
-    return _interp(raw_score, data.get("risk_probability"))
+    if data.get("calibration_input") not in {None, "final_score_0_to_20"}:
+        return None
+    return _interp(final_score, data.get("risk_probability"))
 
 
-def calibrate_severity(raw_score: float | None, calibration: dict | None = None) -> dict | None:
+def calibrate_severity(final_score: float | None, calibration: dict | None = None) -> dict | None:
     data = calibration if calibration is not None else load_calibration()
-    if raw_score is None:
+    if data.get("calibration_input") not in {None, "final_score_0_to_20"}:
+        return None
+    if final_score is None:
         return None
     low = _interp(raw_score, data.get("p_ge_low"))
-    med = _interp(raw_score, data.get("p_ge_medium"))
-    high = _interp(raw_score, data.get("p_ge_high"))
+    med = _interp(final_score, data.get("p_ge_medium"))
+    high = _interp(final_score, data.get("p_ge_high"))
     critical = _interp(raw_score, data.get("p_ge_critical"))
     if any(value is None for value in (low, med, high, critical)):
         return None
