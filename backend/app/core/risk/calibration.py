@@ -32,7 +32,7 @@ def load_calibration(path: Path | None = None) -> dict:
 
 def calibrate_risk_probability(final_score: float | None, calibration: dict | None = None) -> float | None:
     data = calibration if calibration is not None else load_calibration()
-    if data.get("calibration_input") not in {None, "final_score_0_to_20"}:
+    if data.get("calibration_input") != "final_score_0_to_20":
         return None
     return _interp(final_score, data.get("risk_probability"))
 
@@ -43,10 +43,10 @@ def calibrate_severity(final_score: float | None, calibration: dict | None = Non
         return None
     if final_score is None:
         return None
-    low = _interp(raw_score, data.get("p_ge_low"))
+    low = _interp(final_score, data.get("p_ge_low"))
     med = _interp(final_score, data.get("p_ge_medium"))
     high = _interp(final_score, data.get("p_ge_high"))
-    critical = _interp(raw_score, data.get("p_ge_critical"))
+    critical = _interp(final_score, data.get("p_ge_critical"))
     if any(value is None for value in (low, med, high, critical)):
         return None
     low, med, high, critical = [min(max(float(v), 0.0), 1.0) for v in (low, med, high, critical)]
