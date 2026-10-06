@@ -29,6 +29,13 @@ class RiskFinding(BaseModel):
     related_contract_context: list[dict[str, Any]] = Field(default_factory=list)
     severity_factors: dict[str, Any] = Field(default_factory=dict)
     score_components: dict[str, Any] = Field(default_factory=dict)
+    base_score: int = 0
+    score_modifiers: list[dict[str, Any]] = Field(default_factory=list)
+    final_score: int = 0
+    score_override_reason: str | None = None
+    human_review_required: bool = True
+    review_escalation: str = "STANDARD_REVIEW"
+    severity_score: float | None = None
 
 
 class ContractRiskAssessment(BaseModel):
@@ -48,6 +55,12 @@ class ContractRiskAssessment(BaseModel):
     cross_clause_findings: list[dict[str, Any]] = Field(default_factory=list)
     document_findings: list[dict[str, Any]] = Field(default_factory=list)
     unresolved_check_count: int = 0
+    overall_score: int | None = None
+    overall_severity: str | None = None
+    aggregation_adjustments: list[dict[str, Any]] = Field(default_factory=list)
+    human_review_required: bool = False
+    high_count: int = 0
+    critical_count: int = 0
 
 
 class ContractMetadata(BaseModel):
