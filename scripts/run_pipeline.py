@@ -32,24 +32,8 @@ def run(source: Path) -> dict:
 
 
 def resume(analysis_id: str) -> dict:
-    from backend.app.core.config import RUNS_DIR
-    from backend.app.core.risk.run_store import AnalysisRun
-    from backend.app.services.rag_service import classify_contract
-
-    root = Path(RUNS_DIR) / analysis_id
-    if not root.exists():
-        raise SystemExit(f"Run not found: {root}")
-
-    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
-    source = next(root.glob("source.*"), root / "source")
-    if not source.exists():
-        raise SystemExit("The persistent source artifact is missing.")
-
-    return classify_contract(
-        source,
-        progress_callback=emit,
-        filename=manifest.get("source", {}).get("filename") or source.name,
-    )
+    from backend.app.services.rag_service import resume_contract
+    return resume_contract(analysis_id, progress_callback=emit)
 
 
 def main() -> None:
