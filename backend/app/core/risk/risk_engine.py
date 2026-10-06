@@ -583,8 +583,9 @@ def analyze_clause_risk(
         )
 
         legal_source_text = " ".join(
-            str(item.get("why_flagged") or "")
+            str(item.get(key) or "")
             for item in records
+            for key in ("risk_type", "why_flagged")
         )
         source_claim_ok = legal_claim_supported(
             legal_source_text,
@@ -750,9 +751,11 @@ def analyze_clause_risk(
             "unsupported_legal_claim": unsupported_legal_claim,
             "source_conflict": False,
             "source_tier": primary_source.get("source_tier"),
-            "jurisdiction": primary_source.get("jurisdiction"),
-            "effective_date": primary_source.get("effective_date"),
-            "contract_type": primary_source.get("contract_type"),
+            "jurisdiction": jurisdiction,
+            "contract_type": contract_type,
+            "source_jurisdiction": primary_source.get("jurisdiction"),
+            "source_effective_date": primary_source.get("effective_date"),
+            "source_contract_type": primary_source.get("contract_type"),
             "source_url": primary_source.get("source_url"),
             "source_title": primary_source.get("source_title"),
             "retrieval_date": current_retrieval_timestamp,
@@ -832,6 +835,9 @@ def analyze_clause_risk(
                 "jurisdiction": jurisdiction,
                 "effective_date": None,
                 "contract_type": contract_type,
+                "source_jurisdiction": None,
+                "source_effective_date": None,
+                "source_contract_type": None,
                 "source_url": None,
                 "source_title": None,
                 "retrieval_date": current_retrieval_timestamp,
