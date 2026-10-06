@@ -36,6 +36,7 @@ from ..core.rag.segmenter import is_definition
 from ..core.rag.validator import is_real_clause
 from ..core.risk.contract_checks import analyze_contract_checks
 from ..core.risk.contract_metadata import extract_contract_metadata
+from ..core.risk.contract_coverage import build_contract_coverage
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
 from ..core.risk.risk_engine import analyze_clause_risk
 from ..core.risk.risk_playbook import load_playbook
@@ -385,8 +386,16 @@ def _classify_contract(
                 "total": total_valid,
             })
 
-        # Phase 2 clause risk: each clause is checkpointed separately.
-        risk_index = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
+        # Deterministic clause-family coverage is stored separately from risk truth.
+        clause_rows_for_coverage = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
+        coverage_path = run.root / "contract_coverage.json"
+        if coverage_path.exists():
+            contract_coverage = run.read_json("contract_coverage.json", []) or []
+        else:
+            contract_coverage = build_contract_coverage(clause_rows_for_coverage, playbook)
+            run.write_json("contract_coverage.json", contract_coverage)
+
+        # Phase 2 clause risk: each clause is checkpointed separately.        risk_index = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
         for pos, item in enumerate(valid_items):
             idx = int(item["clause_index"])
             label = str(results_by_index[idx].get("predicted_label") or "")
@@ -590,6 +599,7 @@ def _classify_contract(
             "clauses": clauses_out,
             "contract_risk_assessment": assessment,
             "contract_metadata": extract_contract_metadata(filename, clauses_out),
+            "contract_coverage": contract_coverage,
             "run_dir": str(run.root),
         }
 
