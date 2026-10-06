@@ -1,6 +1,7 @@
 """End-to-end, resumable contract classification + risk analysis service."""
 from __future__ import annotations
 
+import csv
 import json
 from pathlib import Path
 from threading import Lock
@@ -462,6 +463,32 @@ def _classify_contract(
             assessment["document_findings"] = document_findings
             assessment["risk_only"] = build_risk_only_view(all_risk_findings + cross_findings + document_findings)
             run.write_json("contract_risk.json", assessment)
+
+        # Export stable CSV views in addition to the raw JSON/JSONL audit artifacts.
+        clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
+        clause_csv = run.path("clauses.csv")
+        with clause_csv.open("w", newline="", encoding="utf-8") as handle:
+            fields = [
+                "clause_index", "clause_text", "predicted_label", "classification_status",
+                "classification_confidence", "risk_status", "risk", "risk_type",
+                "risk_level", "risk_confidence", "risk_confidence_status",
+                "risk_severity_signal", "risk_severity_status", "why_flagged", "evidence",
+            ]
+            writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(clause_rows)
+
+        risk_csv = run.path("risk_findings.csv")
+        with risk_csv.open("w", newline="", encoding="utf-8") as handle:
+            fields = [
+                "finding_id", "clause_index", "predicted_label", "check_id", "question",
+                "answer", "risk_status", "risk_type", "risk_level", "raw_support_score",
+                "confidence", "confidence_status", "severity_signal", "severity_status",
+                "ground_truth_status", "why_flagged", "evidence",
+            ]
+            writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(all_risk_findings + cross_findings + document_findings)
 
         # Persist final status and a compact machine-readable result snapshot.
         clauses_out = []
