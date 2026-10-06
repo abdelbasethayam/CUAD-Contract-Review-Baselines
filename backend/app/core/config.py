@@ -84,7 +84,7 @@ MIN_RETRIEVAL_CONFIDENCE = float(os.getenv("MIN_RETRIEVAL_CONFIDENCE", "0.32"))
 HYBRID_COLLECTION = os.getenv("HYBRID_COLLECTION", "cuad_train_mpnet")
 HYBRID_INDEX_CACHE = os.getenv(
     "HYBRID_INDEX_CACHE",
-    str(PROJECT_ROOT / "output" / "cache" / "hybrid_train_index.npz"),
+    str(PROJECT_ROOT / "output" / "cache" / "cuad_train_mpnet_hybrid.npz"),
 )
 HYBRID_K = int(os.getenv("HYBRID_K", "30"))
 HYBRID_SHORTLIST = int(os.getenv("HYBRID_SHORTLIST", "8"))
