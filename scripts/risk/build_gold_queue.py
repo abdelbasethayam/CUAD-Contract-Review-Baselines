@@ -24,7 +24,7 @@ def sample_rows(source: Path, n: int, seed: int) -> list[dict]:
     df = load_clauses(source)
     playbook = load_playbook()
     pool = []
-    for row in df.to_dict("records"):
+    for clause_index, row in enumerate(df.to_dict("records")):
         checks = applicable_checks(playbook, row["clause_type"])
         for check in checks:
             sample_id = hashlib.sha256(
@@ -33,6 +33,7 @@ def sample_rows(source: Path, n: int, seed: int) -> list[dict]:
             pool.append({
                 "sample_id": sample_id,
                 "document_id": row["document_id"],
+                "clause_index": clause_index,
                 "clause_type": row["clause_type"],
                 "clause_text": row["clause_text"],
                 "check_id": check["id"],
