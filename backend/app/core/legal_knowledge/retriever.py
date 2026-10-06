@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Callable
 from threading import Lock
+from datetime import datetime, timezone
 
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -13,6 +14,7 @@ from qdrant_client import models
 from ..config import LEGAL_ALLOWED_SOURCE_TIERS, LEGAL_CONTRACT_TYPE, LEGAL_JURISDICTION, LEGAL_HYBRID_CANDIDATES, LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_TOP_K, LEGAL_RRF_K
 from ..rag.embedder import embed_queries, make_cohere_client
 from ..rag.retriever import make_qdrant_client
+from ..risk.evidence_policy import normalize_source_record, source_is_eligible
 
 ProgressCallback = Callable[[dict], None]
 
@@ -274,7 +276,9 @@ def retrieve_legal_guidance(
         must_filters.append(
             models.FieldCondition(
                 key="jurisdiction",
-                match=models.MatchValue(value=jurisdiction),
+                match=models.MatchAny(
+                    any=[jurisdiction, "unspecified", "international"],
+                ),
             )
         )
     category_filter = models.Filter(must=must_filters)
@@ -302,6 +306,7 @@ def retrieve_legal_guidance(
     )
     hybrid_hits = _rrf_merge(dense_hits, lexical_hits, int(LEGAL_RRF_K), int(top_k))
     results = []
+    retrieval_timestamp = datetime.now(timezone.utc).isoformat()
     for hit in hybrid_hits:
         payload = hit.get("payload") or {}
         source_contract_type = payload.get("contract_type")
@@ -323,7 +328,8 @@ def retrieve_legal_guidance(
             "jurisdiction": payload.get("jurisdiction"),
             "effective_date": payload.get("effective_date"),
             "contract_type": source_contract_type,
-            "retrieval_date": payload.get("retrieval_date"),
+            "retrieval_date": retrieval_timestamp,
+            "indexed_retrieval_date": payload.get("retrieval_date"),
             "access_type": payload.get("access_type"),
             "license_status": payload.get("license_status"),
             "supporting_quote_or_paraphrase": payload.get("supporting_quote_or_paraphrase"),
