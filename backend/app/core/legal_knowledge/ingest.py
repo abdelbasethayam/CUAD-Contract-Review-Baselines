@@ -39,8 +39,18 @@ DOCUMENTATION_ONLY_FILES = {
 }
 
 
-def parse_knowledge_document(path: Path) -> dict:
-    text = path.read_text(encoding="utf-8")
+def load_source_registry(path: Path = LEGAL_KNOWLEDGE_REGISTRY_PATH) -> dict[str, dict]:
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        str(item.get("source_name")): dict(item)
+        for item in (data.get("sources") or [])
+        if item.get("source_name")
+    }
+
+
+def parse_knowledge_document(path: Path, registry: dict[str, dict] | None = None) -> dict:    text = path.read_text(encoding="utf-8")
     metadata: dict[str, str] = {}
     body = text
 
@@ -52,6 +62,9 @@ def parse_knowledge_document(path: Path) -> dict:
             key, value = line.split(":", 1)
             metadata[key.strip()] = value.strip()
 
+    registry = registry or {}
+    registry_record = registry.get(metadata.get("source_name"), {})
+    metadata = {**registry_record, **metadata}
     missing = REQUIRED_METADATA - set(metadata)
     if missing:
         raise ValueError(f"{path} is missing metadata fields: {sorted(missing)}")
