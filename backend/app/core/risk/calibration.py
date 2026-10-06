@@ -32,7 +32,7 @@ def load_calibration(path: Path | None = None) -> dict:
 
 def calibrate_risk_probability(final_score: float | None, calibration: dict | None = None) -> float | None:
     data = calibration if calibration is not None else load_calibration()
-    if data.get("calibration_input") != "final_score_0_to_20":
+    if data.get("calibration_input") not in {"calibration_score_0_to_20_with_zero_for_nonpositive_or_unscored", "final_score_0_to_20"}:
         return None
     return _interp(final_score, data.get("risk_probability"))
 
