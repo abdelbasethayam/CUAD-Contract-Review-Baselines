@@ -10,7 +10,7 @@ import re
 
 from qdrant_client import models
 
-from ..config import LEGAL_ALLOWED_SOURCE_TIERS, LEGAL_CONTRACT_TYPE, LEGAL_JURISDICTION, LEGAL_HYBRID_CANDIDATES, LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_TOP_K, LEGAL_RRF_K, LEGAL_BM25_K1, LEGAL_BM25_B
+from ..config import LEGAL_ALLOWED_SOURCE_TIERS, LEGAL_CONTRACT_TYPE, LEGAL_JURISDICTION, LEGAL_HYBRID_CANDIDATES, LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_TOP_K, LEGAL_RRF_K
 from ..rag.embedder import embed_queries, make_cohere_client
 from ..rag.retriever import make_qdrant_client
 
@@ -72,6 +72,8 @@ CLAUSE_TYPE_TO_CATEGORY = {
 }
 
 _LEXICAL_LOCK = Lock()
+_BM25_K1 = 1.2
+_BM25_B = 0.75
 _LEXICAL_CACHE: dict[str, tuple[list[dict], dict, float, int]] = {}
 
 
@@ -128,7 +130,7 @@ def _bm25_search(query: str, qdrant_client, collection_name: str, limit: int, al
     query_terms = _tokenize(query)
     if not query_terms:
         return []
-    k1, b = float(LEGAL_BM25_K1), float(LEGAL_BM25_B)
+    k1, b = _BM25_K1, _BM25_B
     scored = []
     for record in records:
         if not _filter_payload(record["payload"], allowed_source_tiers, jurisdiction):
