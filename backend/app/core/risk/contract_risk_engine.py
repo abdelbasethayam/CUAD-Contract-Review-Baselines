@@ -8,6 +8,7 @@ from .knowledge_base import match_risk_domains
 from .risk_playbook import load_playbook
 from .risk_engine import _evidence_valid, _emit
 from .risk_scoring import aggregate_contract_triage
+from .calibration import calibrate_risk_probability, load_calibration
 
 ProgressCallback = Callable[[dict], None]
 
@@ -42,6 +43,12 @@ def aggregate_clause_risks(
         positive,
         contract_metadata=contract_metadata,
         deterministic_signals=deterministic_signals,
+    )
+    calibration = load_calibration()
+    overall_confidence = (
+        calibrate_risk_probability(triage.get("overall_score"), calibration)
+        if triage.get("overall_score") is not None
+        else None
     )
     insufficient = [f for f in findings if f.get("risk_status") == "INSUFFICIENT_EVIDENCE"]
 
@@ -93,8 +100,7 @@ def aggregate_clause_risks(
     if positive:
         status = "POTENTIAL_RISK"
         overall_raw_score = triage["overall_score"]
-        overall_confidence = None
-        confidence_status = "UNCALIBRATED"
+        confidence_status = "CALIBRATED" if overall_confidence is not None else "UNCALIBRATED"
         overall_risk = triage["overall_severity"]
         reason = (
             "One or more contract provisions contain evidence-supported "
