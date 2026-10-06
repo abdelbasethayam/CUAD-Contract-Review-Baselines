@@ -65,6 +65,12 @@ RISK_TEMPERATURE = float(os.getenv("RISK_TEMPERATURE", "0.0"))
 RISK_MAX_TOKENS = int(os.getenv("RISK_MAX_TOKENS", "1800"))
 RISK_SELF_CONSISTENCY_PASSES = int(os.getenv("RISK_SELF_CONSISTENCY_PASSES", "3"))
 RISK_CONTEXT_TOP_K = int(os.getenv("RISK_CONTEXT_TOP_K", "5"))
+RISK_USE_PLAYBOOK = os.getenv("RISK_USE_PLAYBOOK", "true").strip().lower() in {"1", "true", "yes"}
+RISK_USE_CONTEXT = os.getenv("RISK_USE_CONTEXT", "true").strip().lower() in {"1", "true", "yes"}
+RISK_USE_LEGAL_GUIDANCE = os.getenv("RISK_USE_LEGAL_GUIDANCE", "true").strip().lower() in {"1", "true", "yes"}
+RISK_ENABLE_CROSS_CLAUSE = os.getenv("RISK_ENABLE_CROSS_CLAUSE", "true").strip().lower() in {"1", "true", "yes"}
+RISK_ENABLE_DOCUMENT_CHECKS = os.getenv("RISK_ENABLE_DOCUMENT_CHECKS", "true").strip().lower() in {"1", "true", "yes"}
+
 RISK_GOLD_PATH = RISK_DATA_DIR / "gold" / "gold_annotations.csv"
 RISK_CALIBRATION_PATH = RISK_DATA_DIR / "gold" / "calibration.json"
 RISK_EXTERNAL_BENCHMARKS_PATH = RISK_DATA_DIR / "external_benchmarks.json"
