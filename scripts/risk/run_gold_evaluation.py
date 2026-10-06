@@ -149,13 +149,15 @@ def main() -> None:
                 "gold_severity": gold.get("adjudicated_severity", ""),
                 "gold_evidence": gold.get("adjudicated_evidence", ""),
                 "pred_risk": "YES" if prediction.get("risk") else "NO",
-                "pred_probability": prediction.get("confidence"),
+                "pred_probability": prediction.get("risk_probability"),
                 "raw_support_score": prediction.get("raw_support_score"),
                 "final_score": prediction.get("final_score"),
                 "calibration_score": (
                     prediction.get("final_score")
                     if prediction.get("final_score") is not None
                     else 0.0
+                    if prediction.get("risk_status") == "NO_RISK"
+                    else None
                 ),
                 "score_components": json.dumps(prediction.get("score_components") or {}, ensure_ascii=False),
                 "human_review_required": prediction.get("human_review_required"),
