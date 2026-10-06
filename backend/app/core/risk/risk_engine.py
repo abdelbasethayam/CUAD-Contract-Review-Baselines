@@ -16,12 +16,14 @@ from ..config import (
     RISK_USE_CONTEXT,
     RISK_USE_LEGAL_GUIDANCE,
     RISK_USE_PLAYBOOK,
+    LEGAL_KNOWLEDGE_TOP_K,
 )
 from ..rag.generator import call_ollama
 from .calibration import calibrate_risk_probability, calibrate_severity, load_calibration
 from .risk_playbook import applicable_checks, load_playbook, source_records
 from .contract_context import retrieve_related_contract_context
 from .knowledge_base import match_risk_domains, risk_guidance_for_prompt
+from ..legal_knowledge.retriever import retrieve_legal_guidance
 from .risk_detector import detect_legal_indicators
 
 ProgressCallback = Callable[[dict], None]
@@ -211,6 +213,7 @@ def analyze_clause_risk(
     progress_callback: ProgressCallback | None = None,
     playbook: dict | None = None,
     passes: int | None = None,
+    qdrant_client=None,
 ) -> list[dict]:
     playbook = playbook or load_playbook()
     calibration = load_calibration()
@@ -248,6 +251,39 @@ def analyze_clause_risk(
         if RISK_USE_LEGAL_GUIDANCE
         else []
     )
+    if RISK_USE_LEGAL_GUIDANCE:
+        try:
+            guidance.extend(
+                retrieve_legal_guidance(
+                    clause_text,
+                    clause_type,
+                    cohere_client=cohere_client,
+                    qdrant_client=qdrant_client,
+                    top_k=LEGAL_KNOWLEDGE_TOP_K,
+                    progress_callback=progress_callback,
+                )
+            )
+        except Exception as exc:
+            _emit(
+                progress_callback,
+                "legal_guidance",
+                f"Legal knowledge retrieval unavailable: {exc}",
+                clause_index=clause_index,
+            )
+    # Deduplicate guidance records before placing them in the prompt.
+    deduped = []
+    seen = set()
+    for item in guidance:
+        key = (
+            item.get("source_name"),
+            item.get("title"),
+            item.get("retrieved_text"),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+    guidance = deduped[: max(1, LEGAL_KNOWLEDGE_TOP_K * 2)]
     prompt = _prompt(
         clause_text=clause_text,
         clause_type=clause_type,
