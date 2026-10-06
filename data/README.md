@@ -45,10 +45,10 @@ span**) ready for embedding.
 
 | File | Format | Description |
 |---|---|---|
-| `dataset/splits/train/master_clauses_train_wide.csv` | wide | Reference copy of the train contracts |
-| `dataset/splits/test/master_clauses_test_wide.csv` | wide | Reference copy of the test contracts |
-| `dataset/splits/train/master_clauses_train.csv` | long | **Used downstream** — one row per clause span |
-| `dataset/splits/test/master_clauses_test.csv` | long | **Used downstream** — one row per clause span |
+| `data/splits/train/master_clauses_train_wide.csv` | wide | Reference copy of the train contracts |
+| `data/splits/test/master_clauses_test_wide.csv` | wide | Reference copy of the test contracts |
+| `data/splits/train/master_clauses_train.csv` | long | **Used downstream** — one row per clause span |
+| `data/splits/test/master_clauses_test.csv` | long | **Used downstream** — one row per clause span |
 
 **Run**
 
@@ -105,7 +105,7 @@ same length) — `build_qdrant.py` zips them back together by index.
 python scripts/embedding/embed_train.py
 ```
 
-Requires `dataset/splits/train/master_clauses_train.csv` (output of step 1).
+Requires `data/splits/train/master_clauses_train.csv` (output of step 1).
 
 ---
 
