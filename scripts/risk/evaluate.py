@@ -80,7 +80,7 @@ def severity_metrics(gold, pred) -> dict:
         return {}
     g = [x[0] for x in keep]
     p = [x[1] for x in keep]
-    labels = ["LOW", "MEDIUM", "HIGH"]
+    labels = ["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
     encoded = {label: i for i, label in enumerate(labels)}
     mae = float(np.mean([abs(encoded[a] - encoded[b]) for a, b in zip(g, p)]))
     return {
@@ -116,6 +116,16 @@ def evidence_f1(gold: list[str], pred: list[str]) -> dict:
     }
 
 
+def abstention_metrics(df: pd.DataFrame) -> dict:
+    if "risk_status" not in df.columns:
+        return {}
+    abstain = df["risk_status"].astype(str).str.upper().eq("INSUFFICIENT_EVIDENCE")
+    out = {"abstention_rate": float(abstain.mean()), "coverage": float((~abstain).mean()), "abstentions": int(abstain.sum())}
+    if abstain.any() and "gold_risk" in df.columns:
+        gold = df.loc[abstain, "gold_risk"].astype(str).str.upper()
+        out["positive_rate_among_abstentions"] = float(gold.isin(["YES", "1", "TRUE"]).mean())
+    return out
+
 def cluster_bootstrap(df: pd.DataFrame, metric_fn, n: int = 2000, seed: int = 42):
     rng = np.random.default_rng(seed)
     groups = df["contract_id"].astype(str).unique()
@@ -150,11 +160,16 @@ def main() -> None:
     parser.add_argument("--predictions", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=Path("data/risk/results/metrics.json"))
     parser.add_argument("--bootstrap", type=int, default=2000)
+    parser.add_argument("--partition", choices=["calibration", "development", "locked_test"], default="locked_test")
     parser.add_argument("--model-a", type=Path)
     parser.add_argument("--model-b", type=Path)
     args = parser.parse_args()
 
     df = pd.read_csv(args.predictions)
+    if "annotation_partition" in df.columns:
+        df = df[df["annotation_partition"].astype(str) == args.partition].copy()
+    else:
+        raise SystemExit("Evaluation requires annotation_partition metadata.")
     required = {"contract_id", "gold_risk", "pred_risk", "pred_probability"}
     missing = required - set(df.columns)
     if missing:
@@ -172,6 +187,7 @@ def main() -> None:
     result = {
         "binary": binary_metrics(y, pred, prob),
         "calibration": {"ece": ece(y, prob), "brier": float(brier_score_loss(y, prob))},
+        "abstention": abstention_metrics(df),
         "cluster_bootstrap_accuracy": cluster_bootstrap(
             scored_df,
             lambda x: float(accuracy_score(x["_y"], x["_p"])),
