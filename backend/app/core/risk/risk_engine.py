@@ -13,11 +13,15 @@ from ..config import (
     RISK_NUM_CTX,
     RISK_SELF_CONSISTENCY_PASSES,
     RISK_TEMPERATURE,
+    RISK_USE_CONTEXT,
+    RISK_USE_LEGAL_GUIDANCE,
+    RISK_USE_PLAYBOOK,
 )
 from ..rag.generator import call_ollama
 from .calibration import calibrate_risk_probability, calibrate_severity, load_calibration
 from .risk_playbook import applicable_checks, load_playbook, source_records
 from .contract_context import retrieve_related_contract_context
+from .knowledge_base import match_risk_domains, risk_guidance_for_prompt
 from .risk_detector import detect_legal_indicators
 
 ProgressCallback = Callable[[dict], None]
@@ -206,12 +210,17 @@ def analyze_clause_risk(
 ) -> list[dict]:
     playbook = playbook or load_playbook()
     calibration = load_calibration()
-    checks = applicable_checks(playbook, clause_type)
+    checks = applicable_checks(playbook, clause_type) if RISK_USE_PLAYBOOK else []
     if not checks:
-        return []
+        checks = [{
+            "id": "OPEN-RISK-1",
+            "question": "Does this clause contain a concrete customer/buyer exposure that warrants review?",
+            "flag_if": "Yes, with exact evidence",
+            "sources": [],
+        }]
 
     context = []
-    if query_vector and contract_clauses:
+    if RISK_USE_CONTEXT and query_vector and contract_clauses:
         context = retrieve_related_contract_context(
             target_clause_index=clause_index,
             target_vector=query_vector,
