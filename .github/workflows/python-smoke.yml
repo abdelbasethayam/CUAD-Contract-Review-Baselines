@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install runtime dependencies
-        run: python -m pip install -q fastapi pydantic requests numpy pandas scikit-learn scipy qdrant-client cohere python-dotenv
+        run: python -m pip install -q fastapi pydantic requests numpy pandas scikit-learn scipy qdrant-client cohere python-dotenv pytest
       - name: Compile Python sources
         run: python -m compileall -q backend scripts data/scripts
       - name: Import Phase 2 modules
@@ -30,3 +30,6 @@ jobs:
           assert _severity_signal({"exposure_magnitude": 4, "likelihood_uncertainty": 3, "scope_duration": 2, "control_weakness": 1}) == 0.5
           print("Phase 2 imports OK")
           PY
+
+      - name: Run Phase 2 scientific hardening tests
+        run: pytest -q backend/tests/test_phase2_scientific_hardening.py
