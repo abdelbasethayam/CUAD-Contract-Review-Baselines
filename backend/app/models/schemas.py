@@ -65,6 +65,10 @@ class ContractRiskAssessment(BaseModel):
 
 class ContractMetadata(BaseModel):
     name: str | None = None
+    document_hash: str | None = None
+    document_version: str | None = None
+    contract_type: str | None = None
+    jurisdiction_candidates: list[str] = Field(default_factory=list)
     parties: list[str] = Field(default_factory=list)
     agreement_date: str | None = None
     effective_date: str | None = None
