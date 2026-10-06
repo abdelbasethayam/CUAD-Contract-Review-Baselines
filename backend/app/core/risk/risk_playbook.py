@@ -68,6 +68,10 @@ def normalize_playbook(raw: dict) -> dict:
     normalized = {
         "schema_version": 3,
         "source_version": str(raw.get("version") or RISK_PLAYBOOK_VERSION),
+        "owner": str(raw.get("owner") or "research-team"),
+        "effective_date": str(raw.get("effective_date") or "") or None,
+        "approval_status": str(raw.get("approval_status") or "DRAFT").upper(),
+        "approved_by": str(raw.get("approved_by") or "") or None,
         "title": str(raw.get("title") or "Commercial Contract Risk Playbook"),
         "perspective": str(raw.get("perspective") or "customer_buyer"),
         "policy_tier": "D",
