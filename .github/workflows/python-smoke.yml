@@ -30,3 +30,8 @@ jobs:
           assert _severity_signal({"exposure_magnitude": 4, "likelihood_uncertainty": 3, "scope_duration": 2, "control_weakness": 1}) == 0.5
           print("Phase 2 imports OK")
           PY
+
+      - name: Run Phase 2 scientific hardening tests
+        env:
+          PYTHONPATH: .
+        run: pytest -q backend/tests/test_phase2_scientific_hardening.py
