@@ -179,11 +179,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--collection", default=LEGAL_KNOWLEDGE_COLLECTION)
     parser.add_argument("--path", type=Path, default=LEGAL_KNOWLEDGE_PATH)
+    parser.add_argument("--registry", type=Path, default=LEGAL_KNOWLEDGE_REGISTRY_PATH)
     args = parser.parse_args()
 
     count = ingest_legal_knowledge(
         collection_name=args.collection,
         base_path=args.path,
+        registry_path=args.registry,
     )
     print(f"Ingested {count} legal knowledge chunks into {args.collection}.")
 
