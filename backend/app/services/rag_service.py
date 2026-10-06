@@ -225,6 +225,8 @@ def _classify_contract(
         else:
             segments = None
 
+        segment_by_index = {int(item["clause_index"]): item for item in segments_json}
+
         if not segments_json:
             raise ValueError(
                 "No clauses were detected. The document may be empty, image-only, "
