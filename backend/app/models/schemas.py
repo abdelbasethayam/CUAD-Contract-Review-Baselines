@@ -20,6 +20,7 @@ class RiskFinding(BaseModel):
     confidence: float | None = None
     confidence_status: str = "UNCALIBRATED"
     severity_status: str = "UNCALIBRATED"
+    severity_probabilities: dict[str, float] = Field(default_factory=dict)
     ground_truth_status: str = "NOT_AVAILABLE"
     why_flagged: str = ""
     evidence: str = ""
