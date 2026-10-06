@@ -253,12 +253,22 @@ def extract_legal_information(clause_text: str) -> dict[str, list[str]]:
     }
 
 
-def call_ollama(prompt: str, *, model: str | None = None) -> str:
+def call_ollama(
+    prompt: str,
+    *,
+    model: str | None = None,
+    temperature: float | None = None,
+    num_ctx: int | None = None,
+    think: bool | None = None,
+    max_tokens: int | None = None,
+) -> str:
     return call_thinking_ollama(
         prompt,
         model=model or OLLAMA_MODEL,
-        temperature=CLASSIFIER_TEMPERATURE,
-        num_ctx=OLLAMA_NUM_CTX,
+        temperature=CLASSIFIER_TEMPERATURE if temperature is None else float(temperature),
+        num_ctx=OLLAMA_NUM_CTX if num_ctx is None else int(num_ctx),
+        think=think,
+        max_tokens=max_tokens,
     )
 
 
