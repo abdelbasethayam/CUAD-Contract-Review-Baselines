@@ -106,7 +106,7 @@ def main() -> None:
                     "vector": vector_map.get(
                         (str(item["document_id"]), str(stable_index)),
                         [],
-                    ).tolist() if isinstance(vector_map.get((str(item["document_id"]), str(pos))), np.ndarray) else [],
+                    ).tolist() if isinstance(vector_map.get((str(item["document_id"]), str(stable_index))), np.ndarray) else [],
                 })
 
             key = (str(gold["document_id"]), str(gold["clause_index"]))
