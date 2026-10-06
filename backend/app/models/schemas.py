@@ -36,6 +36,7 @@ class RiskFinding(BaseModel):
     final_score: int | None = None
     score_override_reason: str | None = None
     human_review_required: bool = True
+    human_review_status: str = "NOT_REVIEWED"
     review_escalation: str = "STANDARD_REVIEW"
     severity_score: float | None = None
     source_tier: str | None = None
