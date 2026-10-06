@@ -2,50 +2,43 @@
 
 ## Risk playbook
 
-The team commercial risk checklist is treated as a **versioned policy/playbook**, not ground-truth labels.
+The committed Phase 2 playbook is the runnable default at:
+`data/risk/commercial_clause_risk_playbook.json`.
 
-The supplied source contains 24 clause types, 63 clause-specific checks, 10 cross-clause checks, 3 document-level checks, and 7 cited sources.
+It covers **37 clause-risk targets**: all 36 substantive CUAD v1 categories after excluding the five metadata fields, plus the supplemental `Indemnification` risk category. The current artifact contains 101 clause-specific checks. The playbook is policy/guidance, not ground-truth labels.
 
-Import it:
+If you later replace the playbook, keep the same path or set `RISK_PLAYBOOK_PATH` to the replacement.
+
+## Legal guidance knowledge base
+
+The local legal-knowledge files are stored under `backend/data/legal_knowledge/` and are ingested into a separate Qdrant collection so guidance is not mixed with CUAD examples.
+
+Run from the repository root:
 
 ```bash
-python scripts/risk/import_playbook.py /path/to/commercial_clause_risk_checklists.json
+python -m backend.app.core.legal_knowledge.ingest
 ```
 
-The importer preserves check IDs, questions, flag conditions, source IDs, and source metadata, then writes a deterministic `playbook_hash`.
-
-The source archive can also be supplied directly when a compatible RAR extractor is installed:
-
-```bash
-python scripts/risk/import_playbook.py /path/to/risk-materials.rar
-```
+This requires a configured `COHERE_API_KEY`. Existing `data/qdrant_local` contains a prebuilt `legal_knowledge` collection, so ingestion is only needed when that collection is absent, stale, or intentionally replaced.
 
 ## Ground truth
 
 A model finding is **not gold ground truth** merely because it matches the playbook.
 
-Create a human annotation queue from the training split:
+The committed `data/risk/gold/gold_annotations.csv` is a 300-task human-annotation template. Two annotators should independently fill `annotator_1` and `annotator_2`; an adjudicator then fills the `adjudicated_*` columns. Keep the locked test partition untouched.
+
+Fit calibration only from adjudicated calibration rows:
 
 ```bash
-python scripts/risk/build_gold_queue.py --n 300
+python scripts/risk/fit_calibration.py --csv data/risk/gold/gold_annotations.csv
 ```
 
-Two annotators should independently fill `annotator_1` and `annotator_2`; an adjudicator then fills the `adjudicated_*` columns. Keep these contracts outside the final held-out test set.
-
-Recommended gold fields are binary risk, risk type, severity, exact evidence, and adjudication notes.
-
-Fit calibration only from adjudicated rows:
-
-```bash
-python scripts/risk/fit_calibration.py --csv data/risk/gold/adjudicated_predictions.csv
-```
-
-Only after calibration exists should the runtime expose calibrated confidence or severity.
+Do not report calibrated confidence or severity until human adjudication has populated sufficient calibration rows.
 
 ## External benchmarks
 
-External risk corpora are benchmark references, not silent additions to CUAD.
+**ContractEval** is the closest existing published benchmark for clause-level legal-risk identification in commercial contracts. It reuses CUAD and evaluates whether models can extract relevant risk-related spans. It is a useful methodological reference and external comparison, but it is **not** a direct gold standard for your buyer-side risk taxonomy because its task/output protocol differs from this repository.
 
-The litigation-derived `ye-sylvette-sun/contract-risk` corpus has a different target: positives are clauses construed by a U.S. federal court. It must not be relabeled as customer/buyer ground truth.
+**ContractNLI** is useful for a complementary document-level evidence/NLI check, particularly for hypotheses about contractual obligations and evidence spans. It should not be relabeled as risk ground truth.
 
-Synthetic risk corpora are useful for robustness and prompt development, but they should not replace manually adjudicated gold.
+Synthetic risk datasets can be used for robustness/prompt development, but they should not replace the human-adjudicated gold set.
