@@ -29,7 +29,8 @@ def annotation_partition(sample_id: str) -> str:
     return "locked_test"
 
 
-def sample_rows(source: Path, n: int, seed: int) -> list[dict]:    df = load_clauses(source)
+def sample_rows(source: Path, n: int, seed: int) -> list[dict]:
+    df = load_clauses(source)
     playbook = load_playbook()
     pool = []
     for row in df.to_dict("records"):
