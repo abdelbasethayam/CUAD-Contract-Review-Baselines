@@ -48,6 +48,7 @@ def binary_metrics(y, pred, prob) -> dict:
         "recall": float(recall),
         "specificity": float(tn / (tn + fp)) if tn + fp else 0.0,
         "f1": float(f1),
+        "macro_f1": float(f1_score(y, pred, average="macro", zero_division=0)),
         "mcc": float(matthews_corrcoef(y, pred)),
         "tp": int(tp), "tn": int(tn), "fp": int(fp), "fn": int(fn),
     }
@@ -167,21 +168,49 @@ def main() -> None:
     pred = pred.loc[mask].to_numpy(dtype=int)
     prob = df["pred_probability"].astype(float).to_numpy()
 
+    scored_df = df.assign(_y=y, _p=pred)
     result = {
         "binary": binary_metrics(y, pred, prob),
         "calibration": {"ece": ece(y, prob), "brier": float(brier_score_loss(y, prob))},
-        "bootstrap_accuracy": cluster_bootstrap(
-            df.assign(_y=y, _p=pred),
+        "cluster_bootstrap_accuracy": cluster_bootstrap(
+            scored_df,
             lambda x: float(accuracy_score(x["_y"], x["_p"])),
             n=args.bootstrap,
         ),
+        "cluster_bootstrap_f1": cluster_bootstrap(
+            scored_df,
+            lambda x: float(f1_score(x["_y"], x["_p"], zero_division=0)),
+            n=args.bootstrap,
+        ),
     }
+    # Optional contract-level view: a contract is positive when any clause is
+    # positive, avoiding artificial inflation from many clauses in one contract.
+    contract_df = (
+        df.assign(_gold=y, _pred=pred)
+        .groupby("contract_id", as_index=False)
+        .agg(gold_risk=("_gold", "max"), pred_risk=("_pred", "max"))
+    )
+    if len(contract_df) >= 2 and contract_df["gold_risk"].nunique() == 2:
+        result["contract_level"] = {
+            "n_contracts": int(len(contract_df)),
+            "accuracy": float(accuracy_score(contract_df["gold_risk"], contract_df["pred_risk"])),
+            "macro_f1": float(f1_score(contract_df["gold_risk"], contract_df["pred_risk"], average="macro", zero_division=0)),
+            "balanced_accuracy": float(balanced_accuracy_score(contract_df["gold_risk"], contract_df["pred_risk"])),
+        }
 
     if {"gold_severity", "pred_severity"} <= set(df.columns):
         result["severity"] = severity_metrics(
             df["gold_severity"].tolist(),
             df["pred_severity"].tolist(),
         )
+
+    if {"annotator_1", "annotator_2"} <= set(df.columns):
+        ann = df[["annotator_1", "annotator_2"]].dropna()
+        ann = ann[(ann["annotator_1"].astype(str).str.strip() != "") & (ann["annotator_2"].astype(str).str.strip() != "")]
+        if len(ann):
+            result["inter_annotator_cohen_kappa"] = float(
+                cohen_kappa_score(ann["annotator_1"], ann["annotator_2"])
+            )
 
     if {"gold_evidence", "evidence"} <= set(df.columns):
         result["evidence"] = evidence_f1(
@@ -199,6 +228,25 @@ def main() -> None:
         aa = merged["pred_risk_a"].astype(str).str.upper().map({"YES": 1, "NO": 0, "1": 1, "0": 0, "TRUE": 1, "FALSE": 0}).to_numpy()
         bb = merged["pred_risk_b"].astype(str).str.upper().map({"YES": 1, "NO": 0, "1": 1, "0": 0, "TRUE": 1, "FALSE": 0}).to_numpy()
         result["paired_mcnemar"] = mcnemar_exact(aa, bb, yy)
+        merged["_a_correct"] = aa == yy
+        merged["_b_correct"] = bb == yy
+        groups = merged["contract_id"].astype(str).unique()
+        rng = np.random.default_rng(42)
+        diffs = []
+        for _ in range(args.bootstrap):
+            sampled = rng.choice(groups, size=len(groups), replace=True)
+            boot = pd.concat(
+                [merged[merged["contract_id"].astype(str) == g] for g in sampled],
+                ignore_index=True,
+            )
+            diffs.append(float(boot["_b_correct"].mean() - boot["_a_correct"].mean()))
+        result["paired_cluster_bootstrap_accuracy_difference"] = {
+            "estimate_b_minus_a": float(merged["_b_correct"].mean() - merged["_a_correct"].mean()),
+            "ci95_low": float(np.quantile(diffs, 0.025)),
+            "ci95_high": float(np.quantile(diffs, 0.975)),
+            "n_bootstrap": args.bootstrap,
+            "unit": "contract",
+        }
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
