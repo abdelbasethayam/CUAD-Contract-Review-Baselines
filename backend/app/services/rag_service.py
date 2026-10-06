@@ -26,6 +26,7 @@ from ..core.rag.clause_segmenter import segment_document
 from ..core.rag.segmenter import is_definition
 from ..core.rag.validator import is_real_clause
 from ..core.risk.contract_checks import analyze_contract_checks
+from ..core.risk.contract_metadata import extract_contract_metadata
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
 from ..core.risk.risk_engine import analyze_clause_risk
 from ..core.risk.risk_playbook import load_playbook
@@ -456,10 +457,7 @@ def _classify_contract(
                 "total_clauses": len(segments_json),
                 "clauses": clauses_out,
                 "contract_risk_assessment": assessment,
-                "contract_metadata": {
-                    "source_filename": filename,
-                    "name": filename,
-                },
+                "contract_metadata": extract_contract_metadata(filename, clauses_out),
             },
         )
         mark_run_complete(
@@ -480,10 +478,7 @@ def _classify_contract(
             "filename": filename,
             "clauses": clauses_out,
             "contract_risk_assessment": assessment,
-            "contract_metadata": {
-                "source_filename": filename,
-                "name": filename,
-            },
+            "contract_metadata": extract_contract_metadata(filename, clauses_out),
             "run_dir": str(run.root),
         }
 
