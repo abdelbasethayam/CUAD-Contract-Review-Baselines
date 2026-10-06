@@ -20,9 +20,11 @@ The split is contract-disjoint, so no contract identifier appears on both sides.
 
 ## Critical annotation finding
 
-The same normalized text inside one contract can carry more than one CUAD category. In this source:
+The same context text can legitimately appear under more than one CUAD category. **This is not an annotation conflict.** The official CUAD datasheet states that each category (context and answer) is independent and explicitly gives examples where one clause may correspond to multiple categories, including License Grant with Exclusive/Non-Transferable/Affiliate License categories. citeturn546339search0turn546339search18
 
-- 770 same-contract/same-text groups contain multiple labels.
+A direct audit of the original CSV found:
+
+- 784 same-contract/same-text groups contain multiple labels.
 - 1,719 substantive rows (19.80%) are in such groups.
 - A forced single-label classifier has an exact same-text theoretical ceiling of about 87.43% on the test split under the current 1-label-per-row formulation.
 
