@@ -98,12 +98,13 @@ def main() -> None:
 
             doc_rows = source_by_doc.get(str(gold["document_id"]), [])
             contract_clauses = []
-            for pos, item in enumerate(doc_rows):
+            for item in doc_rows:
+                stable_index = int(item["clause_index"])
                 contract_clauses.append({
-                    "clause_index": pos,
+                    "clause_index": stable_index,
                     "clause_text": item["clause_text"],
                     "vector": vector_map.get(
-                        (str(item["document_id"]), str(pos)),
+                        (str(item["document_id"]), str(stable_index)),
                         [],
                     ).tolist() if isinstance(vector_map.get((str(item["document_id"]), str(pos))), np.ndarray) else [],
                 })
@@ -140,6 +141,7 @@ def main() -> None:
 
             record = {
                 "sample_id": sample_id,
+                "annotation_partition": gold.get("annotation_partition", args.partition),
                 "contract_id": gold["document_id"],
                 "clause_index": int(gold["clause_index"]),
                 "check_id": gold["check_id"],
@@ -165,7 +167,7 @@ def main() -> None:
 
     rows = list(done.values())
     fieldnames = [
-        "sample_id", "contract_id", "clause_index", "check_id",
+        "sample_id", "annotation_partition", "contract_id", "clause_index", "check_id",
         "gold_risk", "gold_severity", "gold_evidence",
         "pred_risk", "pred_probability", "raw_support_score",
         "pred_severity", "severity_signal", "evidence",
