@@ -368,6 +368,8 @@ def analyze_clause_risk(
         )
         calibrated_severity = calibrate_severity(severity_signal, calibration)
         source_ids = checks_by_id[check_id].get("sources", [])
+        supporting_sources = source_records(playbook, source_ids)
+        primary_source = supporting_sources[0] if supporting_sources else {}
         findings.append(
             {
                 "clause_index": clause_index,
@@ -411,9 +413,19 @@ def analyze_clause_risk(
                     representative.get("why_flagged") or "No evidence-supported issue identified by the check."
                 ),
                 "evidence": evidence if evidence_ok and status == "POTENTIAL_RISK" else "",
-                "supporting_sources": source_records(playbook, source_ids),
+                "supporting_sources": supporting_sources,
+                "legal_guidance_sources": guidance,
                 "related_contract_context": context,
-                "severity_factors": representative.get("severity_factors") or {},
+                "severity_factors": representative.get("severity_factors") or representative.get("score_components") or {},
+                "source_tier": primary_source.get("source_tier"),
+                "jurisdiction": primary_source.get("jurisdiction"),
+                "effective_date": primary_source.get("effective_date"),
+                "contract_type": primary_source.get("contract_type"),
+                "source_url": primary_source.get("source_url"),
+                "source_title": primary_source.get("source_title"),
+                "retrieval_date": primary_source.get("retrieval_date"),
+                "supporting_quote_or_paraphrase": primary_source.get("supporting_quote_or_paraphrase"),
+                "transferability": primary_source.get("transferability"),
             }
         )
 
