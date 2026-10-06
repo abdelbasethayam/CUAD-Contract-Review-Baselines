@@ -57,6 +57,18 @@ def _emit(
 def _trace_callback(run, callback: ProgressCallback | None):
     def emit(event: dict) -> None:
         run.append_jsonl("trace.jsonl", event)
+        run.write_json(
+            "status.json",
+            {
+                "analysis_id": run.analysis_id,
+                "status": "RUNNING",
+                "last_stage": event.get("stage", "pipeline"),
+                "last_message": event.get("message", ""),
+                "current": event.get("current"),
+                "total": event.get("total"),
+                "clause_index": event.get("clause_index"),
+            },
+        )
         _emit(
             callback,
             event.get("stage", "pipeline"),
