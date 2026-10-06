@@ -31,3 +31,5 @@ qdrant_db/
 # Logs
 *.log
 logs/
+# Deterministic, generated CUAD model-ready derivatives
+data/processed/classification/
