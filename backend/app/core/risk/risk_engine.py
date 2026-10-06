@@ -370,12 +370,20 @@ def analyze_clause_risk(
                 "risk_status": status,
                 "risk_type": representative.get("risk_type") if status == "POTENTIAL_RISK" else None,
                 "risk": status == "POTENTIAL_RISK",
-                "risk_level": calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else None,
+                "risk_level": (calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else (score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None)),
                 "raw_support_score": raw_support,
+                "severity_score": severity_score,
                 "severity_signal": severity_signal,
+                "score_components": score_details["score_components"] if score_details else {},
+                "base_score": score_details["base_score"] if score_details else 0,
+                "score_modifiers": score_details["modifiers"] if score_details else [],
+                "final_score": score_details["final_score"] if score_details else 0,
+                "score_override_reason": score_details["override_reason"] if score_details else None,
+                "human_review_required": score_details["human_review_required"] if score_details else True,
+                "review_escalation": score_details["escalation"] if score_details else "LEGAL_REVIEW",
                 "confidence": calibrated_confidence,
                 "confidence_status": "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED",
-                "severity_status": "CALIBRATED" if calibrated_severity else "UNCALIBRATED",
+                "severity_status": "CALIBRATED" if calibrated_severity else ("RULE_BASED_TRIAGE" if score_details else "UNCALIBRATED"),
                 "severity_probabilities": (
                     calibrated_severity["probabilities"] if calibrated_severity else {}
                 ),
@@ -388,6 +396,7 @@ def analyze_clause_risk(
                     "passes": len(records),
                     "agreement": agreement,
                     "deterministic_indicators": indicators.get("matched_indicators", []),
+                    "score_version": score_details["score_version"] if score_details else None,
                 },
                 "why_flagged": representative.get("why_flagged") if status == "POTENTIAL_RISK" else (
                     representative.get("why_flagged") or "No evidence-supported issue identified by the check."
