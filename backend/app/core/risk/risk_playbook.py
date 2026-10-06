@@ -31,8 +31,20 @@ def normalize_playbook(raw: dict) -> dict:
             checklist.append(
                 {
                     "id": str(item.get("id") or "").strip(),
+                    "risk_domain": str(item.get("risk_domain") or "").strip() or None,
+                    "risk_type": str(item.get("risk_type") or "").strip() or None,
+                    "perspective": str(item.get("perspective") or raw.get("perspective") or "customer_buyer"),
+                    "applies_when": item.get("applies_when") or [],
                     "question": str(item.get("question") or "").strip(),
                     "flag_if": str(item.get("flag_if") or "").strip(),
+                    "do_not_flag_if": item.get("do_not_flag_if") or [],
+                    "required_evidence": item.get("required_evidence") or [],
+                    "evidence_location": str(item.get("evidence_location") or "clause").strip(),
+                    "severity_factors": item.get("severity_factors") or [],
+                    "dependencies": item.get("dependencies") or [],
+                    "jurisdiction_scope": item.get("jurisdiction_scope") or ["unspecified"],
+                    "rationale": str(item.get("rationale") or "").strip() or None,
+                    "version": str(item.get("version") or raw.get("version") or RISK_PLAYBOOK_VERSION),
                     "sources": [str(x) for x in (item.get("sources") or [])],
                 }
             )
@@ -69,8 +81,13 @@ def normalize_playbook(raw: dict) -> dict:
             {
                 "id": str(item.get("id") or "").strip(),
                 "pair": [str(x) for x in (item.get("pair") or [])],
+                "risk_domain": str(item.get("risk_domain") or "").strip() or None,
+                "risk_type": str(item.get("risk_type") or "").strip() or None,
                 "question": str(item.get("question") or "").strip(),
                 "flag_if": str(item.get("flag_if") or "").strip(),
+                "do_not_flag_if": item.get("do_not_flag_if") or [],
+                "dependencies": item.get("dependencies") or [],
+                "jurisdiction_scope": item.get("jurisdiction_scope") or ["unspecified"],
                 "sources": [str(x) for x in (item.get("sources") or [])],
             }
             for item in (raw.get("cross_clause_checks") or [])
@@ -79,8 +96,12 @@ def normalize_playbook(raw: dict) -> dict:
         "document_level_checks": [
             {
                 "id": str(item.get("id") or "").strip(),
+                "risk_domain": str(item.get("risk_domain") or "").strip() or None,
+                "risk_type": str(item.get("risk_type") or "").strip() or None,
                 "question": str(item.get("question") or "").strip(),
                 "flag_if": str(item.get("flag_if") or "").strip(),
+                "dependencies": item.get("dependencies") or [],
+                "jurisdiction_scope": item.get("jurisdiction_scope") or ["unspecified"],
                 "sources": [str(x) for x in (item.get("sources") or [])],
             }
             for item in (raw.get("document_level_checks") or [])
