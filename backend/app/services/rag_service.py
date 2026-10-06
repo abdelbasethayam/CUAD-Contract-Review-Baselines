@@ -230,6 +230,7 @@ def _classify_contract(
             segments = None
 
         segment_by_index = {int(item["clause_index"]): item for item in segments_json}
+        full_contract_text = "\n".join(str(item.get("text") or "") for item in segments_json)
 
         if not segments_json:
             raise ValueError(
@@ -365,6 +366,7 @@ def _classify_contract(
                 section_path=segment_info.get("heading") or segment_info.get("clause_id"),
                 page_start=segment_info.get("page_start"),
                 page_end=segment_info.get("page_end"),
+                full_contract_text=full_contract_text,
             )
             row = {
                 "clause_index": idx,
