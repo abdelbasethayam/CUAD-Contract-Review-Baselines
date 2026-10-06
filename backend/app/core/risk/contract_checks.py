@@ -120,7 +120,7 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
             for ev in item.get("evidence") or []:
                 if isinstance(ev, dict) and str(ev.get("quote") or "").strip():
                     evidence.append({"clause_id": ev.get("clause_id"), "quote": str(ev["quote"]).strip()})
-            factors = item.get("severity_factors") if isinstance(item.get("severity_factors"), dict) else {}
+            factors = item.get("score_components") if isinstance(item.get("score_components"), dict) else (item.get("severity_factors") if isinstance(item.get("severity_factors"), dict) else {})
             out.append({
                 "check_id": check_id,
                 "answer": answer,
@@ -129,11 +129,8 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
                 "clause_ids": ids,
                 "evidence": evidence,
                 "why_flagged": str(item.get("why_flagged") or "").strip(),
-                "severity_factors": {
-                    key: (
-                        float(float(factors[key]) if str(factors.get(key)).replace(".", "", 1).isdigit()
-                        and 0 <= float(factors[key]) <= 5 else None
-                    )
+                "score_components": {
+                    key: (float(factors[key]) if str(factors.get(key)).replace(".", "", 1).isdigit() and 0 <= float(factors[key]) <= 5 else None)
                     for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")
                 },
             })
