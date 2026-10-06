@@ -360,17 +360,38 @@ def _classify_contract(
             )
 
             segment_info = segment_by_index.get(idx, {})
+            structure = extract_clause_structure(
+                item["clause_text"],
+                section_path=segment_info.get("heading") or segment_info.get("clause_id"),
+                page_start=segment_info.get("page_start"),
+                page_end=segment_info.get("page_end"),
+            )
             row = {
                 "clause_index": idx,
                 "clause_id": segment_info.get("clause_id"),
                 "clause_text": item["clause_text"],
-                "section_path": segment_info.get("clause_id"),
-                "page_start": segment_info.get("page_start"),
-                "page_end": segment_info.get("page_end"),
+                "section_path": structure.get("section_path"),
+                "page_start": structure.get("page_start"),
+                "page_end": structure.get("page_end"),
                 "parent_clause": segment_info.get("parent_clause"),
                 "depth": segment_info.get("depth"),
                 "source_blocks": segment_info.get("source_blocks", []),
                 "heading": segment_info.get("heading"),
+                "defined_terms_used": structure.get("defined_terms_used", []),
+                "linked_sections": structure.get("linked_sections", []),
+                "parties_affected": [],
+                "beneficiary": None,
+                "direction_of_obligation": structure.get("direction_of_obligation"),
+                "transaction_role": structure.get("transaction_role"),
+                "commercial_purpose": None,
+                "operational_trigger": None,
+                "scope": structure.get("scope", {}),
+                "rights_and_duties": structure.get("rights_and_duties", []),
+                "exceptions_carveouts": structure.get("exceptions_carveouts", []),
+                "economic_effect": {},
+                "dependencies": structure.get("dependencies", []),
+                "dependency_missing": structure.get("dependency_missing", []),
+                "structure_status": structure.get("structure_status", "DETERMINISTIC_PARTIAL"),
                 "predicted_label": result["predicted_label"],
                 "clause_type": result["predicted_label"],
                 "retrieved_labels": result.get("retrieved_labels", []),
@@ -417,6 +438,16 @@ def _classify_contract(
         else:
             contract_coverage = build_contract_coverage(clause_rows_for_coverage, playbook)
             run.write_json("contract_coverage.json", contract_coverage)
+
+        contract_metadata = extract_contract_metadata(
+            filename,
+            clause_rows_for_coverage,
+            document_hash=(run.read_json("manifest.json", {}) or {}).get("source", {}).get("sha256"),
+            document_version="1",
+        )
+        contract_jurisdiction = (
+            contract_metadata.get("jurisdiction_candidates") or [None]
+        )[0]
 
         # Phase 2 clause risk: each clause is checkpointed separately.
         risk_index = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
