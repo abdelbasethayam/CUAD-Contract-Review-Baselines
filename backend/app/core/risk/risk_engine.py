@@ -80,6 +80,7 @@ def _prompt(
     indicators: dict,
     context: list[dict],
     playbook: dict,
+    guidance: list[dict] | None = None,
 ) -> str:
     checklist = [
         {
@@ -117,6 +118,9 @@ RELATED SAME-CONTRACT CLAUSES
 
 PLAYBOOK CHECKS
 {json.dumps(checklist, indent=2, ensure_ascii=False)}
+
+LEGAL GUIDANCE (not contract evidence)
+{json.dumps(guidance or [], indent=2, ensure_ascii=False)}
 
 Return:
 {{
@@ -228,7 +232,22 @@ def analyze_clause_risk(
             top_k=RISK_CONTEXT_TOP_K,
         )
 
-    indicators = detect_legal_indicators(clause_text, clause_type)
+    indicators = (
+        detect_legal_indicators(clause_text, clause_type)
+        if RISK_USE_LEGAL_GUIDANCE
+        else {"matched_indicators": []}
+    )
+    guidance = (
+        risk_guidance_for_prompt(
+            match_risk_domains(
+                clause_text,
+                clause_type,
+                indicators.get("matched_indicators", []),
+            )
+        )
+        if RISK_USE_LEGAL_GUIDANCE
+        else []
+    )
     prompt = _prompt(
         clause_text=clause_text,
         clause_type=clause_type,
@@ -236,6 +255,7 @@ def analyze_clause_risk(
         indicators=indicators,
         context=context,
         playbook=playbook,
+        guidance=guidance,
     )
 
     n_passes = max(1, int(passes if passes is not None else RISK_SELF_CONSISTENCY_PASSES))
