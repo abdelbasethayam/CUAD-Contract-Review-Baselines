@@ -17,10 +17,14 @@ def _valid_positive(findings: list[dict]) -> list[dict]:
         for finding in findings
         if finding.get("risk_status") == "POTENTIAL_RISK"
         and bool(finding.get("risk"))
-        and _evidence_valid(
-            str(finding.get("evidence") or ""),
-            str(finding.get("clause_text") or ""),
-            finding.get("related_contract_context") or [],
+        and (
+            bool(finding.get("evidence"))
+            if finding.get("scope") in {"cross_clause", "document"}
+            else _evidence_valid(
+                str(finding.get("evidence") or ""),
+                str(finding.get("clause_text") or ""),
+                finding.get("related_contract_context") or [],
+            )
         )
     ]
 
@@ -33,8 +37,8 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
     domain_items = defaultdict(list)
     for finding in positive:
         matches = match_risk_domains(
-            str(finding.get("clause_text") or ""),
-            str(finding.get("predicted_label") or ""),
+            str(finding.get("clause_text") or finding.get("risk_type") or finding.get("question") or ""),
+            str(finding.get("predicted_label") or finding.get("risk_type") or ""),
             finding.get("provenance", {}).get("deterministic_indicators", []),
         )
         domains = [item.get("risk_domain") for item in matches if item.get("risk_domain")]
@@ -45,7 +49,7 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
 
     key_risks = [
         {
-            "clause_id": finding.get("clause_index"),
+            "clause_id": finding.get("clause_index") if finding.get("clause_index") is not None else finding.get("clause_ids"),
             "check_id": finding.get("check_id"),
             "risk_type": finding.get("risk_type"),
             "raw_support_score": finding.get("raw_support_score"),
@@ -101,13 +105,16 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         overall_risk = None
         reason = "No evidence-supported playbook risk finding was identified."
 
-    affected = sorted(
-        {
-            int(finding["clause_index"])
-            for finding in positive
-            if finding.get("clause_index") is not None
-        }
-    )
+    affected_set = set()
+    for finding in positive:
+        if finding.get("clause_index") is not None:
+            affected_set.add(int(finding["clause_index"]))
+        for clause_id in finding.get("clause_ids") or []:
+            try:
+                affected_set.add(int(clause_id))
+            except (TypeError, ValueError):
+                continue
+    affected = sorted(affected_set)
 
     domain_summary = [
         {
