@@ -398,6 +398,7 @@ def _classify_contract(
                 cohere_client=cohere_client,
                 progress_callback=trace,
                 playbook=playbook,
+                qdrant_client=qdrant_client,
             )
             # Idempotent checkpoint: replace only the clause's prior rows.
             existing_lines = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
