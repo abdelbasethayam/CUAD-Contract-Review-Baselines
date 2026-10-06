@@ -45,7 +45,13 @@ function RiskCard({ finding }) {
       {finding.evidence && (
         <div className="evidence-quote">
           <strong>Exact contract evidence</strong>
-          <blockquote>“{finding.evidence}”</blockquote>
+          {Array.isArray(finding.evidence) ? (
+            finding.evidence.map((item, index) => (
+              <blockquote key={index}>Clause {item.clause_id}: “{item.quote}”</blockquote>
+            ))
+          ) : (
+            <blockquote>“{finding.evidence}”</blockquote>
+          )}
         </div>
       )}
 
@@ -173,11 +179,16 @@ function ContractReview() {
     ),
     [clauses]
   );
-  const potential = risks.filter((item) => item.risk_status === "POTENTIAL_RISK");
-  const uncertain = risks.filter((item) => item.risk_status === "INSUFFICIENT_EVIDENCE");
+  const contractWideRisks = [
+    ...(assessment.cross_clause_findings || []),
+    ...(assessment.document_findings || []),
+  ].map((finding) => ({ ...finding, clause_id: (finding.clause_ids || []).join(" + "), scope: finding.scope || "contract" }));
+  const allRisks = [...risks, ...contractWideRisks];
+  const potential = allRisks.filter((item) => item.risk_status === "POTENTIAL_RISK");
+  const uncertain = allRisks.filter((item) => item.risk_status === "INSUFFICIENT_EVIDENCE");
   const visibleRisks = riskFilter === "potential"
     ? potential
-    : riskFilter === "uncertain" ? uncertain : risks;
+    : riskFilter === "uncertain" ? uncertain : allRisks;
 
   return (
     <main className="page">
