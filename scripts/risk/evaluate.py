@@ -96,9 +96,33 @@ def severity_metrics(gold, pred) -> dict:
     }
 
 
+def _char_iou(gold: str, pred: str) -> float:
+    gold = str(gold or "")
+    pred = str(pred or "")
+    if not gold and not pred:
+        return 1.0
+    if not gold or not pred:
+        return 0.0
+    # Character-span IoU is evaluated on normalized whitespace while preserving
+    # the actual quoted content; this complements exact-match/token-F1.
+    gold_norm = " ".join(gold.split())
+    pred_norm = " ".join(pred.split())
+    if gold_norm == pred_norm:
+        return 1.0
+    shortest, longest = sorted((gold_norm, pred_norm), key=len)
+    if shortest in longest:
+        return len(shortest) / len(longest)
+    # Conservative partial overlap using token-boundary common prefix/suffix.
+    g_tokens, p_tokens = gold_norm.split(), pred_norm.split()
+    common = len(set(g_tokens) & set(p_tokens))
+    denom = len(set(g_tokens) | set(p_tokens))
+    return common / denom if denom else 0.0
+
+
 def evidence_f1(gold: list[str], pred: list[str]) -> dict:
     scores = []
     exact = []
+    char_iou = []
     for g, p in zip(gold, pred):
         g = str(g or "")
         p = str(p or "")
@@ -108,11 +132,17 @@ def evidence_f1(gold: list[str], pred: list[str]) -> dict:
         inter = len(gs & ps)
         precision = inter / len(ps) if ps else 0.0
         recall = inter / len(gs) if gs else 0.0
-        scores.append(2 * precision * recall / (precision + recall) if precision + recall else 1.0 if not gs and not ps else 0.0)
+        scores.append(
+            2 * precision * recall / (precision + recall)
+            if precision + recall
+            else 1.0 if not gs and not ps else 0.0
+        )
         exact.append(g.strip() == p.strip())
+        char_iou.append(_char_iou(g, p))
     return {
         "mean_token_f1": float(np.mean(scores)) if scores else 0.0,
         "exact_match": float(np.mean(exact)) if exact else 0.0,
+        "mean_char_iou": float(np.mean(char_iou)) if char_iou else 0.0,
     }
 
 
