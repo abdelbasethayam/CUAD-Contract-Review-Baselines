@@ -284,16 +284,54 @@ def retrieve_legal_guidance(
             "stage": "legal_search",
             "message": f"Searching legal guidance for {category}",
         })
+    candidate_k = max(int(top_k), int(LEGAL_HYBRID_CANDIDATES))
     response = qdrant_client.query_points(
         collection_name=collection_name,
         query=query_vector,
-        limit=top_k,
+        limit=candidate_k,
         query_filter=category_filter,
     )
-    hits = getattr(response, "points", response)
-
-    results = [_payload_to_result(hit, contract_type=contract_type) for hit in hits]
-    if progress_callback:
+    dense_hits = list(getattr(response, "points", response))
+    lexical_hits = _lexical_search(
+        query,
+        qdrant_client,
+        collection_name,
+        candidate_k,
+        allowed_source_tiers,
+        jurisdiction,
+    )
+    hybrid_hits = _rrf_merge(dense_hits, lexical_hits, int(LEGAL_RRF_K), int(top_k))
+    results = []
+    for hit in hybrid_hits:
+        payload = hit.get("payload") or {}
+        source_contract_type = payload.get("contract_type")
+        transferability = (
+            "direct"
+            if not contract_type or not source_contract_type or source_contract_type in {"commercial_general", contract_type}
+            else "limited_by_analogy"
+        )
+        results.append({
+            "rule_id": payload.get("rule_id") or payload.get("chunk_id") or hit.get("id"),
+            "retrieved_text": payload.get("retrieved_text", ""),
+            "source_name": payload.get("source_name"),
+            "source_url": payload.get("source_url"),
+            "title": payload.get("title"),
+            "source_title": payload.get("source_title") or payload.get("title"),
+            "clause_category": payload.get("clause_category"),
+            "source_tier": payload.get("source_tier"),
+            "authority_status": payload.get("authority_status"),
+            "jurisdiction": payload.get("jurisdiction"),
+            "effective_date": payload.get("effective_date"),
+            "contract_type": source_contract_type,
+            "retrieval_date": payload.get("retrieval_date"),
+            "access_type": payload.get("access_type"),
+            "license_status": payload.get("license_status"),
+            "supporting_quote_or_paraphrase": payload.get("supporting_quote_or_paraphrase"),
+            "transferability": transferability,
+            "dense_score": round(float(hit.get("dense_score") or 0.0), 6),
+            "lexical_score": round(float(hit.get("lexical_score") or 0.0), 6),
+            "rrf_score": round(float(hit.get("rrf") or 0.0), 6),
+        })    if progress_callback:
         progress_callback({
             "type": "progress",
             "stage": "legal_search",
