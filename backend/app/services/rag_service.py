@@ -476,6 +476,9 @@ def _classify_contract(
                 progress_callback=trace,
                 playbook=playbook,
                 qdrant_client=qdrant_client,
+                contract_type=contract_metadata.get("contract_type"),
+                jurisdiction=contract_jurisdiction,
+                clause_structure=results_by_index[idx],
             )
             # Idempotent checkpoint: replace only the clause's prior rows.
             existing_lines = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
@@ -504,8 +507,8 @@ def _classify_contract(
                 best = max(
                     positives,
                     key=lambda x: (
+                        float(x.get("final_score") or 0.0),
                         float(x.get("raw_support_score") or 0.0),
-                        float(x.get("severity_signal") or 0.0),
                     ),
                 )
                 row["risk"] = True
