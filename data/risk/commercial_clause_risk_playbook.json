@@ -997,4 +997,996 @@
           "severity_factors": [],
           "dependencies": [],
           "jurisdiction_scope": [
+            "unspecified"          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P4",
+            "P5"
+          ]
+        }
+      ]
+    },
+    "Non-Compete": {
+      "keywords": [
+        "non-compete",
+        "shall not compete",
+        "competitive",
+        "restraint of trade"
+      ],
+      "checklist": [
+        {
+          "id": "NC-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are scope, geography, and duration reasonable?",
+          "flag_if": "Over-broad or excessively long",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
             "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P7"
+          ]
+        },
+        {
+          "id": "NC-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is there a meaningful exception or carve-out for ordinary business?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5"
+          ]
+        }
+      ]
+    },
+    "Exclusivity": {
+      "keywords": [
+        "exclusive",
+        "exclusivity",
+        "sole",
+        "requirements"
+      ],
+      "checklist": [
+        {
+          "id": "EXC-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is exclusivity granted without performance obligations or exit rights?",
+          "flag_if": "Yes",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5"
+          ]
+        },
+        {
+          "id": "EXC-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Do exceptions hollow out the exclusivity or make it one-sided against the reviewing party?",
+          "flag_if": "Yes",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5"
+          ]
+        }
+      ]
+    },
+    "Non-Solicit": {
+      "keywords": [
+        "shall not solicit",
+        "non-solicit",
+        "non-solicitation",
+        "employees",
+        "customers"
+      ],
+      "checklist": [
+        {
+          "id": "NS-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is non-solicit so broad it functions as a non-compete?",
+          "flag_if": "Yes",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5"
+          ]
+        },
+        {
+          "id": "NS-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are duration and covered persons reasonable?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P7"
+          ]
+        }
+      ]
+    },
+    "Minimum Commitment": {
+      "keywords": [
+        "minimum commitment",
+        "take or pay",
+        "minimum purchase",
+        "minimum volume"
+      ],
+      "checklist": [
+        {
+          "id": "MIN-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is there a minimum purchase or take-or-pay obligation?",
+          "flag_if": "Yes — check relief terms",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P6"
+          ]
+        },
+        {
+          "id": "MIN-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is there relief if goods or services are not delivered or are unusable?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P6"
+          ]
+        }
+      ]
+    },
+    "Liquidated Damages": {
+      "keywords": [
+        "liquidated damages",
+        "termination fee",
+        "penalty"
+      ],
+      "checklist": [
+        {
+          "id": "LD-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Does the amount appear to be a reasonable pre-estimate of loss rather than a penalty?",
+          "flag_if": "Looks punitive or arbitrary",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P7"
+          ]
+        },
+        {
+          "id": "LD-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is the relationship between liquidated damages and the liability cap stated?",
+          "flag_if": "Silent or conflicting",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P2",
+            "P4"
+          ]
+        }
+      ]
+    },
+    "Source Code Escrow": {
+      "keywords": [
+        "source code escrow",
+        "escrow agent",
+        "release conditions"
+      ],
+      "checklist": [
+        {
+          "id": "ESC-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is the licensed software business-critical with no escrow or equivalent continuity path?",
+          "flag_if": "Yes",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P6"
+          ]
+        },
+        {
+          "id": "ESC-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are release conditions clear (for example bankruptcy, material breach, failure to support)?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P6"
+          ]
+        }
+      ]
+    },
+    "Insurance": {
+      "keywords": [
+        "insurance",
+        "certificate of insurance",
+        "additional insured",
+        "coverage"
+      ],
+      "checklist": [
+        {
+          "id": "INS-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are insurance requirements stated where the activity creates material risk?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P2",
+            "P6"
+          ]
+        },
+        {
+          "id": "INS-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are required limits aligned with residual liability exposure?",
+          "flag_if": "Limits far below exposure",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P2",
+            "P6"
+          ]
+        }
+      ]
+    },
+    "Governing Law": {
+      "keywords": [
+        "governing law",
+        "governed by",
+        "laws of"
+      ],
+      "checklist": [
+        {
+          "id": "GOV-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is governing law stated?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5"
+          ]
+        },
+        {
+          "id": "GOV-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is the forum or dispute mechanism consistent with the governing law?",
+          "flag_if": "Missing or inconsistent",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P6"
+          ]
+        }
+      ]
+    },
+    "Audit Rights": {
+      "keywords": [
+        "audit",
+        "inspect",
+        "books and records",
+        "upon reasonable notice"
+      ],
+      "checklist": [
+        {
+          "id": "AUD-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are audit rights one-sided in a way that creates undue burden or data exposure for the reviewing party?",
+          "flag_if": "Yes",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P6"
+          ]
+        },
+        {
+          "id": "AUD-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are notice, frequency, and confidentiality protections for audits stated?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5"
+          ]
+        }
+      ]
+    },
+    "Most Favored Nation": {
+      "keywords": [
+        "most favored",
+        "most favoured",
+        "MFN",
+        "no less favorable"
+      ],
+      "checklist": [
+        {
+          "id": "MFN-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is MFN scope (price, terms, customers, territory) clear?",
+          "flag_if": "Unclear",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P4",
+            "P5"
+          ]
+        },
+        {
+          "id": "MFN-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Does MFN conflict with other price or discount restrictions in the contract?",
+          "flag_if": "Yes",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P4",
+            "P5"
+          ]
+        }
+      ]
+    },
+    "Price Restrictions": {
+      "keywords": [
+        "price",
+        "fees",
+        "increase",
+        "adjustment",
+        "discount"
+      ],
+      "checklist": [
+        {
+          "id": "PR-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Can the counterparty raise prices without clear limits or notice?",
+          "flag_if": "Yes",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P1",
+            "P5"
+          ]
+        },
+        {
+          "id": "PR-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are price-adjustment formulas and triggers stated clearly?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P4",
+            "P5"
+          ]
+        }
+      ]
+    },
+    "Warranty": {
+      "keywords": [
+        "warranty",
+        "warranties",
+        "as is",
+        "disclaim",
+        "merchantability",
+        "fitness for a particular purpose"
+      ],
+      "checklist": [
+        {
+          "id": "WAR-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are material warranties disclaimed (for example 'as is') without meaningful remedies?",
+          "flag_if": "Yes",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P2",
+            "P5"
+          ]
+        },
+        {
+          "id": "WAR-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is warranty duration stated and practical?",
+          "flag_if": "Missing or unreasonably short",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5"
+          ]
+        }
+      ]
+    },
+    "Post-Termination Services": {
+      "keywords": [
+        "transition",
+        "wind-down",
+        "post-termination",
+        "assistance after termination"
+      ],
+      "checklist": [
+        {
+          "id": "PTS-1",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Is transition or post-termination assistance required where continuity matters?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5",
+            "P6"
+          ]
+        },
+        {
+          "id": "PTS-2",
+          "risk_domain": null,
+          "risk_type": null,
+          "perspective": "customer_buyer",
+          "applies_when": [],
+          "question": "Are duration, fees, and data-return terms for post-termination services clear?",
+          "flag_if": "No",
+          "do_not_flag_if": [],
+          "required_evidence": [],
+          "evidence_location": "clause",
+          "severity_factors": [],
+          "dependencies": [],
+          "jurisdiction_scope": [
+            "unspecified"
+          ],
+          "rationale": null,
+          "version": "1.0",
+          "sources": [
+            "P5"
+          ]
+        }
+      ]
+    }
+  },
+  "cross_clause_checks": [
+    {
+      "id": "X-1",
+      "pair": [
+        "Limitation of Liability",
+        "Uncapped Liability"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Are carve-out lists for capped and uncapped heads consistent?",
+      "flag_if": "They differ or overlap is unclear",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P2",
+        "P4"
+      ]
+    },
+    {
+      "id": "X-2",
+      "pair": [
+        "Limitation of Liability",
+        "Liquidated Damages"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Are liquidated damages inside or outside the liability cap, and is that stated?",
+      "flag_if": "Silent or conflicting",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P2",
+        "P4"
+      ]
+    },
+    {
+      "id": "X-3",
+      "pair": [
+        "Renewal Term",
+        "Notice Period to Terminate Renewal"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Is the non-renewal notice deadline calculable and inside the current term?",
+      "flag_if": "No",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P5",
+        "P6"
+      ]
+    },
+    {
+      "id": "X-4",
+      "pair": [
+        "Termination for Convenience",
+        "Minimum Commitment"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Does early exit still trigger the full minimum commitment or a heavy fee?",
+      "flag_if": "Yes",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P5"
+      ]
+    },
+    {
+      "id": "X-5",
+      "pair": [
+        "Anti-Assignment",
+        "Change of Control"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Do the two clauses apply different consent standards or consequences to the same corporate event?",
+      "flag_if": "Yes",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P4",
+        "P5"
+      ]
+    },
+    {
+      "id": "X-6",
+      "pair": [
+        "Irrevocable or Perpetual License",
+        "Termination for Convenience"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Can the supplier end a license described as irrevocable or perpetual?",
+      "flag_if": "Yes",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P4",
+        "P5"
+      ]
+    },
+    {
+      "id": "X-7",
+      "pair": [
+        "IP Ownership Assignment",
+        "License Grant"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Does IP assignment leave the other party's license without a source of rights?",
+      "flag_if": "Yes",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P5"
+      ]
+    },
+    {
+      "id": "X-8",
+      "pair": [
+        "License Grant",
+        "Source Code Escrow"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Is there a business-critical software license with no escrow, continuity, or post-termination support?",
+      "flag_if": "Yes",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P5",
+        "P6"
+      ]
+    },
+    {
+      "id": "X-9",
+      "pair": [
+        "Limitation of Liability",
+        "Insurance"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Does the liability cap or residual exposure exceed required insurance limits?",
+      "flag_if": "Yes",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P2",
+        "P6"
+      ]
+    },
+    {
+      "id": "X-10",
+      "pair": [
+        "Limitation of Liability",
+        "Indemnification"
+      ],
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Is indemnification inside or outside the cap, and is the interaction stated?",
+      "flag_if": "Silent, conflicting, or uncapped broad indemnity against reviewing party",
+      "do_not_flag_if": [],
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P2",
+        "P3"
+      ]
+    }
+  ],
+  "document_level_checks": [
+    {
+      "id": "DOC-1",
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Are terms incorporated by URL, schedule, or order form missing from the review package?",
+      "flag_if": "Yes — label UNREAD, not absent",
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P4",
+        "P6"
+      ]
+    },
+    {
+      "id": "DOC-2",
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Do definitions or order-of-precedence clauses narrow or reverse a protective substantive clause?",
+      "flag_if": "Yes",
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P4",
+        "P5"
+      ]
+    },
+    {
+      "id": "DOC-3",
+      "risk_domain": null,
+      "risk_type": null,
+      "question": "Are governing law, forum, and dispute mechanism missing or inconsistent?",
+      "flag_if": "Yes",
+      "dependencies": [],
+      "jurisdiction_scope": [
+        "unspecified"
+      ],
+      "sources": [
+        "P5",
+        "P6"
+      ]
+    }
+  ],
+  "output_template": {
+    "clause_type": "string",
+    "checklist_item_id": "string",
+    "question": "string",
+    "flagged": true,
+    "evidence_span": "exact quote from clause",
+    "sources": [
+      "P1",
+      "P2"
+    ],
+    "note": "Review support only — not legal advice"
+  },
+  "playbook_hash": "1a5eca84e000ce74f90fcf03761185da2c543ff53a32af7a15d7d867111ae47e"
+}
