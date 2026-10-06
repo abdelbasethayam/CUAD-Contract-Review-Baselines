@@ -635,12 +635,21 @@ def analyze_clause_risk(
         )
         calibrated_severity = calibrate_severity(severity_score, calibration) if severity_score is not None else None
 
+        review_escalation = (
+            score_details["escalation"]
+            if score_details
+            else "HIGH_REVIEW"
+        )
+        if calibrated_confidence is not None and calibrated_confidence < 0.75:
+            review_escalation = "HIGH_REVIEW"
+
         if unsupported_legal_claim:
             finding_status = "CONFLICT" if finding_status == "PRESENT" else finding_status
             risk_status = "INSUFFICIENT_EVIDENCE"
             severity_score = None
             calibrated_confidence = None
             calibrated_severity = None
+            review_escalation = "HIGH_REVIEW"
 
         primary_source = supporting_sources[0] if supporting_sources else {}
         severity_status = (
@@ -692,11 +701,7 @@ def analyze_clause_risk(
             "human_review_required": bool(
                 score_details["human_review_required"] if score_details else True
             ),
-            "review_escalation": (
-                "HIGH_REVIEW"
-                if unsupported_legal_claim
-                else (score_details["escalation"] if score_details else "HIGH_REVIEW")
-            ),
+            "review_escalation": review_escalation,
             "confidence": calibrated_confidence,
             "confidence_status": (
                 "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED"
