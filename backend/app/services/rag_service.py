@@ -18,6 +18,7 @@ from ..core.config import (
     RISK_CALIBRATION_PATH,
     RISK_ENABLE_CROSS_CLAUSE,
     RISK_ENABLE_DOCUMENT_CHECKS,
+    LEGAL_KNOWLEDGE_CORPUS_VERSION,
     RUNS_DIR,
     RISK_USE_CONTEXT,
     RISK_USE_LEGAL_GUIDANCE,
@@ -37,9 +38,10 @@ from ..core.rag.validator import is_real_clause
 from ..core.risk.contract_checks import analyze_contract_checks
 from ..core.risk.deterministic_cross_checks import run_deterministic_cross_checks
 from ..core.risk.contract_metadata import extract_contract_metadata
+from ..core.risk.contract_structure import extract_clause_structure
 from ..core.risk.contract_coverage import build_contract_coverage
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
-from ..core.risk.risk_engine import analyze_clause_risk
+from ..core.risk.risk_engine import RISK_PROMPT_VERSION, analyze_clause_risk
 from ..core.risk.risk_playbook import load_playbook
 from ..core.risk.run_store import AnalysisRun, create_or_resume_run, mark_run_complete, mark_run_failed
 from ..core.rag.evidence_compressor import compress_cuad_evidence
@@ -114,6 +116,8 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
         "use_legal_guidance": RISK_USE_LEGAL_GUIDANCE,
         "enable_cross_clause": RISK_ENABLE_CROSS_CLAUSE,
         "enable_document_checks": RISK_ENABLE_DOCUMENT_CHECKS,
+        "prompt_version": RISK_PROMPT_VERSION,
+        "legal_knowledge_corpus_version": LEGAL_KNOWLEDGE_CORPUS_VERSION,
     }
 
 
