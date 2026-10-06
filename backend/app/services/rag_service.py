@@ -589,6 +589,8 @@ def _classify_contract(
                 playbook=effective_playbook,
                 progress_callback=trace,
                 deterministic_signals=deterministic_signals,
+                contract_type=contract_metadata.get("contract_type"),
+                jurisdiction=contract_jurisdiction,
             )
             run.write_json(
                 "contract_checks.json",
