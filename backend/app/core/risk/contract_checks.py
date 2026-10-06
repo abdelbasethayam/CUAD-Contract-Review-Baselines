@@ -31,7 +31,7 @@ def _candidate_clauses(clauses: list[dict], pair: list[str]) -> list[dict]:
     ][:20]
 
 
-def _prompt(clauses: list[dict], cross_checks: list[dict], doc_checks: list[dict]) -> str:
+def _prompt(clauses: list[dict], cross_checks: list[dict], doc_checks: list[dict], deterministic_signals: list[dict] | None = None) -> str:
     compact = [
         {
             "clause_id": item.get("clause_index"),
@@ -60,6 +60,9 @@ CROSS-CLAUSE CHECKS
 
 DOCUMENT CHECKS
 {json.dumps(doc_checks, ensure_ascii=False)}
+
+DETERMINISTIC INTERACTION SIGNALS (candidate signals, not legal conclusions)
+{json.dumps(deterministic_signals or [], ensure_ascii=False)}
 
 Return:
 {{
@@ -148,6 +151,7 @@ def analyze_contract_checks(
     playbook: dict | None = None,
     progress_callback=None,
     passes: int | None = None,
+    deterministic_signals: list[dict] | None = None,
 ) -> tuple[list[dict], list[dict]]:
     playbook = playbook or load_playbook()
     cross_checks = playbook.get("cross_clause_checks") or []
@@ -157,7 +161,7 @@ def analyze_contract_checks(
 
     calibration = load_calibration()
     contract_lookup = {int(x["clause_index"]): x for x in clauses if x.get("clause_index") is not None}
-    prompts = _prompt(clauses, cross_checks, doc_checks)
+    prompts = _prompt(clauses, cross_checks, doc_checks, deterministic_signals)
     n_passes = max(1, int(passes or RISK_SELF_CONSISTENCY_PASSES))
     cross_outputs: list[list[dict]] = []
     doc_outputs: list[list[dict]] = []
@@ -223,6 +227,7 @@ def analyze_contract_checks(
                 "evidence": " ".join(str(x.get("quote") or "") for x in rep.get("evidence") or []),
                 "why_flagged": rep.get("why_flagged"),
                 "score_components": rep.get("score_components") or {},
+                "deterministic_cross_check": bool(deterministic_signals and any(x.get("id") == check_id for x in deterministic_signals)),
             }) if status == "POTENTIAL_RISK" else None
             severity_score = float(score_details["final_score"]) if score_details else None
             severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
