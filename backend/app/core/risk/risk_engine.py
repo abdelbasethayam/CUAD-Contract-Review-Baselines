@@ -239,6 +239,10 @@ def analyze_clause_risk(
             raw = call_ollama(
                 prompt,
                 model=RISK_MODEL,
+                temperature=RISK_TEMPERATURE,
+                num_ctx=RISK_NUM_CTX,
+                max_tokens=RISK_MAX_TOKENS,
+                think=False,
             )
             parsed = _parse(raw, valid_ids)
         except Exception:
