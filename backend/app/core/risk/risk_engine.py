@@ -71,7 +71,23 @@ def _factor(value: object) -> float | None:
     return number if 0.0 <= number <= 5.0 else None
 
 
-def _severity_signal(final_score: float | None) -> float | None:
+def _severity_signal(final_score: float | dict | None) -> float | None:
+    # Backward-compatible helper: production calls pass the deterministic
+    # 0-20 final score; legacy tests may pass the four raw 0-5 components.
+    if isinstance(final_score, dict):
+        keys = (
+            "exposure_magnitude",
+            "likelihood_uncertainty",
+            "scope_duration",
+            "control_weakness",
+        )
+        values = []
+        for key in keys:
+            value = _factor(final_score.get(key))
+            if value is None:
+                return None
+            values.append(value)
+        return round(sum(values) / 20.0, 4)
     if final_score is None:
         return None
     return round(float(final_score) / 20.0, 4)
