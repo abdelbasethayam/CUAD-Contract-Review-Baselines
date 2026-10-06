@@ -1,7 +1,7 @@
 """Ingest curated legal guidance into a separate Qdrant collection.
 
-Run from the backend directory:
-    python -m app.core.legal_knowledge.ingest
+Run from the repository root:
+    python -m backend.app.core.legal_knowledge.ingest
 """
 
 from __future__ import annotations
@@ -124,7 +124,10 @@ def load_curated_chunks(
                         "license_status": metadata["license_status"],
                         "effective_date": metadata.get("effective_date"),
                         "retrieval_date": retrieval_date,
-                        "transferability": metadata.get("transferability", "same_contract_type_preferred"),                    },
+                        "transferability": metadata.get(
+                            "transferability", "same_contract_type_preferred"
+                        ),
+                    },
                 }
             )
     return chunks
@@ -145,8 +148,9 @@ def recreate_collection(client, vector_size: int, collection_name: str) -> None:
 def ingest_legal_knowledge(
     collection_name: str = LEGAL_KNOWLEDGE_COLLECTION,
     base_path: Path = LEGAL_KNOWLEDGE_PATH,
+    registry_path: Path = LEGAL_KNOWLEDGE_REGISTRY_PATH,
 ) -> int:
-    chunks = load_curated_chunks(base_path)
+    chunks = load_curated_chunks(base_path, registry_path)
     if not chunks:
         raise ValueError(f"No legal knowledge markdown files found under {base_path}")
 
