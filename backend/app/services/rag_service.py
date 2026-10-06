@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from threading import Lock
+import hashlib
 from typing import Callable
 
 import numpy as np
@@ -13,6 +14,7 @@ from ..core.config import (
     RISK_MODEL,
     RISK_SELF_CONSISTENCY_PASSES,
     RISK_PLAYBOOK_PATH,
+    RISK_CALIBRATION_PATH,
     TOP_K,
 )
 from ..core.rag import (
@@ -78,6 +80,16 @@ def _trace_callback(run, callback: ProgressCallback | None):
     return emit
 
 
+def _file_hash(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def _pipeline_config(top_k: int, playbook: dict) -> dict:
     return {
         "phase": 2,
@@ -87,6 +99,7 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
         "risk_self_consistency_passes": RISK_SELF_CONSISTENCY_PASSES,
         "playbook_hash": playbook.get("playbook_hash"),
         "playbook_path": str(RISK_PLAYBOOK_PATH),
+        "calibration_hash": _file_hash(RISK_CALIBRATION_PATH),
     }
 
 
