@@ -37,7 +37,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("dataset/raw/cuad"),
+        default=Path("data/raw/cuad"),
         help="Directory where the CUAD archive should be extracted.",
     )
     parser.add_argument(
