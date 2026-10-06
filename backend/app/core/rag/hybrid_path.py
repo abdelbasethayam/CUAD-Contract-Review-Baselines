@@ -14,6 +14,9 @@ from ..config import (
     HYBRID_INDEX_CACHE,
     HYBRID_K,
     HYBRID_SHORTLIST,
+    HYBRID_RERANK,
+    HYBRID_RERANKER_MODEL,
+    HYBRID_RERANK_TOP_K,
     OLLAMA_MODEL,
     OLLAMA_NUM_CTX,
     OLLAMA_URL,
@@ -61,7 +64,7 @@ def classify_with_hybrid_qwen(
     idx = index or get_hybrid_index()
     if alpha is None or beta is None:
         a, b = load_fusion_params(
-            fusion_params_path or "output/eval_1495/qwen_improved/fusion_params.json"
+            fusion_params_path or "output/eval/qwen_improved/hybrid-rerank-1_fusion_params.json"
         )
         alpha = alpha if alpha is not None else a
         beta = beta if beta is not None else b
@@ -81,4 +84,8 @@ def classify_with_hybrid_qwen(
         k=HYBRID_K,
         shortlist_size=HYBRID_SHORTLIST,
         permutations=permutations,
+        examples_per_candidate=1,
+        rerank=HYBRID_RERANK,
+        reranker_model=HYBRID_RERANKER_MODEL,
+        rerank_top_k=HYBRID_RERANK_TOP_K,
     )

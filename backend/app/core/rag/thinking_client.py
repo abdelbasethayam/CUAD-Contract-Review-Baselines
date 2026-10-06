@@ -68,6 +68,7 @@ def call_thinking_ollama(
     model: str | None = None,
     temperature: float = 0.1,
     num_ctx: int = 8192,
+    think: bool | None = None,
 ) -> str:
     """Call Ollama generate API; return raw model text (may include think tags)."""
     selected = model or OLLAMA_MODEL
@@ -81,7 +82,8 @@ def call_thinking_ollama(
                     "model": selected,
                     "prompt": prompt,
                     "stream": False,
-                    "format": "json",  # best-effort; thinking models may ignore
+                    "format": "json",
+                    "think": CLASSIFIER_THINK if think is None else bool(think),
                     "options": {
                         "temperature": temperature,
                         "num_ctx": num_ctx,

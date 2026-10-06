@@ -129,6 +129,7 @@ class HybridIndex:
         query_vector,
         k: int = 30,
         exclude_document_id: str | None = None,
+        exclude_document_ids: set[str] | None = None,
     ) -> list[Hit]:
         qv = np.asarray(query_vector, dtype=np.float32).reshape(-1)
         qv = qv / max(float(np.linalg.norm(qv)), 1e-9)
@@ -148,9 +149,12 @@ class HybridIndex:
 
         order = np.argsort(-rrf)
         hits: list[Hit] = []
+        excluded = set(exclude_document_ids or ())
+        if exclude_document_id:
+            excluded.add(str(exclude_document_id))
         for idx in order:
             doc_id = str(self.document_ids[idx])
-            if exclude_document_id and doc_id and doc_id == exclude_document_id:
+            if doc_id and doc_id in excluded:
                 continue
             hits.append(
                 Hit(
@@ -166,6 +170,24 @@ class HybridIndex:
             if len(hits) >= k:
                 break
         return hits
+
+    def excluding_documents(self, document_ids: set[str]) -> "HybridIndex":
+        """Return an index fit only on documents not in document_ids.
+
+        This is important for validation: filtering hits at search time would
+        still let validation documents influence TF-IDF vocabulary/IDF.
+        """
+        excluded = {str(x) for x in document_ids}
+        keep = [
+            i for i, doc_id in enumerate(self.document_ids)
+            if str(doc_id) not in excluded
+        ]
+        return HybridIndex(
+            [self.texts[i] for i in keep],
+            [self.labels[i] for i in keep],
+            [str(self.document_ids[i]) for i in keep],
+            self.dense[keep],
+        )
 
     @staticmethod
     def label_votes(hits: list[Hit]) -> dict[str, float]:

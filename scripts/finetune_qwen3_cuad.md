@@ -1,69 +1,54 @@
-# Fine-tune Qwen3-4B for CUAD clause classification (path to ~90%+)
+# Fine-tune Qwen3-8B for CUAD-derived clause classification
 
-## Why fine-tune
+## Goal
 
-Zero-shot RAG classification plateaus well below 90%. Published work:
+Compare a LoRA fine-tuned Qwen3-8B classifier against the non-fine-tuned Qwen3-8B hybrid RAG pipeline. Do not assume a target accuracy before running validation.
 
-- Fine-tuned **Qwen3-4B** CUAD extractor: **~0.90 detection F1** (Hugging Face: `Ihteshamstar/qwen3-4b-cuad-extractor`)
-- Fine-tuned encoders on CUAD-style tasks: **~86–88%**
+## Data protocol
 
-## Data
+- Keep the raw CUAD source immutable.
+- Use the repository's 410/100 document-disjoint train/test split.
+- Create the SFT train/validation split from the 410 training contracts only.
+- Never use the 100-contract test split for prompt, retrieval, fusion, or training decisions.
+- Retain legitimate cross-category span reuse; it is part of the CUAD annotation design.
+
+## Prepare
 
 ```bash
-pip install datasets transformers peft accelerate trl
-
-python - <<'PY'
-from datasets import load_dataset
-ds = load_dataset("dvgodoy/CUAD_v1_Contract_Understanding_clause_classification")
-print(ds)
-print(ds["train"][0])
-PY
+python scripts/finetune/prepare_sft_data.py \
+  --train data/splits/train/master_clauses_train.csv \
+  --test data/splits/test/master_clauses_test.csv \
+  --out-dir data/finetune
 ```
 
-Recommended splits: stratify by `label`, hold out 10–15% test never used for prompt tuning.
+## Train
 
-### Training example format
-
-```text
-### Clause:
-{clause_text}
-
-### Task:
-Classify into exactly one CUAD label from: {label_list}
-
-### Answer:
-{"clause_type": "Governing Law"}
+```bash
+python scripts/finetune/train_lora.py \
+  --base Qwen/Qwen3-8B \
+  --data-dir data/finetune \
+  --out output/ft_qwen3_8b_cuad
 ```
 
-Optional: include retrieved Top-K examples in train (retrieval-augmented fine-tune) so train == serve.
+The training script disables Qwen3 thinking in the chat template when the tokenizer supports that switch. This keeps the training target aligned with the structured classification output.
 
-## LoRA sketch (Unsloth / PEFT)
+## Recommended tuning
 
-```python
-# Pseudocode — adapt to your GPU and Unsloth/TRL version
-from unsloth import FastLanguageModel
-model, tokenizer = FastLanguageModel.from_pretrained(
-    "Qwen/Qwen3-4B-Thinking-2507",  # or Instruct-2507 for stricter JSON
-    max_seq_length=4096,
-    load_in_4bit=True,
-)
-model = FastLanguageModel.get_peft_model(model, r=16, lora_alpha=32, target_modules="all-linear")
-# SFTTrainer on JSON-only targets; mask loss on prompt tokens
-```
-
-**Tip:** For structured JSON output, fine-tune the **Instruct-2507** variant or train Thinking models with a supervised final-answer segment only (ignore loss inside `<think>` if present).
+Start with the shipped LoRA configuration. Use validation macro-F1 to choose among small sweeps of learning rate, LoRA rank, and epoch count. Keep the tokenizer/template and label set fixed across runs.
 
 ## Evaluation
 
-```bash
-python -m backend.eval.run_classification_eval --fixed-json data/eval/your_holdout.json
-```
+Evaluate the fine-tuned model on the validation split first. After selecting the checkpoint, run the 100-contract test split exactly once for the reported result.
 
-Track per-label F1; rare labels (e.g. Source Code Escrow) need oversampling or hierarchical grouping.
+Compare the fine-tuned model both with:
 
-## Serving fine-tuned weights
+1. Qwen3-8B zero-/one-/five-shot baselines.
+2. Qwen3-8B hybrid RAG with optional BGE reranking.
 
-- Merge LoRA → GGUF → Ollama Modelfile, **or**
-- vLLM with the merged HF checkpoint
+## Serving
 
-Point `OLLAMA_MODEL` / `CLASSIFIER_MODEL` at the fine-tuned tag.
+Merge the LoRA adapter into the base model or serve the adapter with a compatible runtime, then point `OLLAMA_MODEL` at the resulting local model. For the hybrid production path, keep the same MPNet retrieval and candidate shortlist settings used during evaluation.
+
+## Important
+
+The single-label target is a project-derived flattening of the original CUAD category annotations. The original dataset can annotate the same clause for multiple independent categories, so SFT results should be interpreted as performance on this derived task.

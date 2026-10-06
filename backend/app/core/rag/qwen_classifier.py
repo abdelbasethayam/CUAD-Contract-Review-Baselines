@@ -18,6 +18,7 @@ from pathlib import Path
 import requests
 
 from .hybrid_retrieval import Hit, HybridIndex
+from .reranker import rerank_hits
 
 LETTERS = string.ascii_uppercase
 EPS = 1e-4
@@ -56,12 +57,14 @@ Output rules:
 @dataclass
 class OllamaSettings:
     url: str = "http://localhost:11434"
-    model: str = "qwen2.5:7b"
+    model: str = "qwen3:8b"
     num_ctx: int = 8192
     seed: int = 42
     timeout: int = 300
     retries: int = 3
     top_logprobs: int = 20
+    think: bool = False
+    temperature: float = 0.0
 
 
 def _clip(text: str, limit: int) -> str:
@@ -92,8 +95,14 @@ def build_mcq_prompt(
     definitions: dict[str, str],
     evidence: list[Hit],
     example_chars: int = 600,
-    clause_chars: int = 2500,
+    clause_chars: int = 3500,
 ) -> str:
+    if not candidates:
+        raise ValueError("At least one candidate label is required.")
+    if len(candidates) > len(LETTERS):
+        raise ValueError(
+            f"Letter-based MCQ supports at most {len(LETTERS)} candidates."
+        )
     options = "\n".join(
         f"{LETTERS[i]}. {label}: {definitions.get(label, '').strip()}".rstrip(": ")
         for i, label in enumerate(candidates)
@@ -158,13 +167,15 @@ def call_letter_model(prompt: str, n_options: int, cfg: OllamaSettings):
                     "model": cfg.model,
                     "prompt": prompt,
                     "stream": False,
+                    "think": cfg.think,
                     "options": {
-                        "temperature": 0,
+                        "temperature": cfg.temperature,
                         "seed": cfg.seed,
                         "num_ctx": cfg.num_ctx,
-                        "num_predict": 4,
+                        "num_predict": 2,
                     },
-                    "logprobs": cfg.top_logprobs,
+                    "logprobs": True,
+                    "top_logprobs": cfg.top_logprobs,
                 },
                 timeout=cfg.timeout,
             )
@@ -188,16 +199,32 @@ def score_candidates(
     hits: list[Hit],
     cfg: OllamaSettings,
     permutations: int = 1,
+    examples_per_candidate: int = 1,
+    seed: int = 42,
 ) -> dict:
     """Average letter probabilities over option-order permutations."""
     permutations = max(1, int(permutations))
+    examples_per_candidate = max(1, int(examples_per_candidate))
+    if len(candidates) > len(LETTERS):
+        raise ValueError("Candidate-constrained MCQ cannot exceed 26 labels.")
     totals = {label: 0.0 for label in candidates}
     sources: list[str] = []
     raws: list[str] = []
     used = 0
     for perm in range(permutations):
-        order = candidates[perm:] + candidates[:perm] if perm else list(candidates)
-        evidence = select_evidence(hits, order)
+        if perm == 0:
+            order = list(candidates)
+        else:
+            import random
+            rng = random.Random(seed + perm)
+            order = list(candidates)
+            rng.shuffle(order)
+        evidence = select_evidence(
+            hits,
+            order,
+            per_label=examples_per_candidate,
+            top_labels_extra=0,
+        )
         prompt = build_mcq_prompt(clause_text, order, definitions, evidence)
         probs, source, raw = call_letter_model(prompt, len(order), cfg)
         sources.append(source)
@@ -260,13 +287,34 @@ def classify_clause_hybrid(
     k: int = 30,
     shortlist_size: int = 8,
     permutations: int = 1,
+    examples_per_candidate: int = 1,
+    seed: int = 42,
+    rerank: bool = False,
+    reranker_model: str = "BAAI/bge-reranker-v2-m3",
+    rerank_top_k: int = 30,
 ) -> dict:
-    """Hybrid shortlist + Qwen letter probs + fusion."""
+    """Hybrid shortlist + optional cross-encoder reranking + Qwen fusion."""
     cfg = cfg or OllamaSettings()
     hits = index.search(clause_text, query_vector, k=k)
+    if rerank and hits:
+        hits = rerank_hits(
+            clause_text,
+            hits,
+            model_name=reranker_model,
+            top_k=rerank_top_k,
+        )
     votes = index.label_votes(hits)
     candidates = index.shortlist(hits, size=shortlist_size)
-    scored = score_candidates(clause_text, candidates, definitions, hits, cfg, permutations)
+    scored = score_candidates(
+        clause_text,
+        candidates,
+        definitions,
+        hits,
+        cfg,
+        permutations=permutations,
+        examples_per_candidate=examples_per_candidate,
+        seed=seed,
+    )
     cand_knn = {c: votes.get(c, 0.0) for c in candidates}
     norm = sum(cand_knn.values()) or 1.0
     cand_knn = {c: v / norm for c, v in cand_knn.items()}

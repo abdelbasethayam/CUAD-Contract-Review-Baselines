@@ -23,3 +23,4 @@ python-dotenv           # loads .env (COHERE_API_KEY, QDRANT_URL, etc.)
 # --- Data pipeline (split_cuad.py, embed_train.py, build_qdrant.py) ---
 pandas                  # CSV loading/reshaping, config.load_labels()
 scikit-learn             # train_test_split in split_cuad.py
+sentence-transformers    # MPNet embeddings + optional BGE cross-encoder reranking

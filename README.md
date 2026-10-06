@@ -57,12 +57,12 @@ A pure RAG + untrained small model is a baseline; fine-tuning is what improves a
 |-----------|-------------|
 | Preprocessing | Text cleanup, legal abbreviation expansion |
 | Dense retrieval | Cohere embeddings + Qdrant |
-| Hybrid retrieval | Dense + TF-IDF fused with RRF (raises label shortlist recall) |
-| LLM classifier | Qwen via Ollama (letter-MCQ + score fusion, or JSON path) |
+| Hybrid retrieval | MPNet dense + TF-IDF fused with RRF |
+| LLM classifier | Qwen3-8B via Ollama, non-thinking MCQ/logprobs for candidate scoring |
 | High-precision rules | Regex priors for clear classes (e.g. Governing Law) |
 | Confusion handling | Tie-break for known hard label pairs |
 | Evaluation | Accuracy, Recall@K, per-label metrics, error types |
-| Fine-tuning | LoRA scripts for Qwen2.5-7B-Instruct on master clause CSVs |
+| Fine-tuning | LoRA scripts for Qwen3-8B on document-disjoint train/validation data |
 
 ---
 
@@ -79,9 +79,9 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 cp backend/.env.example backend/.env
-# Edit .env: set COHERE_API_KEY, OLLAMA_MODEL=qwen2.5:7b
+# Edit .env: set OLLAMA_MODEL=qwen3:8b (Qwen2.5-7B remains a comparison baseline)
 
-ollama pull qwen2.5:7b
+ollama pull qwen3:8b
 ```
 
 ### Data validation / classification preparation
@@ -96,13 +96,24 @@ This keeps the 410/100 contract-disjoint split, excludes the five contract-metad
 
 See [docs/DATA_QUALITY_CUAD.md](docs/DATA_QUALITY_CUAD.md) for the audit policy.
 
-**Hybrid retrieval only (no LLM):**
+**Shot baselines on the real held-out test set:**
 
 ```bash
-python scripts/06_run_qwen_improved.py run --split test --no-llm
+python scripts/01_reembed_local.py
+python scripts/07_run_shot_baselines.py
 ```
 
-**Fine-tune Qwen (optional, improves accuracy / macro-F1):**
+**Leakage-safe hybrid Qwen evaluation:**
+
+```bash
+python scripts/06_run_qwen_improved.py run --split val --experiment hybrid-rerank-1
+python scripts/06_run_qwen_improved.py tune --experiment hybrid-rerank-1
+python scripts/06_run_qwen_improved.py run --split test --experiment hybrid-rerank-1
+```
+
+The test run requires frozen validation fusion parameters. Test clauses are never used to tune retrieval, reranking, examples, prompts, or fusion.
+
+**Fine-tune Qwen:**
 
 ```bash
 pip install -r requirements-finetune.txt
@@ -122,16 +133,18 @@ Details: [docs/FINETUNE.md](https://github.com/abdelbasethayam/CUAD-Contract-Rev
 
 ---
 
-## 5. Expected performance (order of magnitude)
+## 5. Evaluation policy
 
-| Method | Rough accuracy | Notes |
-|--------|----------------|--------|
-| Dense top-5 + constrained LLM | ~60–66% | Limited by shortlist recall (~84%) |
-| Hybrid kNN only (no LLM) | ~70% | Strong free baseline |
-| Hybrid + Qwen (no FT) | often above old RAG baseline | Depends on model/size |
-| **LoRA fine-tuned Qwen2.5-7B** | **~75–85%** | Macro-F1 often ~0.55–0.70 (rare labels hurt macro) |
+The repository no longer publishes guessed accuracy ranges for the final pipeline. Report:
 
-These are approximate; final numbers should be measured on the held-out test split.
+- accuracy
+- macro-F1
+- held-out test clause count and contract count
+- candidate shortlist recall
+- per-label F1 / support
+- the exact model, embedding model, reranker, shot count, and frozen fusion parameters
+
+Use validation for all configuration decisions. Use the untouched test split only after the configuration is frozen.
 
 ---
 

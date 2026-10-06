@@ -37,7 +37,8 @@ def load_clean_clauses(csv_path: Path) -> list[dict]:
     with csv_path.open("r", encoding="utf-8-sig") as f:
         for idx, row in enumerate(csv.DictReader(f), start=2):
             label = str(row.get("clause_type", "")).strip()
-            text = str(row.get("clause_text", "")).strip()
+            clean_text = str(row.get("clause_text_clean", "") or "").strip()
+            text = clean_text or str(row.get("clause_text", "")).strip()
             is_meta = str(row.get("is_metadata", "")).lower() == "true"
             doc_id = str(row.get("document_id", "")).strip()
             answer = str(row.get("answer", "")).strip()
@@ -49,6 +50,7 @@ def load_clean_clauses(csv_path: Path) -> list[dict]:
                     "document_id": doc_id,
                     "clause_type": label,
                     "clause_text": text,
+                    "clause_text_source": "clause_text_clean" if clean_text else "clause_text",
                     "answer": answer,
                 })
     return clauses
