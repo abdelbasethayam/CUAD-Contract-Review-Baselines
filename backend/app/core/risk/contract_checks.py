@@ -10,6 +10,7 @@ from ..rag.generator import call_ollama
 from .calibration import calibrate_risk_probability, calibrate_severity, load_calibration
 from .risk_engine import _evidence_valid, _majority, _severity_signal, _support_score
 from .risk_playbook import load_playbook, source_records
+from .risk_scoring import score_finding
 
 
 def _candidate_clauses(clauses: list[dict], pair: list[str]) -> list[dict]:
@@ -71,7 +72,7 @@ Return:
       "clause_ids": [1, 2],
       "evidence": [{{"clause_id": 1, "quote": "exact quote"}}],
       "why_flagged": "concise explanation",
-      "severity_factors": {{"impact": 0, "scope": 0, "asymmetry": 0, "duration": 0, "reversibility": 0}}
+      "score_components": {{"exposure_magnitude": 0, "likelihood_uncertainty": 0, "scope_duration": 0, "control_weakness": 0}}
     }}
   ],
   "document_findings": [
@@ -130,10 +131,10 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
                 "why_flagged": str(item.get("why_flagged") or "").strip(),
                 "severity_factors": {
                     key: (
-                        float(factors[key]) if str(factors.get(key)).replace(".", "", 1).isdigit()
-                        and 0 <= float(factors[key]) <= 3 else None
+                        float(float(factors[key]) if str(factors.get(key)).replace(".", "", 1).isdigit()
+                        and 0 <= float(factors[key]) <= 5 else None
                     )
-                    for key in ("impact", "scope", "asymmetry", "duration", "reversibility")
+                    for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")
                 },
             })
         return out
