@@ -72,7 +72,7 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
     if positive:
         status = "POTENTIAL_RISK"
         overall_raw_score = round(
-            1.0 - 0.5 ** len(positive),
+            max(float(item.get("raw_support_score") or 0.0) for item in positive),
             4,
         )
         overall_confidence = None
@@ -127,6 +127,7 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         "overall_confidence": overall_confidence,
         "confidence_status": confidence_status,
         "overall_raw_risk_score": overall_raw_score,
+        "overall_raw_score_semantics": "maximum evidence-support diagnostic; not a probability",
         "severity_status": "UNCALIBRATED",
         "risk_domains": domain_summary,
         "key_risks": key_risks,
