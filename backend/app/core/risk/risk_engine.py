@@ -645,10 +645,20 @@ def analyze_clause_risk(
             if score_details and score_details.get("final_score") is not None
             else None
         )
-        calibrated_confidence = (
-            calibrate_risk_probability(severity_score, calibration)
+        calibration_score = (
+            severity_score
             if risk_status == "POTENTIAL_RISK" and severity_score is not None
+            else 0.0
+            if finding_status in {"NOT_FOUND", "NOT_APPLICABLE"} and risk_status == "NO_RISK"
             else None
+        )
+        calibrated_probability = (
+            calibrate_risk_probability(calibration_score, calibration)
+            if calibration_score is not None
+            else None
+        )
+        calibrated_confidence = (
+            calibrated_probability if risk_status == "POTENTIAL_RISK" else None
         )
         calibrated_severity = calibrate_severity(severity_score, calibration) if severity_score is not None else None
 
@@ -664,6 +674,8 @@ def analyze_clause_risk(
             finding_status = "CONFLICT" if finding_status == "PRESENT" else finding_status
             risk_status = "INSUFFICIENT_EVIDENCE"
             severity_score = None
+            calibration_score = None
+            calibrated_probability = None
             calibrated_confidence = None
             calibrated_severity = None
             review_escalation = "HIGH_REVIEW"
@@ -736,6 +748,10 @@ def analyze_clause_risk(
                 "REVIEW_REQUIRED" if effective_human_review_required else "NOT_REVIEWED"
             ),
             "review_escalation": effective_review_escalation,
+            "risk_probability": calibrated_probability,
+            "risk_probability_status": (
+                "CALIBRATED" if calibrated_probability is not None else "UNCALIBRATED"
+            ),
             "confidence": calibrated_confidence,
             "confidence_status": (
                 "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED"
@@ -761,8 +777,8 @@ def analyze_clause_risk(
                     if item.get("id") or item.get("rule_id")
                 ],
                 "score_version": score_details["score_version"] if score_details else None,
-                "calibration_input": severity_score,
-                "calibration_status": "CALIBRATED" if calibrated_confidence is not None else "NOT_CALIBRATED",
+                "calibration_input": calibration_score,
+                "calibration_status": "CALIBRATED" if calibrated_probability is not None else "NOT_CALIBRATED",
             },
             "why_flagged": representative.get("why_flagged") if risk_status == "POTENTIAL_RISK" else (
                 representative.get("why_flagged")
