@@ -315,28 +315,29 @@ def retrieve_legal_guidance(
             if not contract_type or not source_contract_type or source_contract_type in {"commercial_general", contract_type}
             else "limited_by_analogy"
         )
+        normalized_source = normalize_source_record(
+            str(payload.get("rule_id") or payload.get("chunk_id") or hit.get("id")),
+            payload,
+            default_tier="B",
+            retrieval_date=retrieval_timestamp,
+        )
+        normalized_source["transferability"] = transferability
+        if not source_is_eligible(
+            normalized_source,
+            claim_kind="review_question",
+            jurisdiction=jurisdiction,
+            contract_type=contract_type,
+        ):
+            continue
         results.append({
-            "rule_id": payload.get("rule_id") or payload.get("chunk_id") or hit.get("id"),
+            **normalized_source,
+            "rule_id": normalized_source["id"],
             "retrieved_text": payload.get("retrieved_text", ""),
-            "source_name": payload.get("source_name"),
-            "source_url": payload.get("source_url"),
-            "title": payload.get("title"),
-            "source_title": payload.get("source_title") or payload.get("title"),
             "clause_category": payload.get("clause_category"),
-            "source_tier": payload.get("source_tier"),
-            "authority_status": payload.get("authority_status"),
-            "jurisdiction": payload.get("jurisdiction"),
-            "effective_date": payload.get("effective_date"),
-            "contract_type": source_contract_type,
-            "retrieval_date": retrieval_timestamp,
-            "indexed_retrieval_date": payload.get("retrieval_date"),
-            "access_type": payload.get("access_type"),
-            "license_status": payload.get("license_status"),
-            "supporting_quote_or_paraphrase": payload.get("supporting_quote_or_paraphrase"),
-            "transferability": transferability,
             "dense_score": round(float(hit.get("dense_score") or 0.0), 6),
             "lexical_score": round(float(hit.get("lexical_score") or 0.0), 6),
             "rrf_score": round(float(hit.get("rrf") or 0.0), 6),
+            "indexed_retrieval_date": payload.get("retrieval_date"),
         })
     if progress_callback:
         progress_callback({
