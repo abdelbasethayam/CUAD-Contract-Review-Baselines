@@ -20,8 +20,16 @@ from backend.app.core.rag.eval_data import load_clauses
 from backend.app.core.risk.risk_playbook import applicable_checks, load_playbook
 
 
-def sample_rows(source: Path, n: int, seed: int) -> list[dict]:
-    df = load_clauses(source)
+def annotation_partition(sample_id: str) -> str:
+    value = int(sample_id[:8], 16) % 100
+    if value < 25:
+        return "calibration"
+    if value < 50:
+        return "development"
+    return "locked_test"
+
+
+def sample_rows(source: Path, n: int, seed: int) -> list[dict]:    df = load_clauses(source)
     playbook = load_playbook()
     pool = []
     for row in df.to_dict("records"):
@@ -33,6 +41,7 @@ def sample_rows(source: Path, n: int, seed: int) -> list[dict]:
             ).hexdigest()[:16]
             pool.append({
                 "sample_id": sample_id,
+                "annotation_partition": annotation_partition(sample_id),
                 "document_id": row["document_id"],
                 "clause_index": clause_index,
                 "clause_type": row["clause_type"],
