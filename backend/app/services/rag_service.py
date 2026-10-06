@@ -204,6 +204,12 @@ def _classify_contract(
                     "clause_id": segment.clause_id,
                     "text": segment.text,
                     "parser": segment.parser,
+                    "page_start": segment.page_start,
+                    "page_end": segment.page_end,
+                    "parent_clause": segment.parent_clause,
+                    "depth": segment.depth,
+                    "source_blocks": segment.source_blocks,
+                    "heading": segment.heading,
                     "metadata": segment.metadata or {},
                 }
                 for i, segment in enumerate(segments)
