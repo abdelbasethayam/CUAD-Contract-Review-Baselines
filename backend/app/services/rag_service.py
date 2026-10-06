@@ -395,7 +395,8 @@ def _classify_contract(
             contract_coverage = build_contract_coverage(clause_rows_for_coverage, playbook)
             run.write_json("contract_coverage.json", contract_coverage)
 
-        # Phase 2 clause risk: each clause is checkpointed separately.        risk_index = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
+        # Phase 2 clause risk: each clause is checkpointed separately.
+        risk_index = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
         for pos, item in enumerate(valid_items):
             idx = int(item["clause_index"])
             label = str(results_by_index[idx].get("predicted_label") or "")
