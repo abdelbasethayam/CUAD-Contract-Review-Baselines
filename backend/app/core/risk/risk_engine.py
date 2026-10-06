@@ -15,6 +15,7 @@ from ..config import (
     RISK_TEMPERATURE,
 )
 from ..rag.generator import call_ollama
+from .calibration import calibrate_risk_probability, calibrate_severity, load_calibration
 from .risk_playbook import applicable_checks, load_playbook, source_records
 from .contract_context import retrieve_related_contract_context
 from .risk_detector import detect_legal_indicators
@@ -204,6 +205,7 @@ def analyze_clause_risk(
     passes: int | None = None,
 ) -> list[dict]:
     playbook = playbook or load_playbook()
+    calibration = load_calibration()
     checks = applicable_checks(playbook, clause_type)
     if not checks:
         return []
@@ -279,6 +281,12 @@ def analyze_clause_risk(
             indicator_match=indicator_match,
         )
         severity_signal = _severity_signal(representative.get("severity_factors") or {})
+        calibrated_confidence = (
+            calibrate_risk_probability(raw_support, calibration)
+            if status == "POTENTIAL_RISK"
+            else None
+        )
+        calibrated_severity = calibrate_severity(severity_signal, calibration)
         source_ids = checks_by_id[check_id].get("sources", [])
         findings.append(
             {
@@ -291,11 +299,15 @@ def analyze_clause_risk(
                 "risk_status": status,
                 "risk_type": representative.get("risk_type") if status == "POTENTIAL_RISK" else None,
                 "risk": status == "POTENTIAL_RISK",
-                "risk_level": None,
+                "risk_level": calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else None,
                 "raw_support_score": raw_support,
                 "severity_signal": severity_signal,
-                "confidence": None,
-                "confidence_status": "UNCALIBRATED",
+                "confidence": calibrated_confidence,
+                "confidence_status": "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED",
+                "severity_status": "CALIBRATED" if calibrated_severity else "UNCALIBRATED",
+                "severity_probabilities": (
+                    calibrated_severity["probabilities"] if calibrated_severity else {}
+                ),
                 "ground_truth_status": "PLAYBOOK_DERIVED",
                 "provenance": {
                     "playbook_hash": playbook.get("playbook_hash"),
