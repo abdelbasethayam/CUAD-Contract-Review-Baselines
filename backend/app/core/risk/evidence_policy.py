@@ -114,9 +114,50 @@ def apply_transferability(
     return result
 
 
+LEGAL_CLAIM_PATTERNS = (
+    "illegal",
+    "unlawful",
+    "unenforceable",
+    "invalid under",
+    "void under",
+    "prohibited by",
+    "violates",
+    "violation of",
+    "contrary to law",
+    "antitrust violation",
+)
+
+
+def contains_legal_claim(text: str) -> bool:
+    lowered = str(text or "").lower()
+    return any(pattern in lowered for pattern in LEGAL_CLAIM_PATTERNS)
+
+
+def legal_claim_supported(
+    text: str,
+    sources: list[dict[str, Any]],
+    *,
+    jurisdiction: str | None = None,
+    contract_type: str | None = None,
+) -> bool:
+    if not contains_legal_claim(text):
+        return True
+    return any(
+        source_is_eligible(
+            source,
+            claim_kind="legal_conclusion",
+            jurisdiction=jurisdiction,
+            contract_type=contract_type,
+        )
+        for source in sources
+    )
+
+
 __all__ = [
     "SOURCE_TIERS",
     "normalize_source_record",
     "source_is_eligible",
     "apply_transferability",
+    "contains_legal_claim",
+    "legal_claim_supported",
 ]

@@ -8,6 +8,7 @@ from .knowledge_base import match_risk_domains
 from .risk_playbook import load_playbook
 from .risk_engine import _evidence_valid, _emit
 from .risk_scoring import aggregate_contract_triage
+from .calibration import calibrate_risk_probability, load_calibration
 
 ProgressCallback = Callable[[dict], None]
 
@@ -30,10 +31,14 @@ def _valid_positive(findings: list[dict]) -> list[dict]:
     ]
 
 
-def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -> dict:
+def aggregate_clause_risks(
+    findings: list[dict],
+    playbook: dict | None = None,
+    contract_metadata: dict | None = None,
+    deterministic_signals: list[dict] | None = None,
+) -> dict:
     playbook = playbook or load_playbook()
     positive = _valid_positive(findings)
-    triage = aggregate_contract_triage(positive)
     insufficient = [f for f in findings if f.get("risk_status") == "INSUFFICIENT_EVIDENCE"]
 
     domain_items = defaultdict(list)
@@ -49,6 +54,18 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         for domain in finding["risk_domains"]:
             domain_items[domain].append(finding)
 
+    triage = aggregate_contract_triage(
+        positive,
+        contract_metadata=contract_metadata,
+        deterministic_signals=deterministic_signals,
+    )
+    calibration = load_calibration()
+    overall_confidence = (
+        calibrate_risk_probability(triage.get("overall_score"), calibration)
+        if triage.get("overall_score") is not None
+        else None
+    )
+
     key_risks = [
         {
             "clause_id": finding.get("clause_index") if finding.get("clause_index") is not None else finding.get("clause_ids"),
@@ -56,6 +73,12 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
             "risk_type": finding.get("risk_type"),
             "raw_support_score": finding.get("raw_support_score"),
             "severity_signal": finding.get("severity_signal"),
+            "final_score": finding.get("final_score"),
+            "score_components": finding.get("score_components", {}),
+            "human_review_required": finding.get("human_review_required"),
+            "review_escalation": finding.get("review_escalation"),
+            "finding_status": finding.get("finding_status"),
+            "evidence_status": finding.get("evidence_status"),
             "confidence": finding.get("confidence"),
             "confidence_status": finding.get("confidence_status"),
             "ground_truth_status": finding.get("ground_truth_status"),
@@ -78,8 +101,7 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
     if positive:
         status = "POTENTIAL_RISK"
         overall_raw_score = triage["overall_score"]
-        overall_confidence = None
-        confidence_status = "UNCALIBRATED"
+        confidence_status = "CALIBRATED" if overall_confidence is not None else "UNCALIBRATED"
         overall_risk = triage["overall_severity"]
         reason = (
             "One or more contract provisions contain evidence-supported "
@@ -137,6 +159,9 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         "overall_raw_score_semantics": "deterministic 0-20 triage score; not a probability",
         "severity_status": "RULE_BASED_TRIAGE",
         "risk_domains": domain_summary,
+        "exposure_concentration": triage.get("exposure_concentration", []),
+        "control_gap_count": triage.get("control_gap_count", 0),
+        "unreviewed_assumption_count": triage.get("unreviewed_assumption_count", 0),
         "key_risks": key_risks,
         "affected_clauses": affected,
         "reason": reason,
@@ -148,6 +173,9 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         "overall_severity": triage["overall_severity"],
         "aggregation_adjustments": triage["aggregation_adjustments"],
         "human_review_required": triage["human_review_required"],
+        "legal_review_required": triage.get("legal_review_required", False),
+        "business_owner_review_required": triage.get("business_owner_review_required", False),
+        "privacy_security_review_required": triage.get("privacy_security_review_required", False),
         "high_count": triage["high_count"],
         "critical_count": triage["critical_count"],
         "two_high_same_domain": triage["two_high_same_domain"],

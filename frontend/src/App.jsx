@@ -35,6 +35,11 @@ function RiskCard({ finding }) {
           <span className="field-note">{finding.confidence_status || "UNCALIBRATED"}</span>
         </div>
         <div>
+          <span className="field-label">Triage score</span>
+          <strong>{finding.final_score == null ? "Not scored" : String(finding.final_score) + " / 20"}</strong>
+          <span className="field-note">Internal review-prioritization score</span>
+        </div>
+        <div>
           <span className="field-label">Ground truth / provenance</span>
           <strong>{finding.ground_truth_status || "NOT_AVAILABLE"}</strong>
           <span className="field-note">Not gold unless manually adjudicated.</span>
@@ -61,6 +66,9 @@ function RiskCard({ finding }) {
         {finding.provenance?.agreement != null && (
           <span>Self-consistency: {Math.round(finding.provenance.agreement * 100)}%</span>
         )}
+        {finding.review_escalation && <span>Escalation: {finding.review_escalation}</span>}
+        {finding.human_review_status && <span>Review: {finding.human_review_status}</span>}
+        {finding.source_tier && <span>Source tier: {finding.source_tier}</span>}
         {finding.provenance?.playbook_hash && (
           <span>Playbook: {finding.provenance.playbook_hash.slice(0, 12)}…</span>
         )}
@@ -244,6 +252,7 @@ function ContractReview() {
               <div><span>Effective date</span><strong>{result.contract_metadata?.effective_date || "Not extracted"}</strong></div>
               <div><span>Expiration date</span><strong>{result.contract_metadata?.expiration_date || "Not extracted"}</strong></div>
               <div><span>Governing law</span><strong>{result.contract_metadata?.governing_law || "Not extracted"}</strong></div>
+              <div><span>Contract type</span><strong>{result.contract_metadata?.contract_type || "Not determined"}</strong></div>
               <div><span>Ground truth</span><strong>{assessment.gold_status || "PLAYBOOK_DERIVED"}</strong></div>
             </div>
           </section>
@@ -261,8 +270,14 @@ function ContractReview() {
                 <h2>{assessment.status === "POTENTIAL_RISK" ? "Potential risk identified" : (assessment.status || "Assessment unavailable")}</h2>
                 <p>{assessment.reason}</p>
                 <div className="status-line">
-                  <span>Overall severity: {assessment.overall_risk || "Not calibrated"}</span>
+                  <span>Overall severity: {assessment.overall_severity || assessment.overall_risk || "Not scored"}</span>
+                  <span>Triage score: {assessment.overall_score == null ? "Not scored" : String(assessment.overall_score) + " / 20"}</span>
                   <span>Confidence: {assessment.overall_confidence == null ? "Not calibrated" : Math.round(assessment.overall_confidence * 100) + "%"}</span>
+                </div>
+                <div className="status-line">
+                  {assessment.legal_review_required && <span>Legal review required</span>}
+                  {assessment.business_owner_review_required && <span>Business-owner review</span>}
+                  {assessment.privacy_security_review_required && <span>Privacy/security review</span>}
                 </div>
                 <p className="muted">This uploaded contract has no independent gold label. Findings are tagged {assessment.gold_status || "PLAYBOOK_DERIVED"}.</p>
               </article>

@@ -25,7 +25,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=Path("data/risk/gold/calibration.json"))
-    parser.add_argument("--score-column", default="raw_support_score")
+    parser.add_argument("--score-column", default="calibration_score")
     parser.add_argument("--partition", default="calibration", choices=["calibration", "development"])
     parser.add_argument("--severity-score-column", default="final_score")
     parser.add_argument("--gold-risk-column", default="adjudicated_risk")
@@ -49,16 +49,23 @@ def main() -> None:
         raise SystemExit("At least 30 adjudicated risk examples are recommended for calibration.")
 
     x = risk_df[args.score_column].astype(float).to_numpy()
+    if np.any((x < 0) | (x > 20)):
+        raise SystemExit("calibration_score must be in the inclusive 0-20 range.")
     y = risk_df[args.gold_risk_column].map(
         {"0": 0, "1": 1, "YES": 1, "NO": 0, "TRUE": 1, "FALSE": 0}
     ).astype(float).to_numpy()
+    if np.unique(y).size < 2:
+        raise SystemExit("Calibration partition must contain both YES and NO adjudicated risk cases.")
     risk_curve = fit_curve(x, y)
     risk_pred = np.interp(x, risk_curve["x"], risk_curve["y"])
 
     result = {
         "schema_version": 1,
         "method": "isotonic",
+        "calibration_input": "calibration_score_0_to_20_with_zero_for_nonpositive_or_unscored",
         "n_risk_calibration": int(len(x)),
+        "n_positive": int(y.sum()),
+        "n_negative": int(len(y) - y.sum()),
         "risk_probability": risk_curve,
         "calibration_partition": args.partition,
         "severity_score_column": args.severity_score_column,

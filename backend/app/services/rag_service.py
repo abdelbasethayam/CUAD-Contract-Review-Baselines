@@ -18,6 +18,7 @@ from ..core.config import (
     RISK_CALIBRATION_PATH,
     RISK_ENABLE_CROSS_CLAUSE,
     RISK_ENABLE_DOCUMENT_CHECKS,
+    LEGAL_KNOWLEDGE_CORPUS_VERSION,
     RUNS_DIR,
     RISK_USE_CONTEXT,
     RISK_USE_LEGAL_GUIDANCE,
@@ -37,9 +38,10 @@ from ..core.rag.validator import is_real_clause
 from ..core.risk.contract_checks import analyze_contract_checks
 from ..core.risk.deterministic_cross_checks import run_deterministic_cross_checks
 from ..core.risk.contract_metadata import extract_contract_metadata
+from ..core.risk.contract_structure import extract_clause_structure
 from ..core.risk.contract_coverage import build_contract_coverage
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
-from ..core.risk.risk_engine import analyze_clause_risk
+from ..core.risk.risk_engine import RISK_PROMPT_VERSION, analyze_clause_risk
 from ..core.risk.risk_playbook import load_playbook
 from ..core.risk.run_store import AnalysisRun, create_or_resume_run, mark_run_complete, mark_run_failed
 from ..core.rag.evidence_compressor import compress_cuad_evidence
@@ -114,6 +116,8 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
         "use_legal_guidance": RISK_USE_LEGAL_GUIDANCE,
         "enable_cross_clause": RISK_ENABLE_CROSS_CLAUSE,
         "enable_document_checks": RISK_ENABLE_DOCUMENT_CHECKS,
+        "prompt_version": RISK_PROMPT_VERSION,
+        "legal_knowledge_corpus_version": LEGAL_KNOWLEDGE_CORPUS_VERSION,
     }
 
 
@@ -226,6 +230,7 @@ def _classify_contract(
             segments = None
 
         segment_by_index = {int(item["clause_index"]): item for item in segments_json}
+        full_contract_text = "\n".join(str(item.get("text") or "") for item in segments_json)
 
         if not segments_json:
             raise ValueError(
@@ -356,17 +361,39 @@ def _classify_contract(
             )
 
             segment_info = segment_by_index.get(idx, {})
+            structure = extract_clause_structure(
+                item["clause_text"],
+                section_path=segment_info.get("heading") or segment_info.get("clause_id"),
+                page_start=segment_info.get("page_start"),
+                page_end=segment_info.get("page_end"),
+                full_contract_text=full_contract_text,
+            )
             row = {
                 "clause_index": idx,
                 "clause_id": segment_info.get("clause_id"),
                 "clause_text": item["clause_text"],
-                "section_path": segment_info.get("clause_id"),
-                "page_start": segment_info.get("page_start"),
-                "page_end": segment_info.get("page_end"),
+                "section_path": structure.get("section_path"),
+                "page_start": structure.get("page_start"),
+                "page_end": structure.get("page_end"),
                 "parent_clause": segment_info.get("parent_clause"),
                 "depth": segment_info.get("depth"),
                 "source_blocks": segment_info.get("source_blocks", []),
                 "heading": segment_info.get("heading"),
+                "defined_terms_used": structure.get("defined_terms_used", []),
+                "linked_sections": structure.get("linked_sections", []),
+                "parties_affected": [],
+                "beneficiary": None,
+                "direction_of_obligation": structure.get("direction_of_obligation"),
+                "transaction_role": structure.get("transaction_role"),
+                "commercial_purpose": None,
+                "operational_trigger": None,
+                "scope": structure.get("scope", {}),
+                "rights_and_duties": structure.get("rights_and_duties", []),
+                "exceptions_carveouts": structure.get("exceptions_carveouts", []),
+                "economic_effect": {},
+                "dependencies": structure.get("dependencies", []),
+                "dependency_missing": structure.get("dependency_missing", []),
+                "structure_status": structure.get("structure_status", "DETERMINISTIC_PARTIAL"),
                 "predicted_label": result["predicted_label"],
                 "clause_type": result["predicted_label"],
                 "retrieved_labels": result.get("retrieved_labels", []),
@@ -414,6 +441,16 @@ def _classify_contract(
             contract_coverage = build_contract_coverage(clause_rows_for_coverage, playbook)
             run.write_json("contract_coverage.json", contract_coverage)
 
+        contract_metadata = extract_contract_metadata(
+            filename,
+            clause_rows_for_coverage,
+            document_hash=(run.read_json("manifest.json", {}) or {}).get("source", {}).get("sha256"),
+            document_version="1",
+        )
+        contract_jurisdiction = (
+            contract_metadata.get("jurisdiction_candidates") or [None]
+        )[0]
+
         # Phase 2 clause risk: each clause is checkpointed separately.
         risk_index = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
         for pos, item in enumerate(valid_items):
@@ -441,7 +478,27 @@ def _classify_contract(
                 progress_callback=trace,
                 playbook=playbook,
                 qdrant_client=qdrant_client,
+                contract_type=contract_metadata.get("contract_type"),
+                jurisdiction=contract_jurisdiction,
+                clause_structure=results_by_index[idx],
             )
+            for finding in findings:
+                finding.setdefault("provenance", {}).update(
+                    {
+                        "contract_id": contract_metadata.get("document_hash"),
+                        "document_version": contract_metadata.get("document_version"),
+                        "model_id": RISK_MODEL,
+                        "model_version": RISK_MODEL,
+                        "prompt_version": RISK_PROMPT_VERSION,
+                        "retrieval_corpus_version": LEGAL_KNOWLEDGE_CORPUS_VERSION,
+                        "parser_version": segment_info.get("parser"),
+                        "policy_version": playbook.get("source_version"),
+                        "reviewer_id": None,
+                        "review_timestamp": None,
+                        "override_reason": finding.get("score_override_reason"),
+                    }
+                )
+
             # Idempotent checkpoint: replace only the clause's prior rows.
             existing_lines = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
             existing_for_clause = [
@@ -469,8 +526,8 @@ def _classify_contract(
                 best = max(
                     positives,
                     key=lambda x: (
+                        float(x.get("final_score") or 0.0),
                         float(x.get("raw_support_score") or 0.0),
-                        float(x.get("severity_signal") or 0.0),
                     ),
                 )
                 row["risk"] = True
@@ -532,6 +589,8 @@ def _classify_contract(
                 playbook=effective_playbook,
                 progress_callback=trace,
                 deterministic_signals=deterministic_signals,
+                contract_type=contract_metadata.get("contract_type"),
+                jurisdiction=contract_jurisdiction,
             )
             run.write_json(
                 "contract_checks.json",
@@ -553,6 +612,8 @@ def _classify_contract(
             assessment = aggregate_clause_risks(
                 all_risk_findings + cross_findings + document_findings,
                 playbook=playbook,
+                contract_metadata=contract_metadata,
+                deterministic_signals=deterministic_signals,
             )
             assessment["cross_clause_findings"] = cross_findings
             assessment["document_findings"] = document_findings
@@ -606,11 +667,7 @@ def _classify_contract(
                 "contract_risk_assessment": assessment,
                 "contract_coverage": contract_coverage,
                 "deterministic_cross_checks": deterministic_signals,
-                "contract_metadata": {
-                    **extract_contract_metadata(filename, clauses_out),
-                    "document_hash": _file_hash(file_path),
-                    "document_version": _file_hash(file_path),
-                },
+                "contract_metadata": contract_metadata,
             },
         )
         mark_run_complete(
@@ -631,7 +688,7 @@ def _classify_contract(
             "filename": filename,
             "clauses": clauses_out,
             "contract_risk_assessment": assessment,
-            "contract_metadata": extract_contract_metadata(filename, clauses_out),
+            "contract_metadata": contract_metadata,
             "contract_coverage": contract_coverage,
             "deterministic_cross_checks": deterministic_signals,
             "run_dir": str(run.root),

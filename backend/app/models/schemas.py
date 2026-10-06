@@ -11,6 +11,8 @@ class RiskFinding(BaseModel):
     check_id: str | None = None
     question: str | None = None
     answer: str | None = None
+    finding_status: str = "UNCERTAIN"
+    evidence_status: str = "UNCERTAIN"
     risk_status: str = "INSUFFICIENT_EVIDENCE"
     risk: bool = False
     risk_type: str | None = None
@@ -19,6 +21,8 @@ class RiskFinding(BaseModel):
     severity_signal: float | None = None
     confidence: float | None = None
     confidence_status: str = "UNCALIBRATED"
+    risk_probability: float | None = None
+    risk_probability_status: str = "UNCALIBRATED"
     severity_status: str = "UNCALIBRATED"
     severity_probabilities: dict[str, float] = Field(default_factory=dict)
     ground_truth_status: str = "NOT_AVAILABLE"
@@ -34,18 +38,30 @@ class RiskFinding(BaseModel):
     final_score: int | None = None
     score_override_reason: str | None = None
     human_review_required: bool = True
+    human_review_status: str = "NOT_REVIEWED"
     review_escalation: str = "STANDARD_REVIEW"
     severity_score: float | None = None
     source_tier: str | None = None
     jurisdiction: str | None = None
     effective_date: str | None = None
     contract_type: str | None = None
+    source_contract_type: str | None = None
+    source_jurisdiction: str | None = None
+    source_effective_date: str | None = None
     source_url: str | None = None
     source_title: str | None = None
     retrieval_date: str | None = None
     supporting_quote_or_paraphrase: str | None = None
     transferability: str | None = None
     legal_guidance_sources: list[dict[str, Any]] = Field(default_factory=list)
+    control_assessments: dict[str, Any] = Field(default_factory=dict)
+    override_flags: dict[str, bool] = Field(default_factory=dict)
+    economic_effect: dict[str, Any] = Field(default_factory=dict)
+    jurisdiction_sensitive: bool = False
+    unsupported_legal_claim: bool = False
+    source_conflict: bool = False
+    evidence_span: str = ""
+    evidence_source: str = "none"
 
 
 class ContractRiskAssessment(BaseModel):
@@ -69,6 +85,12 @@ class ContractRiskAssessment(BaseModel):
     overall_severity: str | None = None
     aggregation_adjustments: list[dict[str, Any]] = Field(default_factory=list)
     human_review_required: bool = False
+    legal_review_required: bool = False
+    business_owner_review_required: bool = False
+    privacy_security_review_required: bool = False
+    exposure_concentration: list[dict[str, Any]] = Field(default_factory=list)
+    control_gap_count: int = 0
+    unreviewed_assumption_count: int = 0
     high_count: int = 0
     critical_count: int = 0
 
@@ -84,6 +106,11 @@ class ContractMetadata(BaseModel):
     effective_date: str | None = None
     expiration_date: str | None = None
     governing_law: str | None = None
+    contract_type_candidates: list[str] = Field(default_factory=list)
+    contract_type_status: str = "HEURISTIC_CANDIDATE"
+    metadata_status: str = "PARTIAL_HEURISTIC"
+    evidence: dict[str, Any] = Field(default_factory=dict)
+    provenance: str | None = None
     source_filename: str | None = None
 
 
