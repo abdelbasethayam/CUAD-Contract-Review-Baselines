@@ -26,6 +26,8 @@ def main() -> None:
     parser.add_argument("--csv", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=Path("data/risk/gold/calibration.json"))
     parser.add_argument("--score-column", default="raw_support_score")
+    parser.add_argument("--partition", default="calibration", choices=["calibration", "development"])
+    parser.add_argument("--severity-score-column", default="final_score")
     parser.add_argument("--gold-risk-column", default="adjudicated_risk")
     parser.add_argument("--gold-severity-column", default="adjudicated_severity")
     args = parser.parse_args()
