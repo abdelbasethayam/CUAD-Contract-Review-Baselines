@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 from typing import Callable
+from threading import Lock
+
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from qdrant_client import models
 
-from ..config import LEGAL_ALLOWED_SOURCE_TIERS, LEGAL_CONTRACT_TYPE, LEGAL_JURISDICTION, LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_TOP_K
+from ..config import LEGAL_ALLOWED_SOURCE_TIERS, LEGAL_CONTRACT_TYPE, LEGAL_JURISDICTION, LEGAL_HYBRID_CANDIDATES, LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_TOP_K, LEGAL_RRF_K
 from ..rag.embedder import embed_queries, make_cohere_client
 from ..rag.retriever import make_qdrant_client
 
@@ -67,6 +71,80 @@ CLAUSE_TYPE_TO_CATEGORY = {
     "Post-Termination Services": "Termination Assistance",
 }
 
+_LEXICAL_LOCK = Lock()
+_LEXICAL_CACHE: dict[str, tuple[TfidfVectorizer, object, list[dict]]] = {}
+
+
+def _load_lexical_index(qdrant_client, collection_name: str):
+    cached = _LEXICAL_CACHE.get(collection_name)
+    if cached is not None:
+        return cached
+    with _LEXICAL_LOCK:
+        cached = _LEXICAL_CACHE.get(collection_name)
+        if cached is not None:
+            return cached
+        records = []
+        offset = None
+        while True:
+            points, offset = qdrant_client.scroll(
+                collection_name=collection_name,
+                limit=256,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            for point in points:
+                payload = point.payload or {}
+                text = str(payload.get("retrieved_text") or "").strip()
+                if text:
+                    records.append({"id": str(point.id), "payload": payload, "text": text})
+            if offset is None:
+                break
+        vectorizer = TfidfVectorizer(lowercase=True, ngram_range=(1, 2), sublinear_tf=True)
+        matrix = vectorizer.fit_transform([item["text"] for item in records]) if records else None
+        cached = (vectorizer, matrix, records)
+        _LEXICAL_CACHE[collection_name] = cached
+        return cached
+
+
+def _filter_payload(payload: dict, allowed_source_tiers: tuple[str, ...], jurisdiction: str | None) -> bool:
+    if allowed_source_tiers and str(payload.get("source_tier") or "").upper() not in set(allowed_source_tiers):
+        return False
+    if jurisdiction and str(payload.get("jurisdiction") or "") not in {jurisdiction, "unspecified", "international"}:
+        return False
+    return True
+
+
+def _lexical_search(query: str, qdrant_client, collection_name: str, limit: int, allowed_source_tiers: tuple[str, ...], jurisdiction: str | None) -> list[dict]:
+    vectorizer, matrix, records = _load_lexical_index(qdrant_client, collection_name)
+    if matrix is None or not records:
+        return []
+    query_vector = vectorizer.transform([query])
+    scores = (matrix @ query_vector.T).toarray().ravel()
+    order = np.argsort(-scores)
+    results = []
+    for idx in order:
+        record = records[int(idx)]
+        if not _filter_payload(record["payload"], allowed_source_tiers, jurisdiction):
+            continue
+        results.append({"id": record["id"], "score": float(scores[int(idx)]), "payload": record["payload"]})
+        if len(results) >= limit:
+            break
+    return results
+
+
+def _rrf_merge(dense_hits: list, lexical_hits: list, rrf_k: int, limit: int) -> list:
+    merged = {}
+    for rank, hit in enumerate(dense_hits, start=1):
+        merged.setdefault(str(hit.id), {"id": str(hit.id), "dense_score": 0.0, "lexical_score": 0.0, "payload": hit.payload or {}})
+        merged[str(hit.id)]["dense_score"] = float(hit.score)
+        merged[str(hit.id)]["rrf"] = merged[str(hit.id)].get("rrf", 0.0) + 1.0 / (rrf_k + rank)
+    for rank, item in enumerate(lexical_hits, start=1):
+        key = str(item["id"])
+        merged.setdefault(key, {"id": key, "dense_score": 0.0, "lexical_score": 0.0, "payload": item["payload"]})
+        merged[key]["lexical_score"] = float(item["score"])
+        merged[key]["rrf"] = merged[key].get("rrf", 0.0) + 1.0 / (rrf_k + rank)
+    return sorted(merged.values(), key=lambda x: x.get("rrf", 0.0), reverse=True)[:limit]
 
 def map_clause_category(clause_type: str) -> str | None:
     normalized = str(clause_type or "").strip()
