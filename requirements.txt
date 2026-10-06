@@ -24,3 +24,5 @@ python-dotenv           # loads .env (COHERE_API_KEY, QDRANT_URL, etc.)
 pandas                  # CSV loading/reshaping, config.load_labels()
 scikit-learn             # train_test_split in split_cuad.py
 sentence-transformers    # MPNet embeddings + optional BGE cross-encoder reranking
+
+rarfile                 # Optional: import the team's .rar playbook bundle
