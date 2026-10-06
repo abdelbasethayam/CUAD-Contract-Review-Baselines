@@ -148,6 +148,15 @@ def resume_contract(
     if not source_candidates:
         raise FileNotFoundError(f"Persistent source missing for run: {analysis_id}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    expected = manifest.get("pipeline") or {}
+    current = _pipeline_config(int(expected.get("top_k", TOP_K)), load_playbook())
+    # Explicit resume must use the same experiment configuration. A changed
+    # playbook/model/calibration file starts a new run instead of mixing artifacts.
+    if expected and current != expected:
+        raise RuntimeError(
+            "Run configuration changed since this analysis started. "
+            "Start a new analysis instead of resuming with mixed artifacts."
+        )
     if manifest.get("status") == "COMPLETED":
         result_path = root / "result.json"
         if result_path.exists():
