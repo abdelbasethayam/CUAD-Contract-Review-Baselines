@@ -135,12 +135,11 @@ Return:
       "risk_type": "specific risk type or null",
       "evidence": "exact contiguous quote or empty string",
       "why_flagged": "concise explanation or empty string",
-      "severity_factors": {{
-        "impact": 0,
-        "scope": 0,
-        "asymmetry": 0,
-        "duration": 0,
-        "reversibility": 0
+      "score_components": {{
+        "exposure_magnitude": 0,
+        "likelihood_uncertainty": 0,
+        "scope_duration": 0,
+        "control_weakness": 0
       }}
     }}
   ]
