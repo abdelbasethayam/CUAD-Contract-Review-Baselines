@@ -2,7 +2,7 @@
 """LoRA SFT for CUAD clause classification.
 
 Recommended base (best accuracy / macro-F1 tradeoff for this task):
-  Qwen/Qwen2.5-7B-Instruct
+  Qwen/Qwen3-8B
 
 Lighter alternative:
   Qwen/Qwen3-4B-Instruct-2507   (if available) or Qwen/Qwen3-4B-Instruct
@@ -22,7 +22,7 @@ Usage:
   python scripts/finetune/train_lora.py \\
     --base Qwen/Qwen2.5-7B-Instruct \\
     --data-dir data/finetune \\
-    --out output/ft_qwen25_7b_cuad
+    --out output/ft_qwen3_8b_cuad
 """
 from __future__ import annotations
 
@@ -81,8 +81,17 @@ def main() -> None:
         messages = example["messages"]
         if hasattr(tokenizer, "apply_chat_template"):
             text = tokenizer.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=False
-            )
+                try:
+                    text = tokenizer.apply_chat_template(
+                        messages,
+                        tokenize=False,
+                        add_generation_prompt=False,
+                        enable_thinking=False,
+                    )
+                except TypeError:
+                    text = tokenizer.apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=False
+                    )
         else:
             parts = []
             for m in messages:
