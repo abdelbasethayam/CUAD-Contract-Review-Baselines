@@ -84,6 +84,18 @@ cp backend/.env.example backend/.env
 ollama pull qwen2.5:7b
 ```
 
+### Data validation / classification preparation
+
+The raw CUAD master CSV is kept immutable. Use the reproducible validator/preparer below to create the model-ready long-format training/test files:
+
+```bash
+python data/scripts/dataset/prepare_classification.py
+```
+
+This keeps the 410/100 contract-disjoint split, excludes the five contract-metadata fields from clause classification, preserves the original clause text, and adds a conservative normalized text view. It also reports multi-label annotation overlaps and other data-quality checks. Do not use the `answer` field as classifier input.
+
+See [docs/DATA_QUALITY_CUAD.md](docs/DATA_QUALITY_CUAD.md) for the audit policy.
+
 **Hybrid retrieval only (no LLM):**
 
 ```bash
