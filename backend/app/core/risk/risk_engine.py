@@ -366,7 +366,7 @@ def analyze_clause_risk(
             if status == "POTENTIAL_RISK"
             else None
         )
-        calibrated_severity = calibrate_severity(severity_signal, calibration)
+        calibrated_severity = calibrate_severity(severity_score, calibration)
         source_ids = checks_by_id[check_id].get("sources", [])
         supporting_sources = source_records(playbook, source_ids)
         primary_source = supporting_sources[0] if supporting_sources else {}
