@@ -32,14 +32,14 @@ This is not a cleaning defect. It follows from the CUAD task structure, where ca
 
 ### Modeling implication
 
-For a faithful CUAD formulation, model each category independently or use a multi-label target representation.
+For a faithful CUAD formulation, model each category independently or use a cross-category target representation.
 
 For the project's existing single-label classifier, keep the "main legal function" framing, but:
 
 1. Do not delete overlapping rows.
 2. Report the conflict-aware ceiling.
 3. Add an evaluation on the unambiguous subset.
-4. Treat the multi-label overlap flag as an ambiguity indicator, not a corrected label.
+4. Treat the cross-category overlap flag as an ambiguity indicator, not a corrected label.
 5. Do not claim that single-label accuracy is equivalent to the original CUAD extraction benchmark.
 
 ## Two annotation QC anomalies
@@ -85,7 +85,7 @@ For the research result, report at least:
 
 - overall single-label Accuracy and Macro-F1 on the existing contract-disjoint test set;
 - per-label support and a low-support flag for categories with test n < 10;
-- the unambiguous-subset result (rows with multi_label_overlap = False);
+- the unambiguous-subset result (rows with cross_category_span_reuse = False);
 - normalized exact-text overlap rate between train and test;
 - Recall@K of the retrieval shortlist before LLM classification.
 
