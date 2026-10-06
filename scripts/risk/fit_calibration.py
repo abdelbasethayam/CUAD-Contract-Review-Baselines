@@ -68,14 +68,18 @@ def main() -> None:
     if args.gold_severity_column in df.columns:
         severity_input = args.severity_score_column if args.severity_score_column in df.columns else args.score_column
         sev = df.dropna(subset=[severity_input, args.gold_severity_column]).copy()
-        sev = sev[sev[args.gold_severity_column].isin(["LOW", "MEDIUM", "HIGH"])]
+        sev = sev[sev[args.gold_severity_column].isin(["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"])]
         if len(sev) >= 30 and sev[args.gold_severity_column].nunique() >= 2:
             xs = sev[severity_input].astype(float).to_numpy()
             levels = sev[args.gold_severity_column].to_numpy()
-            p_med = np.array([1.0 if level in {"MEDIUM", "HIGH"} else 0.0 for level in levels])
-            p_high = np.array([1.0 if level == "HIGH" else 0.0 for level in levels])
+            p_low = np.array([1.0 if level in {"LOW", "MEDIUM", "HIGH", "CRITICAL"} else 0.0 for level in levels])
+            p_med = np.array([1.0 if level in {"MEDIUM", "HIGH", "CRITICAL"} else 0.0 for level in levels])
+            p_high = np.array([1.0 if level in {"HIGH", "CRITICAL"} else 0.0 for level in levels])
+            p_critical = np.array([1.0 if level == "CRITICAL" else 0.0 for level in levels])
+            result["p_ge_low"] = fit_curve(xs, p_low)
             result["p_ge_medium"] = fit_curve(xs, p_med)
             result["p_ge_high"] = fit_curve(xs, p_high)
+            result["p_ge_critical"] = fit_curve(xs, p_critical)
             result["n_severity_calibration"] = int(len(sev))
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
