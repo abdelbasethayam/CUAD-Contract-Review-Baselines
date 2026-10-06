@@ -36,6 +36,16 @@ class RiskFinding(BaseModel):
     human_review_required: bool = True
     review_escalation: str = "STANDARD_REVIEW"
     severity_score: float | None = None
+    source_tier: str | None = None
+    jurisdiction: str | None = None
+    effective_date: str | None = None
+    contract_type: str | None = None
+    source_url: str | None = None
+    source_title: str | None = None
+    retrieval_date: str | None = None
+    supporting_quote_or_paraphrase: str | None = None
+    transferability: str | None = None
+    legal_guidance_sources: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ContractRiskAssessment(BaseModel):
