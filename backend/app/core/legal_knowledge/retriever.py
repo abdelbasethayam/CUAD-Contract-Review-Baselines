@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Callable
 from threading import Lock
-
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
+from collections import Counter
+import math
+import re
 
 from qdrant_client import models
 
@@ -72,7 +72,13 @@ CLAUSE_TYPE_TO_CATEGORY = {
 }
 
 _LEXICAL_LOCK = Lock()
-_LEXICAL_CACHE: dict[str, tuple[TfidfVectorizer, object, list[dict]]] = {}
+_BM25_K1 = 1.2
+_BM25_B = 0.75
+_LEXICAL_CACHE: dict[str, tuple[list[dict], dict, float, int]] = {}
+
+
+def _tokenize(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9_]+", str(text or "").lower())
 
 
 def _load_lexical_index(qdrant_client, collection_name: str):
@@ -87,22 +93,24 @@ def _load_lexical_index(qdrant_client, collection_name: str):
         offset = None
         while True:
             points, offset = qdrant_client.scroll(
-                collection_name=collection_name,
-                limit=256,
-                offset=offset,
-                with_payload=True,
-                with_vectors=False,
+                collection_name=collection_name, limit=256, offset=offset,
+                with_payload=True, with_vectors=False,
             )
             for point in points:
                 payload = point.payload or {}
                 text = str(payload.get("retrieved_text") or "").strip()
-                if text:
-                    records.append({"id": str(point.id), "payload": payload, "text": text})
+                tokens = _tokenize(text)
+                if tokens:
+                    records.append({"id": str(point.id), "payload": payload, "tokens": tokens})
             if offset is None:
                 break
-        vectorizer = TfidfVectorizer(lowercase=True, ngram_range=(1, 2), sublinear_tf=True)
-        matrix = vectorizer.fit_transform([item["text"] for item in records]) if records else None
-        cached = (vectorizer, matrix, records)
+        document_frequency = Counter()
+        for record in records:
+            document_frequency.update(set(record["tokens"]))
+        avgdl = (sum(len(r["tokens"]) for r in records) / len(records)) if records else 0.0
+        n_docs = len(records)
+        idf = {term: math.log(1.0 + (n_docs - freq + 0.5) / (freq + 0.5)) for term, freq in document_frequency.items()}
+        cached = (records, idf, avgdl, n_docs)
         _LEXICAL_CACHE[collection_name] = cached
         return cached
 
@@ -115,22 +123,31 @@ def _filter_payload(payload: dict, allowed_source_tiers: tuple[str, ...], jurisd
     return True
 
 
-def _lexical_search(query: str, qdrant_client, collection_name: str, limit: int, allowed_source_tiers: tuple[str, ...], jurisdiction: str | None) -> list[dict]:
-    vectorizer, matrix, records = _load_lexical_index(qdrant_client, collection_name)
-    if matrix is None or not records:
+def _bm25_search(query: str, qdrant_client, collection_name: str, limit: int, allowed_source_tiers: tuple[str, ...], jurisdiction: str | None) -> list[dict]:
+    records, idf, avgdl, _ = _load_lexical_index(qdrant_client, collection_name)
+    if not records or avgdl <= 0:
         return []
-    query_vector = vectorizer.transform([query])
-    scores = (matrix @ query_vector.T).toarray().ravel()
-    order = np.argsort(-scores)
-    results = []
-    for idx in order:
-        record = records[int(idx)]
+    query_terms = _tokenize(query)
+    if not query_terms:
+        return []
+    k1, b = _BM25_K1, _BM25_B
+    scored = []
+    for record in records:
         if not _filter_payload(record["payload"], allowed_source_tiers, jurisdiction):
             continue
-        results.append({"id": record["id"], "score": float(scores[int(idx)]), "payload": record["payload"]})
-        if len(results) >= limit:
-            break
-    return results
+        counts = Counter(record["tokens"])
+        dl = len(record["tokens"])
+        score = 0.0
+        for term in query_terms:
+            tf = counts.get(term, 0)
+            if not tf:
+                continue
+            weight = idf.get(term, 0.0)
+            score += weight * (tf * (k1 + 1.0)) / (tf + k1 * (1.0 - b + b * dl / avgdl))
+        if score > 0.0:
+            scored.append({"id": record["id"], "score": score, "payload": record["payload"]})
+    scored.sort(key=lambda item: item["score"], reverse=True)
+    return scored[:limit]
 
 
 def _rrf_merge(dense_hits: list, lexical_hits: list, rrf_k: int, limit: int) -> list:
@@ -145,7 +162,6 @@ def _rrf_merge(dense_hits: list, lexical_hits: list, rrf_k: int, limit: int) -> 
         merged[key]["lexical_score"] = float(item["score"])
         merged[key]["rrf"] = merged[key].get("rrf", 0.0) + 1.0 / (rrf_k + rank)
     return sorted(merged.values(), key=lambda x: x.get("rrf", 0.0), reverse=True)[:limit]
-
 def map_clause_category(clause_type: str) -> str | None:
     normalized = str(clause_type or "").strip()
     if normalized in CATEGORY_QUERY_TERMS:
@@ -292,7 +308,7 @@ def retrieve_legal_guidance(
         query_filter=category_filter,
     )
     dense_hits = list(getattr(response, "points", response))
-    lexical_hits = _lexical_search(
+    lexical_hits = _bm25_search(
         query,
         qdrant_client,
         collection_name,
