@@ -69,6 +69,7 @@ def call_thinking_ollama(
     temperature: float = 0.1,
     num_ctx: int = 8192,
     think: bool | None = None,
+    max_tokens: int | None = None,
 ) -> str:
     """Call Ollama generate API; return raw model text (may include think tags)."""
     selected = model or OLLAMA_MODEL
@@ -87,6 +88,7 @@ def call_thinking_ollama(
                     "options": {
                         "temperature": temperature,
                         "num_ctx": num_ctx,
+                        **({"num_predict": int(max_tokens)} if max_tokens else {}),
                     },
                 },
                 timeout=OLLAMA_TIMEOUT_SECONDS,
