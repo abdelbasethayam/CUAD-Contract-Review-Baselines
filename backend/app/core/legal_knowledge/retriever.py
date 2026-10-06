@@ -123,18 +123,34 @@ def build_guidance_query(clause_text: str, clause_type: str) -> tuple[str, str |
     return query, category
 
 
-def _payload_to_result(hit) -> dict:
+def _payload_to_result(hit, *, contract_type: str | None = None) -> dict:
     payload = hit.payload or {}
+    source_contract_type = payload.get("contract_type")
+    transferability = (
+        "direct"
+        if not contract_type or not source_contract_type or source_contract_type in {"commercial_general", contract_type}
+        else "limited_by_analogy"
+    )
     return {
         "rule_id": payload.get("rule_id") or payload.get("chunk_id"),
         "retrieved_text": payload.get("retrieved_text", ""),
         "source_name": payload.get("source_name"),
         "source_url": payload.get("source_url"),
         "title": payload.get("title"),
+        "source_title": payload.get("source_title") or payload.get("title"),
         "clause_category": payload.get("clause_category"),
+        "source_tier": payload.get("source_tier"),
+        "authority_status": payload.get("authority_status"),
+        "jurisdiction": payload.get("jurisdiction"),
+        "effective_date": payload.get("effective_date"),
+        "contract_type": source_contract_type,
+        "retrieval_date": payload.get("retrieval_date"),
+        "access_type": payload.get("access_type"),
+        "license_status": payload.get("license_status"),
+        "supporting_quote_or_paraphrase": payload.get("supporting_quote_or_paraphrase"),
+        "transferability": transferability,
         "relevance_score": round(float(hit.score), 4),
     }
-
 
 def retrieve_legal_guidance(
     clause_text: str,
@@ -145,6 +161,9 @@ def retrieve_legal_guidance(
     top_k: int = LEGAL_KNOWLEDGE_TOP_K,
     collection_name: str = LEGAL_KNOWLEDGE_COLLECTION,
     progress_callback: ProgressCallback | None = None,
+    allowed_source_tiers: tuple[str, ...] = LEGAL_ALLOWED_SOURCE_TIERS,
+    jurisdiction: str | None = LEGAL_JURISDICTION,
+    contract_type: str | None = LEGAL_CONTRACT_TYPE,
 ) -> list[dict]:
     query, category = build_guidance_query(clause_text, classified_clause_type)
     if not category:
