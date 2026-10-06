@@ -42,6 +42,9 @@ class RiskFinding(BaseModel):
     jurisdiction: str | None = None
     effective_date: str | None = None
     contract_type: str | None = None
+    source_contract_type: str | None = None
+    source_jurisdiction: str | None = None
+    source_effective_date: str | None = None
     source_url: str | None = None
     source_title: str | None = None
     retrieval_date: str | None = None
