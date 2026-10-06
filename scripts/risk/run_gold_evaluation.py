@@ -152,6 +152,11 @@ def main() -> None:
                 "pred_probability": prediction.get("confidence"),
                 "raw_support_score": prediction.get("raw_support_score"),
                 "final_score": prediction.get("final_score"),
+                "calibration_score": (
+                    prediction.get("final_score")
+                    if prediction.get("final_score") is not None
+                    else 0.0
+                ),
                 "score_components": json.dumps(prediction.get("score_components") or {}, ensure_ascii=False),
                 "human_review_required": prediction.get("human_review_required"),
                 "pred_severity": prediction.get("risk_level") or "",
@@ -173,7 +178,7 @@ def main() -> None:
         "sample_id", "annotation_partition", "contract_id", "clause_index", "check_id",
         "gold_risk", "gold_severity", "gold_evidence",
         "pred_risk", "pred_probability", "raw_support_score",
-        "pred_severity", "severity_signal", "final_score", "score_components", "human_review_required", "evidence",
+        "pred_severity", "severity_signal", "final_score", "calibration_score", "score_components", "human_review_required", "evidence",
         "risk_status", "risk_type", "ground_truth_status",
         "playbook_ground_truth_status",
     ]
