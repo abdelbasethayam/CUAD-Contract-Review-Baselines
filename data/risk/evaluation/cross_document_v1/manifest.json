@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "SYNTHETIC_DIAGNOSTIC_FIXTURE",
-  "created_at_utc": "2026-10-09T21:06:38.279168+00:00",
+  "created_at_utc": "2026-10-11T01:02:40.466014+00:00",
   "case_count": 39,
   "cross_clause_check_count": 10,
   "document_check_count": 3,
@@ -38,3 +38,5 @@
   "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
   "limitation": "Scenario labels are authored for deterministic regression testing and are not independently annotated real-contract truth. Their pass rates measure fixture behavior only, not model accuracy."
 }
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

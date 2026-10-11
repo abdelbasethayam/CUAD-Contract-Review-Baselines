@@ -41,7 +41,9 @@ Interpretation: these are authored synthetic regression cases, not human gold. S
 - Playbook SHA-256: e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440
 - Analyzer code SHA-256: 860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9
 - Runner code SHA-256: f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad
-- Scenario manifest SHA-256: ca5cfbc510c7ef7fbd65664de69ac2a788a69d89f2dbcb13c8932f1ea18593cb
-- JSONL SHA-256: 32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c
-- CSV SHA-256: 963e784aefd56295154ebbf9a58d8a1b0d3e154c65dbd74e99449f52fae00dfe
+- Scenario manifest SHA-256: 64b99ca4dfd3c99e08f943391a5550cefec3a0e5b51f8e265b5ade6ab8a15737
+- JSONL SHA-256: fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f
+- CSV SHA-256: 02cd18acd70d7a85dfb31d87d16811460c36d745cfee86640b4039b4c5b06200
 - CSV artifact: data/risk/results/cross_document_model_scenarios.csv
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

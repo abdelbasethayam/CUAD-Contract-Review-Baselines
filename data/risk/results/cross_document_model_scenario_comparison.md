@@ -47,8 +47,10 @@
 ## Reproducibility
 
 - Baseline SHA-256: 722e26122c405b7e04c43dc08a09c4450b8b1b7138d5b9315e14e47196506b3d
-- Batched SHA-256: 32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c
+- Batched SHA-256: fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f
 - Analyzer code SHA-256: 860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9
 - Runner code SHA-256: f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad
 
 This is a code-path ablation on 39 hand-authored synthetic fixtures. It measures whether the batching change improves fixture-status conformance and preserves outputs under the constructed scenarios. It is not human gold, not real-contract accuracy, and not legal correctness.
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

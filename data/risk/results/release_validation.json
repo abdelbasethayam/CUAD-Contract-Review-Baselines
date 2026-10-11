@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "started_at_utc": "2026-10-09T21:06:33.747703+00:00",
-  "finished_at_utc": "2026-10-09T21:07:03.126194+00:00",
-  "elapsed_seconds": 29.378,
-  "git_head_at_run_time": "8c373301b194081ec03d6a2198724b8edb90112e",
+  "started_at_utc": "2026-10-11T01:02:37.304096+00:00",
+  "finished_at_utc": "2026-10-11T01:03:08.351178+00:00",
+  "elapsed_seconds": 31.047,
+  "git_head_at_run_time": "630350a5d9010004f1c7653ba48d48a3a09c0924",
   "status": "PASS",
   "checks": [
     {
@@ -17,7 +17,7 @@
         "scripts/risk"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.056,
+      "duration_seconds": 0.051,
       "passed": true,
       "output": ""
     },
@@ -28,9 +28,9 @@
         "scripts/risk/validate_evaluation_integrity.py"
       ],
       "exit_code": 0,
-      "duration_seconds": 4.335,
+      "duration_seconds": 2.972,
       "passed": true,
-      "output": "{\n  \"checks\": [\n    {\n      \"name\": \"train_test_contract_overlap\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"gold_uses_train_docs_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"gold_partition_disjoint\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"silver_uses_test_docs_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"silver_train_overlap\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"expert_presence_uses_test_docs_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_payload_train_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_payload_test_overlap\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_mpnet_payload_train_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_mpnet_payload_test_overlap\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_hashing_payload_train_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_hashing_payload_test_overlap\",\n      \"passed\": true,\n      \"value\": 0\n    }\n  ],\n  \"train_contracts\": 410,\n  \"test_contracts\": 100,\n  \"train_rows\": 10545,\n  \"test_rows\": 2556\n}\nException ignored in: <function QdrantClient.__del__ at 0x7d0cb54ecfe0>\nTraceback (most recent call last):\n  File \"/home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/qdrant_client/qdrant_client.py\", line 169, in __del__\n  File \"/home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/qdrant_client/qdrant_client.py\", line 178, in close\n  File \"/home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/qdrant_client/local/qdrant_local.py\", line 109, in close\nImportError: sys.meta_path is None, Python is likely shutting down\n"
+      "output": "{\n  \"checks\": [\n    {\n      \"name\": \"train_test_contract_overlap\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"gold_uses_train_docs_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"gold_partition_disjoint\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"silver_uses_test_docs_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"silver_train_overlap\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"expert_presence_uses_test_docs_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_payload_train_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_payload_test_overlap\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_mpnet_payload_train_only\",\n      \"passed\": true,\n      \"value\": 0\n    },\n    {\n      \"name\": \"cuad_train_mpnet_payload_test_overlap\",\n      \"passed\": true,\n      \"value\": 0\n    }\n  ],\n  \"train_contracts\": 410,\n  \"test_contracts\": 100,\n  \"train_rows\": 10545,\n  \"test_rows\": 2556\n}\nException ignored in: <function QdrantClient.__del__ at 0x74542adf0fe0>\nTraceback (most recent call last):\n  File \"/home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/qdrant_client/qdrant_client.py\", line 169, in __del__\n  File \"/home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/qdrant_client/qdrant_client.py\", line 178, in close\n  File \"/home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/qdrant_client/local/qdrant_local.py\", line 109, in close\nImportError: sys.meta_path is None, Python is likely shutting down\n"
     },
     {
       "name": "playbook_domain_validation",
@@ -39,7 +39,7 @@
         "scripts/risk/normalize_playbook_domains.py"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.044,
+      "duration_seconds": 0.043,
       "passed": true,
       "output": "Clause checks: 101; cross-clause checks: 10; document checks: 3; mapped domains: 10\nMissing domain assignments after normalization: 0\nMode: CHECK ONLY\n"
     },
@@ -72,7 +72,7 @@
         "scripts/risk/audit_cross_document_scenario_suite.py"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.044,
+      "duration_seconds": 0.046,
       "passed": true,
       "output": "{\n  \"status\": \"PASS\",\n  \"case_count\": 39,\n  \"checks\": {\n    \"all_13_cross_document_checks_covered\": true,\n    \"all_expected_39_scenarios_present\": true,\n    \"three_scenario_types_have_13_cases_each\": true,\n    \"all_scenarios_have_canonical_domains\": true,\n    \"all_expected_evidence_anchors_exist\": true,\n    \"all_fixture_hashes_match\": true,\n    \"all_fixture_files_exist\": true,\n    \"synthetic_non_gold_label_is_explicit\": true,\n    \"playbook_hash_matches_manifest\": true,\n    \"manifest_case_count_matches\": true\n  },\n  \"json\": \"data/risk/results/cross_document_scenario_audit.json\",\n  \"markdown\": \"data/risk/results/cross_document_scenario_audit.md\"\n}\n"
     },
@@ -86,9 +86,9 @@
         "--resume"
       ],
       "exit_code": 0,
-      "duration_seconds": 2.534,
+      "duration_seconds": 2.512,
       "passed": true,
-      "output": "[SKIP] positive: all rows already checkpointed\n[SKIP] control: all rows already checkpointed\n[SKIP] incomplete: all rows already checkpointed\n{\n  \"schema_version\": 1,\n  \"status\": \"COMPLETED\",\n  \"case_count\": 39,\n  \"expected_case_count\": 39,\n  \"model_check_batch_size\": 4,\n  \"model_batches_per_pass\": 4,\n  \"scenario_types\": {\n    \"positive\": 13,\n    \"control\": 13,\n    \"incomplete\": 13\n  },\n  \"check_ids_covered\": [\n    \"DOC-1\",\n    \"DOC-2\",\n    \"DOC-3\",\n    \"X-1\",\n    \"X-10\",\n    \"X-2\",\n    \"X-3\",\n    \"X-4\",\n    \"X-5\",\n    \"X-6\",\n    \"X-7\",\n    \"X-8\",\n    \"X-9\"\n  ],\n  \"expected_status_counts\": {\n    \"POTENTIAL_RISK\": 14,\n    \"NO_RISK\": 13,\n    \"INSUFFICIENT_EVIDENCE\": 12\n  },\n  \"observed_status_counts\": {\n    \"POTENTIAL_RISK\": 16,\n    \"NO_RISK\": 10,\n    \"INSUFFICIENT_EVIDENCE\": 13,\n    \"MISSING\": 0\n  },\n  \"scenario_status_conformance_count\": 27,\n  \"scenario_status_conformance_rate\": 0.6923076923076923,\n  \"scenario_status_conformance_by_type\": {\n    \"positive\": {\n      \"cases\": 13,\n      \"matched\": 10,\n      \"rate\": 0.7692307692307693,\n      \"observed_status_counts\": {\n        \"POTENTIAL_RISK\": 10,\n        \"NO_RISK\": 3,\n        \"INSUFFICIENT_EVIDENCE\": 0,\n        \"MISSING\": 0\n      }\n    },\n    \"control\": {\n      \"cases\": 13,\n      \"matched\": 7,\n      \"rate\": 0.5384615384615384,\n      \"observed_status_counts\": {\n        \"POTENTIAL_RISK\": 2,\n        \"NO_RISK\": 7,\n        \"INSUFFICIENT_EVIDENCE\": 4,\n        \"MISSING\": 0\n      }\n    },\n    \"incomplete\": {\n      \"cases\": 13,\n      \"matched\": 10,\n      \"rate\": 0.7692307692307693,\n      \"observed_status_counts\": {\n        \"POTENTIAL_RISK\": 4,\n        \"NO_RISK\": 0,\n        \"INSUFFICIENT_EVIDENCE\": 9,\n        \"MISSING\": 0\n      }\n    }\n  },\n  \"scenario_status_conformance_by_check\": [\n    {\n      \"check_id\": \"DOC-1\",\n      \"scope\": \"document\",\n      \"risk_domain\": \"Commercial Risk\",\n      \"cases\": 3,\n      \"matched\": 3,\n      \"rate\": 1.0,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ]\n    },\n    {\n      \"check_id\": \"DOC-2\",\n      \"scope\": \"document\",\n      \"risk_domain\": \"Dispute Resolution Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"DOC-3\",\n      \"scope\": \"document\",\n      \"risk_domain\": \"Dispute Resolution Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ]\n    },\n    {\n      \"check_id\": \"X-1\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Liability Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-10\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Liability Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ]\n    },\n    {\n      \"check_id\": \"X-2\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Financial Risk\",\n      \"cases\": 3,\n      \"matched\": 1,\n      \"rate\": 0.3333333333333333,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-3\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Termination Risk\",\n      \"cases\": 3,\n      \"matched\": 1,\n      \"rate\": 0.3333333333333333,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-4\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Commercial Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-5\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Assignment / Control Risk\",\n      \"cases\": 3,\n      \"matched\": 3,\n      \"rate\": 1.0,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-6\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Intellectual Property Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"NO_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-7\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Intellectual Property Risk\",\n      \"cases\": 3,\n      \"matched\": 3,\n      \"rate\": 1.0,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-8\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Operational Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ]\n    },\n    {\n      \"check_id\": \"X-9\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Insurance Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    }\n  ],\n  \"metrics_warning\": \"Scenario-status conformance on synthetic stimuli is not accuracy, precision/recall on real contracts, or legal correctness.\",\n  \"evidence_exact_all\": true,\n  \"scenario_run_summaries\": [],\n  \"playbook_sha256\": \"e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440\",\n  \"analyzer_code_sha256\": \"860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9\",\n  \"runner_code_sha256\": \"f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad\",\n  \"summary_generator_code_sha256\": \"9a1dd5014179cdadf882a81d50d802cb1835c723bcfe1274fc3f51138a93993f\",\n  \"scenario_suite_manifest_sha256\": \"ca5cfbc510c7ef7fbd65664de69ac2a788a69d89f2dbcb13c8932f1ea18593cb\",\n  \"jsonl_sha256\": \"32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c\",\n  \"csv_sha256\": \"963e784aefd56295154ebbf9a58d8a1b0d3e154c65dbd74e99449f52fae00dfe\",\n  \"updated_at_utc\": \"2026-10-09T21:06:40.522489+00:00\"\n}\n"
+      "output": "[SKIP] positive: all rows already checkpointed\n[SKIP] control: all rows already checkpointed\n[SKIP] incomplete: all rows already checkpointed\n{\n  \"schema_version\": 1,\n  \"status\": \"COMPLETED\",\n  \"case_count\": 39,\n  \"expected_case_count\": 39,\n  \"model_check_batch_size\": 4,\n  \"model_batches_per_pass\": 4,\n  \"scenario_types\": {\n    \"positive\": 13,\n    \"control\": 13,\n    \"incomplete\": 13\n  },\n  \"check_ids_covered\": [\n    \"DOC-1\",\n    \"DOC-2\",\n    \"DOC-3\",\n    \"X-1\",\n    \"X-10\",\n    \"X-2\",\n    \"X-3\",\n    \"X-4\",\n    \"X-5\",\n    \"X-6\",\n    \"X-7\",\n    \"X-8\",\n    \"X-9\"\n  ],\n  \"expected_status_counts\": {\n    \"POTENTIAL_RISK\": 14,\n    \"NO_RISK\": 13,\n    \"INSUFFICIENT_EVIDENCE\": 12\n  },\n  \"observed_status_counts\": {\n    \"POTENTIAL_RISK\": 16,\n    \"NO_RISK\": 10,\n    \"INSUFFICIENT_EVIDENCE\": 13,\n    \"MISSING\": 0\n  },\n  \"scenario_status_conformance_count\": 27,\n  \"scenario_status_conformance_rate\": 0.6923076923076923,\n  \"scenario_status_conformance_by_type\": {\n    \"positive\": {\n      \"cases\": 13,\n      \"matched\": 10,\n      \"rate\": 0.7692307692307693,\n      \"observed_status_counts\": {\n        \"POTENTIAL_RISK\": 10,\n        \"NO_RISK\": 3,\n        \"INSUFFICIENT_EVIDENCE\": 0,\n        \"MISSING\": 0\n      }\n    },\n    \"control\": {\n      \"cases\": 13,\n      \"matched\": 7,\n      \"rate\": 0.5384615384615384,\n      \"observed_status_counts\": {\n        \"POTENTIAL_RISK\": 2,\n        \"NO_RISK\": 7,\n        \"INSUFFICIENT_EVIDENCE\": 4,\n        \"MISSING\": 0\n      }\n    },\n    \"incomplete\": {\n      \"cases\": 13,\n      \"matched\": 10,\n      \"rate\": 0.7692307692307693,\n      \"observed_status_counts\": {\n        \"POTENTIAL_RISK\": 4,\n        \"NO_RISK\": 0,\n        \"INSUFFICIENT_EVIDENCE\": 9,\n        \"MISSING\": 0\n      }\n    }\n  },\n  \"scenario_status_conformance_by_check\": [\n    {\n      \"check_id\": \"DOC-1\",\n      \"scope\": \"document\",\n      \"risk_domain\": \"Commercial Risk\",\n      \"cases\": 3,\n      \"matched\": 3,\n      \"rate\": 1.0,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ]\n    },\n    {\n      \"check_id\": \"DOC-2\",\n      \"scope\": \"document\",\n      \"risk_domain\": \"Dispute Resolution Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"DOC-3\",\n      \"scope\": \"document\",\n      \"risk_domain\": \"Dispute Resolution Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ]\n    },\n    {\n      \"check_id\": \"X-1\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Liability Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-10\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Liability Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ]\n    },\n    {\n      \"check_id\": \"X-2\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Financial Risk\",\n      \"cases\": 3,\n      \"matched\": 1,\n      \"rate\": 0.3333333333333333,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-3\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Termination Risk\",\n      \"cases\": 3,\n      \"matched\": 1,\n      \"rate\": 0.3333333333333333,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-4\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Commercial Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-5\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Assignment / Control Risk\",\n      \"cases\": 3,\n      \"matched\": 3,\n      \"rate\": 1.0,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-6\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Intellectual Property Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"NO_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-7\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Intellectual Property Risk\",\n      \"cases\": 3,\n      \"matched\": 3,\n      \"rate\": 1.0,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    },\n    {\n      \"check_id\": \"X-8\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Operational Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"POTENTIAL_RISK\"\n      ]\n    },\n    {\n      \"check_id\": \"X-9\",\n      \"scope\": \"cross_clause\",\n      \"risk_domain\": \"Insurance Risk\",\n      \"cases\": 3,\n      \"matched\": 2,\n      \"rate\": 0.6666666666666666,\n      \"expected_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"NO_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ],\n      \"observed_statuses\": [\n        \"POTENTIAL_RISK\",\n        \"POTENTIAL_RISK\",\n        \"INSUFFICIENT_EVIDENCE\"\n      ]\n    }\n  ],\n  \"metrics_warning\": \"Scenario-status conformance on synthetic stimuli is not accuracy, precision/recall on real contracts, or legal correctness.\",\n  \"evidence_exact_all\": true,\n  \"scenario_run_summaries\": [],\n  \"playbook_sha256\": \"e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440\",\n  \"analyzer_code_sha256\": \"860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9\",\n  \"runner_code_sha256\": \"f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad\",\n  \"summary_generator_code_sha256\": \"9a1dd5014179cdadf882a81d50d802cb1835c723bcfe1274fc3f51138a93993f\",\n  \"scenario_suite_manifest_sha256\": \"64b99ca4dfd3c99e08f943391a5550cefec3a0e5b51f8e265b5ade6ab8a15737\",\n  \"jsonl_sha256\": \"fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f\",\n  \"csv_sha256\": \"02cd18acd70d7a85dfb31d87d16811460c36d745cfee86640b4039b4c5b06200\",\n  \"updated_at_utc\": \"2026-10-11T01:02:42.690666+00:00\"\n}\n"
     },
     {
       "name": "render_cross_document_model_report",
@@ -97,7 +97,7 @@
         "scripts/risk/render_cross_document_model_report.py"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.037,
+      "duration_seconds": 0.038,
       "passed": true,
       "output": "Wrote data/risk/results/cross_document_model_scenarios_summary.md\n"
     },
@@ -123,7 +123,7 @@
         "current"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.074,
+      "duration_seconds": 0.072,
       "passed": true,
       "output": "{\n  \"status\": \"PASS\",\n  \"analysis_id\": \"abdc407021e71b3b-fe8f4d863361b393\",\n  \"elapsed_seconds\": 367.0,\n  \"json\": \"data/risk/results/smoke_test_audit_current.json\",\n  \"markdown\": \"data/risk/results/smoke_test_audit_current.md\",\n  \"checks\": {\n    \"http_200\": true,\n    \"run_completed\": true,\n    \"source_hash_matches_manifest\": true,\n    \"all_clause_positive_findings_have_valid_evidence\": true,\n    \"all_cross_document_positive_findings_have_valid_evidence\": true,\n    \"run_has_core_artifacts\": true\n  }\n}\n"
     },
@@ -138,7 +138,7 @@
         "batching"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.076,
+      "duration_seconds": 0.073,
       "passed": true,
       "output": "{\n  \"status\": \"PASS\",\n  \"analysis_id\": \"abdc407021e71b3b-fcd070f126af256d\",\n  \"elapsed_seconds\": 16.222,\n  \"json\": \"data/risk/results/smoke_test_audit_batching.json\",\n  \"markdown\": \"data/risk/results/smoke_test_audit_batching.md\",\n  \"checks\": {\n    \"http_200\": true,\n    \"run_completed\": true,\n    \"source_hash_matches_manifest\": true,\n    \"all_clause_positive_findings_have_valid_evidence\": true,\n    \"all_cross_document_positive_findings_have_valid_evidence\": true,\n    \"run_has_core_artifacts\": true\n  }\n}\n"
     },
@@ -153,7 +153,7 @@
         "post_batching"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.072,
+      "duration_seconds": 0.069,
       "passed": true,
       "output": "{\n  \"status\": \"PASS\",\n  \"analysis_id\": \"abdc407021e71b3b-fcd070f126af256d\",\n  \"elapsed_seconds\": 577.177,\n  \"json\": \"data/risk/results/smoke_test_audit_post_batching.json\",\n  \"markdown\": \"data/risk/results/smoke_test_audit_post_batching.md\",\n  \"checks\": {\n    \"http_200\": true,\n    \"run_completed\": true,\n    \"source_hash_matches_manifest\": true,\n    \"all_clause_positive_findings_have_valid_evidence\": true,\n    \"all_cross_document_positive_findings_have_valid_evidence\": true,\n    \"run_has_core_artifacts\": true\n  }\n}\n"
     },
@@ -164,7 +164,7 @@
         "scripts/risk/audit_smoke_run.py"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.055,
+      "duration_seconds": 0.058,
       "passed": true,
       "output": "{\n  \"status\": \"PASS\",\n  \"analysis_id\": \"56a13430f537613f-460547d488bfb3a2\",\n  \"elapsed_seconds\": 423.0,\n  \"json\": \"data/risk/results/smoke_test_audit.json\",\n  \"markdown\": \"data/risk/results/smoke_test_audit.md\",\n  \"checks\": {\n    \"http_200\": true,\n    \"run_completed\": true,\n    \"source_hash_matches_manifest\": true,\n    \"all_clause_positive_findings_have_valid_evidence\": true,\n    \"all_cross_document_positive_findings_have_valid_evidence\": true,\n    \"run_has_core_artifacts\": true\n  }\n}\n"
     },
@@ -179,7 +179,7 @@
         "pdf"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.046,
+      "duration_seconds": 0.054,
       "passed": true,
       "output": "{\n  \"status\": \"PASS\",\n  \"analysis_id\": \"db10b978019252fc-460547d488bfb3a2\",\n  \"elapsed_seconds\": 82.978,\n  \"json\": \"data/risk/results/smoke_test_audit_pdf.json\",\n  \"markdown\": \"data/risk/results/smoke_test_audit_pdf.md\",\n  \"checks\": {\n    \"http_200\": true,\n    \"run_completed\": true,\n    \"source_hash_matches_manifest\": true,\n    \"all_clause_positive_findings_have_valid_evidence\": true,\n    \"all_cross_document_positive_findings_have_valid_evidence\": true,\n    \"run_has_core_artifacts\": true\n  }\n}\n"
     },
@@ -205,9 +205,9 @@
         "scripts/risk/evaluate_local_hashing_baseline.py"
       ],
       "exit_code": 0,
-      "duration_seconds": 9.469,
+      "duration_seconds": 9.189,
       "passed": true,
-      "output": "{\n  \"status\": \"PASS\",\n  \"output\": \"data/risk/results/local_hashing_cuad_retrieval_baseline.json\",\n  \"isolation\": {\n    \"train_contract_count\": 383,\n    \"test_contract_count\": 92,\n    \"train_eligible_rows\": 7004,\n    \"test_eligible_rows\": 1679,\n    \"train_test_contract_overlap\": 0,\n    \"passed\": true\n  },\n  \"metrics\": {\n    \"nearest_neighbor_accuracy\": 0.4705,\n    \"nearest_neighbor_macro_f1\": 0.3391,\n    \"recall_at_1\": 0.4705,\n    \"recall_at_5\": 0.6945,\n    \"mrr_at_5\": 0.5605,\n    \"nearest_neighbor_accuracy_contract_bootstrap_95_ci\": {\n      \"lower_95\": 0.4402,\n      \"upper_95\": 0.5048\n    },\n    \"nearest_neighbor_macro_f1_contract_bootstrap_95_ci\": {\n      \"lower_95\": 0.2954,\n      \"upper_95\": 0.3703\n    }\n  },\n  \"runtime_seconds\": 7.896,\n  \"labels_with_test_support\": 36\n}\n"
+      "output": "{\n  \"status\": \"PASS\",\n  \"output\": \"data/risk/results/local_hashing_cuad_retrieval_baseline.json\",\n  \"isolation\": {\n    \"train_contract_count\": 383,\n    \"test_contract_count\": 92,\n    \"train_eligible_rows\": 7004,\n    \"test_eligible_rows\": 1679,\n    \"train_test_contract_overlap\": 0,\n    \"passed\": true\n  },\n  \"metrics\": {\n    \"nearest_neighbor_accuracy\": 0.4705,\n    \"nearest_neighbor_macro_f1\": 0.3391,\n    \"recall_at_1\": 0.4705,\n    \"recall_at_5\": 0.6945,\n    \"mrr_at_5\": 0.5605,\n    \"nearest_neighbor_accuracy_contract_bootstrap_95_ci\": {\n      \"lower_95\": 0.4402,\n      \"upper_95\": 0.5048\n    },\n    \"nearest_neighbor_macro_f1_contract_bootstrap_95_ci\": {\n      \"lower_95\": 0.2954,\n      \"upper_95\": 0.3703\n    }\n  },\n  \"runtime_seconds\": 7.761,\n  \"labels_with_test_support\": 36\n}\n"
     },
     {
       "name": "phase2_report",
@@ -216,54 +216,54 @@
         "scripts/risk/report_phase2_experiment.py"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.117,
+      "duration_seconds": 0.121,
       "passed": true,
-      "output": "{\n  \"status\": \"PASS\",\n  \"failed_checks\": [],\n  \"json_report\": \"data/risk/results/phase2_reproducible_report.json\",\n  \"markdown_report\": \"data/risk/results/phase2_reproducible_report.md\",\n  \"silver_rows\": 300,\n  \"gold_filled\": 0,\n  \"domain_mappings\": 114,\n  \"integrity_passed\": \"12/12\"\n}\n"
+      "output": "{\n  \"status\": \"PASS\",\n  \"failed_checks\": [],\n  \"json_report\": \"data/risk/results/phase2_reproducible_report.json\",\n  \"markdown_report\": \"data/risk/results/phase2_reproducible_report.md\",\n  \"silver_rows\": 300,\n  \"gold_filled\": 0,\n  \"domain_mappings\": 114,\n  \"integrity_passed\": \"10/10\"\n}\n"
     },
     {
       "name": "backend_tests",
       "command": [
-        "/opt/conda/bin/pytest",
+        "/home/jovyan/CUAD-Contract-Review-Baselines/.venv/bin/pytest",
         "-q",
         "backend/tests"
       ],
       "exit_code": 0,
-      "duration_seconds": 12.21,
+      "duration_seconds": 15.542,
       "passed": true,
-      "output": "........................................................................ [ 68%]\n.................................                                        [100%]\n=============================== warnings summary ===============================\n.venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\nbackend/tests/test_clause_segmenter.py::test_zto_top_level_clauses_do_not_collapse_into_three_records\n  /home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/pydantic/main.py:542: DeprecationWarning: `force_full_page_ocr` is deprecated; set `mode=OcrMode.FULL_PAGE` instead.\n    return self.__pydantic_serializer__.to_json(\n\nbackend/tests/test_clause_segmenter.py::test_zto_top_level_clauses_do_not_collapse_into_three_records\n  /home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/docling/pipeline/standard_pdf_pipeline.py:606: DeprecationWarning: This field is deprecated. Use `generate_page_images=True` and call `TableItem.get_image()` to extract table images from page images.\n    or self.pipeline_options.generate_table_images\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n105 passed, 3 warnings in 10.23s\n"
+      "output": "........................................................................ [ 68%]\n.................................                                        [100%]\n=============================== warnings summary ===============================\n.venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\nbackend/tests/test_clause_segmenter.py::test_zto_top_level_clauses_do_not_collapse_into_three_records\n  /home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/pydantic/main.py:542: DeprecationWarning: `force_full_page_ocr` is deprecated; set `mode=OcrMode.FULL_PAGE` instead.\n    return self.__pydantic_serializer__.to_json(\n\nbackend/tests/test_clause_segmenter.py::test_zto_top_level_clauses_do_not_collapse_into_three_records\n  /home/jovyan/CUAD-Contract-Review-Baselines/.venv/lib/python3.12/site-packages/docling/pipeline/standard_pdf_pipeline.py:606: DeprecationWarning: This field is deprecated. Use `generate_page_images=True` and call `TableItem.get_image()` to extract table images from page images.\n    or self.pipeline_options.generate_table_images\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n105 passed, 3 warnings in 12.48s\n"
     }
   ],
   "hashes": {
-    "data/risk/EVALUATION_INTEGRITY_REPORT.json": "f21076f7ef121103bcb3451f5eb7ce222b120d6fcd08b79762d31e611a35c02a",
-    "data/risk/results/phase2_reproducible_report.json": "d5e68661e51cce0ea65f5dfcd11b3c7197afcd05a91a846552e32f1a14159650",
+    "data/risk/EVALUATION_INTEGRITY_REPORT.json": "22c888f4febc428e4f4878314134726558984fb59271993ac28ca69fd73b464a",
+    "data/risk/results/phase2_reproducible_report.json": "bf694de4e74a250e434dd0c6dc3ee576a70a86a14eacbb806141f7c2a3559984",
     "data/risk/results/local_hashing_cuad_index_manifest.json": "c299acabf364e3e1d8bec192e7032d645b01865daa5d01ed5d47894393cae29e",
     "data/risk/results/local_hashing_index_manifest.json": "ab5f81305f77e638b656a294becd675e66a32c0d98db26aa6a6e7e3094c688f9",
     "data/risk/results/legal_knowledge_retrieval_validation.json": "3e14f8f94bf1a60d1b57cf8c0a6aeffeab4a2e90052338605a474ea07fdc0cf0",
     "data/risk/results/smoke_upload_api_result.json": "bfbe62136d6b030bf0e07360d508708658e5d13ec8bf5fd9b40ee852d788bd53",
-    "data/risk/results/smoke_test_audit.json": "c0dce11ff848c84eba6f30644ef8013d98b736d1e90032125e62964603cbf51c",
+    "data/risk/results/smoke_test_audit.json": "0659116be612bf20b6fba63e4cb9c580341189d10f6543bb86eb6cdaaf27de03",
     "data/risk/results/smoke_upload_api_current_20261009.json": "4f505a3590be9a206d9376d73269b6f8fc78495ca5c3476d7fdeb269ad7b13cf",
-    "data/risk/results/smoke_test_audit_current.json": "3e835422af859ca5a231e3b17adc37c86079448eaf06207d0c7dcf74c6da7e73",
+    "data/risk/results/smoke_test_audit_current.json": "61b11483758f1c9a870a548b5363965e9d8d4df43c306adcd3ec9314a9192cbf",
     "data/risk/results/smoke_upload_api_batching_20261009.json": "2a36817d69f72a7deb77ab405a4f16a2873503ece996bd07fe1186f1f9d6b485",
-    "data/risk/results/smoke_test_audit_batching.json": "0cdee8d8a4c10e7cd5ad0cc95c85ffa0b5bfcda8d9b3b2533e9772748829e774",
+    "data/risk/results/smoke_test_audit_batching.json": "0ecd6134ea51112676d198a653b5449cc7d92d5bf4878cae3781eef96ca81f3a",
     "data/risk/results/smoke_upload_api_post_batching_20261009.json": "d6b0733e2568a120448280c13f1fdce4b19bdf59162cb94f7d0e84d5cc76b832",
-    "data/risk/results/smoke_test_audit_post_batching.json": "b97ede5b69ed06e45efea9fd1a3ca4ad25e440bda7f12fc6a769d138f3a732cd",
+    "data/risk/results/smoke_test_audit_post_batching.json": "97bdd3d04ad223757922c9635d5051f8c6cb7e0558f87ea3d9ec40efb304247a",
     "data/risk/results/smoke_upload_api_fast_result.json": "4472e6e4d897b288d4eaffda6fc05c5727f492e7f01a36d48dd2838f01de0dea",
-    "data/risk/results/smoke_test_audit_fast.json": "0923351ae03da2f37d86ad280af610c1c6ca5c60ddb42cfdebcb22246ba55d4e",
+    "data/risk/results/smoke_test_audit_fast.json": "151d03156413e2a55629824876b8c29f6021542deab867e1304d56bfa166b698",
     "data/risk/results/smoke_upload_api_pdf_result.json": "04c7c8260550c38d8f8c172f6a236c94e64f839295fdd90cb0894fc28cab1294",
-    "data/risk/results/smoke_test_audit_pdf.json": "781229f96f17687bec0140d2fcb7c49640e7efe14d7919a66294ac4f6e916134",
-    "data/risk/results/local_hashing_cuad_retrieval_baseline.json": "d17cea8099573c76d0159d0d80ee9341907eed1ada4d9a48a44772acf12f5160",
-    "data/risk/results/cross_document_scenario_audit.json": "54a6cabfe46b3d6806e21f419a5f19766a35c48ca7ed9eebadc067bd8004b86a",
+    "data/risk/results/smoke_test_audit_pdf.json": "f3f514aa899c8fb2ca6665fa8b52560958a7a4df45b1a5d4b917039c9496a780",
+    "data/risk/results/local_hashing_cuad_retrieval_baseline.json": "36f83e7dfacf0d62c408ad77a800d1d380281c071bce2aa4b047fc0d3810d9c1",
+    "data/risk/results/cross_document_scenario_audit.json": "3bf9d640c3a53d352f171e0650711e61e33d274928b0761c76b3b037f9627ed8",
     "data/risk/evaluation/cross_document_v1/scenario_matrix.jsonl": "3f97fabbe7882d943d51fadfcaf76b5e3c3ad84d48f687437d14e112f213acbc",
-    "data/risk/evaluation/cross_document_v1/manifest.json": "ca5cfbc510c7ef7fbd65664de69ac2a788a69d89f2dbcb13c8932f1ea18593cb",
-    "data/risk/results/cross_document_model_scenarios.jsonl": "32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c",
-    "data/risk/results/cross_document_model_scenarios.csv": "963e784aefd56295154ebbf9a58d8a1b0d3e154c65dbd74e99449f52fae00dfe",
-    "data/risk/results/cross_document_model_scenarios_summary.json": "ee810f0bfba2074ad4a28d45144e1f8205933bee469dde02001ce31b44c5b8d2",
-    "data/risk/results/cross_document_model_scenarios_summary.md": "d4a5f5ae66372233d9221f177e43431e1b845c84e02b3f305cc5ec02afadb908",
-    "data/risk/results/cross_document_model_scenario_comparison.json": "3ca3fcdfa27d55a5a9e7aae6f431c857b7966e617e535e69136a4f634560ded6",
-    "data/risk/results/cross_document_model_scenario_comparison.md": "97ea3502d57d2348b218111f8e1a637ed6310052f6dfb44ab704140615292144",
+    "data/risk/evaluation/cross_document_v1/manifest.json": "64b99ca4dfd3c99e08f943391a5550cefec3a0e5b51f8e265b5ade6ab8a15737",
+    "data/risk/results/cross_document_model_scenarios.jsonl": "fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f",
+    "data/risk/results/cross_document_model_scenarios.csv": "02cd18acd70d7a85dfb31d87d16811460c36d745cfee86640b4039b4c5b06200",
+    "data/risk/results/cross_document_model_scenarios_summary.json": "f1cb5618234e26765a0ab163ec3968864c3f9f2175fb8c5191e9d855d175dcc6",
+    "data/risk/results/cross_document_model_scenarios_summary.md": "4e446fd15d517064437525845859debb861d8345ea4b129ff59d57abfa8e42d9",
+    "data/risk/results/cross_document_model_scenario_comparison.json": "1d02cf196852f8a9962a988c7d3346559ec3320eb3f4108c9b3f521c7559a797",
+    "data/risk/results/cross_document_model_scenario_comparison.md": "b99a83d16a8286f741b0045cca985a4b52ae5f8ed2efcb35b3a9e43e91906373",
     "scripts/risk/compare_cross_document_model_runs.py": "0f775ed4acd03a94157975357917b2e6dbf4b62185e974ed06d067138163af22",
     "scripts/risk/render_cross_document_model_report.py": "aaedd2b0603d01e6fce90334fadb54add88d077566924159e1e5250b418ab12a",
-    "data/risk/team_export/export_manifest.json": "82a7bcc9fae2fada9ccba622e4926cb1b0c0facc8d13e00924af22fd809fac78",
+    "data/risk/team_export/export_manifest.json": "bab78a035a40428b4f544432650f655b43d234e852778d50dd9a165bfb4b4155",
     "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.csv": "12c618b4617225b9462616edaa553af23c7ac6b2a2e9527e6c0840e9b7d9230f",
     "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.jsonl": "e81c096b0f6517b6d1f72cee08208e7f4269bb1285bf48f1853efbfd440d62ca",
     "data/risk/commercial_clause_risk_playbook.json": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
@@ -284,3 +284,5 @@
   },
   "interpretation": "Release checks validate code/data invariants and unit behavior. They do not estimate custom risk accuracy or legal correctness; human gold remains unavailable."
 }
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

@@ -49,16 +49,6 @@
       "name": "cuad_train_mpnet_payload_test_overlap",
       "passed": true,
       "value": 0
-    },
-    {
-      "name": "cuad_train_hashing_payload_train_only",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "cuad_train_hashing_payload_test_overlap",
-      "passed": true,
-      "value": 0
     }
   ],
   "train_contracts": 410,
@@ -66,3 +56,5 @@
   "train_rows": 10545,
   "test_rows": 2556
 }
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

@@ -1,8 +1,8 @@
 # Phase 2 Reproducible Experiment Report
 
 **Validation: PASS**  
-Generated (UTC): 2026-10-09T21:06:50.890644+00:00  
-Git HEAD at report time: 8c373301b194081ec03d6a2198724b8edb90112e
+Generated (UTC): 2026-10-11T01:02:52.781113+00:00  
+Git HEAD at report time: 630350a5d9010004f1c7653ba48d48a3a09c0924
 
 > This report is not a legal correctness evaluation. Custom-risk accuracy remains unavailable because the human gold queue has no adjudicated labels.
 
@@ -14,7 +14,7 @@ Git HEAD at report time: 8c373301b194081ec03d6a2198724b8edb90112e
 | Held-out test contracts | 100 |
 | Train clause rows | 10545 |
 | Test clause rows | 2556 |
-| Integrity checks passing | 12/12 |
+| Integrity checks passing | 10/10 |
 | Clause-level playbook checks | 101 |
 | Cross-clause checks | 10 |
 | Document checks | 3 |
@@ -124,9 +124,11 @@ From repository root:
 - Silver JSONL: e81c096b0f6517b6d1f72cee08208e7f4269bb1285bf48f1853efbfd440d62ca
 - Playbook: e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440
 - Taxonomy: ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218
-- Integrity report: f21076f7ef121103bcb3451f5eb7ce222b120d6fcd08b79762d31e611a35c02a
+- Integrity report: 22c888f4febc428e4f4878314134726558984fb59271993ac28ca69fd73b464a
 
 ## Scope of claims
 
 Supported now: implementation/reproducibility, train/test leakage checks, exact-quote gating behavior, deterministic domain routing, and machine-silver disagreement/abstention diagnostics.  
 Not supported now: custom-risk accuracy, legal correctness, severity calibration validity, probability calibration validity, or cross-clause/document risk sensitivity on real expert-labeled cases.
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

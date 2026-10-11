@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-10-09T21:06:41.262992+00:00",
+  "generated_at_utc": "2026-10-11T01:02:43.431470+00:00",
   "interpretation": "Synthetic plumbing smoke test only. The input is invented. Results do not estimate model accuracy, legal correctness or sensitivity on real contracts.",
   "http_status": 200,
   "elapsed_seconds": 82.978,
@@ -88,3 +88,5 @@
     "trace.jsonl": "85db6d32206956ee637dfa5c6d37c270de59d3e3ad62635e75e5811b074bf72f"
   }
 }
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
