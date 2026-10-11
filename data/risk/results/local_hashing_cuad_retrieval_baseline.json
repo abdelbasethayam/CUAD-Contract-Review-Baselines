@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-10-11T01:02:52.468280+00:00",
+  "generated_at_utc": "2026-10-11T01:33:08.319609+00:00",
   "status": "PASS",
   "experiment_name": "local_hashing_cuad_nearest_neighbor_retrieval",
   "scope": "Held-out CUAD clause-category retrieval/classification baseline; not custom-risk accuracy, legal correctness or severity evaluation.",
@@ -339,6 +339,6 @@
       "recall_at_5": 0.4286
     }
   ],
-  "runtime_seconds": 7.761,
+  "runtime_seconds": 7.764,
   "interpretation": "Nearest-neighbor labels and top-5 hit metrics measure the local lexical-vector baseline only. They are not numerically equivalent to the prior Cohere/retrieval-conditioned SLM configuration. The held-out true category labels are used only for evaluation and were not inserted into the index."
 }

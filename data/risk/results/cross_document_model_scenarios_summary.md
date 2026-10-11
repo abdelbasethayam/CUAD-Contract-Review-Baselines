@@ -41,7 +41,7 @@ Interpretation: these are authored synthetic regression cases, not human gold. S
 - Playbook SHA-256: e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440
 - Analyzer code SHA-256: 860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9
 - Runner code SHA-256: f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad
-- Scenario manifest SHA-256: 64b99ca4dfd3c99e08f943391a5550cefec3a0e5b51f8e265b5ade6ab8a15737
-- JSONL SHA-256: fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f
-- CSV SHA-256: 02cd18acd70d7a85dfb31d87d16811460c36d745cfee86640b4039b4c5b06200
+- Scenario manifest SHA-256: 56a2696d439b96a70430ad101413d088f6f57ca5346e8af3763a16dfd9183769
+- JSONL SHA-256: b35d724e595b6b6b9ef5d8bdb97bad0c014796a38a51dc635963087146130ead
+- CSV SHA-256: c335d81c215698a32185ffe755408b41b15c7ad9b4565d0c3851295826844f59
 - CSV artifact: data/risk/results/cross_document_model_scenarios.csv

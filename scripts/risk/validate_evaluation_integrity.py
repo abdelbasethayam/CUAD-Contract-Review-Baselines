@@ -28,14 +28,18 @@ if eg.exists():
 # Local Qdrant contract collections must contain training docs only.
 client=QdrantClient(path=str(ROOT/'data/qdrant_local'))
 for name in ('cuad_train','cuad_train_mpnet','cuad_train_hashing'):
-    if client.collection_exists(name):
-        seen=set(); off=None
-        while True:
-            pts, off=client.scroll(collection_name=name,limit=512,offset=off,with_payload=['document_id'])
-            seen.update(str((p.payload or {}).get('document_id','')) for p in pts)
-            if off is None: break
-        checks.append((name+'_payload_train_only', seen<=train_docs, len(seen-train_docs)))
-        checks.append((name+'_payload_test_overlap', not(seen&test_docs), len(seen&test_docs)))
+    if not client.collection_exists(name):
+        # Never silently drop an integrity check when a required index is missing.
+        checks.append((name+'_payload_train_only', False, 'collection_missing'))
+        checks.append((name+'_payload_test_overlap', False, 'collection_missing'))
+        continue
+    seen=set(); off=None
+    while True:
+        pts, off=client.scroll(collection_name=name,limit=512,offset=off,with_payload=['document_id'])
+        seen.update(str((p.payload or {}).get('document_id','')) for p in pts)
+        if off is None: break
+    checks.append((name+'_payload_train_only', seen<=train_docs, len(seen-train_docs)))
+    checks.append((name+'_payload_test_overlap', not(seen&test_docs), len(seen&test_docs)))
 report={'checks':[{'name':n,'passed':bool(ok),'value':v} for n,ok,v in checks],
         'train_contracts':len(train_docs),'test_contracts':len(test_docs),
         'train_rows':len(tr),'test_rows':len(te)}

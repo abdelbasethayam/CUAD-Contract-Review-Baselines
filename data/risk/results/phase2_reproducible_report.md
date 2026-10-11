@@ -1,8 +1,8 @@
 # Phase 2 Reproducible Experiment Report
 
 **Validation: PASS**  
-Generated (UTC): 2026-10-11T01:02:52.781113+00:00  
-Git HEAD at report time: 630350a5d9010004f1c7653ba48d48a3a09c0924
+Generated (UTC): 2026-10-11T01:33:08.663708+00:00
+Git HEAD at report time: ae90391b260146f941fd0a4d4979a25fa4ce2cd3
 
 > This report is not a legal correctness evaluation. Custom-risk accuracy remains unavailable because the human gold queue has no adjudicated labels.
 
@@ -14,7 +14,7 @@ Git HEAD at report time: 630350a5d9010004f1c7653ba48d48a3a09c0924
 | Held-out test contracts | 100 |
 | Train clause rows | 10545 |
 | Test clause rows | 2556 |
-| Integrity checks passing | 10/10 |
+| Integrity checks passing | 12/12 |
 | Clause-level playbook checks | 101 |
 | Cross-clause checks | 10 |
 | Document checks | 3 |
@@ -124,7 +124,7 @@ From repository root:
 - Silver JSONL: e81c096b0f6517b6d1f72cee08208e7f4269bb1285bf48f1853efbfd440d62ca
 - Playbook: e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440
 - Taxonomy: ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218
-- Integrity report: 22c888f4febc428e4f4878314134726558984fb59271993ac28ca69fd73b464a
+- Integrity report: f21076f7ef121103bcb3451f5eb7ce222b120d6fcd08b79762d31e611a35c02a
 
 ## Scope of claims
 

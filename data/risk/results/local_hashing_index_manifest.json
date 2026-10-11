@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "created_at_utc": "2026-10-09T16:41:47.429778+00:00",
+  "created_at_utc": "2026-10-11T01:14:16.020159+00:00",
   "status": "PASS",
   "embedding_backend": "local_hashing",
   "embedding_spec": {
@@ -32,7 +32,7 @@
     }
   },
   "sources": {
-    "train_index_manifest_sha256": "c299acabf364e3e1d8bec192e7032d645b01865daa5d01ed5d47894393cae29e",
+    "train_index_manifest_sha256": "468f5793a56e45ecbba26f26f7ea3e76303098d3a6e6ae32d9ca12c627dc4fc1",
     "legal_source_registry_sha256": "d5fc3d7596879e8212d7da76d7e0659976c69d3d25a711d9c2639f721373a7f5",
     "legal_markdown_files": {
       "backend/data/legal_knowledge/aba/indemnification.md": "eb5af21a3ae9cccc3a83dbbc8508cedb16266e4c1e263373d15bd2fe3f6cf166",

@@ -256,6 +256,10 @@ Key files:
 
 The run manifest stores the source SHA-256, pipeline settings, normalized playbook hash, calibration hash, code fingerprint, Python/platform and repository HEAD. Re-running the model is not promised to be bit-identical across model digests, runtime/library versions or accelerator conditions; the recorded outputs and hashes are the evidence for the completed run.
 
+## Evaluation protocol without human gold
+
+Because no custom-risk gold labels have been adjudicated, the implementation and reporting workaround is specified in [`docs/PHASE2_NO_GOLD_EVALUATION_PROTOCOL.md`](PHASE2_NO_GOLD_EVALUATION_PROTOCOL.md). It separates deterministic invariants, synthetic fixture conformance, proposed metamorphic tests, machine-judge diagnostics, machine-silver disagreement, and aligned external clause-classification benchmarks. None is presented as a substitute measurement of custom-risk accuracy.
+
 ## 7. Limitations and Threats to Validity
 
 1. **Offline retrieval profile has different retrieval characteristics.** The verified server configuration uses local Ollama, local Qdrant and a 768-dimensional HashingVectorizer index for both training-clause retrieval and curated legal knowledge. This avoids sending clause/query text to Cohere in this profile, but its lexical-vector similarities are not equivalent to Cohere semantic embeddings. The Cohere profile remains supported separately, and its indexes must not be mixed with local-hashing vectors. Network independence does not imply correctness or confidentiality guarantees outside the local deployment boundary.

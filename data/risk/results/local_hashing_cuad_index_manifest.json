@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "created_at_utc": "2026-10-09T16:41:43.390256+00:00",
+  "created_at_utc": "2026-10-11T01:14:07.360619+00:00",
   "status": "PASS",
   "collection": "cuad_train_hashing",
   "embedding": {

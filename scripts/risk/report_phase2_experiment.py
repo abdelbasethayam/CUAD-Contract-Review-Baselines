@@ -366,7 +366,7 @@ def main() -> int:
     md = f"""# Phase 2 Reproducible Experiment Report
 
 **Validation: {report['validation']['status']}**  
-Generated (UTC): {report['generated_at_utc']}  
+Generated (UTC): {report['generated_at_utc']}
 Git HEAD at report time: {report['git_head_at_report_time'] or 'unavailable'}
 
 > This report is not a legal correctness evaluation. Custom-risk accuracy remains unavailable because the human gold queue has no adjudicated labels.

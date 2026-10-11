@@ -49,6 +49,16 @@
       "name": "cuad_train_mpnet_payload_test_overlap",
       "passed": true,
       "value": 0
+    },
+    {
+      "name": "cuad_train_hashing_payload_train_only",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "cuad_train_hashing_payload_test_overlap",
+      "passed": true,
+      "value": 0
     }
   ],
   "train_contracts": 410,

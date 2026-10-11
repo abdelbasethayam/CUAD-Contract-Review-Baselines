@@ -1,7 +1,7 @@
 {
   "report_version": "phase2-reproducible-report-v1",
-  "generated_at_utc": "2026-10-11T01:02:52.781113+00:00",
-  "git_head_at_report_time": "630350a5d9010004f1c7653ba48d48a3a09c0924",
+  "generated_at_utc": "2026-10-11T01:33:08.663708+00:00",
+  "git_head_at_report_time": "ae90391b260146f941fd0a4d4979a25fa4ce2cd3",
   "interpretation_warning": "This report describes pipeline integrity, machine-silver behavior and operational evidence. It does not calculate custom-risk accuracy because no human gold annotations exist.",
   "reproduction_inputs": {
     "silver_csv": "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.csv",
@@ -49,41 +49,41 @@
     "gold_template_sha256": "5f27fd615cdf4ae8995bcb0fc541bd18bd6e893d7a9b05a7c3f5fe99f13fa976",
     "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
     "taxonomy_sha256": "ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218",
-    "integrity_report_sha256": "22c888f4febc428e4f4878314134726558984fb59271993ac28ca69fd73b464a",
+    "integrity_report_sha256": "f21076f7ef121103bcb3451f5eb7ce222b120d6fcd08b79762d31e611a35c02a",
     "external_cuad_manifest_sha256": "bc8b073f0cf9c224bd1a3ba33a56a6f104e0395581b069063420e23ea7a00ca5",
-    "local_hashing_cuad_index_manifest_sha256": "c299acabf364e3e1d8bec192e7032d645b01865daa5d01ed5d47894393cae29e",
-    "local_hashing_profile_manifest_sha256": "ab5f81305f77e638b656a294becd675e66a32c0d98db26aa6a6e7e3094c688f9",
+    "local_hashing_cuad_index_manifest_sha256": "468f5793a56e45ecbba26f26f7ea3e76303098d3a6e6ae32d9ca12c627dc4fc1",
+    "local_hashing_profile_manifest_sha256": "7b0eacb52d4bfa6368dff97bf5e9d939a26303e6f32df27468515d01312645a9",
     "legal_knowledge_retrieval_validation_sha256": "3e14f8f94bf1a60d1b57cf8c0a6aeffeab4a2e90052338605a474ea07fdc0cf0",
-    "local_hashing_cuad_retrieval_baseline_sha256": "36f83e7dfacf0d62c408ad77a800d1d380281c071bce2aa4b047fc0d3810d9c1",
+    "local_hashing_cuad_retrieval_baseline_sha256": "186e75d24f090f892e7331fc1f4f0db222506bcbeded6ec03346dad6802a7b81",
     "cross_document_scenario_matrix_sha256": "3f97fabbe7882d943d51fadfcaf76b5e3c3ad84d48f687437d14e112f213acbc",
-    "cross_document_scenario_audit_sha256": "3bf9d640c3a53d352f171e0650711e61e33d274928b0761c76b3b037f9627ed8",
-    "cross_document_model_scenarios_jsonl_sha256": "fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f",
-    "cross_document_model_scenarios_csv_sha256": "02cd18acd70d7a85dfb31d87d16811460c36d745cfee86640b4039b4c5b06200",
-    "cross_document_model_scenarios_summary_sha256": "f1cb5618234e26765a0ab163ec3968864c3f9f2175fb8c5191e9d855d175dcc6",
-    "cross_document_model_scenario_comparison_json_sha256": "1d02cf196852f8a9962a988c7d3346559ec3320eb3f4108c9b3f521c7559a797",
-    "cross_document_model_scenario_comparison_md_sha256": "b99a83d16a8286f741b0045cca985a4b52ae5f8ed2efcb35b3a9e43e91906373",
+    "cross_document_scenario_audit_sha256": "aa3f871ceb31379f132d805b78045be6919993585eafb2fc8cc10b5fe9d06c49",
+    "cross_document_model_scenarios_jsonl_sha256": "b35d724e595b6b6b9ef5d8bdb97bad0c014796a38a51dc635963087146130ead",
+    "cross_document_model_scenarios_csv_sha256": "c335d81c215698a32185ffe755408b41b15c7ad9b4565d0c3851295826844f59",
+    "cross_document_model_scenarios_summary_sha256": "df824ce6dbff5a6ba34da55ba2d81090c456eabd306ab9579f52c8fb03f7fd4c",
+    "cross_document_model_scenario_comparison_json_sha256": "e2387cda4e62b10c32f5aa9affc14f95378e7ca926da2003fefaa060c900d246",
+    "cross_document_model_scenario_comparison_md_sha256": "05dcf15750b6cf64a5cfbb6e6a07fe1cccffbb1e587401170675c2fe9b8e8aad",
     "cross_document_analyzer_code_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
     "cross_document_runner_code_sha256": "9a1dd5014179cdadf882a81d50d802cb1835c723bcfe1274fc3f51138a93993f",
     "upload_smoke_run_hashes": {
       "txt_three_pass": {
         "result_sha256": "bfbe62136d6b030bf0e07360d508708658e5d13ec8bf5fd9b40ee852d788bd53",
-        "audit_sha256": "0659116be612bf20b6fba63e4cb9c580341189d10f6543bb86eb6cdaaf27de03"
+        "audit_sha256": "47910a6e7878d1fb1f1ed9236a4cecf5ed4a1b87d2413dc486d7088b257d76ef"
       },
       "pdf_three_pass": {
         "result_sha256": "04c7c8260550c38d8f8c172f6a236c94e64f839295fdd90cb0894fc28cab1294",
-        "audit_sha256": "f3f514aa899c8fb2ca6665fa8b52560958a7a4df45b1a5d4b917039c9496a780"
+        "audit_sha256": "b67f395e4f46f6151fe9dac461d80b9726512fb2be222df1e65cc1b6b49b7a6e"
       },
       "txt_single_pass": {
         "result_sha256": "4472e6e4d897b288d4eaffda6fc05c5727f492e7f01a36d48dd2838f01de0dea",
-        "audit_sha256": "151d03156413e2a55629824876b8c29f6021542deab867e1304d56bfa166b698"
+        "audit_sha256": "68b4c138a83f912a0759e37fe35b349f4990020e59db47456d6955f3f7316bc5"
       },
       "txt_current_20261009": {
         "result_sha256": "4f505a3590be9a206d9376d73269b6f8fc78495ca5c3476d7fdeb269ad7b13cf",
-        "audit_sha256": "61b11483758f1c9a870a548b5363965e9d8d4df43c306adcd3ec9314a9192cbf"
+        "audit_sha256": "d357f62dd238b14dff64d1ec138f04b2657c758a5bc42b28b8be0db29b114b38"
       },
       "txt_post_batching_20261009": {
         "result_sha256": "d6b0733e2568a120448280c13f1fdce4b19bdf59162cb94f7d0e84d5cc76b832",
-        "audit_sha256": "97bdd3d04ad223757922c9635d5051f8c6cb7e0558f87ea3d9ec40efb304247a"
+        "audit_sha256": "d3d4e99acc183c3293b6526237d407adcdbacd90eed6566671faaf94fd5f8ed6"
       }
     }
   },
@@ -94,7 +94,7 @@
         "result_path": "data/risk/results/smoke_upload_api_result.json",
         "audit_path": "data/risk/results/smoke_test_audit.json",
         "result_sha256": "bfbe62136d6b030bf0e07360d508708658e5d13ec8bf5fd9b40ee852d788bd53",
-        "audit_sha256": "0659116be612bf20b6fba63e4cb9c580341189d10f6543bb86eb6cdaaf27de03",
+        "audit_sha256": "47910a6e7878d1fb1f1ed9236a4cecf5ed4a1b87d2413dc486d7088b257d76ef",
         "http_status": 200,
         "elapsed_seconds": 423.0,
         "analysis_id": null,
@@ -114,7 +114,7 @@
         "result_path": "data/risk/results/smoke_upload_api_pdf_result.json",
         "audit_path": "data/risk/results/smoke_test_audit_pdf.json",
         "result_sha256": "04c7c8260550c38d8f8c172f6a236c94e64f839295fdd90cb0894fc28cab1294",
-        "audit_sha256": "f3f514aa899c8fb2ca6665fa8b52560958a7a4df45b1a5d4b917039c9496a780",
+        "audit_sha256": "b67f395e4f46f6151fe9dac461d80b9726512fb2be222df1e65cc1b6b49b7a6e",
         "http_status": 200,
         "elapsed_seconds": 82.978,
         "analysis_id": null,
@@ -134,7 +134,7 @@
         "result_path": "data/risk/results/smoke_upload_api_fast_result.json",
         "audit_path": "data/risk/results/smoke_test_audit_fast.json",
         "result_sha256": "4472e6e4d897b288d4eaffda6fc05c5727f492e7f01a36d48dd2838f01de0dea",
-        "audit_sha256": "151d03156413e2a55629824876b8c29f6021542deab867e1304d56bfa166b698",
+        "audit_sha256": "68b4c138a83f912a0759e37fe35b349f4990020e59db47456d6955f3f7316bc5",
         "http_status": 200,
         "elapsed_seconds": 171.126,
         "analysis_id": null,
@@ -154,7 +154,7 @@
         "result_path": "data/risk/results/smoke_upload_api_current_20261009.json",
         "audit_path": "data/risk/results/smoke_test_audit_current.json",
         "result_sha256": "4f505a3590be9a206d9376d73269b6f8fc78495ca5c3476d7fdeb269ad7b13cf",
-        "audit_sha256": "61b11483758f1c9a870a548b5363965e9d8d4df43c306adcd3ec9314a9192cbf",
+        "audit_sha256": "d357f62dd238b14dff64d1ec138f04b2657c758a5bc42b28b8be0db29b114b38",
         "http_status": 200,
         "elapsed_seconds": 367.0,
         "analysis_id": null,
@@ -174,7 +174,7 @@
         "result_path": "data/risk/results/smoke_upload_api_post_batching_20261009.json",
         "audit_path": "data/risk/results/smoke_test_audit_post_batching.json",
         "result_sha256": "d6b0733e2568a120448280c13f1fdce4b19bdf59162cb94f7d0e84d5cc76b832",
-        "audit_sha256": "97bdd3d04ad223757922c9635d5051f8c6cb7e0558f87ea3d9ec40efb304247a",
+        "audit_sha256": "d3d4e99acc183c3293b6526237d407adcdbacd90eed6566671faaf94fd5f8ed6",
         "http_status": 200,
         "elapsed_seconds": 577.177,
         "analysis_id": null,
@@ -196,7 +196,7 @@
     "interpretation": "Authored synthetic scenario matrix for regression/coverage; not human gold and not a measure of risk accuracy or generalization.",
     "audit": {
       "schema_version": 1,
-      "generated_at_utc": "2026-10-11T01:02:40.512042+00:00",
+      "generated_at_utc": "2026-10-11T01:32:56.272173+00:00",
       "status": "PASS",
       "checks": {
         "all_13_cross_document_checks_covered": true,
@@ -569,22 +569,22 @@
       "analyzer_code_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
       "runner_code_sha256": "f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad",
       "summary_generator_code_sha256": "9a1dd5014179cdadf882a81d50d802cb1835c723bcfe1274fc3f51138a93993f",
-      "scenario_suite_manifest_sha256": "64b99ca4dfd3c99e08f943391a5550cefec3a0e5b51f8e265b5ade6ab8a15737",
-      "jsonl_sha256": "fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f",
-      "csv_sha256": "02cd18acd70d7a85dfb31d87d16811460c36d745cfee86640b4039b4c5b06200",
-      "updated_at_utc": "2026-10-11T01:02:42.690666+00:00"
+      "scenario_suite_manifest_sha256": "56a2696d439b96a70430ad101413d088f6f57ca5346e8af3763a16dfd9183769",
+      "jsonl_sha256": "b35d724e595b6b6b9ef5d8bdb97bad0c014796a38a51dc635963087146130ead",
+      "csv_sha256": "c335d81c215698a32185ffe755408b41b15c7ad9b4565d0c3851295826844f59",
+      "updated_at_utc": "2026-10-11T01:32:58.464703+00:00"
     },
     "model_jsonl_path": "data/risk/results/cross_document_model_scenarios.jsonl",
     "model_csv_path": "data/risk/results/cross_document_model_scenarios.csv",
     "batching_ablation_comparison": {
       "schema_version": 1,
       "status": "COMPLETED",
-      "created_at_utc": "2026-10-11T01:02:43.106247+00:00",
+      "created_at_utc": "2026-10-11T01:32:58.910802+00:00",
       "comparison_type": "ONE_SHOT_VS_BATCHED_SYNTHETIC_ENGINE_ABLATION",
       "baseline_path": "data/risk/evaluation/cross_document_v1/archive/cross_document_model_scenarios_pre_batching_20261009.jsonl",
       "current_path": "data/risk/results/cross_document_model_scenarios.jsonl",
       "baseline_sha256": "722e26122c405b7e04c43dc08a09c4450b8b1b7138d5b9315e14e47196506b3d",
-      "current_sha256": "fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f",
+      "current_sha256": "b35d724e595b6b6b9ef5d8bdb97bad0c014796a38a51dc635963087146130ead",
       "case_count": 39,
       "same_case_set": true,
       "one_shot": {
@@ -884,7 +884,7 @@
     "description": "Deterministic 768-dimensional HashingVectorizer lexical-vector baseline; do not compare its retrieval behavior as equivalent to Cohere Embed v3 semantic embeddings.",
     "cuad_train_index": {
       "schema_version": 1,
-      "created_at_utc": "2026-10-09T16:41:43.390256+00:00",
+      "created_at_utc": "2026-10-11T01:14:07.360619+00:00",
       "status": "PASS",
       "collection": "cuad_train_hashing",
       "embedding": {
@@ -915,7 +915,7 @@
     },
     "local_profile_validation": {
       "schema_version": 1,
-      "created_at_utc": "2026-10-09T16:41:47.429778+00:00",
+      "created_at_utc": "2026-10-11T01:14:16.020159+00:00",
       "status": "PASS",
       "embedding_backend": "local_hashing",
       "embedding_spec": {
@@ -947,7 +947,7 @@
         }
       },
       "sources": {
-        "train_index_manifest_sha256": "c299acabf364e3e1d8bec192e7032d645b01865daa5d01ed5d47894393cae29e",
+        "train_index_manifest_sha256": "468f5793a56e45ecbba26f26f7ea3e76303098d3a6e6ae32d9ca12c627dc4fc1",
         "legal_source_registry_sha256": "d5fc3d7596879e8212d7da76d7e0659976c69d3d25a711d9c2639f721373a7f5",
         "legal_markdown_files": {
           "backend/data/legal_knowledge/aba/indemnification.md": "eb5af21a3ae9cccc3a83dbbc8508cedb16266e4c1e263373d15bd2fe3f6cf166",
@@ -997,8 +997,7 @@
             {
               "source_name": "World Commerce & Contracting",
               "title": "Contracting Principles - Liability Caps and Exclusions From Liability",
-              "source_tier": "B",
-              "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+              "source_tier": "B",              "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
               "dense_score": 0.351619,
               "rrf_score": 0.032522
             },
@@ -1080,7 +1079,7 @@
     },
     "local_hashing_cuad_retrieval_baseline": {
       "schema_version": 1,
-      "generated_at_utc": "2026-10-11T01:02:52.468280+00:00",
+      "generated_at_utc": "2026-10-11T01:33:08.319609+00:00",
       "status": "PASS",
       "experiment_name": "local_hashing_cuad_nearest_neighbor_retrieval",
       "scope": "Held-out CUAD clause-category retrieval/classification baseline; not custom-risk accuracy, legal correctness or severity evaluation.",
@@ -1419,7 +1418,7 @@
           "recall_at_5": 0.4286
         }
       ],
-      "runtime_seconds": 7.761,
+      "runtime_seconds": 7.764,
       "interpretation": "Nearest-neighbor labels and top-5 hit metrics measure the local lexical-vector baseline only. They are not numerically equivalent to the prior Cohere/retrieval-conditioned SLM configuration. The held-out true category labels are used only for evaluation and were not inserted into the index."
     }
   },
@@ -1488,8 +1487,8 @@
       "source_version": "1.1"
     },
     "integrity": {
-      "checks_total": 10,
-      "checks_passed": 10,
+      "checks_total": 12,
+      "checks_passed": 12,
       "all_passed": true,
       "checks": [
         {
@@ -1539,6 +1538,16 @@
         },
         {
           "name": "cuad_train_mpnet_payload_test_overlap",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "cuad_train_hashing_payload_train_only",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "cuad_train_hashing_payload_test_overlap",
           "passed": true,
           "value": 0
         }

@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "status": "COMPLETED",
-  "created_at_utc": "2026-10-11T01:02:43.106247+00:00",
+  "created_at_utc": "2026-10-11T01:32:58.910802+00:00",
   "comparison_type": "ONE_SHOT_VS_BATCHED_SYNTHETIC_ENGINE_ABLATION",
   "baseline_path": "data/risk/evaluation/cross_document_v1/archive/cross_document_model_scenarios_pre_batching_20261009.jsonl",
   "current_path": "data/risk/results/cross_document_model_scenarios.jsonl",
   "baseline_sha256": "722e26122c405b7e04c43dc08a09c4450b8b1b7138d5b9315e14e47196506b3d",
-  "current_sha256": "fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f",
+  "current_sha256": "b35d724e595b6b6b9ef5d8bdb97bad0c014796a38a51dc635963087146130ead",
   "case_count": 39,
   "same_case_set": true,
   "one_shot": {

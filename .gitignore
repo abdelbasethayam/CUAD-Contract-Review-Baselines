@@ -48,3 +48,8 @@ data/qdrant_local/
 
 # Large derived evaluation export (> GitHub single-file limit); included in the dated reproducibility ZIP
 data/risk/external/cuad_expert_test.jsonl
+
+# Additional machine-local stores and generated release archives
+.venv/
+backend/data/qdrant_local/
+data/risk/releases/*.zip
