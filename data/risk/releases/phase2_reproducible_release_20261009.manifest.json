@@ -356,5 +356,12 @@
   },
   "interpretation": "Includes code/data/docs/results needed to inspect and reproduce the recorded Phase 2 experiments. The custom risk queue is still unannotated human gold; model-silver and synthetic scenario results are diagnostic and must not be called human-gold accuracy.",
   "zip_sha256": "ca06d68a95064f3574482d9dcd5660341396dcd33dbce54fd5656dccb3ea7bd9",
-  "zip_bytes": 41011323
+  "zip_bytes": 41011323,
+  "github_branch_archive_included": false,
+  "github_branch_expert_export_included": false,
+  "github_branch_transfer_note": "The generated ZIP and the derived >100 MB data/risk/external/cuad_expert_test.jsonl are not stored in this GitHub branch. The ZIP upload exceeded the GitHub API connector payload/transport limit; the external JSONL is intentionally excluded as a single oversized Git file. This manifest describes the original package generated on the remote evaluation server, not a claim that the ZIP itself is in this branch. The preparation and packaging scripts and their hashes are committed so the omitted artifacts can be regenerated.",
+  "github_branch_rebuild_steps": [
+    "Run python scripts/risk/prepare_cuad_expert_eval.py --help and use the documented options to regenerate data/risk/external/cuad_expert_test.jsonl.",
+    "Run python scripts/risk/package_phase2_release.py to recreate the release ZIP and checksum manifest."
+  ]
 }
