@@ -45,5 +45,3 @@ Interpretation: these are authored synthetic regression cases, not human gold. S
 - JSONL SHA-256: fd4bba65bec0f12367bf97f1c5d7c32a2de541e6bda6e4b347e52a1e403c968f
 - CSV SHA-256: 02cd18acd70d7a85dfb31d87d16811460c36d745cfee86640b4039b4c5b06200
 - CSV artifact: data/risk/results/cross_document_model_scenarios.csv
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

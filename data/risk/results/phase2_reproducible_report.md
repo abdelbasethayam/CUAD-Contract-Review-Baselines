@@ -130,5 +130,3 @@ From repository root:
 
 Supported now: implementation/reproducibility, train/test leakage checks, exact-quote gating behavior, deterministic domain routing, and machine-silver disagreement/abstention diagnostics.  
 Not supported now: custom-risk accuracy, legal correctness, severity calibration validity, probability calibration validity, or cross-clause/document risk sensitivity on real expert-labeled cases.
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

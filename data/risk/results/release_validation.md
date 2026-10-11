@@ -80,5 +80,3 @@ These checks validate implementation/data integrity, not custom-risk accuracy. H
 - docs/PHASE2_LOGICAL_MODEL.md: cb0afc854bc1f40b6ef82d772cb8c953d53dee6253512ea427b44219f05c4926
 - data/risk/GOLD_STATUS.md: c092b49b6be89f41334d46c5334c35b455a0d8ea10ca4f5f4c92dc0791cd12a5
 - backend/tests/test_contract_checks_batching.py: 510c238521e8a1ed74fc32580dc861b2e7a9dcdcfe8a245ff318f93a696d8411
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

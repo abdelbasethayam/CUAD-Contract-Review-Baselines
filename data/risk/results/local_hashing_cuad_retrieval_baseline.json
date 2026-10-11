@@ -342,5 +342,3 @@
   "runtime_seconds": 7.761,
   "interpretation": "Nearest-neighbor labels and top-5 hit metrics measure the local lexical-vector baseline only. They are not numerically equivalent to the prior Cohere/retrieval-conditioned SLM configuration. The held-out true category labels are used only for evaluation and were not inserted into the index."
 }
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
