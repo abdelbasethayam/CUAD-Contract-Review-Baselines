@@ -1,6 +1,6 @@
 # Phase 2 Evaluation Without Human Gold Labels
 
-**Status:** executable workaround and reporting protocol; not a substitute claim of legal-risk accuracy.
+**Status:** current no-gold evaluation protocol and reporting guardrails; the metamorphic scenario expansion below is the next evaluation extension. This is not a substitute claim of legal-risk accuracy.
 
 ## Why the missing gold set is not a reason to stop
 
