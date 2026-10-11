@@ -1,0 +1,28 @@
+SYNTHETIC POSITIVE RISK-STRESS AGREEMENT
+Constructed solely for pipeline regression and coverage diagnostics; not legal advice.
+
+1. LIABILITY CAP. Supplier liability is capped at $100,000, except that indemnification obligations and liquidated damages are uncapped and remain outside the cap. Other liability heads are capped, creating overlap between capped and uncapped heads.
+
+2. LIQUIDATED DAMAGES. Supplier shall pay $1,000,000 in liquidated damages for delay, and those liquidated damages are expressly outside the cap.
+
+3. TERM AND RENEWAL. The Agreement has a 12-month term and renews automatically unless non-renewal notice is received at least 18 months before the end of the 12-month term.
+
+4. CONVENIENCE TERMINATION AND MINIMUMS. Customer may terminate for convenience on 30 days notice but remains liable for every remaining minimum commitment and all fees for the remaining term.
+
+5. ASSIGNMENT AND CHANGE OF CONTROL. Assignment requires consent that may be withheld in Supplier's sole discretion. A change of control is deemed assignment but the change-of-control section says it requires no consent, creating different standards for the same event.
+
+6. LICENSE AND TERMINATION. Supplier grants a perpetual, irrevocable, worldwide license, but a separate termination clause says all license rights end automatically on termination.
+
+7. IP OWNERSHIP AND LICENSE GRANT. Customer assigns all newly developed IP to Supplier without a separate license-back. The license grant only covers Supplier-owned materials and does not clearly grant Customer continued rights in its assigned deliverables.
+
+8. CRITICAL SOFTWARE. The licensed software is business-critical, but no source code escrow, continuity commitment, or post-termination support is provided.
+
+9. INSURANCE. Supplier liability is capped at $100,000 while required insurance limits are only $50,000, leaving exposure above stated coverage.
+
+10. INDEMNIFICATION. Indemnification obligations are expressly uncapped and outside the liability cap.
+
+11. INCORPORATED MATERIALS. Services are subject to Supplier's online terms and policies, which may be updated at any time. No fixed version of these terms is attached to the contract package.
+
+12. ORDER OF PRECEDENCE. Supplier's online terms prevail over this signed Agreement in a conflict and may narrow the protective remedies negotiated in this Agreement.
+
+13. GOVERNING LAW AND DISPUTES. Governing law is stated only in the Order Form, while each Order Form may select a different forum and dispute procedure. The current Order Form is not attached.

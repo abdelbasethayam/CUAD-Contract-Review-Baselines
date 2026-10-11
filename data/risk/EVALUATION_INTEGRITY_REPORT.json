@@ -1,0 +1,68 @@
+{
+  "checks": [
+    {
+      "name": "train_test_contract_overlap",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "gold_uses_train_docs_only",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "gold_partition_disjoint",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "silver_uses_test_docs_only",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "silver_train_overlap",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "expert_presence_uses_test_docs_only",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "cuad_train_payload_train_only",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "cuad_train_payload_test_overlap",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "cuad_train_mpnet_payload_train_only",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "cuad_train_mpnet_payload_test_overlap",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "cuad_train_hashing_payload_train_only",
+      "passed": true,
+      "value": 0
+    },
+    {
+      "name": "cuad_train_hashing_payload_test_overlap",
+      "passed": true,
+      "value": 0
+    }
+  ],
+  "train_contracts": 410,
+  "test_contracts": 100,
+  "train_rows": 10545,
+  "test_rows": 2556
+}

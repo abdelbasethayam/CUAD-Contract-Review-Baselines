@@ -30,7 +30,10 @@ def main():
             for check_id in checks[:1]:
                 sample_id=hashlib.sha256(f"{doc_id}|{item['clause_type']}|{check_id}".encode()).hexdigest()[:16]
                 contract_text="\n\n".join(str(x["clause_text"]) for x in sorted(clauses,key=lambda z:int(z["clause_index"])))
-                pool.append({"sample_id":sample_id,"annotation_partition":"calibration" if int(sample_id[:8],16)%100<25 else ("development" if int(sample_id[:8],16)%100<50 else "locked_test"),"contract_id":doc_id,"clause_type":item["clause_type"],"check_id":check_id,"contract_text":contract_text,"search_status":"NOT_FOUND_BY_SEARCH","adjudicated_presence":"","adjudicated_risk":"","adjudicated_risk_type":"","adjudicated_evidence":"","notes":""})
+                digest=hashlib.sha256(doc_id.encode("utf-8")).hexdigest()
+                bucket=int(digest[:8],16)%100
+                partition="calibration" if bucket<25 else ("development" if bucket<50 else "locked_test")
+                pool.append({"sample_id":sample_id,"annotation_partition":partition,"contract_id":doc_id,"clause_type":item["clause_type"],"check_id":check_id,"contract_text":contract_text,"search_status":"NOT_FOUND_BY_SEARCH","adjudicated_presence":"","adjudicated_risk":"","adjudicated_risk_type":"","adjudicated_evidence":"","notes":""})
     rng=random.Random(args.seed); rng.shuffle(pool); rows=pool[:min(args.n,len(pool))]
     if not rows: raise SystemExit("No absence candidates found.")
     args.out.parent.mkdir(parents=True,exist_ok=True)

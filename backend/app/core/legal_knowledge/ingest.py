@@ -14,7 +14,7 @@ from pathlib import Path
 
 from qdrant_client import models
 
-from ..config import LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_PATH, LEGAL_KNOWLEDGE_REGISTRY_PATH
+from ..config import EMBEDDING_BACKEND, LEGAL_KNOWLEDGE_COLLECTION, LEGAL_KNOWLEDGE_PATH, LEGAL_KNOWLEDGE_REGISTRY_PATH
 from ..rag.embedder import embed_documents, make_cohere_client
 from ..rag.retriever import make_qdrant_client
 
@@ -166,6 +166,8 @@ def ingest_legal_knowledge(
     for chunk, vector in zip(chunks, vectors):
         payload = {
             "retrieved_text": chunk["text"],
+            "embedding_backend": EMBEDDING_BACKEND,
+            "embedding_dimension": len(vector),
             **chunk["metadata"],
         }
         points.append(

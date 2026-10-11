@@ -75,13 +75,16 @@ RISK_GOLD_PATH = RISK_DATA_DIR / "gold" / "gold_annotations.csv"
 RISK_CALIBRATION_PATH = RISK_DATA_DIR / "gold" / "calibration.json"
 RISK_EXTERNAL_BENCHMARKS_PATH = RISK_DATA_DIR / "external_benchmarks.json"
 
+EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "cohere").strip().lower()
+LOCAL_HASHING_DIM = int(os.getenv("LOCAL_HASHING_DIM", "768"))
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 COHERE_MODEL = os.getenv(
     "COHERE_MODEL",
     os.getenv("COHERE_EMBED_MODEL", "embed-english-v3.0"),
 )
 COHERE_EMBED_BATCH_SIZE = int(os.getenv("COHERE_BATCH_SIZE", "96"))
-COHERE_MAX_RETRY_ATTEMPTS = int(os.getenv("COHERE_MAX_RETRY_ATTEMPTS", "8"))
+COHERE_TIMEOUT_SECONDS = float(os.getenv("COHERE_TIMEOUT_SECONDS", "45"))
+COHERE_MAX_RETRY_ATTEMPTS = int(os.getenv("COHERE_MAX_RETRY_ATTEMPTS", "3"))
 
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")

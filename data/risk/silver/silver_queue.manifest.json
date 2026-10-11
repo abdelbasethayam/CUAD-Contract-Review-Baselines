@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "queue_path": "data/risk/silver/silver_queue.csv",
+  "source_path": "data/splits/test/master_clauses_test.csv",
+  "source_sha256": "14ede6e03f6255760f705837b9fb62709b03875985e52a75ee7b5fbc385a9002",
+  "playbook_hash": "9b0a1752c7891857594eade8f10bbb5b7e317559d210a259741cf6a141dc6efb",
+  "seed": 42,
+  "n_requested": 300,
+  "n_written": 300,
+  "sampling_method": "contract-disjoint deterministic partition; 25/25/50 target allocation; locked-test one-per-check coverage then round-robin fill",
+  "partition_counts": {
+    "locked_test": 150,
+    "calibration": 75,
+    "development": 75
+  },
+  "contract_counts": {
+    "locked_test": 35,
+    "calibration": 19,
+    "development": 18
+  },
+  "cross_partition_contracts": 0,
+  "check_counts": {
+    "locked_test": 95,
+    "calibration": 75,
+    "development": 75
+  },
+  "locked_test_check_coverage": 95
+}

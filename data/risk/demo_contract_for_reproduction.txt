@@ -1,0 +1,35 @@
+SAMPLE COMMERCIAL SOFTWARE SERVICES AGREEMENT
+(Research demonstration fixture only; not legal advice.)
+
+1. PARTIES AND TERM
+This Agreement is entered into by Northstar Analytics Ltd. ("Customer") and VendorCo Ltd. ("Supplier"). The initial term is one year and automatically renews for successive one-year periods unless either party gives written notice at least 120 days before the end of the then-current term.
+
+2. FEES AND MINIMUM COMMITMENT
+Customer shall pay the annual subscription fee stated in each Order Form. Customer commits to a minimum of 100,000 transactions per contract year. Fees paid or payable are non-refundable, including where the service is unavailable for an extended period.
+
+3. LIMITATION OF LIABILITY
+Except for payment obligations, confidentiality breaches, and indemnification obligations, neither party shall be liable for indirect, incidental, special, consequential, or punitive damages. In no event shall Customer's aggregate liability exceed ten times the fees paid or payable during the Term. Supplier's aggregate liability shall not exceed the fees paid by Customer in the previous one month.
+
+4. INDEMNIFICATION
+Customer shall indemnify, defend, and hold harmless Supplier and its affiliates from any and all claims, losses, damages, liabilities, and expenses arising out of Customer's use of the Services. Supplier shall have no obligation to indemnify Customer for third-party intellectual property infringement claims.
+
+5. TERMINATION
+Supplier may terminate this Agreement immediately for any breach. Customer may terminate for material breach only if Supplier fails to cure within 90 days after written notice. If Customer terminates for convenience, Customer remains liable for all fees for the entire remaining term and all minimum commitments.
+
+6. INTELLECTUAL PROPERTY AND LICENSE
+Supplier retains all right, title, and interest in the Services and grants Customer a worldwide, perpetual, irrevocable, transferable, sublicensable license to use, modify, reproduce, and distribute all software and documentation supplied under this Agreement. Customer hereby assigns to Supplier all intellectual property developed in connection with the Services, including Customer materials and pre-existing tools, without a separate license-back.
+
+7. INSURANCE
+Supplier shall maintain commercially reasonable insurance coverage during the Term and provide certificates upon request. No minimum policy limits are stated in this Agreement.
+
+8. ASSIGNMENT AND CHANGE OF CONTROL
+Customer may not assign this Agreement without Supplier's prior written consent, which may be withheld in Supplier's sole discretion. A change of control of Customer is deemed an assignment. Supplier may assign this Agreement to any affiliate without consent.
+
+9. INCORPORATED DOCUMENTS AND PRECEDENCE
+The Services are also subject to Supplier's online terms and the policies referenced on Supplier's website, each of which may be updated from time to time. If an Order Form conflicts with this Agreement or online terms, Supplier's online terms prevail. No fixed version of the online terms is attached to this demonstration fixture.
+
+10. GOVERNING LAW AND DISPUTES
+This Agreement is governed by the laws specified in the applicable Order Form. Each Order Form may designate a different forum and dispute procedure.
+
+11. POST-TERMINATION EFFECTS
+Upon termination, Supplier may disable Customer access immediately. Supplier will provide transition assistance only at its then-current rates and only if it chooses to do so. Customer must export all data before the effective termination date.

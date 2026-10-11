@@ -133,6 +133,35 @@ Details: [docs/FINETUNE.md](https://github.com/abdelbasethayam/CUAD-Contract-Rev
 
 ---
 
+## Phase 2 — Uploadable contract risk review
+
+The repository now contains an end-to-end PDF/TXT upload application that performs clause segmentation, CUAD clause classification, buyer-side playbook risk checks, exact contract-evidence validation, cross-clause/document checks, and contract-level triage. The current interactive profile uses one risk reasoning pass for lower latency; this does not constitute multi-pass agreement, risk confidence remains uncalibrated without human gold, and exact-evidence gating remains enabled. Set `RISK_SELF_CONSISTENCY_PASSES=3` for a slower repeated-pass diagnostic run.
+
+**Start the UI/API:** configure Ollama and backend/.env, then run bash scripts/start_all.sh. The API health check is curl -fsS http://127.0.0.1:8000/health; the frontend is usually on port 5173.
+
+**Run the synthetic TXT smoke and audit, using the configured interactive setting:**
+    .venv/bin/python scripts/risk/smoke_upload_api.py
+    .venv/bin/python scripts/risk/audit_smoke_run.py
+
+For a PDF test fixture, run `python scripts/risk/smoke_upload_api.py --file test_contract.pdf --out data/risk/results/smoke_upload_api_pdf_result.json`, then audit it with `python scripts/risk/audit_smoke_run.py --input data/risk/results/smoke_upload_api_pdf_result.json --suffix pdf`. The checked-in run records include the earlier three-pass TXT/PDF runs plus a one-pass TXT run for a measured latency comparison.
+
+**Rebuild the no-network retrieval profile from source:** stop the backend, then run `bash scripts/risk/build_local_retrieval_profile.sh`. This rebuilds both 768-dimensional local hashing indexes, proves train/test/index isolation, checks representative legal guidance retrieval, regenerates the team export/report, and runs the release suite. Start the app afterward with `bash scripts/start_all.sh`. Do not rebuild the embedded Qdrant collections while the backend is running.
+
+**Regenerate reproducible artifacts (without rebuilding indexes):**
+    .venv/bin/python scripts/risk/validate_evaluation_integrity.py
+    .venv/bin/python scripts/risk/normalize_playbook_domains.py
+    .venv/bin/python scripts/risk/export_team_pack.py
+    .venv/bin/python scripts/risk/report_phase2_experiment.py
+    .venv/bin/python scripts/risk/run_release_checks.py
+
+Full guides: docs/PHASE2_RISK_PIPELINE.md, docs/PHASE2_REPRODUCIBILITY.md, and docs/PHASE2_PAPER_DRAFT.md. Release validation can be recorded with python scripts/risk/run_release_checks.py.
+
+The risk playbook is review guidance, not legal ground truth. The 300-case risk benchmark is model-generated **silver**, not human gold. Custom-risk accuracy is therefore unavailable; the paper and reports intentionally make no precision/recall/F1 claims for the custom risk predicates.
+
+**Privacy and offline mode:** the default `EMBEDDING_BACKEND=cohere` sends clause/query text to Cohere for embeddings and requires network access. For a local-only mode, set `EMBEDDING_BACKEND=local_hashing`, `LOCAL_HASHING_DIM=768`, `QDRANT_COLLECTION=cuad_train_hashing`, and `LEGAL_KNOWLEDGE_COLLECTION=legal_knowledge_hashing` in `backend/.env`, then stop the backend and run `bash scripts/risk/build_local_retrieval_profile.sh`. Restart with `bash scripts/start_all.sh`. This local mode uses deterministic HashingVectorizer/cosine retrieval (lexical-vector baseline), not a pretrained semantic embedding model, and must be evaluated as a separate configuration. Ollama generation and Qdrant remain local; do not upload confidential documents to any network-enabled mode unless the transfer is authorized.
+
+---
+
 ## 5. Evaluation policy
 
 The repository no longer publishes guessed accuracy ranges for the final pipeline. Report:

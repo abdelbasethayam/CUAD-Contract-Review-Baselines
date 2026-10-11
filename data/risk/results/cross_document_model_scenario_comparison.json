@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "status": "COMPLETED",
+  "created_at_utc": "2026-10-09T21:06:40.938899+00:00",
+  "comparison_type": "ONE_SHOT_VS_BATCHED_SYNTHETIC_ENGINE_ABLATION",
+  "baseline_path": "data/risk/evaluation/cross_document_v1/archive/cross_document_model_scenarios_pre_batching_20261009.jsonl",
+  "current_path": "data/risk/results/cross_document_model_scenarios.jsonl",
+  "baseline_sha256": "722e26122c405b7e04c43dc08a09c4450b8b1b7138d5b9315e14e47196506b3d",
+  "current_sha256": "32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c",
+  "case_count": 39,
+  "same_case_set": true,
+  "one_shot": {
+    "cases": 39,
+    "matches": 11,
+    "rate": 0.28205128205128205,
+    "status_counts": {
+      "INSUFFICIENT_EVIDENCE": 36,
+      "POTENTIAL_RISK": 3
+    },
+    "by_type": {
+      "positive": {
+        "cases": 13,
+        "matches": 0,
+        "rate": 0.0
+      },
+      "control": {
+        "cases": 13,
+        "matches": 0,
+        "rate": 0.0
+      },
+      "incomplete": {
+        "cases": 13,
+        "matches": 11,
+        "rate": 0.8461538461538461
+      }
+    }
+  },
+  "batched": {
+    "cases": 39,
+    "matches": 27,
+    "rate": 0.6923076923076923,
+    "status_counts": {
+      "POTENTIAL_RISK": 16,
+      "NO_RISK": 10,
+      "INSUFFICIENT_EVIDENCE": 13
+    },
+    "by_type": {
+      "positive": {
+        "cases": 13,
+        "matches": 10,
+        "rate": 0.7692307692307693
+      },
+      "control": {
+        "cases": 13,
+        "matches": 7,
+        "rate": 0.5384615384615384
+      },
+      "incomplete": {
+        "cases": 13,
+        "matches": 10,
+        "rate": 0.7692307692307693
+      }
+    }
+  },
+  "conformance_delta_cases": 16,
+  "conformance_delta_rate": 0.41025641025641024,
+  "status_changes_count": 25,
+  "status_changes": [
+    {
+      "scenario_id": "DOC-1-CONTROL",
+      "scenario_type": "control",
+      "expected_status": "NO_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "DOC-1-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "DOC-2-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "DOC-3-CONTROL",
+      "scenario_type": "control",
+      "expected_status": "NO_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "DOC-3-INCOMPLETE",
+      "scenario_type": "incomplete",
+      "expected_status": "INSUFFICIENT_EVIDENCE",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": true,
+      "after_matches": false
+    },
+    {
+      "scenario_id": "DOC-3-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-1-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-10-CONTROL",
+      "scenario_type": "control",
+      "expected_status": "NO_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-10-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-2-CONTROL",
+      "scenario_type": "control",
+      "expected_status": "NO_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": false
+    },
+    {
+      "scenario_id": "X-2-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": false
+    },
+    {
+      "scenario_id": "X-3-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": false
+    },
+    {
+      "scenario_id": "X-4-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-5-CONTROL",
+      "scenario_type": "control",
+      "expected_status": "NO_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-5-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-6-CONTROL",
+      "scenario_type": "control",
+      "expected_status": "NO_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-6-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": false
+    },
+    {
+      "scenario_id": "X-7-CONTROL",
+      "scenario_type": "control",
+      "expected_status": "NO_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-7-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-8-CONTROL",
+      "scenario_type": "control",
+      "expected_status": "NO_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "NO_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-8-INCOMPLETE",
+      "scenario_type": "incomplete",
+      "expected_status": "INSUFFICIENT_EVIDENCE",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": true,
+      "after_matches": false
+    },
+    {
+      "scenario_id": "X-8-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-9-CONTROL",
+      "scenario_type": "control",
+      "expected_status": "NO_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": false
+    },
+    {
+      "scenario_id": "X-9-INCOMPLETE",
+      "scenario_type": "incomplete",
+      "expected_status": "INSUFFICIENT_EVIDENCE",
+      "before": "POTENTIAL_RISK",
+      "after": "INSUFFICIENT_EVIDENCE",
+      "before_matches": false,
+      "after_matches": true
+    },
+    {
+      "scenario_id": "X-9-POSITIVE",
+      "scenario_type": "positive",
+      "expected_status": "POTENTIAL_RISK",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "POTENTIAL_RISK",
+      "before_matches": false,
+      "after_matches": true
+    }
+  ],
+  "interpretation": "This is a code-path ablation on 39 hand-authored synthetic fixtures. It measures whether the batching change improves fixture-status conformance and preserves outputs under the constructed scenarios. It is not human gold, not real-contract accuracy, and not legal correctness.",
+  "code_hashes": {
+    "analyzer": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+    "runner": "f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad"
+  }
+}

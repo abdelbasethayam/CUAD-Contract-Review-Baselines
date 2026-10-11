@@ -56,6 +56,7 @@ class ContractRiskAssessment(BaseModel):
     overall_raw_risk_score: float | None = None
     severity_status: str = "UNCALIBRATED"
     risk_domains: list[dict[str, Any]] = Field(default_factory=list)
+    deterministic_cross_checks: list[dict[str, Any]] = Field(default_factory=list)
     key_risks: list[dict[str, Any]] = Field(default_factory=list)
     affected_clauses: list[int] = Field(default_factory=list)
     reason: str = ""

@@ -26,6 +26,12 @@ source_url: https://example.com/worldcc
 title: Term and Termination
 clause_category: Termination
 document_filename: termination.md
+source_tier: B
+authority_status: NON_BINDING_PROFESSIONAL_PRACTICE
+jurisdiction: international
+contract_type: commercial_general
+access_type: public
+license_status: reference_only
 ---
 
 Termination guidance for notice, cure, transition, and survival.
@@ -72,11 +78,15 @@ def test_legal_knowledge_retrieval_prioritizes_category(monkeypatch):
     captured = {}
 
     class FakeQdrant:
+        def scroll(self, **kwargs):
+            return ([], None)
+
         def query_points(self, **kwargs):
             captured.update(kwargs)
             return SimpleNamespace(
                 points=[
                     SimpleNamespace(
+                        id="termination-guidance-1",
                         score=0.91,
                         payload={
                             "retrieved_text": "Review termination cure periods.",
@@ -103,7 +113,8 @@ def test_legal_knowledge_retrieval_prioritizes_category(monkeypatch):
     )
 
     assert results[0]["source_name"] == "WorldCC"
-    assert results[0]["relevance_score"] == 0.91
+    assert results[0]["dense_score"] == 0.91
+    assert results[0]["rrf_score"] > 0
     assert captured["collection_name"] == "legal_knowledge_test"
     assert captured["query_filter"].must[0].match.value == "Termination"
 
@@ -317,12 +328,13 @@ def test_clause_result_response_compatibility_with_existing_fields():
     )
 
     assert result.predicted_label == "Termination For Convenience"
-    assert "risk" not in result.model_dump()
+    assert result.risk is False
+    assert "risk" in result.model_dump()
 
 
 def test_documents_classify_response_includes_legacy_and_risk_fields(monkeypatch):
-    def fake_classify_contract(file_path):
-        return {"clauses": [
+    def fake_classify_contract(file_path, filename=None):
+        return {"filename": filename or file_path.name, "contract_metadata": {}, "analysis_id": None, "clauses": [
             {
                 "clause_index": 0,
                 "clause_text": "Supplier shall indemnify Customer for third-party claims.",
@@ -354,5 +366,5 @@ def test_documents_classify_response_includes_legacy_and_risk_fields(monkeypatch
     clause = response.json()["clauses"][0]
     assert clause["predicted_label"] == "Indemnification"
     assert clause["retrieved_labels"] == ["Indemnification"]
-    assert "risk" not in clause
+    assert clause["risk"] is True
     assert response.json()["contract_risk_assessment"]["status"] == "COMPLETED"

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-09T21:06:38.231538+00:00",
+  "playbook_source_version": "1.1",
+  "clause_check_count": 101,
+  "cross_clause_check_count": 10,
+  "document_check_count": 3,
+  "canonical_domain_count": 10,
+  "domain_mapping_validation": "PASS",
+  "sources": {
+    "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+    "taxonomy_sha256": "ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218",
+    "source_registry_sha256": "d5fc3d7596879e8212d7da76d7e0659976c69d3d25a711d9c2639f721373a7f5"
+  },
+  "exports": {
+    "risk_clause_checks.csv": {
+      "sha256": "7d9031ed0bb286bc68e49573bd14df712b21a25eaf28651f015b7ec56eb0dcf7"
+    },
+    "risk_cross_clause_checks.csv": {
+      "sha256": "7a129e4185fcd02e6125b1b86858035f3fe92286d1a34dcc4bfef41eff8df33a"
+    },
+    "risk_document_checks.csv": {
+      "sha256": "32784b27c9d4ce6822b9a66938756b077a66269d58c495e45b41e6a4aa2fc7b9"
+    },
+    "risk_playbook_exact.json": {
+      "sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440"
+    },
+    "risk_taxonomy.json": {
+      "sha256": "ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218"
+    },
+    "source_registry.json": {
+      "sha256": "d5fc3d7596879e8212d7da76d7e0659976c69d3d25a711d9c2639f721373a7f5"
+    }
+  },
+  "warning": "Playbook and taxonomy are review guidance, not human gold labels or evidence of a fact in an uploaded contract."
+}

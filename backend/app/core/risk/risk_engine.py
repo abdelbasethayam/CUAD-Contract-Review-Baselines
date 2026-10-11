@@ -50,6 +50,22 @@ def _evidence_valid(evidence: str, clause_text: str, context: list[dict]) -> boo
     )
 
 
+def _evidence_source(evidence: str, clause_text: str, clause_index: int, context: list[dict]) -> dict:
+    """Return the exact clause that contains the evidence quote."""
+    quote = str(evidence or "").strip()
+    if quote and quote in str(clause_text or ""):
+        return {"evidence_clause_index": clause_index, "evidence_scope": "target_clause"}
+    for item in context or []:
+        text = str(item.get("clause_text") or "")
+        if quote and quote in text:
+            try:
+                source_index = int(item.get("clause_index"))
+            except (TypeError, ValueError):
+                source_index = None
+            return {"evidence_clause_index": source_index, "evidence_scope": "related_contract_clause"}
+    return {"evidence_clause_index": None, "evidence_scope": None}
+
+
 def _factor(value: object) -> float | None:
     try:
         number = float(value)
@@ -89,6 +105,7 @@ def _prompt(
         {
             "id": item["id"],
             "risk_domain": item.get("risk_domain"),
+            "risk_subdomain": item.get("risk_subdomain"),
             "risk_type": item.get("risk_type"),
             "perspective": item.get("perspective"),
             "applies_when": item.get("applies_when", []),
@@ -116,6 +133,10 @@ Rules:
 6. Risk type must identify the concrete exposure, not just "risk".
 7. Keep reasons concise and audit-friendly.
 8. Return JSON only. No hidden reasoning, no markdown, no extra text.
+9. Each checklist item is a RISK PREDICATE: "answer" the supplied question as written.
+10. Apply the supplied flag_if and do_not_flag_if rules when setting status. Do not treat every YES as a risk.
+11. If the question asks whether a risk condition exists, YES can be POTENTIAL_RISK only when flag_if is satisfied and exact evidence supports it. If flag_if is not satisfied, use NO_RISK.
+12. A mutual/reciprocal clause must not be labeled one-sided when the contract text itself applies the protection to both parties.
 
 CURRENT CLAUSE
 ID: {clause_type}
@@ -204,11 +225,22 @@ def _parse(raw: str, valid_ids: set[str]) -> list[dict]:
 
 
 def _majority(records: list[dict]) -> tuple[str, float]:
+    """Return a conservative repeated-pass decision and agreement signal.
+
+    A single pass has no measurable inter-pass agreement, so its agreement
+    signal is 0 rather than 1.0. Even-number ties abstain instead of inheriting
+    Counter's insertion-order tie break.
+    """
     if not records:
         return "DON'T KNOW", 0.0
     votes = Counter(record["answer"] for record in records)
     answer, count = votes.most_common(1)[0]
-    return answer, round(count / len(records), 4)
+    agreement = round(count / len(records), 4)
+    if len(records) == 1:
+        return answer, 0.0
+    if count * 2 <= len(records):
+        return "DON'T KNOW", agreement
+    return answer, agreement
 
 
 def analyze_clause_risk(
@@ -344,12 +376,12 @@ def analyze_clause_risk(
         evidence = representative["evidence"]
         evidence_ok = _evidence_valid(evidence, clause_text, context)
         indicator_match = bool(indicators.get("matched_indicators"))
-        status = representative["status"]
-        if answer == "YES":
-            status = "POTENTIAL_RISK" if evidence_ok else "INSUFFICIENT_EVIDENCE"
-        elif answer == "NO":
-            status = "NO_RISK"
-        else:
+        status = "INSUFFICIENT_EVIDENCE" if answer == "DON'T KNOW" else representative["status"]
+        # Trust the model's explicit policy-aware status, but never accept a
+        # positive risk conclusion without exact contract evidence.
+        if status == "POTENTIAL_RISK" and not evidence_ok:
+            status = "INSUFFICIENT_EVIDENCE"
+        elif status not in {"POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE", "ERROR"}:
             status = "INSUFFICIENT_EVIDENCE"
 
         raw_support = _support_score(
@@ -370,18 +402,26 @@ def analyze_clause_risk(
         source_ids = checks_by_id[check_id].get("sources", [])
         supporting_sources = source_records(playbook, source_ids)
         primary_source = supporting_sources[0] if supporting_sources else {}
+        evidence_location = _evidence_source(evidence, clause_text, clause_index, context) if evidence_ok and status == "POTENTIAL_RISK" else {
+            "evidence_clause_index": None,
+            "evidence_scope": None,
+        }
         findings.append(
             {
                 "clause_index": clause_index,
                 "clause_text": clause_text,
                 "predicted_label": clause_type,
                 "check_id": check_id,
+                **evidence_location,
+                "risk_domain": checks_by_id[check_id].get("risk_domain"),
+                "risk_subdomain": checks_by_id[check_id].get("risk_subdomain"),
                 "question": checks_by_id[check_id]["question"],
                 "answer": answer,
                 "risk_status": status,
                 "risk_type": representative.get("risk_type") if status == "POTENTIAL_RISK" else None,
                 "risk": status == "POTENTIAL_RISK",
                 "risk_level": (calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else (score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None)),
+                "severity": score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None,
                 "raw_support_score": raw_support,
                 "severity_score": severity_score,
                 "severity_signal": severity_signal,
@@ -440,12 +480,15 @@ def analyze_clause_risk(
                 "clause_text": clause_text,
                 "predicted_label": clause_type,
                 "check_id": check["id"],
+                "risk_domain": check.get("risk_domain"),
+                "risk_subdomain": check.get("risk_subdomain"),
                 "question": check["question"],
                 "answer": "DON'T KNOW",
                 "risk_status": "INSUFFICIENT_EVIDENCE",
                 "risk_type": None,
                 "risk": False,
                 "risk_level": None,
+                "severity": None,
                 "raw_support_score": 0.0,
                 "severity_signal": None,
                 "confidence": None,

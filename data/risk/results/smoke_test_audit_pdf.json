@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-10-09T21:06:41.262992+00:00",
+  "interpretation": "Synthetic plumbing smoke test only. The input is invented. Results do not estimate model accuracy, legal correctness or sensitivity on real contracts.",
+  "http_status": 200,
+  "elapsed_seconds": 82.978,
+  "analysis_id": "db10b978019252fc-460547d488bfb3a2",
+  "run_dir": "data/runs/db10b978019252fc-460547d488bfb3a2",
+  "source_file": "/home/jovyan/CUAD-Contract-Review-Baselines/test_contract.pdf",
+  "source_sha256": "db10b978019252fc65bf8680b63afbc54df198ef894f417113c3da391cff4fa4",
+  "manifest_source": {
+    "filename": "test_contract.pdf",
+    "sha256": "db10b978019252fc65bf8680b63afbc54df198ef894f417113c3da391cff4fa4"
+  },
+  "pipeline_config": {
+    "calibration_hash": null,
+    "code_fingerprint": "9702b273cab8ef010eeca0c17e1c952120a065a604eff59b99c82c47caa0ce51",
+    "embedding_backend": "local_hashing",
+    "embedding_model": "sklearn.HashingVectorizer(n_features=768, ngram_range=(1,2), norm=l2)",
+    "enable_cross_clause": true,
+    "enable_document_checks": true,
+    "legal_knowledge_collection": "legal_knowledge_hashing",
+    "phase": 2,
+    "playbook_hash": "03c41c2bd8d560824facaf4c3b0097060b199678322e465504d5ef0aa4830793",
+    "playbook_path": "data/risk/commercial_clause_risk_playbook.json",
+    "qdrant_collection": "cuad_train_hashing",
+    "risk_context_top_k": 5,
+    "risk_model": "qwen3:8b",
+    "risk_self_consistency_passes": 3,
+    "top_k": 12,
+    "use_context": true,
+    "use_legal_guidance": true,
+    "use_playbook": true
+  },
+  "summary": {
+    "pipeline_status": "COMPLETED",
+    "clause_count": 2,
+    "classified_labels": [
+      {
+        "clause_index": 0,
+        "label": "NO_APPLICABLE_LABEL",
+        "classification_status": "NO_APPLICABLE_LABEL"
+      },
+      {
+        "clause_index": 1,
+        "label": "NO_APPLICABLE_LABEL",
+        "classification_status": "NO_APPLICABLE_LABEL"
+      }
+    ],
+    "clause_risk_finding_count": 0,
+    "clause_positive_count": 0,
+    "target_clause_evidence_valid_count": 0,
+    "related_clause_evidence_valid_count": 0,
+    "invalid_or_unmapped_positive_evidence_count": 0,
+    "cross_clause_statuses": {
+      "INSUFFICIENT_EVIDENCE": 10
+    },
+    "document_statuses": {
+      "INSUFFICIENT_EVIDENCE": 3
+    },
+    "cross_or_document_positive_evidence_valid_count": 0,
+    "cross_or_document_positive_evidence_invalid_count": 0,
+    "overall_status": "INSUFFICIENT_EVIDENCE",
+    "overall_risk": null,
+    "deterministic_candidate_signal_ids": [],
+    "legal_guidance_search_calls": 0,
+    "legal_guidance_matches_total": 0
+  },
+  "positive_clause_findings": [],
+  "valid_related_clause_evidence": [],
+  "positive_cross_document_findings": [],
+  "checks": {
+    "http_200": true,
+    "run_completed": true,
+    "source_hash_matches_manifest": true,
+    "all_clause_positive_findings_have_valid_evidence": true,
+    "all_cross_document_positive_findings_have_valid_evidence": true,
+    "run_has_core_artifacts": true
+  },
+  "failed_checks": [],
+  "core_artifact_sha256": {
+    "manifest.json": "8cf626fe859528ee55742c08e50300e5ec004bf9763dff105eda30b389bbfa35",
+    "contract_checks.json": "8a0659ff5f9fe84cad0fcf648dd8ab722f54de13766ec9baa7049836ffdd5331",
+    "contract_risk.json": "60659fd20d2cc8c66b815bce683ab6a3816d4e416eb281ee1d3f3358884c1491",
+    "result.json": "987392ac13764d10b81628b6b423c7ae04dae568195dcca5af517e4498923160",
+    "risk_findings.csv": "993b10a9f2f9c7e7c67f9d28bfb8f5e1525d176bb725e88dc0a6acb97c9deeb5",
+    "clauses.csv": "98febb6d24e868b63bc3afd5732b2a434e50f7f255fb5f4d500073af6a1579d8",
+    "trace.jsonl": "85db6d32206956ee637dfa5c6d37c270de59d3e3ad62635e75e5811b074bf72f"
+  }
+}

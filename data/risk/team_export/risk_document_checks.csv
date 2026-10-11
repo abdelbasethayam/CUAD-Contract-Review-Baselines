@@ -1,0 +1,4 @@
+﻿id,risk_domain,risk_subdomain,risk_type,question,flag_if,dependencies,jurisdiction_scope,sources
+DOC-1,Commercial Risk,,,"Are terms incorporated by URL, schedule, or order form missing from the review package?","Yes — label UNREAD, not absent",,,"[""P4"",""P6""]"
+DOC-2,Dispute Resolution Risk,,,Do definitions or order-of-precedence clauses narrow or reverse a protective substantive clause?,Yes,,,"[""P4"",""P5""]"
+DOC-3,Dispute Resolution Risk,,,"Are governing law, forum, and dispute mechanism missing or inconsistent?",Yes,,,"[""P5"",""P6""]"

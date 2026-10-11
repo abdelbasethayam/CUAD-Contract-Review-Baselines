@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from collections import Counter, defaultdict
 
@@ -14,21 +15,47 @@ from .risk_scoring import score_finding
 
 
 def _candidate_clauses(clauses: list[dict], pair: list[str]) -> list[dict]:
-    names = {str(x).strip().lower() for x in pair}
+    """Return explicit label matches plus text matches for any missing pair member.
+
+    Cross-clause checks often span clauses whose CUAD category names do not
+    exactly match playbook terminology (e.g., Cap On Liability vs Limitation of
+    Liability, or a termination clause that also states minimum-commitment fees).
+    Returning only the first exact-label match can hide the second half of the
+    relationship, so search by text for missing pair concepts as well.
+    """
+    pair_names = [str(value).strip() for value in pair if str(value).strip()]
+    names = {value.lower() for value in pair_names}
     selected = [
         item for item in clauses
         if str(item.get("predicted_label") or "").strip().lower() in names
     ]
-    if selected:
-        return selected
-    # Fall back to risk-relevant text when the classifier label is not a close
-    # CUAD category match.
-    tokens = [re.findall(r"[a-z0-9]+", str(x).lower()) for x in pair]
-    terms = {term for group in tokens for term in group if len(term) > 4}
-    return [
-        item for item in clauses
-        if any(term in str(item.get("clause_text") or "").lower() for term in terms)
-    ][:20]
+    selected_labels = {
+        str(item.get("predicted_label") or "").strip().lower()
+        for item in selected
+    }
+    if selected_labels >= names:
+        return selected[:20]
+
+    missing_names = [value for value in pair_names if value.lower() not in selected_labels]
+    terms_by_name = []
+    for value in missing_names:
+        terms = {term for term in re.findall(r"[a-z0-9]+", value.lower()) if len(term) > 4}
+        # Add conservative word stems for common inflections (e.g. renewal/renews,
+        # indemnification/indemnifies) so a missing pair concept can be retrieved
+        # even when the contract uses a grammatical variant.
+        terms.update(term[:-2] for term in tuple(terms) if len(term) >= 7)
+        terms_by_name.append(terms)
+    fallback = []
+    selected_ids = {item.get("clause_index") for item in selected}
+    for item in clauses:
+        if item.get("clause_index") in selected_ids:
+            continue
+        text = str(item.get("clause_text") or "").lower()
+        if any(terms and any(term in text for term in terms) for terms in terms_by_name):
+            fallback.append(item)
+
+    # Preserve explicit label matches first, then supplement with lexical hits.
+    return (selected + fallback)[:20]
 
 
 def _prompt(clauses: list[dict], cross_checks: list[dict], doc_checks: list[dict], deterministic_signals: list[dict] | None = None) -> str:
@@ -161,29 +188,48 @@ def analyze_contract_checks(
 
     calibration = load_calibration()
     contract_lookup = {int(x["clause_index"]): x for x in clauses if x.get("clause_index") is not None}
-    prompts = _prompt(clauses, cross_checks, doc_checks, deterministic_signals)
     n_passes = max(1, int(passes or RISK_SELF_CONSISTENCY_PASSES))
-    cross_outputs: list[list[dict]] = []
-    doc_outputs: list[list[dict]] = []
 
-    for _ in range(n_passes):
-        try:
-            parsed_cross, parsed_doc = _parse(
-                call_ollama(
-                    prompts,
-                    model=RISK_MODEL,
-                    temperature=RISK_TEMPERATURE,
-                    num_ctx=RISK_NUM_CTX,
-                    max_tokens=RISK_MAX_TOKENS,
-                    think=False,
-                ),
-                {str(x.get("id")) for x in cross_checks},
-                {str(x.get("id")) for x in doc_checks},
-            )
-        except Exception:
-            parsed_cross, parsed_doc = [], []
-        cross_outputs.append(parsed_cross)
-        doc_outputs.append(parsed_doc)
+    # A single response for all 13 checks was frequently truncated at the
+    # configured output-token limit. Chunking constrains each response while
+    # retaining the exact same clause evidence and deterministic final collapse.
+    check_batch_size = 4
+    cross_outputs: list[list[dict]] = [[] for _ in range(n_passes)]
+    doc_outputs: list[list[dict]] = [[] for _ in range(n_passes)]
+    combined_checks = [("cross_clause", check) for check in cross_checks] + [
+        ("document", check) for check in doc_checks
+    ]
+    batches = [
+        combined_checks[start:start + check_batch_size]
+        for start in range(0, len(combined_checks), check_batch_size)
+    ]
+
+    for pass_index in range(n_passes):
+        for batch_index, batch in enumerate(batches, start=1):
+            batch_cross = [check for kind, check in batch if kind == "cross_clause"]
+            batch_doc = [check for kind, check in batch if kind == "document"]
+            prompt = _prompt(clauses, batch_cross, batch_doc, deterministic_signals)
+            try:
+                parsed_cross, parsed_doc = _parse(
+                    call_ollama(
+                        prompt,
+                        model=RISK_MODEL,
+                        temperature=RISK_TEMPERATURE,
+                        num_ctx=RISK_NUM_CTX,
+                        max_tokens=RISK_MAX_TOKENS,
+                        think=False,
+                    ),
+                    {str(x.get("id")) for x in batch_cross},
+                    {str(x.get("id")) for x in batch_doc},
+                )
+            except Exception:
+                logging.getLogger(__name__).exception(
+                    "Cross/document model batch failed (pass=%d batch=%d/%d)",
+                    pass_index + 1, batch_index, len(batches),
+                )
+                parsed_cross, parsed_doc = [], []
+            cross_outputs[pass_index].extend(parsed_cross)
+            doc_outputs[pass_index].extend(parsed_doc)
 
     def collapse(outputs: list[list[dict]], source_items: list[dict], kind: str) -> list[dict]:
         by_id = defaultdict(list)
@@ -242,12 +288,15 @@ def analyze_contract_checks(
             results.append({
                 "scope": kind,
                 "check_id": check_id,
+                "risk_domain": check.get("risk_domain"),
+                "risk_subdomain": check.get("risk_subdomain"),
                 "question": check.get("question", ""),
                 "answer": answer,
                 "risk_status": status,
                 "risk": status == "POTENTIAL_RISK",
                 "risk_type": rep.get("risk_type") if status == "POTENTIAL_RISK" else None,
                 "risk_level": (calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else (score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None)),
+                "severity": score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None,
                 "raw_support_score": raw_support,
                 "severity_score": severity_score,
                 "severity_signal": severity_signal,
@@ -276,6 +325,8 @@ def analyze_contract_checks(
                     "model": RISK_MODEL,
                     "passes": len(records),
                     "agreement": agreement,
+                    "check_batch_size": check_batch_size,
+                    "model_batches_per_pass": len(batches),
                 },
                 "supporting_sources": supporting_sources,
                 "source_tier": primary_source.get("source_tier"),
@@ -298,12 +349,15 @@ def analyze_contract_checks(
             results.append({
                 "scope": kind,
                 "check_id": str(check.get("id")),
+                "risk_domain": check.get("risk_domain"),
+                "risk_subdomain": check.get("risk_subdomain"),
                 "question": check.get("question", ""),
                 "answer": "DON'T KNOW",
                 "risk_status": "INSUFFICIENT_EVIDENCE",
                 "risk": False,
                 "risk_type": None,
                 "risk_level": None,
+                "severity": None,
                 "raw_support_score": 0.0,
                 "severity_signal": None,
                 "confidence": None,
@@ -320,6 +374,8 @@ def analyze_contract_checks(
                     "model": RISK_MODEL,
                     "passes": n_passes,
                     "agreement": 0.0,
+                    "check_batch_size": check_batch_size,
+                    "model_batches_per_pass": len(batches),
                 },
                 "supporting_sources": source_records(playbook, check.get("sources", [])),
                 "severity_factors": {},

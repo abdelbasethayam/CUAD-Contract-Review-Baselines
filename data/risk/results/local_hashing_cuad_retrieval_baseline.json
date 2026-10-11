@@ -1,0 +1,344 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-10-09T21:06:50.464438+00:00",
+  "status": "PASS",
+  "experiment_name": "local_hashing_cuad_nearest_neighbor_retrieval",
+  "scope": "Held-out CUAD clause-category retrieval/classification baseline; not custom-risk accuracy, legal correctness or severity evaluation.",
+  "configuration": {
+    "embedding": "sklearn HashingVectorizer",
+    "dimension": 768,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "alternate_sign": false,
+    "normalization": "l2",
+    "similarity": "sparse dot product of L2-normalized vectors (cosine similarity)",
+    "top_k": 5,
+    "tie_breaking": "stable corpus-row order",
+    "bootstrap_replicates": 1000,
+    "bootstrap_unit": "test contract (cluster bootstrap)",
+    "bootstrap_seed": 42
+  },
+  "inputs": {
+    "train_csv": "data/splits/train/master_clauses_train.csv",
+    "train_csv_sha256": "baf7bef34bff8f8d7e3c1bb75b031b42730f7cd1234d1a89d52d794e5f3e855f",
+    "test_csv": "data/splits/test/master_clauses_test.csv",
+    "test_csv_sha256": "14ede6e03f6255760f705837b9fb62709b03875985e52a75ee7b5fbc385a9002"
+  },
+  "isolation": {
+    "train_contract_count": 383,
+    "test_contract_count": 92,
+    "train_eligible_rows": 7004,
+    "test_eligible_rows": 1679,
+    "train_test_contract_overlap": 0,
+    "passed": true
+  },
+  "metrics": {
+    "nearest_neighbor_accuracy": 0.4705,
+    "nearest_neighbor_macro_f1": 0.3391,
+    "recall_at_1": 0.4705,
+    "recall_at_5": 0.6945,
+    "mrr_at_5": 0.5605,
+    "nearest_neighbor_accuracy_contract_bootstrap_95_ci": {
+      "lower_95": 0.4402,
+      "upper_95": 0.5048
+    },
+    "nearest_neighbor_macro_f1_contract_bootstrap_95_ci": {
+      "lower_95": 0.2954,
+      "upper_95": 0.3703
+    }
+  },
+  "label_metrics": [
+    {
+      "label": "Affiliate License-Licensee",
+      "support": 16,
+      "nearest_neighbor_correct": 1,
+      "nearest_neighbor_accuracy": 0.0625,
+      "recall_at_5_hits": 3,
+      "recall_at_5": 0.1875
+    },
+    {
+      "label": "Affiliate License-Licensor",
+      "support": 8,
+      "nearest_neighbor_correct": 0,
+      "nearest_neighbor_accuracy": 0.0,
+      "recall_at_5_hits": 1,
+      "recall_at_5": 0.125
+    },
+    {
+      "label": "Anti-Assignment",
+      "support": 114,
+      "nearest_neighbor_correct": 101,
+      "nearest_neighbor_accuracy": 0.886,
+      "recall_at_5_hits": 109,
+      "recall_at_5": 0.9561
+    },
+    {
+      "label": "Audit Rights",
+      "support": 128,
+      "nearest_neighbor_correct": 72,
+      "nearest_neighbor_accuracy": 0.5625,
+      "recall_at_5_hits": 92,
+      "recall_at_5": 0.7188
+    },
+    {
+      "label": "Cap On Liability",
+      "support": 110,
+      "nearest_neighbor_correct": 60,
+      "nearest_neighbor_accuracy": 0.5455,
+      "recall_at_5_hits": 100,
+      "recall_at_5": 0.9091
+    },
+    {
+      "label": "Change Of Control",
+      "support": 43,
+      "nearest_neighbor_correct": 17,
+      "nearest_neighbor_accuracy": 0.3953,
+      "recall_at_5_hits": 28,
+      "recall_at_5": 0.6512
+    },
+    {
+      "label": "Competitive Restriction Exception",
+      "support": 22,
+      "nearest_neighbor_correct": 2,
+      "nearest_neighbor_accuracy": 0.0909,
+      "recall_at_5_hits": 5,
+      "recall_at_5": 0.2273
+    },
+    {
+      "label": "Covenant Not To Sue",
+      "support": 28,
+      "nearest_neighbor_correct": 17,
+      "nearest_neighbor_accuracy": 0.6071,
+      "recall_at_5_hits": 23,
+      "recall_at_5": 0.8214
+    },
+    {
+      "label": "Exclusivity",
+      "support": 74,
+      "nearest_neighbor_correct": 23,
+      "nearest_neighbor_accuracy": 0.3108,
+      "recall_at_5_hits": 37,
+      "recall_at_5": 0.5
+    },
+    {
+      "label": "Governing Law",
+      "support": 88,
+      "nearest_neighbor_correct": 88,
+      "nearest_neighbor_accuracy": 1.0,
+      "recall_at_5_hits": 88,
+      "recall_at_5": 1.0
+    },
+    {
+      "label": "Insurance",
+      "support": 118,
+      "nearest_neighbor_correct": 89,
+      "nearest_neighbor_accuracy": 0.7542,
+      "recall_at_5_hits": 101,
+      "recall_at_5": 0.8559
+    },
+    {
+      "label": "Ip Ownership Assignment",
+      "support": 49,
+      "nearest_neighbor_correct": 21,
+      "nearest_neighbor_accuracy": 0.4286,
+      "recall_at_5_hits": 31,
+      "recall_at_5": 0.6327
+    },
+    {
+      "label": "Irrevocable Or Perpetual License",
+      "support": 34,
+      "nearest_neighbor_correct": 2,
+      "nearest_neighbor_accuracy": 0.0588,
+      "recall_at_5_hits": 16,
+      "recall_at_5": 0.4706
+    },
+    {
+      "label": "Joint Ip Ownership",
+      "support": 17,
+      "nearest_neighbor_correct": 5,
+      "nearest_neighbor_accuracy": 0.2941,
+      "recall_at_5_hits": 10,
+      "recall_at_5": 0.5882
+    },
+    {
+      "label": "License Grant",
+      "support": 150,
+      "nearest_neighbor_correct": 76,
+      "nearest_neighbor_accuracy": 0.5067,
+      "recall_at_5_hits": 122,
+      "recall_at_5": 0.8133
+    },
+    {
+      "label": "Liquidated Damages",
+      "support": 8,
+      "nearest_neighbor_correct": 1,
+      "nearest_neighbor_accuracy": 0.125,
+      "recall_at_5_hits": 4,
+      "recall_at_5": 0.5
+    },
+    {
+      "label": "Minimum Commitment",
+      "support": 62,
+      "nearest_neighbor_correct": 15,
+      "nearest_neighbor_accuracy": 0.2419,
+      "recall_at_5_hits": 32,
+      "recall_at_5": 0.5161
+    },
+    {
+      "label": "Most Favored Nation",
+      "support": 7,
+      "nearest_neighbor_correct": 0,
+      "nearest_neighbor_accuracy": 0.0,
+      "recall_at_5_hits": 1,
+      "recall_at_5": 0.1429
+    },
+    {
+      "label": "No-Solicit Of Customers",
+      "support": 7,
+      "nearest_neighbor_correct": 1,
+      "nearest_neighbor_accuracy": 0.1429,
+      "recall_at_5_hits": 1,
+      "recall_at_5": 0.1429
+    },
+    {
+      "label": "No-Solicit Of Employees",
+      "support": 10,
+      "nearest_neighbor_correct": 6,
+      "nearest_neighbor_accuracy": 0.6,
+      "recall_at_5_hits": 9,
+      "recall_at_5": 0.9
+    },
+    {
+      "label": "Non-Compete",
+      "support": 37,
+      "nearest_neighbor_correct": 12,
+      "nearest_neighbor_accuracy": 0.3243,
+      "recall_at_5_hits": 20,
+      "recall_at_5": 0.5405
+    },
+    {
+      "label": "Non-Disparagement",
+      "support": 11,
+      "nearest_neighbor_correct": 6,
+      "nearest_neighbor_accuracy": 0.5455,
+      "recall_at_5_hits": 8,
+      "recall_at_5": 0.7273
+    },
+    {
+      "label": "Non-Transferable License",
+      "support": 59,
+      "nearest_neighbor_correct": 1,
+      "nearest_neighbor_accuracy": 0.0169,
+      "recall_at_5_hits": 41,
+      "recall_at_5": 0.6949
+    },
+    {
+      "label": "Notice Period To Terminate Renewal",
+      "support": 31,
+      "nearest_neighbor_correct": 0,
+      "nearest_neighbor_accuracy": 0.0,
+      "recall_at_5_hits": 31,
+      "recall_at_5": 1.0
+    },
+    {
+      "label": "Post-Termination Services",
+      "support": 82,
+      "nearest_neighbor_correct": 35,
+      "nearest_neighbor_accuracy": 0.4268,
+      "recall_at_5_hits": 61,
+      "recall_at_5": 0.7439
+    },
+    {
+      "label": "Price Restrictions",
+      "support": 1,
+      "nearest_neighbor_correct": 0,
+      "nearest_neighbor_accuracy": 0.0,
+      "recall_at_5_hits": 0,
+      "recall_at_5": 0.0
+    },
+    {
+      "label": "Renewal Term",
+      "support": 44,
+      "nearest_neighbor_correct": 38,
+      "nearest_neighbor_accuracy": 0.8636,
+      "recall_at_5_hits": 41,
+      "recall_at_5": 0.9318
+    },
+    {
+      "label": "Revenue/Profit Sharing",
+      "support": 91,
+      "nearest_neighbor_correct": 23,
+      "nearest_neighbor_accuracy": 0.2527,
+      "recall_at_5_hits": 35,
+      "recall_at_5": 0.3846
+    },
+    {
+      "label": "Rofr/Rofo/Rofn",
+      "support": 67,
+      "nearest_neighbor_correct": 14,
+      "nearest_neighbor_accuracy": 0.209,
+      "recall_at_5_hits": 27,
+      "recall_at_5": 0.403
+    },
+    {
+      "label": "Source Code Escrow",
+      "support": 16,
+      "nearest_neighbor_correct": 12,
+      "nearest_neighbor_accuracy": 0.75,
+      "recall_at_5_hits": 12,
+      "recall_at_5": 0.75
+    },
+    {
+      "label": "Termination For Convenience",
+      "support": 37,
+      "nearest_neighbor_correct": 20,
+      "nearest_neighbor_accuracy": 0.5405,
+      "recall_at_5_hits": 28,
+      "recall_at_5": 0.7568
+    },
+    {
+      "label": "Third Party Beneficiary",
+      "support": 8,
+      "nearest_neighbor_correct": 7,
+      "nearest_neighbor_accuracy": 0.875,
+      "recall_at_5_hits": 7,
+      "recall_at_5": 0.875
+    },
+    {
+      "label": "Uncapped Liability",
+      "support": 28,
+      "nearest_neighbor_correct": 14,
+      "nearest_neighbor_accuracy": 0.5,
+      "recall_at_5_hits": 26,
+      "recall_at_5": 0.9286
+    },
+    {
+      "label": "Unlimited/All-You-Can-Eat-License",
+      "support": 9,
+      "nearest_neighbor_correct": 0,
+      "nearest_neighbor_accuracy": 0.0,
+      "recall_at_5_hits": 1,
+      "recall_at_5": 0.1111
+    },
+    {
+      "label": "Volume Restriction",
+      "support": 44,
+      "nearest_neighbor_correct": 4,
+      "nearest_neighbor_accuracy": 0.0909,
+      "recall_at_5_hits": 6,
+      "recall_at_5": 0.1364
+    },
+    {
+      "label": "Warranty Duration",
+      "support": 21,
+      "nearest_neighbor_correct": 7,
+      "nearest_neighbor_accuracy": 0.3333,
+      "recall_at_5_hits": 9,
+      "recall_at_5": 0.4286
+    }
+  ],
+  "runtime_seconds": 7.896,
+  "interpretation": "Nearest-neighbor labels and top-5 hit metrics measure the local lexical-vector baseline only. They are not numerically equivalent to the prior Cohere/retrieval-conditioned SLM configuration. The held-out true category labels are used only for evaluation and were not inserted into the index."
+}

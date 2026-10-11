@@ -1,0 +1,1578 @@
+{
+  "report_version": "phase2-reproducible-report-v1",
+  "generated_at_utc": "2026-10-09T21:06:50.890644+00:00",
+  "git_head_at_report_time": "8c373301b194081ec03d6a2198724b8edb90112e",
+  "interpretation_warning": "This report describes pipeline integrity, machine-silver behavior and operational evidence. It does not calculate custom-risk accuracy because no human gold annotations exist.",
+  "reproduction_inputs": {
+    "silver_csv": "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.csv",
+    "silver_jsonl": "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.jsonl",
+    "gold_template": "data/risk/gold/gold_annotations.csv",
+    "playbook": "data/risk/commercial_clause_risk_playbook.json",
+    "taxonomy": "backend/data/legal_knowledge/risk_taxonomy.json",
+    "integrity_report": "data/risk/EVALUATION_INTEGRITY_REPORT.json",
+    "external_cuad_manifest": "data/risk/external/cuad_expert_test.manifest.json",
+    "local_hashing_cuad_index_manifest": "data/risk/results/local_hashing_cuad_index_manifest.json",
+    "local_hashing_profile_manifest": "data/risk/results/local_hashing_index_manifest.json",
+    "legal_knowledge_retrieval_validation": "data/risk/results/legal_knowledge_retrieval_validation.json",
+    "local_hashing_cuad_retrieval_baseline": "data/risk/results/local_hashing_cuad_retrieval_baseline.json",
+    "cross_document_scenario_matrix": "data/risk/evaluation/cross_document_v1/scenario_matrix.jsonl",
+    "cross_document_scenario_audit": "data/risk/results/cross_document_scenario_audit.json",
+    "cross_document_model_scenarios_jsonl": "data/risk/results/cross_document_model_scenarios.jsonl",
+    "cross_document_model_scenarios_csv": "data/risk/results/cross_document_model_scenarios.csv",
+    "cross_document_model_scenarios_summary": "data/risk/results/cross_document_model_scenarios_summary.json",
+    "upload_smoke_runs": {
+      "txt_three_pass": {
+        "result": "data/risk/results/smoke_upload_api_result.json",
+        "audit": "data/risk/results/smoke_test_audit.json"
+      },
+      "pdf_three_pass": {
+        "result": "data/risk/results/smoke_upload_api_pdf_result.json",
+        "audit": "data/risk/results/smoke_test_audit_pdf.json"
+      },
+      "txt_single_pass": {
+        "result": "data/risk/results/smoke_upload_api_fast_result.json",
+        "audit": "data/risk/results/smoke_test_audit_fast.json"
+      },
+      "txt_current_20261009": {
+        "result": "data/risk/results/smoke_upload_api_current_20261009.json",
+        "audit": "data/risk/results/smoke_test_audit_current.json"
+      },
+      "txt_post_batching_20261009": {
+        "result": "data/risk/results/smoke_upload_api_post_batching_20261009.json",
+        "audit": "data/risk/results/smoke_test_audit_post_batching.json"
+      }
+    }
+  },
+  "hashes": {
+    "silver_csv_sha256": "12c618b4617225b9462616edaa553af23c7ac6b2a2e9527e6c0840e9b7d9230f",
+    "silver_jsonl_sha256": "e81c096b0f6517b6d1f72cee08208e7f4269bb1285bf48f1853efbfd440d62ca",
+    "gold_template_sha256": "5f27fd615cdf4ae8995bcb0fc541bd18bd6e893d7a9b05a7c3f5fe99f13fa976",
+    "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+    "taxonomy_sha256": "ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218",
+    "integrity_report_sha256": "f21076f7ef121103bcb3451f5eb7ce222b120d6fcd08b79762d31e611a35c02a",
+    "external_cuad_manifest_sha256": "bc8b073f0cf9c224bd1a3ba33a56a6f104e0395581b069063420e23ea7a00ca5",
+    "local_hashing_cuad_index_manifest_sha256": "c299acabf364e3e1d8bec192e7032d645b01865daa5d01ed5d47894393cae29e",
+    "local_hashing_profile_manifest_sha256": "ab5f81305f77e638b656a294becd675e66a32c0d98db26aa6a6e7e3094c688f9",
+    "legal_knowledge_retrieval_validation_sha256": "3e14f8f94bf1a60d1b57cf8c0a6aeffeab4a2e90052338605a474ea07fdc0cf0",
+    "local_hashing_cuad_retrieval_baseline_sha256": "d17cea8099573c76d0159d0d80ee9341907eed1ada4d9a48a44772acf12f5160",
+    "cross_document_scenario_matrix_sha256": "3f97fabbe7882d943d51fadfcaf76b5e3c3ad84d48f687437d14e112f213acbc",
+    "cross_document_scenario_audit_sha256": "54a6cabfe46b3d6806e21f419a5f19766a35c48ca7ed9eebadc067bd8004b86a",
+    "cross_document_model_scenarios_jsonl_sha256": "32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c",
+    "cross_document_model_scenarios_csv_sha256": "963e784aefd56295154ebbf9a58d8a1b0d3e154c65dbd74e99449f52fae00dfe",
+    "cross_document_model_scenarios_summary_sha256": "ee810f0bfba2074ad4a28d45144e1f8205933bee469dde02001ce31b44c5b8d2",
+    "cross_document_model_scenario_comparison_json_sha256": "3ca3fcdfa27d55a5a9e7aae6f431c857b7966e617e535e69136a4f634560ded6",
+    "cross_document_model_scenario_comparison_md_sha256": "97ea3502d57d2348b218111f8e1a637ed6310052f6dfb44ab704140615292144",
+    "cross_document_analyzer_code_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+    "cross_document_runner_code_sha256": "9a1dd5014179cdadf882a81d50d802cb1835c723bcfe1274fc3f51138a93993f",
+    "upload_smoke_run_hashes": {
+      "txt_three_pass": {
+        "result_sha256": "bfbe62136d6b030bf0e07360d508708658e5d13ec8bf5fd9b40ee852d788bd53",
+        "audit_sha256": "c0dce11ff848c84eba6f30644ef8013d98b736d1e90032125e62964603cbf51c"
+      },
+      "pdf_three_pass": {
+        "result_sha256": "04c7c8260550c38d8f8c172f6a236c94e64f839295fdd90cb0894fc28cab1294",
+        "audit_sha256": "781229f96f17687bec0140d2fcb7c49640e7efe14d7919a66294ac4f6e916134"
+      },
+      "txt_single_pass": {
+        "result_sha256": "4472e6e4d897b288d4eaffda6fc05c5727f492e7f01a36d48dd2838f01de0dea",
+        "audit_sha256": "0923351ae03da2f37d86ad280af610c1c6ca5c60ddb42cfdebcb22246ba55d4e"
+      },
+      "txt_current_20261009": {
+        "result_sha256": "4f505a3590be9a206d9376d73269b6f8fc78495ca5c3476d7fdeb269ad7b13cf",
+        "audit_sha256": "3e835422af859ca5a231e3b17adc37c86079448eaf06207d0c7dcf74c6da7e73"
+      },
+      "txt_post_batching_20261009": {
+        "result_sha256": "d6b0733e2568a120448280c13f1fdce4b19bdf59162cb94f7d0e84d5cc76b832",
+        "audit_sha256": "b97ede5b69ed06e45efea9fd1a3ca4ad25e440bda7f12fc6a769d138f3a732cd"
+      }
+    }
+  },
+  "upload_smoke_tests": {
+    "interpretation": "Pipeline integration diagnostics only; synthetic/repository fixtures do not measure risk accuracy or legal correctness.",
+    "runs": {
+      "txt_three_pass": {
+        "result_path": "data/risk/results/smoke_upload_api_result.json",
+        "audit_path": "data/risk/results/smoke_test_audit.json",
+        "result_sha256": "bfbe62136d6b030bf0e07360d508708658e5d13ec8bf5fd9b40ee852d788bd53",
+        "audit_sha256": "c0dce11ff848c84eba6f30644ef8013d98b736d1e90032125e62964603cbf51c",
+        "http_status": 200,
+        "elapsed_seconds": 423.0,
+        "analysis_id": null,
+        "pipeline_status": "COMPLETED",
+        "clause_count": 4,
+        "risk_self_consistency_passes": 3,
+        "clause_risk_finding_count": 13,
+        "cross_clause_finding_count": null,
+        "document_finding_count": null,
+        "overall_status": "POTENTIAL_RISK",
+        "overall_risk": "MEDIUM",
+        "audit_status": null,
+        "audit_passed": true,
+        "not_an_accuracy_measurement": true
+      },
+      "pdf_three_pass": {
+        "result_path": "data/risk/results/smoke_upload_api_pdf_result.json",
+        "audit_path": "data/risk/results/smoke_test_audit_pdf.json",
+        "result_sha256": "04c7c8260550c38d8f8c172f6a236c94e64f839295fdd90cb0894fc28cab1294",
+        "audit_sha256": "781229f96f17687bec0140d2fcb7c49640e7efe14d7919a66294ac4f6e916134",
+        "http_status": 200,
+        "elapsed_seconds": 82.978,
+        "analysis_id": null,
+        "pipeline_status": "COMPLETED",
+        "clause_count": 2,
+        "risk_self_consistency_passes": 3,
+        "clause_risk_finding_count": 0,
+        "cross_clause_finding_count": null,
+        "document_finding_count": null,
+        "overall_status": "INSUFFICIENT_EVIDENCE",
+        "overall_risk": null,
+        "audit_status": null,
+        "audit_passed": true,
+        "not_an_accuracy_measurement": true
+      },
+      "txt_single_pass": {
+        "result_path": "data/risk/results/smoke_upload_api_fast_result.json",
+        "audit_path": "data/risk/results/smoke_test_audit_fast.json",
+        "result_sha256": "4472e6e4d897b288d4eaffda6fc05c5727f492e7f01a36d48dd2838f01de0dea",
+        "audit_sha256": "0923351ae03da2f37d86ad280af610c1c6ca5c60ddb42cfdebcb22246ba55d4e",
+        "http_status": 200,
+        "elapsed_seconds": 171.126,
+        "analysis_id": null,
+        "pipeline_status": "COMPLETED",
+        "clause_count": 4,
+        "risk_self_consistency_passes": 1,
+        "clause_risk_finding_count": 13,
+        "cross_clause_finding_count": null,
+        "document_finding_count": null,
+        "overall_status": "POTENTIAL_RISK",
+        "overall_risk": "MEDIUM",
+        "audit_status": null,
+        "audit_passed": true,
+        "not_an_accuracy_measurement": true
+      },
+      "txt_current_20261009": {
+        "result_path": "data/risk/results/smoke_upload_api_current_20261009.json",
+        "audit_path": "data/risk/results/smoke_test_audit_current.json",
+        "result_sha256": "4f505a3590be9a206d9376d73269b6f8fc78495ca5c3476d7fdeb269ad7b13cf",
+        "audit_sha256": "3e835422af859ca5a231e3b17adc37c86079448eaf06207d0c7dcf74c6da7e73",
+        "http_status": 200,
+        "elapsed_seconds": 367.0,
+        "analysis_id": null,
+        "pipeline_status": "COMPLETED",
+        "clause_count": 11,
+        "risk_self_consistency_passes": 1,
+        "clause_risk_finding_count": 28,
+        "cross_clause_finding_count": null,
+        "document_finding_count": null,
+        "overall_status": "POTENTIAL_RISK",
+        "overall_risk": "HIGH",
+        "audit_status": null,
+        "audit_passed": true,
+        "not_an_accuracy_measurement": true
+      },
+      "txt_post_batching_20261009": {
+        "result_path": "data/risk/results/smoke_upload_api_post_batching_20261009.json",
+        "audit_path": "data/risk/results/smoke_test_audit_post_batching.json",
+        "result_sha256": "d6b0733e2568a120448280c13f1fdce4b19bdf59162cb94f7d0e84d5cc76b832",
+        "audit_sha256": "b97ede5b69ed06e45efea9fd1a3ca4ad25e440bda7f12fc6a769d138f3a732cd",
+        "http_status": 200,
+        "elapsed_seconds": 577.177,
+        "analysis_id": null,
+        "pipeline_status": "COMPLETED",
+        "clause_count": 11,
+        "risk_self_consistency_passes": 1,
+        "clause_risk_finding_count": 28,
+        "cross_clause_finding_count": null,
+        "document_finding_count": null,
+        "overall_status": "POTENTIAL_RISK",
+        "overall_risk": "HIGH",
+        "audit_status": null,
+        "audit_passed": true,
+        "not_an_accuracy_measurement": true
+      }
+    }
+  },
+  "cross_document_synthetic_evaluation": {
+    "interpretation": "Authored synthetic scenario matrix for regression/coverage; not human gold and not a measure of risk accuracy or generalization.",
+    "audit": {
+      "schema_version": 1,
+      "generated_at_utc": "2026-10-09T21:06:38.322969+00:00",
+      "status": "PASS",
+      "checks": {
+        "all_13_cross_document_checks_covered": true,
+        "all_expected_39_scenarios_present": true,
+        "three_scenario_types_have_13_cases_each": true,
+        "all_scenarios_have_canonical_domains": true,
+        "all_expected_evidence_anchors_exist": true,
+        "all_fixture_hashes_match": true,
+        "all_fixture_files_exist": true,
+        "synthetic_non_gold_label_is_explicit": true,
+        "playbook_hash_matches_manifest": true,
+        "manifest_case_count_matches": true
+      },
+      "case_count": 39,
+      "check_ids_covered": [
+        "DOC-1",
+        "DOC-2",
+        "DOC-3",
+        "X-1",
+        "X-10",
+        "X-2",
+        "X-3",
+        "X-4",
+        "X-5",
+        "X-6",
+        "X-7",
+        "X-8",
+        "X-9"
+      ],
+      "scenario_type_counts": {
+        "positive": 13,
+        "control": 13,
+        "incomplete": 13
+      },
+      "expected_status_counts": {
+        "POTENTIAL_RISK": 14,
+        "NO_RISK": 13,
+        "INSUFFICIENT_EVIDENCE": 12
+      },
+      "fixture_hashes": {
+        "positive": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+        "control": "949613a7f418b0375b32b96da8dbcf6286a3dc02d0181285da79c4c693c08b27",
+        "incomplete": "d2f0004623deed734e15a5b834ddf821259ac31f3943d956c89a42e73f1d7eaa"
+      },
+      "missing_anchors": [],
+      "fixture_hash_mismatches": [],
+      "missing_fixtures": [],
+      "interpretation": "This is a synthetic fixture-integrity/coverage audit. It verifies that each cross-clause/document check has positive, protected-control and incomplete-context stimuli with the recorded text anchors. It does not prove the LLM makes the expected decision, does not estimate generalization, and is not human gold.",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "taxonomy_sha256": "ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218",
+      "scenario_matrix_sha256": "3f97fabbe7882d943d51fadfcaf76b5e3c3ad84d48f687437d14e112f213acbc"
+    },
+    "matrix_path": "data/risk/evaluation/cross_document_v1/scenario_matrix.jsonl",
+    "matrix_sha256": "3f97fabbe7882d943d51fadfcaf76b5e3c3ad84d48f687437d14e112f213acbc",
+    "model_execution": {
+      "schema_version": 1,
+      "status": "COMPLETED",
+      "case_count": 39,
+      "expected_case_count": 39,
+      "model_check_batch_size": 4,
+      "model_batches_per_pass": 4,
+      "scenario_types": {
+        "positive": 13,
+        "control": 13,
+        "incomplete": 13
+      },
+      "check_ids_covered": [
+        "DOC-1",
+        "DOC-2",
+        "DOC-3",
+        "X-1",
+        "X-10",
+        "X-2",
+        "X-3",
+        "X-4",
+        "X-5",
+        "X-6",
+        "X-7",
+        "X-8",
+        "X-9"
+      ],
+      "expected_status_counts": {
+        "POTENTIAL_RISK": 14,
+        "NO_RISK": 13,
+        "INSUFFICIENT_EVIDENCE": 12
+      },
+      "observed_status_counts": {
+        "POTENTIAL_RISK": 16,
+        "NO_RISK": 10,
+        "INSUFFICIENT_EVIDENCE": 13,
+        "MISSING": 0
+      },
+      "scenario_status_conformance_count": 27,
+      "scenario_status_conformance_rate": 0.6923076923076923,
+      "scenario_status_conformance_by_type": {
+        "positive": {
+          "cases": 13,
+          "matched": 10,
+          "rate": 0.7692307692307693,
+          "observed_status_counts": {
+            "POTENTIAL_RISK": 10,
+            "NO_RISK": 3,
+            "INSUFFICIENT_EVIDENCE": 0,
+            "MISSING": 0
+          }
+        },
+        "control": {
+          "cases": 13,
+          "matched": 7,
+          "rate": 0.5384615384615384,
+          "observed_status_counts": {
+            "POTENTIAL_RISK": 2,
+            "NO_RISK": 7,
+            "INSUFFICIENT_EVIDENCE": 4,
+            "MISSING": 0
+          }
+        },
+        "incomplete": {
+          "cases": 13,
+          "matched": 10,
+          "rate": 0.7692307692307693,
+          "observed_status_counts": {
+            "POTENTIAL_RISK": 4,
+            "NO_RISK": 0,
+            "INSUFFICIENT_EVIDENCE": 9,
+            "MISSING": 0
+          }
+        }
+      },
+      "scenario_status_conformance_by_check": [
+        {
+          "check_id": "DOC-1",
+          "scope": "document",
+          "risk_domain": "Commercial Risk",
+          "cases": 3,
+          "matched": 3,
+          "rate": 1.0,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "POTENTIAL_RISK"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "POTENTIAL_RISK"
+          ]
+        },
+        {
+          "check_id": "DOC-2",
+          "scope": "document",
+          "risk_domain": "Dispute Resolution Risk",
+          "cases": 3,
+          "matched": 2,
+          "rate": 0.6666666666666666,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "INSUFFICIENT_EVIDENCE",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        {
+          "check_id": "DOC-3",
+          "scope": "document",
+          "risk_domain": "Dispute Resolution Risk",
+          "cases": 3,
+          "matched": 2,
+          "rate": 0.6666666666666666,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "POTENTIAL_RISK"
+          ]
+        },
+        {
+          "check_id": "X-1",
+          "scope": "cross_clause",
+          "risk_domain": "Liability Risk",
+          "cases": 3,
+          "matched": 2,
+          "rate": 0.6666666666666666,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "INSUFFICIENT_EVIDENCE",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        {
+          "check_id": "X-10",
+          "scope": "cross_clause",
+          "risk_domain": "Liability Risk",
+          "cases": 3,
+          "matched": 2,
+          "rate": 0.6666666666666666,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "POTENTIAL_RISK"
+          ]
+        },
+        {
+          "check_id": "X-2",
+          "scope": "cross_clause",
+          "risk_domain": "Financial Risk",
+          "cases": 3,
+          "matched": 1,
+          "rate": 0.3333333333333333,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "NO_RISK",
+            "POTENTIAL_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        {
+          "check_id": "X-3",
+          "scope": "cross_clause",
+          "risk_domain": "Termination Risk",
+          "cases": 3,
+          "matched": 1,
+          "rate": 0.3333333333333333,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        {
+          "check_id": "X-4",
+          "scope": "cross_clause",
+          "risk_domain": "Commercial Risk",
+          "cases": 3,
+          "matched": 2,
+          "rate": 0.6666666666666666,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "INSUFFICIENT_EVIDENCE",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        {
+          "check_id": "X-5",
+          "scope": "cross_clause",
+          "risk_domain": "Assignment / Control Risk",
+          "cases": 3,
+          "matched": 3,
+          "rate": 1.0,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        {
+          "check_id": "X-6",
+          "scope": "cross_clause",
+          "risk_domain": "Intellectual Property Risk",
+          "cases": 3,
+          "matched": 2,
+          "rate": 0.6666666666666666,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "NO_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        {
+          "check_id": "X-7",
+          "scope": "cross_clause",
+          "risk_domain": "Intellectual Property Risk",
+          "cases": 3,
+          "matched": 3,
+          "rate": 1.0,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        {
+          "check_id": "X-8",
+          "scope": "cross_clause",
+          "risk_domain": "Operational Risk",
+          "cases": 3,
+          "matched": 2,
+          "rate": 0.6666666666666666,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "POTENTIAL_RISK"
+          ]
+        },
+        {
+          "check_id": "X-9",
+          "scope": "cross_clause",
+          "risk_domain": "Insurance Risk",
+          "cases": 3,
+          "matched": 2,
+          "rate": 0.6666666666666666,
+          "expected_statuses": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ],
+          "observed_statuses": [
+            "POTENTIAL_RISK",
+            "POTENTIAL_RISK",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        }
+      ],
+      "metrics_warning": "Scenario-status conformance on synthetic stimuli is not accuracy, precision/recall on real contracts, or legal correctness.",
+      "evidence_exact_all": true,
+      "scenario_run_summaries": [],
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_code_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_code_sha256": "f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad",
+      "summary_generator_code_sha256": "9a1dd5014179cdadf882a81d50d802cb1835c723bcfe1274fc3f51138a93993f",
+      "scenario_suite_manifest_sha256": "ca5cfbc510c7ef7fbd65664de69ac2a788a69d89f2dbcb13c8932f1ea18593cb",
+      "jsonl_sha256": "32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c",
+      "csv_sha256": "963e784aefd56295154ebbf9a58d8a1b0d3e154c65dbd74e99449f52fae00dfe",
+      "updated_at_utc": "2026-10-09T21:06:40.522489+00:00"
+    },
+    "model_jsonl_path": "data/risk/results/cross_document_model_scenarios.jsonl",
+    "model_csv_path": "data/risk/results/cross_document_model_scenarios.csv",
+    "batching_ablation_comparison": {
+      "schema_version": 1,
+      "status": "COMPLETED",
+      "created_at_utc": "2026-10-09T21:06:40.938899+00:00",
+      "comparison_type": "ONE_SHOT_VS_BATCHED_SYNTHETIC_ENGINE_ABLATION",
+      "baseline_path": "data/risk/evaluation/cross_document_v1/archive/cross_document_model_scenarios_pre_batching_20261009.jsonl",
+      "current_path": "data/risk/results/cross_document_model_scenarios.jsonl",
+      "baseline_sha256": "722e26122c405b7e04c43dc08a09c4450b8b1b7138d5b9315e14e47196506b3d",
+      "current_sha256": "32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c",
+      "case_count": 39,
+      "same_case_set": true,
+      "one_shot": {
+        "cases": 39,
+        "matches": 11,
+        "rate": 0.28205128205128205,
+        "status_counts": {
+          "INSUFFICIENT_EVIDENCE": 36,
+          "POTENTIAL_RISK": 3
+        },
+        "by_type": {
+          "positive": {
+            "cases": 13,
+            "matches": 0,
+            "rate": 0.0
+          },
+          "control": {
+            "cases": 13,
+            "matches": 0,
+            "rate": 0.0
+          },
+          "incomplete": {
+            "cases": 13,
+            "matches": 11,
+            "rate": 0.8461538461538461
+          }
+        }
+      },
+      "batched": {
+        "cases": 39,
+        "matches": 27,
+        "rate": 0.6923076923076923,
+        "status_counts": {
+          "POTENTIAL_RISK": 16,
+          "NO_RISK": 10,
+          "INSUFFICIENT_EVIDENCE": 13
+        },
+        "by_type": {
+          "positive": {
+            "cases": 13,
+            "matches": 10,
+            "rate": 0.7692307692307693
+          },
+          "control": {
+            "cases": 13,
+            "matches": 7,
+            "rate": 0.5384615384615384
+          },
+          "incomplete": {
+            "cases": 13,
+            "matches": 10,
+            "rate": 0.7692307692307693
+          }
+        }
+      },
+      "conformance_delta_cases": 16,
+      "conformance_delta_rate": 0.41025641025641024,
+      "status_changes_count": 25,
+      "status_changes": [
+        {
+          "scenario_id": "DOC-1-CONTROL",
+          "scenario_type": "control",
+          "expected_status": "NO_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "DOC-1-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "DOC-2-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "DOC-3-CONTROL",
+          "scenario_type": "control",
+          "expected_status": "NO_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "DOC-3-INCOMPLETE",
+          "scenario_type": "incomplete",
+          "expected_status": "INSUFFICIENT_EVIDENCE",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": true,
+          "after_matches": false
+        },
+        {
+          "scenario_id": "DOC-3-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-1-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-10-CONTROL",
+          "scenario_type": "control",
+          "expected_status": "NO_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-10-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-2-CONTROL",
+          "scenario_type": "control",
+          "expected_status": "NO_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": false
+        },
+        {
+          "scenario_id": "X-2-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": false
+        },
+        {
+          "scenario_id": "X-3-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": false
+        },
+        {
+          "scenario_id": "X-4-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-5-CONTROL",
+          "scenario_type": "control",
+          "expected_status": "NO_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-5-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-6-CONTROL",
+          "scenario_type": "control",
+          "expected_status": "NO_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-6-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": false
+        },
+        {
+          "scenario_id": "X-7-CONTROL",
+          "scenario_type": "control",
+          "expected_status": "NO_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-7-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-8-CONTROL",
+          "scenario_type": "control",
+          "expected_status": "NO_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "NO_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-8-INCOMPLETE",
+          "scenario_type": "incomplete",
+          "expected_status": "INSUFFICIENT_EVIDENCE",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": true,
+          "after_matches": false
+        },
+        {
+          "scenario_id": "X-8-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-9-CONTROL",
+          "scenario_type": "control",
+          "expected_status": "NO_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": false
+        },
+        {
+          "scenario_id": "X-9-INCOMPLETE",
+          "scenario_type": "incomplete",
+          "expected_status": "INSUFFICIENT_EVIDENCE",
+          "before": "POTENTIAL_RISK",
+          "after": "INSUFFICIENT_EVIDENCE",
+          "before_matches": false,
+          "after_matches": true
+        },
+        {
+          "scenario_id": "X-9-POSITIVE",
+          "scenario_type": "positive",
+          "expected_status": "POTENTIAL_RISK",
+          "before": "INSUFFICIENT_EVIDENCE",
+          "after": "POTENTIAL_RISK",
+          "before_matches": false,
+          "after_matches": true
+        }
+      ],
+      "interpretation": "This is a code-path ablation on 39 hand-authored synthetic fixtures. It measures whether the batching change improves fixture-status conformance and preserves outputs under the constructed scenarios. It is not human gold, not real-contract accuracy, and not legal correctness.",
+      "code_hashes": {
+        "analyzer": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+        "runner": "f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad"
+      }
+    },
+    "batching_ablation_comparison_path": "data/risk/results/cross_document_model_scenario_comparison.json",
+    "batching_ablation_comparison_markdown_path": "data/risk/results/cross_document_model_scenario_comparison.md"
+  },
+  "retrieval_profile": {
+    "active_server_embedding_backend": "local_hashing",
+    "description": "Deterministic 768-dimensional HashingVectorizer lexical-vector baseline; do not compare its retrieval behavior as equivalent to Cohere Embed v3 semantic embeddings.",
+    "cuad_train_index": {
+      "schema_version": 1,
+      "created_at_utc": "2026-10-09T16:41:43.390256+00:00",
+      "status": "PASS",
+      "collection": "cuad_train_hashing",
+      "embedding": {
+        "backend": "sklearn.HashingVectorizer",
+        "dimension": 768,
+        "ngram_range": [
+          1,
+          2
+        ],
+        "alternate_sign": false,
+        "normalization": "l2",
+        "note": "Deterministic local lexical-vector baseline; not a pretrained semantic embedding model."
+      },
+      "source": {
+        "train_csv": "data/splits/train/master_clauses_train.csv",
+        "train_csv_sha256": "baf7bef34bff8f8d7e3c1bb75b031b42730f7cd1234d1a89d52d794e5f3e855f",
+        "test_csv": "data/splits/test/master_clauses_test.csv",
+        "test_csv_sha256": "14ede6e03f6255760f705837b9fb62709b03875985e52a75ee7b5fbc385a9002"
+      },
+      "counts": {
+        "eligible_train_rows": 7004,
+        "indexed_points": 7004,
+        "train_contracts": 383,
+        "test_contracts": 100,
+        "train_test_contract_overlap": 0
+      },
+      "leakage_policy": "Only eligible rows from data/splits/train/master_clauses_train.csv are indexed. No test rows or test labels are inserted."
+    },
+    "local_profile_validation": {
+      "schema_version": 1,
+      "created_at_utc": "2026-10-09T16:41:47.429778+00:00",
+      "status": "PASS",
+      "embedding_backend": "local_hashing",
+      "embedding_spec": {
+        "implementation": "sklearn.feature_extraction.text.HashingVectorizer",
+        "dimension": 768,
+        "ngram_range": [
+          1,
+          2
+        ],
+        "alternate_sign": false,
+        "normalization": "l2",
+        "caveat": "Lexical-vector retrieval; not a pretrained semantic embedding model."
+      },
+      "qdrant_path": "data/qdrant_local",
+      "cuad_train_collection": "cuad_train_hashing",
+      "legal_knowledge_collection": "legal_knowledge_hashing",
+      "collections": {
+        "cuad_train_hashing": {
+          "point_count": 7004,
+          "scanned_point_count": 7004,
+          "vector_dimension": 768,
+          "metadata_failures": 0
+        },
+        "legal_knowledge_hashing": {
+          "point_count": 19,
+          "scanned_point_count": 19,
+          "vector_dimension": 768,
+          "metadata_failures": 0
+        }
+      },
+      "sources": {
+        "train_index_manifest_sha256": "c299acabf364e3e1d8bec192e7032d645b01865daa5d01ed5d47894393cae29e",
+        "legal_source_registry_sha256": "d5fc3d7596879e8212d7da76d7e0659976c69d3d25a711d9c2639f721373a7f5",
+        "legal_markdown_files": {
+          "backend/data/legal_knowledge/aba/indemnification.md": "eb5af21a3ae9cccc3a83dbbc8508cedb16266e4c1e263373d15bd2fe3f6cf166",
+          "backend/data/legal_knowledge/aba/limitation_of_liability.md": "8233b974262ba42c1a0929e9a101285a9a7bde4435af67af340b109902bb4822",
+          "backend/data/legal_knowledge/aba/termination.md": "1f483973db2f06c31fa9c5f747188f714b4064faca01baacc256b57b2b825ea3",
+          "backend/data/legal_knowledge/iba/indemnification.md": "124203c5f949167e73f757ded2768c37f1c94bc95e0d339fe8eea7e468f69fad",
+          "backend/data/legal_knowledge/icc/force_majeure_hardship.md": "3f1c50ccea99d46d6bda8258d01209a0dd6bdbb450f287df99cd7531371fada8",
+          "backend/data/legal_knowledge/uncitral/arbitration_mediation.md": "f7852ba17eca3d1b3f990fa8125ae2d6b599eb72fbe913d41897e64f377115a3",
+          "backend/data/legal_knowledge/wipo/confidentiality.md": "67e460c2ed19242f00df233064f22b6368a2ab637720be14788ad4bbf45ae788",
+          "backend/data/legal_knowledge/wipo/intellectual_property.md": "77f3bd87989f36a023850b4c7363bc097b57d5e206238aac684b4aeb6db7c24b",
+          "backend/data/legal_knowledge/worldcc/assignment.md": "2280e442e5e6c9c91369993118e5f5e9cb4a463b95fe395ba63e44474ac1dbec",
+          "backend/data/legal_knowledge/worldcc/confidentiality.md": "800155ed3133baa5640bc1363778fa7fed24be38595984fd4a7dd19f3f6e8b5d",
+          "backend/data/legal_knowledge/worldcc/indemnification.md": "93aa88026d901889f1e3c270fd1632452cb4628e2a94af3e4b28c49341a11b60",
+          "backend/data/legal_knowledge/worldcc/insurance.md": "80facac7ebef28ae158e427c35849ecbd0d4e89216038d9d20e01254a4c7cfaa",
+          "backend/data/legal_knowledge/worldcc/intellectual_property.md": "938107581c68982849373928ba4bbe201d9b4be87972f5b75e0842cf26e276b7",
+          "backend/data/legal_knowledge/worldcc/limitation_of_liability.md": "acd68145dc439a5bde102fb61c5662f295dbb312eccbcd249a7ea8887adf3fc5",
+          "backend/data/legal_knowledge/worldcc/payment.md": "56bafb66972804318036154ad654cab0134d1c042463a10ede4c201a921bab95",
+          "backend/data/legal_knowledge/worldcc/termination.md": "591fbdaa18b0711d7718bc1c255e42846eee77d69d657467cceef0f29ac370ea",
+          "backend/data/legal_knowledge/worldcc/warranties.md": "379f36fe9d8444a0cb106580723e7b8be273cce78563a422fcccfbb64187226a"
+        }
+      },
+      "train_test_isolation": {
+        "source_train_csv_sha256": "baf7bef34bff8f8d7e3c1bb75b031b42730f7cd1234d1a89d52d794e5f3e855f",
+        "source_test_csv_sha256": "14ede6e03f6255760f705837b9fb62709b03875985e52a75ee7b5fbc385a9002",
+        "train_test_contract_overlap": 0,
+        "indexed_train_rows": 7004,
+        "test_rows_indexed": 0
+      },
+      "problems": []
+    },
+    "legal_knowledge_validation": {
+      "status": "PASS",
+      "case_count": 3,
+      "checks": [
+        {
+          "clause_type": "Cap On Liability",
+          "match_count": 3,
+          "sources": [
+            {
+              "source_name": "American Bar Association",
+              "title": "When the Limitation of Liability Is Not So Limiting",
+              "source_tier": "B",
+              "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+              "dense_score": 0.420206,
+              "rrf_score": 0.032522
+            },
+            {
+              "source_name": "World Commerce & Contracting",
+              "title": "Contracting Principles - Liability Caps and Exclusions From Liability",
+              "source_tier": "B",
+              "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+              "dense_score": 0.351619,
+              "rrf_score": 0.032522
+            },
+            {
+              "source_name": "American Bar Association",
+              "title": "Negotiating Indemnity",
+              "source_tier": "B",
+              "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+              "dense_score": 0.0,
+              "rrf_score": 0.015873
+            }
+          ],
+          "passed": true
+        },
+        {
+          "clause_type": "Termination For Convenience",
+          "match_count": 3,
+          "sources": [
+            {
+              "source_name": "World Commerce & Contracting",
+              "title": "Contracting Principles - Term and Termination",
+              "source_tier": "B",
+              "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+              "dense_score": 0.41712,
+              "rrf_score": 0.032787
+            },
+            {
+              "source_name": "American Bar Association",
+              "title": "SaaS Agreements: Key Contractual Provisions",
+              "source_tier": "B",
+              "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+              "dense_score": 0.25953,
+              "rrf_score": 0.032258
+            },
+            {
+              "source_name": "International Chamber of Commerce",
+              "title": "ICC Force Majeure and Hardship Clauses",
+              "source_tier": "B",
+              "authority_status": "NON_BINDING_MODEL_CLAUSE_GUIDANCE",
+              "dense_score": 0.0,
+              "rrf_score": 0.015873
+            }
+          ],
+          "passed": true
+        },
+        {
+          "clause_type": "License Grant",
+          "match_count": 3,
+          "sources": [
+            {
+              "source_name": "World Intellectual Property Organization",
+              "title": "Technology Transfer Agreements",
+              "source_tier": "A",
+              "authority_status": "OFFICIAL_NON_BINDING_GUIDANCE",
+              "dense_score": 0.421562,
+              "rrf_score": 0.032787
+            },
+            {
+              "source_name": "World Intellectual Property Organization",
+              "title": "Technology Transfer Agreements",
+              "source_tier": "A",
+              "authority_status": "OFFICIAL_NON_BINDING_GUIDANCE",
+              "dense_score": 0.382835,
+              "rrf_score": 0.032002
+            },
+            {
+              "source_name": "World Commerce & Contracting",
+              "title": "Contracting Principles - Intellectual Property Rights and Indemnification for Third Party IP Claims",
+              "source_tier": "B",
+              "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+              "dense_score": 0.318378,
+              "rrf_score": 0.032002
+            }
+          ],
+          "passed": true
+        }
+      ],
+      "note": "Retrieval quality is not legal correctness. Returned sources are contextual guidance; contract findings still require exact contract evidence."
+    },
+    "local_hashing_cuad_retrieval_baseline": {
+      "schema_version": 1,
+      "generated_at_utc": "2026-10-09T21:06:50.464438+00:00",
+      "status": "PASS",
+      "experiment_name": "local_hashing_cuad_nearest_neighbor_retrieval",
+      "scope": "Held-out CUAD clause-category retrieval/classification baseline; not custom-risk accuracy, legal correctness or severity evaluation.",
+      "configuration": {
+        "embedding": "sklearn HashingVectorizer",
+        "dimension": 768,
+        "ngram_range": [
+          1,
+          2
+        ],
+        "alternate_sign": false,
+        "normalization": "l2",
+        "similarity": "sparse dot product of L2-normalized vectors (cosine similarity)",
+        "top_k": 5,
+        "tie_breaking": "stable corpus-row order",
+        "bootstrap_replicates": 1000,
+        "bootstrap_unit": "test contract (cluster bootstrap)",
+        "bootstrap_seed": 42
+      },
+      "inputs": {
+        "train_csv": "data/splits/train/master_clauses_train.csv",
+        "train_csv_sha256": "baf7bef34bff8f8d7e3c1bb75b031b42730f7cd1234d1a89d52d794e5f3e855f",
+        "test_csv": "data/splits/test/master_clauses_test.csv",
+        "test_csv_sha256": "14ede6e03f6255760f705837b9fb62709b03875985e52a75ee7b5fbc385a9002"
+      },
+      "isolation": {
+        "train_contract_count": 383,
+        "test_contract_count": 92,
+        "train_eligible_rows": 7004,
+        "test_eligible_rows": 1679,
+        "train_test_contract_overlap": 0,
+        "passed": true
+      },
+      "metrics": {
+        "nearest_neighbor_accuracy": 0.4705,
+        "nearest_neighbor_macro_f1": 0.3391,
+        "recall_at_1": 0.4705,
+        "recall_at_5": 0.6945,
+        "mrr_at_5": 0.5605,
+        "nearest_neighbor_accuracy_contract_bootstrap_95_ci": {
+          "lower_95": 0.4402,
+          "upper_95": 0.5048
+        },
+        "nearest_neighbor_macro_f1_contract_bootstrap_95_ci": {
+          "lower_95": 0.2954,
+          "upper_95": 0.3703
+        }
+      },
+      "label_metrics": [
+        {
+          "label": "Affiliate License-Licensee",
+          "support": 16,
+          "nearest_neighbor_correct": 1,
+          "nearest_neighbor_accuracy": 0.0625,
+          "recall_at_5_hits": 3,
+          "recall_at_5": 0.1875
+        },
+        {
+          "label": "Affiliate License-Licensor",
+          "support": 8,
+          "nearest_neighbor_correct": 0,
+          "nearest_neighbor_accuracy": 0.0,
+          "recall_at_5_hits": 1,
+          "recall_at_5": 0.125
+        },
+        {
+          "label": "Anti-Assignment",
+          "support": 114,
+          "nearest_neighbor_correct": 101,
+          "nearest_neighbor_accuracy": 0.886,
+          "recall_at_5_hits": 109,
+          "recall_at_5": 0.9561
+        },
+        {
+          "label": "Audit Rights",
+          "support": 128,
+          "nearest_neighbor_correct": 72,
+          "nearest_neighbor_accuracy": 0.5625,
+          "recall_at_5_hits": 92,
+          "recall_at_5": 0.7188
+        },
+        {
+          "label": "Cap On Liability",
+          "support": 110,
+          "nearest_neighbor_correct": 60,
+          "nearest_neighbor_accuracy": 0.5455,
+          "recall_at_5_hits": 100,
+          "recall_at_5": 0.9091
+        },
+        {
+          "label": "Change Of Control",
+          "support": 43,
+          "nearest_neighbor_correct": 17,
+          "nearest_neighbor_accuracy": 0.3953,
+          "recall_at_5_hits": 28,
+          "recall_at_5": 0.6512
+        },
+        {
+          "label": "Competitive Restriction Exception",
+          "support": 22,
+          "nearest_neighbor_correct": 2,
+          "nearest_neighbor_accuracy": 0.0909,
+          "recall_at_5_hits": 5,
+          "recall_at_5": 0.2273
+        },
+        {
+          "label": "Covenant Not To Sue",
+          "support": 28,
+          "nearest_neighbor_correct": 17,
+          "nearest_neighbor_accuracy": 0.6071,
+          "recall_at_5_hits": 23,
+          "recall_at_5": 0.8214
+        },
+        {
+          "label": "Exclusivity",
+          "support": 74,
+          "nearest_neighbor_correct": 23,
+          "nearest_neighbor_accuracy": 0.3108,
+          "recall_at_5_hits": 37,
+          "recall_at_5": 0.5
+        },
+        {
+          "label": "Governing Law",
+          "support": 88,
+          "nearest_neighbor_correct": 88,
+          "nearest_neighbor_accuracy": 1.0,
+          "recall_at_5_hits": 88,
+          "recall_at_5": 1.0
+        },
+        {
+          "label": "Insurance",
+          "support": 118,
+          "nearest_neighbor_correct": 89,
+          "nearest_neighbor_accuracy": 0.7542,
+          "recall_at_5_hits": 101,
+          "recall_at_5": 0.8559
+        },
+        {
+          "label": "Ip Ownership Assignment",
+          "support": 49,
+          "nearest_neighbor_correct": 21,
+          "nearest_neighbor_accuracy": 0.4286,
+          "recall_at_5_hits": 31,
+          "recall_at_5": 0.6327
+        },
+        {
+          "label": "Irrevocable Or Perpetual License",
+          "support": 34,
+          "nearest_neighbor_correct": 2,
+          "nearest_neighbor_accuracy": 0.0588,
+          "recall_at_5_hits": 16,
+          "recall_at_5": 0.4706
+        },
+        {
+          "label": "Joint Ip Ownership",
+          "support": 17,
+          "nearest_neighbor_correct": 5,
+          "nearest_neighbor_accuracy": 0.2941,
+          "recall_at_5_hits": 10,
+          "recall_at_5": 0.5882
+        },
+        {
+          "label": "License Grant",
+          "support": 150,
+          "nearest_neighbor_correct": 76,
+          "nearest_neighbor_accuracy": 0.5067,
+          "recall_at_5_hits": 122,
+          "recall_at_5": 0.8133
+        },
+        {
+          "label": "Liquidated Damages",
+          "support": 8,
+          "nearest_neighbor_correct": 1,
+          "nearest_neighbor_accuracy": 0.125,
+          "recall_at_5_hits": 4,
+          "recall_at_5": 0.5
+        },
+        {
+          "label": "Minimum Commitment",
+          "support": 62,
+          "nearest_neighbor_correct": 15,
+          "nearest_neighbor_accuracy": 0.2419,
+          "recall_at_5_hits": 32,
+          "recall_at_5": 0.5161
+        },
+        {
+          "label": "Most Favored Nation",
+          "support": 7,
+          "nearest_neighbor_correct": 0,
+          "nearest_neighbor_accuracy": 0.0,
+          "recall_at_5_hits": 1,
+          "recall_at_5": 0.1429
+        },
+        {
+          "label": "No-Solicit Of Customers",
+          "support": 7,
+          "nearest_neighbor_correct": 1,
+          "nearest_neighbor_accuracy": 0.1429,
+          "recall_at_5_hits": 1,
+          "recall_at_5": 0.1429
+        },
+        {
+          "label": "No-Solicit Of Employees",
+          "support": 10,
+          "nearest_neighbor_correct": 6,
+          "nearest_neighbor_accuracy": 0.6,
+          "recall_at_5_hits": 9,
+          "recall_at_5": 0.9
+        },
+        {
+          "label": "Non-Compete",
+          "support": 37,
+          "nearest_neighbor_correct": 12,
+          "nearest_neighbor_accuracy": 0.3243,
+          "recall_at_5_hits": 20,
+          "recall_at_5": 0.5405
+        },
+        {
+          "label": "Non-Disparagement",
+          "support": 11,
+          "nearest_neighbor_correct": 6,
+          "nearest_neighbor_accuracy": 0.5455,
+          "recall_at_5_hits": 8,
+          "recall_at_5": 0.7273
+        },
+        {
+          "label": "Non-Transferable License",
+          "support": 59,
+          "nearest_neighbor_correct": 1,
+          "nearest_neighbor_accuracy": 0.0169,
+          "recall_at_5_hits": 41,
+          "recall_at_5": 0.6949
+        },
+        {
+          "label": "Notice Period To Terminate Renewal",
+          "support": 31,
+          "nearest_neighbor_correct": 0,
+          "nearest_neighbor_accuracy": 0.0,
+          "recall_at_5_hits": 31,
+          "recall_at_5": 1.0
+        },
+        {
+          "label": "Post-Termination Services",
+          "support": 82,
+          "nearest_neighbor_correct": 35,
+          "nearest_neighbor_accuracy": 0.4268,
+          "recall_at_5_hits": 61,
+          "recall_at_5": 0.7439
+        },
+        {
+          "label": "Price Restrictions",
+          "support": 1,
+          "nearest_neighbor_correct": 0,
+          "nearest_neighbor_accuracy": 0.0,
+          "recall_at_5_hits": 0,
+          "recall_at_5": 0.0
+        },
+        {
+          "label": "Renewal Term",
+          "support": 44,
+          "nearest_neighbor_correct": 38,
+          "nearest_neighbor_accuracy": 0.8636,
+          "recall_at_5_hits": 41,
+          "recall_at_5": 0.9318
+        },
+        {
+          "label": "Revenue/Profit Sharing",
+          "support": 91,
+          "nearest_neighbor_correct": 23,
+          "nearest_neighbor_accuracy": 0.2527,
+          "recall_at_5_hits": 35,
+          "recall_at_5": 0.3846
+        },
+        {
+          "label": "Rofr/Rofo/Rofn",
+          "support": 67,
+          "nearest_neighbor_correct": 14,
+          "nearest_neighbor_accuracy": 0.209,
+          "recall_at_5_hits": 27,
+          "recall_at_5": 0.403
+        },
+        {
+          "label": "Source Code Escrow",
+          "support": 16,
+          "nearest_neighbor_correct": 12,
+          "nearest_neighbor_accuracy": 0.75,
+          "recall_at_5_hits": 12,
+          "recall_at_5": 0.75
+        },
+        {
+          "label": "Termination For Convenience",
+          "support": 37,
+          "nearest_neighbor_correct": 20,
+          "nearest_neighbor_accuracy": 0.5405,
+          "recall_at_5_hits": 28,
+          "recall_at_5": 0.7568
+        },
+        {
+          "label": "Third Party Beneficiary",
+          "support": 8,
+          "nearest_neighbor_correct": 7,
+          "nearest_neighbor_accuracy": 0.875,
+          "recall_at_5_hits": 7,
+          "recall_at_5": 0.875
+        },
+        {
+          "label": "Uncapped Liability",
+          "support": 28,
+          "nearest_neighbor_correct": 14,
+          "nearest_neighbor_accuracy": 0.5,
+          "recall_at_5_hits": 26,
+          "recall_at_5": 0.9286
+        },
+        {
+          "label": "Unlimited/All-You-Can-Eat-License",
+          "support": 9,
+          "nearest_neighbor_correct": 0,
+          "nearest_neighbor_accuracy": 0.0,
+          "recall_at_5_hits": 1,
+          "recall_at_5": 0.1111
+        },
+        {
+          "label": "Volume Restriction",
+          "support": 44,
+          "nearest_neighbor_correct": 4,
+          "nearest_neighbor_accuracy": 0.0909,
+          "recall_at_5_hits": 6,
+          "recall_at_5": 0.1364
+        },
+        {
+          "label": "Warranty Duration",
+          "support": 21,
+          "nearest_neighbor_correct": 7,
+          "nearest_neighbor_accuracy": 0.3333,
+          "recall_at_5_hits": 9,
+          "recall_at_5": 0.4286
+        }
+      ],
+      "runtime_seconds": 7.896,
+      "interpretation": "Nearest-neighbor labels and top-5 hit metrics measure the local lexical-vector baseline only. They are not numerically equivalent to the prior Cohere/retrieval-conditioned SLM configuration. The held-out true category labels are used only for evaluation and were not inserted into the index."
+    }
+  },
+  "datasets": {
+    "split": {
+      "train_contracts": 410,
+      "test_contracts": 100,
+      "train_clause_rows": 10545,
+      "test_clause_rows": 2556
+    },
+    "silver": {
+      "rows": 300,
+      "unique_samples": 300,
+      "unique_contracts": 72,
+      "unique_checks": 95,
+      "partitions": {
+        "locked_test": 150,
+        "calibration": 75,
+        "development": 75
+      },
+      "statuses": {
+        "MACHINE_DISAGREEMENT": 165,
+        "MACHINE_AGREED_BUT_EVIDENCE_INVALID": 5,
+        "MACHINE_AGREED": 108,
+        "MACHINE_AGREED_UNCERTAIN": 22
+      },
+      "risk_decisions": {
+        "UNCERTAIN": 192,
+        "NO": 95,
+        "YES": 13
+      },
+      "protocols": {
+        "silver_v5_blind_parallel": 300
+      },
+      "machine_yes_rows": 13,
+      "machine_yes_with_exact_evidence": 13,
+      "machine_yes_evidence_rate": 1.0,
+      "direct_machine_agreement_rate": 0.36,
+      "agreement_including_agreed_uncertain_rate": 0.43333333333333335,
+      "disagreement_rate": 0.55,
+      "evidence_invalid_agreement_rate": 0.016666666666666666,
+      "custom_risk_accuracy": null,
+      "custom_risk_accuracy_reason": "No human gold risk labels are available."
+    },
+    "human_gold": {
+      "queue_rows": 300,
+      "filled_risk_labels": 0,
+      "filled_evidence_spans": 0,
+      "status": "PENDING_HUMAN_ADJUDICATION"
+    },
+    "external_cuad": {
+      "task_count": 3420,
+      "contract_count": 95,
+      "category_count": 36,
+      "answerable_tasks": 825,
+      "impossible_tasks": 2595,
+      "allowed_claim": "CUAD clause/evidence behavior only; not custom risk-predicate, severity or legal-correctness ground truth."
+    },
+    "playbook": {
+      "clause_type_count": 37,
+      "clause_check_count": 101,
+      "cross_clause_check_count": 10,
+      "document_check_count": 3,
+      "canonical_domain_count": 10,
+      "missing_domain_mappings": [],
+      "source_version": "1.1"
+    },
+    "integrity": {
+      "checks_total": 12,
+      "checks_passed": 12,
+      "all_passed": true,
+      "checks": [
+        {
+          "name": "train_test_contract_overlap",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "gold_uses_train_docs_only",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "gold_partition_disjoint",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "silver_uses_test_docs_only",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "silver_train_overlap",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "expert_presence_uses_test_docs_only",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "cuad_train_payload_train_only",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "cuad_train_payload_test_overlap",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "cuad_train_mpnet_payload_train_only",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "cuad_train_mpnet_payload_test_overlap",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "cuad_train_hashing_payload_train_only",
+          "passed": true,
+          "value": 0
+        },
+        {
+          "name": "cuad_train_hashing_payload_test_overlap",
+          "passed": true,
+          "value": 0
+        }
+      ]
+    }
+  },
+  "validation": {
+    "checks": {
+      "silver_csv_has_300_rows": true,
+      "silver_jsonl_has_300_rows": true,
+      "silver_sample_ids_unique": true,
+      "silver_csv_jsonl_ids_match": true,
+      "silver_partitions_expected": true,
+      "all_114_playbook_checks_have_canonical_domains": true,
+      "all_existing_integrity_checks_pass": true,
+      "human_gold_still_unannotated": true,
+      "every_machine_yes_has_exact_clause_quote": true,
+      "cross_document_synthetic_matrix_passes": true,
+      "cross_document_model_scenarios_complete": true,
+      "cross_document_model_analyzer_hash_current_and_runner_traced": true,
+      "cross_document_batching_ablation_complete": true,
+      "five_recorded_upload_smoke_audits_pass": true
+    },
+    "failed_checks": [],
+    "status": "PASS"
+  }
+}

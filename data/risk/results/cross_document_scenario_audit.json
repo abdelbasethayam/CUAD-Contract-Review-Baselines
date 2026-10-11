@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-10-09T21:06:38.322969+00:00",
+  "status": "PASS",
+  "checks": {
+    "all_13_cross_document_checks_covered": true,
+    "all_expected_39_scenarios_present": true,
+    "three_scenario_types_have_13_cases_each": true,
+    "all_scenarios_have_canonical_domains": true,
+    "all_expected_evidence_anchors_exist": true,
+    "all_fixture_hashes_match": true,
+    "all_fixture_files_exist": true,
+    "synthetic_non_gold_label_is_explicit": true,
+    "playbook_hash_matches_manifest": true,
+    "manifest_case_count_matches": true
+  },
+  "case_count": 39,
+  "check_ids_covered": [
+    "DOC-1",
+    "DOC-2",
+    "DOC-3",
+    "X-1",
+    "X-10",
+    "X-2",
+    "X-3",
+    "X-4",
+    "X-5",
+    "X-6",
+    "X-7",
+    "X-8",
+    "X-9"
+  ],
+  "scenario_type_counts": {
+    "positive": 13,
+    "control": 13,
+    "incomplete": 13
+  },
+  "expected_status_counts": {
+    "POTENTIAL_RISK": 14,
+    "NO_RISK": 13,
+    "INSUFFICIENT_EVIDENCE": 12
+  },
+  "fixture_hashes": {
+    "positive": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+    "control": "949613a7f418b0375b32b96da8dbcf6286a3dc02d0181285da79c4c693c08b27",
+    "incomplete": "d2f0004623deed734e15a5b834ddf821259ac31f3943d956c89a42e73f1d7eaa"
+  },
+  "missing_anchors": [],
+  "fixture_hash_mismatches": [],
+  "missing_fixtures": [],
+  "interpretation": "This is a synthetic fixture-integrity/coverage audit. It verifies that each cross-clause/document check has positive, protected-control and incomplete-context stimuli with the recorded text anchors. It does not prove the LLM makes the expected decision, does not estimate generalization, and is not human gold.",
+  "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+  "taxonomy_sha256": "ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218",
+  "scenario_matrix_sha256": "3f97fabbe7882d943d51fadfcaf76b5e3c3ad84d48f687437d14e112f213acbc"
+}

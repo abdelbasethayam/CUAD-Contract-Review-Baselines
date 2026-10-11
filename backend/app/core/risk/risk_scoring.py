@@ -303,6 +303,9 @@ def aggregate_contract_triage(
             "exposure_concentration": [],
             "control_gap_count": 0,
             "unreviewed_assumption_count": 0,
+            "high_count": 0,
+            "critical_count": 0,
+            "two_high_same_domain": False,
         }
 
     scored = [

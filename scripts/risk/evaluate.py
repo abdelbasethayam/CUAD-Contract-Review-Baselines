@@ -53,11 +53,14 @@ def binary_metrics(y, pred, prob) -> dict:
         "tp": int(tp), "tn": int(tn), "fp": int(fp), "fn": int(fn),
     }
     prob = np.asarray(prob, dtype=float)
-    if np.unique(y).size == 2:
+    finite = np.isfinite(prob)
+    if finite.all() and np.unique(y).size == 2:
         out["auroc"] = float(roc_auc_score(y, prob))
         p, r, _ = precision_recall_curve(y, prob)
         out["pr_auc"] = float(auc(r, p))
-    out["brier"] = float(brier_score_loss(y, prob))
+        out["brier"] = float(brier_score_loss(y, prob))
+    else:
+        out["probability_metrics_available"] = False
     return out
 
 
@@ -181,12 +184,17 @@ def main() -> None:
     df = df.loc[mask].copy()
     y = y.loc[mask].to_numpy(dtype=int)
     pred = pred.loc[mask].to_numpy(dtype=int)
-    prob = df["pred_probability"].astype(float).to_numpy()
+    prob = pd.to_numeric(df["pred_probability"], errors="coerce").to_numpy(dtype=float)
 
     scored_df = df.assign(_y=y, _p=pred)
     result = {
         "binary": binary_metrics(y, pred, prob),
-        "calibration": {"ece": ece(y, prob), "brier": float(brier_score_loss(y, prob))},
+        "calibration": (
+            {"ece": ece(y[np.isfinite(prob)], prob[np.isfinite(prob)]),
+             "brier": float(brier_score_loss(y[np.isfinite(prob)], prob[np.isfinite(prob)]))}
+            if np.isfinite(prob).all()
+            else {"available": False, "reason": "pred_probability is not calibrated or contains missing values"}
+        ),
         "abstention": abstention_metrics(df),
         "cluster_bootstrap_accuracy": cluster_bootstrap(
             scored_df,
@@ -220,12 +228,27 @@ def main() -> None:
             df["pred_severity"].tolist(),
         )
 
-    if {"annotator_1", "annotator_2"} <= set(df.columns):
-        ann = df[["annotator_1", "annotator_2"]].dropna()
-        ann = ann[(ann["annotator_1"].astype(str).str.strip() != "") & (ann["annotator_2"].astype(str).str.strip() != "")]
+    if {"annotator_1_risk", "annotator_2_risk"} <= set(df.columns):
+        ann = df[["annotator_1_risk", "annotator_2_risk"]].copy()
+        ann = ann[(ann["annotator_1_risk"].astype(str).str.strip() != "") & (ann["annotator_2_risk"].astype(str).str.strip() != "")]
         if len(ann):
             result["inter_annotator_cohen_kappa"] = float(
-                cohen_kappa_score(ann["annotator_1"], ann["annotator_2"])
+                cohen_kappa_score(ann["annotator_1_risk"], ann["annotator_2_risk"])
+            )
+
+    if {"annotator_1_severity", "annotator_2_severity"} <= set(df.columns):
+        sev = df[["annotator_1_severity", "annotator_2_severity"]].copy()
+        sev = sev[sev["annotator_1_severity"].isin(["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"])]
+        sev = sev[sev["annotator_2_severity"].isin(["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"])]
+        if len(sev) >= 2:
+            labels = ["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
+            enc = {label: i for i, label in enumerate(labels)}
+            result["inter_annotator_severity_quadratic_kappa"] = float(
+                cohen_kappa_score(
+                    [enc[x] for x in sev["annotator_1_severity"]],
+                    [enc[x] for x in sev["annotator_2_severity"]],
+                    weights="quadratic",
+                )
             )
 
     if {"gold_evidence", "evidence"} <= set(df.columns):

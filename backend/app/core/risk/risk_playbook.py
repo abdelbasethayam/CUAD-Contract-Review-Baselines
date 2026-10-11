@@ -32,6 +32,7 @@ def normalize_playbook(raw: dict) -> dict:
                 {
                     "id": str(item.get("id") or "").strip(),
                     "risk_domain": str(item.get("risk_domain") or "").strip() or None,
+                    "risk_subdomain": str(item.get("risk_subdomain") or "").strip() or None,
                     "risk_type": str(item.get("risk_type") or "").strip() or None,
                     "perspective": str(item.get("perspective") or raw.get("perspective") or "customer_buyer"),
                     "applies_when": item.get("applies_when") or [],
@@ -82,6 +83,7 @@ def normalize_playbook(raw: dict) -> dict:
                 "id": str(item.get("id") or "").strip(),
                 "pair": [str(x) for x in (item.get("pair") or [])],
                 "risk_domain": str(item.get("risk_domain") or "").strip() or None,
+                "risk_subdomain": str(item.get("risk_subdomain") or "").strip() or None,
                 "risk_type": str(item.get("risk_type") or "").strip() or None,
                 "question": str(item.get("question") or "").strip(),
                 "flag_if": str(item.get("flag_if") or "").strip(),
@@ -97,6 +99,7 @@ def normalize_playbook(raw: dict) -> dict:
             {
                 "id": str(item.get("id") or "").strip(),
                 "risk_domain": str(item.get("risk_domain") or "").strip() or None,
+                "risk_subdomain": str(item.get("risk_subdomain") or "").strip() or None,
                 "risk_type": str(item.get("risk_type") or "").strip() or None,
                 "question": str(item.get("question") or "").strip(),
                 "flag_if": str(item.get("flag_if") or "").strip(),

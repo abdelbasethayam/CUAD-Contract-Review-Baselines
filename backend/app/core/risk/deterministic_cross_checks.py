@@ -68,8 +68,70 @@ def run_deterministic_cross_checks(clauses: list[dict[str, Any]]) -> list[dict[s
         results.append({"id": "DET-EVIDENCE-GAP", "name": "evidence_gap", "candidate": True, "clause_ids": [int(c["clause_index"]) for c in evidence_hits[:8]], "evidence": _evidence(evidence_hits[:5]), "reason": "A financial or audit-linked obligation may lack visible measurement, records, reporting, or verification mechanics."})
 
     precedence_hits = _contains(clauses, ("order of precedence", "priority", "in case of conflict", "master agreement", "order form", "exhibit", "schedule", "online terms"))
-    if len(precedence_hits) >= 2 and not any("order of precedence" in str(c.get("clause_text") or "").lower() for c in precedence_hits):
+    if len(precedence_hits) >= 2 and not any(
+        any(marker in str(c.get("clause_text") or "").lower()
+            for marker in ("order of precedence", "prevail over", "prevails over", "takes precedence", "priority over"))
+        for c in precedence_hits
+    ):
         results.append({"id": "DET-PRECEDENCE-GAP", "name": "precedence_gap", "candidate": True, "clause_ids": [int(c["clause_index"]) for c in precedence_hits[:8]], "evidence": _evidence(precedence_hits[:5]), "reason": "Multiple incorporated-document references were found without an explicit hierarchy in the visible text."})
+
+    # Single-clause document signals are included because some contract-wide
+    # checks are triggered by explicit incorporation/versioning language rather
+    # than by the interaction of two clause types. These remain review candidates,
+    # not automatic legal conclusions.
+    for clause in clauses:
+        text = str(clause.get("clause_text") or "")
+        lowered = text.lower()
+        if clause.get("clause_index") is None or not text.strip():
+            continue
+        refers_to_external_terms = any(term in lowered for term in (
+            "online terms", "website", "incorporated by reference", "terms at",
+            "terms available at", "policies referenced",
+        ))
+        has_missing_or_mutable_version = any(term in lowered for term in (
+            "no fixed version", "not attached", "not included", "may be updated",
+            "as updated from time to time", "current version",
+        ))
+        if refers_to_external_terms and has_missing_or_mutable_version:
+            results.append({
+                "id": "DET-INCORPORATED-UNREAD",
+                "name": "incorporated_terms_unread",
+                "candidate": True,
+                "clause_ids": [int(clause["clause_index"])],
+                "evidence": _evidence([clause], limit=1),
+                "reason": "The agreement references external terms or policies whose fixed version is missing or mutable; verify the referenced material before review is considered complete.",
+            })
+        has_precedence_language = any(term in lowered for term in (
+            "prevail", "in case of conflict", "notwithstanding anything",
+            "order of precedence", "takes precedence",
+        ))
+        names_external_precedence = any(term in lowered for term in (
+            "online terms", "website", "supplier's terms", "supplier terms",
+            "policies referenced", "terms of service",
+        ))
+        if has_precedence_language and names_external_precedence and has_missing_or_mutable_version:
+            results.append({
+                "id": "DET-PRECEDENCE-OVERRIDE",
+                "name": "mutable_external_precedence",
+                "candidate": True,
+                "clause_ids": [int(clause["clause_index"])],
+                "evidence": _evidence([clause], limit=1),
+                "reason": "A mutable or unattached external term is stated to prevail in a conflict; inspect which protections it can override.",
+            })
+        has_law_by_external_form = (
+            ("governed by the laws specified in" in lowered or "governing law" in lowered)
+            and ("order form" in lowered or "each order form" in lowered)
+            and ("different forum" in lowered or "different dispute" in lowered or "forum and dispute procedure" in lowered)
+        )
+        if has_law_by_external_form:
+            results.append({
+                "id": "DET-DISPUTE-MECHANISM-AMBIGUITY",
+                "name": "dispute_mechanism_ambiguity",
+                "candidate": True,
+                "clause_ids": [int(clause["clause_index"])],
+                "evidence": _evidence([clause], limit=1),
+                "reason": "Governing law or dispute mechanics are delegated to order forms that may vary; check that the governing-law, forum and procedure combination is determinable for this contract.",
+            })
 
     return results
 

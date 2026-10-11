@@ -17,7 +17,8 @@ HIGH_PRECISION_RULES: list[tuple[str, re.Pattern[str]]] = [
         r"|\b(for any reason|without cause|for convenience)\b.{0,80}\bterminat\w*\b", re.I)),
     ("Non-Compete", re.compile(
         r"\b(non-?compete|not (to )?compete|refrain from compet|"
-        r"competing (business|product|service|activity))\b", re.I)),
+        r"competing (business|product|service|activity|computer program)|"
+        r"(shall|will|may) not (directly or indirectly )?(market|sell|offer|provide|develop|operate).{0,50}\bcompeting\b)\b", re.I)),
     ("No-Solicit Of Employees", re.compile(
         r"\b(non-?solicit\w*|shall not solicit|not solicit).{0,40}\b(employee|personnel|staff)\b"
         r"|\b(employee|personnel).{0,40}\b(non-?solicit|shall not solicit)\b", re.I)),

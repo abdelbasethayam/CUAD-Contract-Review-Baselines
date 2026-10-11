@@ -1,0 +1,100 @@
+{
+  "status": "PASS",
+  "case_count": 3,
+  "checks": [
+    {
+      "clause_type": "Cap On Liability",
+      "match_count": 3,
+      "sources": [
+        {
+          "source_name": "American Bar Association",
+          "title": "When the Limitation of Liability Is Not So Limiting",
+          "source_tier": "B",
+          "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+          "dense_score": 0.420206,
+          "rrf_score": 0.032522
+        },
+        {
+          "source_name": "World Commerce & Contracting",
+          "title": "Contracting Principles - Liability Caps and Exclusions From Liability",
+          "source_tier": "B",
+          "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+          "dense_score": 0.351619,
+          "rrf_score": 0.032522
+        },
+        {
+          "source_name": "American Bar Association",
+          "title": "Negotiating Indemnity",
+          "source_tier": "B",
+          "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+          "dense_score": 0.0,
+          "rrf_score": 0.015873
+        }
+      ],
+      "passed": true
+    },
+    {
+      "clause_type": "Termination For Convenience",
+      "match_count": 3,
+      "sources": [
+        {
+          "source_name": "World Commerce & Contracting",
+          "title": "Contracting Principles - Term and Termination",
+          "source_tier": "B",
+          "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+          "dense_score": 0.41712,
+          "rrf_score": 0.032787
+        },
+        {
+          "source_name": "American Bar Association",
+          "title": "SaaS Agreements: Key Contractual Provisions",
+          "source_tier": "B",
+          "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+          "dense_score": 0.25953,
+          "rrf_score": 0.032258
+        },
+        {
+          "source_name": "International Chamber of Commerce",
+          "title": "ICC Force Majeure and Hardship Clauses",
+          "source_tier": "B",
+          "authority_status": "NON_BINDING_MODEL_CLAUSE_GUIDANCE",
+          "dense_score": 0.0,
+          "rrf_score": 0.015873
+        }
+      ],
+      "passed": true
+    },
+    {
+      "clause_type": "License Grant",
+      "match_count": 3,
+      "sources": [
+        {
+          "source_name": "World Intellectual Property Organization",
+          "title": "Technology Transfer Agreements",
+          "source_tier": "A",
+          "authority_status": "OFFICIAL_NON_BINDING_GUIDANCE",
+          "dense_score": 0.421562,
+          "rrf_score": 0.032787
+        },
+        {
+          "source_name": "World Intellectual Property Organization",
+          "title": "Technology Transfer Agreements",
+          "source_tier": "A",
+          "authority_status": "OFFICIAL_NON_BINDING_GUIDANCE",
+          "dense_score": 0.382835,
+          "rrf_score": 0.032002
+        },
+        {
+          "source_name": "World Commerce & Contracting",
+          "title": "Contracting Principles - Intellectual Property Rights and Indemnification for Third Party IP Claims",
+          "source_tier": "B",
+          "authority_status": "NON_BINDING_PROFESSIONAL_PRACTICE",
+          "dense_score": 0.318378,
+          "rrf_score": 0.032002
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "note": "Retrieval quality is not legal correctness. Returned sources are contextual guidance; contract findings still require exact contract evidence."
+}

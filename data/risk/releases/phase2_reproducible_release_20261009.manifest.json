@@ -1,0 +1,360 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-09T21:07:23.702136+00:00",
+  "repository_root": "/home/jovyan/CUAD-Contract-Review-Baselines",
+  "release_zip": "data/risk/releases/phase2_reproducible_release_20261009.zip",
+  "file_count": 87,
+  "files": {
+    "docs/PHASE2_PAPER_DRAFT.md": {
+      "sha256": "08679fc94a0d2d0519a127bb3b1f3debe7dec72e63396072fb9d31aa69a3acf5",
+      "bytes": 37714
+    },
+    "docs/PHASE2_REPRODUCIBILITY.md": {
+      "sha256": "29f7d9a455d8d4c87ec1681cb0ba64a2bb67508d52ed4e50473b4206d6302abc",
+      "bytes": 16000
+    },
+    "docs/PHASE2_CLAIM_EVIDENCE_MATRIX.md": {
+      "sha256": "5e341e9fa377d29789cfac96a8f88d976bd08bd8a120be0be52d61a4e11a702a",
+      "bytes": 5104
+    },
+    "docs/PHASE2_LOGICAL_MODEL.md": {
+      "sha256": "cb0afc854bc1f40b6ef82d772cb8c953d53dee6253512ea427b44219f05c4926",
+      "bytes": 7763
+    },
+    "data/risk/GOLD_STATUS.md": {
+      "sha256": "c092b49b6be89f41334d46c5334c35b455a0d8ea10ca4f5f4c92dc0791cd12a5",
+      "bytes": 3610
+    },
+    "data/risk/EVALUATION_PROTOCOL.md": {
+      "sha256": "75c08f1e8c60e76b460e425a086837f52fea215ed442c31115b82177eaf16086",
+      "bytes": 2048
+    },
+    "data/risk/EVALUATION_INTEGRITY_REPORT.json": {
+      "sha256": "f21076f7ef121103bcb3451f5eb7ce222b120d6fcd08b79762d31e611a35c02a",
+      "bytes": 1319
+    },
+    "data/risk/commercial_clause_risk_playbook.json": {
+      "sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "bytes": 101987
+    },
+    "backend/data/legal_knowledge/risk_taxonomy.json": {
+      "sha256": "ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218",
+      "bytes": 7448
+    },
+    "backend/data/legal_knowledge/source_registry.json": {
+      "sha256": "d5fc3d7596879e8212d7da76d7e0659976c69d3d25a711d9c2639f721373a7f5",
+      "bytes": 2101
+    },
+    "data/risk/gold/annotation_queue.csv": {
+      "sha256": "5f27fd615cdf4ae8995bcb0fc541bd18bd6e893d7a9b05a7c3f5fe99f13fa976",
+      "bytes": 217264
+    },
+    "data/risk/gold/gold_annotations.csv": {
+      "sha256": "5f27fd615cdf4ae8995bcb0fc541bd18bd6e893d7a9b05a7c3f5fe99f13fa976",
+      "bytes": 217264
+    },
+    "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.csv": {
+      "sha256": "12c618b4617225b9462616edaa553af23c7ac6b2a2e9527e6c0840e9b7d9230f",
+      "bytes": 234138
+    },
+    "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.jsonl": {
+      "sha256": "e81c096b0f6517b6d1f72cee08208e7f4269bb1285bf48f1853efbfd440d62ca",
+      "bytes": 587201
+    },
+    "data/risk/silver/silver_annotations_final_v5_summary.json": {
+      "sha256": "8621a15e9f9830f371be9d6a69af8d27fa69c9ef675ab7c061681370453fed12",
+      "bytes": 577
+    },
+    "data/risk/external/cuad_expert_test.jsonl": {
+      "sha256": "db3eacab76d07135ecc5785d4d7e983ba2cef5ee7398b5f0bc37b56d1019e76f",
+      "bytes": 179506219
+    },
+    "data/risk/external/cuad_expert_test.manifest.json": {
+      "sha256": "bc8b073f0cf9c224bd1a3ba33a56a6f104e0395581b069063420e23ea7a00ca5",
+      "bytes": 1612
+    },
+    "data/risk/evaluation/cross_document_v1/scenario_matrix.jsonl": {
+      "sha256": "3f97fabbe7882d943d51fadfcaf76b5e3c3ad84d48f687437d14e112f213acbc",
+      "bytes": 26512
+    },
+    "data/risk/evaluation/cross_document_v1/manifest.json": {
+      "sha256": "ca5cfbc510c7ef7fbd65664de69ac2a788a69d89f2dbcb13c8932f1ea18593cb",
+      "bytes": 1153
+    },
+    "data/risk/evaluation/cross_document_v1/positive_risk_stress_contract.txt": {
+      "sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "bytes": 2572
+    },
+    "data/risk/evaluation/cross_document_v1/protected_control_contract.txt": {
+      "sha256": "949613a7f418b0375b32b96da8dbcf6286a3dc02d0181285da79c4c693c08b27",
+      "bytes": 2853
+    },
+    "data/risk/evaluation/cross_document_v1/incomplete_contract_pack.txt": {
+      "sha256": "d2f0004623deed734e15a5b834ddf821259ac31f3943d956c89a42e73f1d7eaa",
+      "bytes": 1913
+    },
+    "data/risk/evaluation/cross_document_v1/archive/cross_document_model_scenarios_pre_batching_20261009.jsonl": {
+      "sha256": "722e26122c405b7e04c43dc08a09c4450b8b1b7138d5b9315e14e47196506b3d",
+      "bytes": 63250
+    },
+    "data/risk/evaluation/cross_document_v1/archive/cross_document_model_scenarios.csv_pre_batching_20261009.csv": {
+      "sha256": "7a6156e1037b5a4b8bd26a05b18b0a77e191b17618bd37a05e569f71eaae5b0f",
+      "bytes": 22763
+    },
+    "data/risk/evaluation/cross_document_v1/archive/cross_document_model_scenarios_summary.json_pre_batching_20261009.json": {
+      "sha256": "7da24d9cd8266b1b226aa507cafcf23538db9102beb7b116730b889cd2d55aca",
+      "bytes": 7737
+    },
+    "data/risk/results/cross_document_scenario_audit.json": {
+      "sha256": "54a6cabfe46b3d6806e21f419a5f19766a35c48ca7ed9eebadc067bd8004b86a",
+      "bytes": 1956
+    },
+    "data/risk/results/cross_document_scenario_audit.md": {
+      "sha256": "d25990e7cdc8ad91832cd6f238e6b3d45088777b67671c7b79aacf6e10ca4741",
+      "bytes": 1303
+    },
+    "data/risk/results/cross_document_model_scenarios.jsonl": {
+      "sha256": "32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c",
+      "bytes": 81309
+    },
+    "data/risk/results/cross_document_model_scenarios.csv": {
+      "sha256": "963e784aefd56295154ebbf9a58d8a1b0d3e154c65dbd74e99449f52fae00dfe",
+      "bytes": 39708
+    },
+    "data/risk/results/cross_document_model_scenarios_summary.json": {
+      "sha256": "ee810f0bfba2074ad4a28d45144e1f8205933bee469dde02001ce31b44c5b8d2",
+      "bytes": 7872
+    },
+    "data/risk/results/cross_document_model_scenarios_summary.md": {
+      "sha256": "d4a5f5ae66372233d9221f177e43431e1b845c84e02b3f305cc5ec02afadb908",
+      "bytes": 3605
+    },
+    "data/risk/results/cross_document_model_scenario_comparison.json": {
+      "sha256": "3ca3fcdfa27d55a5a9e7aae6f431c857b7966e617e535e69136a4f634560ded6",
+      "bytes": 8699
+    },
+    "data/risk/results/cross_document_model_scenario_comparison.md": {
+      "sha256": "97ea3502d57d2348b218111f8e1a637ed6310052f6dfb44ab704140615292144",
+      "bytes": 3427
+    },
+    "data/risk/results/smoke_upload_api_current_20261009.json": {
+      "sha256": "4f505a3590be9a206d9376d73269b6f8fc78495ca5c3476d7fdeb269ad7b13cf",
+      "bytes": 1139824
+    },
+    "data/risk/results/smoke_test_audit_current.json": {
+      "sha256": "3e835422af859ca5a231e3b17adc37c86079448eaf06207d0c7dcf74c6da7e73",
+      "bytes": 10422
+    },
+    "data/risk/results/smoke_test_audit_current.md": {
+      "sha256": "8907b89325adaa6db1a38b5915f33173b83d8f787a5aae7e8072027014a2723e",
+      "bytes": 3002
+    },
+    "data/risk/results/smoke_upload_api_post_batching_20261009.json": {
+      "sha256": "d6b0733e2568a120448280c13f1fdce4b19bdf59162cb94f7d0e84d5cc76b832",
+      "bytes": 1153979
+    },
+    "data/risk/results/smoke_upload_api_batching_20261009.json": {
+      "sha256": "2a36817d69f72a7deb77ab405a4f16a2873503ece996bd07fe1186f1f9d6b485",
+      "bytes": 1153974
+    },
+    "data/risk/results/smoke_test_audit_batching.json": {
+      "sha256": "0cdee8d8a4c10e7cd5ad0cc95c85ffa0b5bfcda8d9b3b2533e9772748829e774",
+      "bytes": 10688
+    },
+    "data/risk/results/smoke_test_audit_post_batching.json": {
+      "sha256": "b97ede5b69ed06e45efea9fd1a3ca4ad25e440bda7f12fc6a769d138f3a732cd",
+      "bytes": 10689
+    },
+    "data/risk/results/smoke_test_audit_post_batching.md": {
+      "sha256": "4bd6498949d2461b633c385f254023e400066a6f10cece8ed33f733ef5c91674",
+      "bytes": 2969
+    },
+    "data/risk/results/smoke_upload_api_result.json": {
+      "sha256": "bfbe62136d6b030bf0e07360d508708658e5d13ec8bf5fd9b40ee852d788bd53",
+      "bytes": 498648
+    },
+    "data/risk/results/smoke_test_audit.json": {
+      "sha256": "c0dce11ff848c84eba6f30644ef8013d98b736d1e90032125e62964603cbf51c",
+      "bytes": 6565
+    },
+    "data/risk/results/smoke_test_audit.md": {
+      "sha256": "333507c334219db868824371fcf1ef2f06d09e2d69adaca182ca65579d37a11c",
+      "bytes": 2520
+    },
+    "data/risk/results/smoke_upload_api_fast_result.json": {
+      "sha256": "4472e6e4d897b288d4eaffda6fc05c5727f492e7f01a36d48dd2838f01de0dea",
+      "bytes": 493452
+    },
+    "data/risk/results/smoke_test_audit_fast.json": {
+      "sha256": "0923351ae03da2f37d86ad280af610c1c6ca5c60ddb42cfdebcb22246ba55d4e",
+      "bytes": 6547
+    },
+    "data/risk/results/smoke_test_audit_fast.md": {
+      "sha256": "d696e84efd0606bb7100737e3b34e15af48d3bcbd1ccce8546839a127d0e7622",
+      "bytes": 2508
+    },
+    "data/risk/results/smoke_upload_api_pdf_result.json": {
+      "sha256": "04c7c8260550c38d8f8c172f6a236c94e64f839295fdd90cb0894fc28cab1294",
+      "bytes": 128611
+    },
+    "data/risk/results/smoke_test_audit_pdf.json": {
+      "sha256": "781229f96f17687bec0140d2fcb7c49640e7efe14d7919a66294ac4f6e916134",
+      "bytes": 3711
+    },
+    "data/risk/results/smoke_test_audit_pdf.md": {
+      "sha256": "fc10b47627f970706d68138aeb1dca4d06a3c5b90e1689009a23216cb4c11832",
+      "bytes": 2320
+    },
+    "data/risk/results/local_hashing_cuad_retrieval_baseline.json": {
+      "sha256": "d17cea8099573c76d0159d0d80ee9341907eed1ada4d9a48a44772acf12f5160",
+      "bytes": 9644
+    },
+    "data/risk/results/local_hashing_cuad_index_manifest.json": {
+      "sha256": "c299acabf364e3e1d8bec192e7032d645b01865daa5d01ed5d47894393cae29e",
+      "bytes": 1072
+    },
+    "data/risk/results/local_hashing_index_manifest.json": {
+      "sha256": "ab5f81305f77e638b656a294becd675e66a32c0d98db26aa6a6e7e3094c688f9",
+      "bytes": 3788
+    },
+    "data/risk/results/legal_knowledge_retrieval_validation.json": {
+      "sha256": "3e14f8f94bf1a60d1b57cf8c0a6aeffeab4a2e90052338605a474ea07fdc0cf0",
+      "bytes": 3410
+    },
+    "data/risk/results/phase2_reproducible_report.json": {
+      "sha256": "d5e68661e51cce0ea65f5dfcd11b3c7197afcd05a91a846552e32f1a14159650",
+      "bytes": 57622
+    },
+    "data/risk/results/phase2_reproducible_report.md": {
+      "sha256": "2e5e5d706709e2da7918dda8afbe34491f1f4da68e202475208dcde51983d10b",
+      "bytes": 7685
+    },
+    "data/risk/results/release_validation.json": {
+      "sha256": "2e7ff9fb72e85d74395b95fc3d016ef72c5c7a9b453a98c8fa8067690158cfbd",
+      "bytes": 32715
+    },
+    "data/risk/results/release_validation.md": {
+      "sha256": "0fc4cff48da74f802ac0a943c416d7495cd18cc76b3e374ebf023263bcb46bb8",
+      "bytes": 6842
+    },
+    "data/risk/team_export/README.md": {
+      "sha256": "8d163e515ee58f8302f7851a2c904b84995df37c53ae2803a4300095edba8821",
+      "bytes": 1262
+    },
+    "data/risk/team_export/export_manifest.json": {
+      "sha256": "82a7bcc9fae2fada9ccba622e4926cb1b0c0facc8d13e00924af22fd809fac78",
+      "bytes": 1463
+    },
+    "data/risk/team_export/risk_playbook_exact.json": {
+      "sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "bytes": 101987
+    },
+    "data/risk/team_export/risk_clause_checks.csv": {
+      "sha256": "7d9031ed0bb286bc68e49573bd14df712b21a25eaf28651f015b7ec56eb0dcf7",
+      "bytes": 31306
+    },
+    "data/risk/team_export/risk_cross_clause_checks.csv": {
+      "sha256": "7a129e4185fcd02e6125b1b86858035f3fe92286d1a34dcc4bfef41eff8df33a",
+      "bytes": 2088
+    },
+    "data/risk/team_export/risk_document_checks.csv": {
+      "sha256": "32784b27c9d4ce6822b9a66938756b077a66269d58c495e45b41e6a4aa2fc7b9",
+      "bytes": 557
+    },
+    "data/risk/team_export/risk_taxonomy.json": {
+      "sha256": "ebf0dea3cfcc97bb53e488265d8ef507339ba587fc660f3f942822d50ce0d218",
+      "bytes": 7448
+    },
+    "data/risk/team_export/source_registry.json": {
+      "sha256": "d5fc3d7596879e8212d7da76d7e0659976c69d3d25a711d9c2639f721373a7f5",
+      "bytes": 2101
+    },
+    "scripts/risk/package_phase2_release.py": {
+      "sha256": "5f2e995a1b693716a35fc241f0f83c02cdf9175d3794737295bb307e691ed325",
+      "bytes": 7492
+    },
+    "scripts/risk/run_cross_document_model_scenarios.py": {
+      "sha256": "9a1dd5014179cdadf882a81d50d802cb1835c723bcfe1274fc3f51138a93993f",
+      "bytes": 18240
+    },
+    "scripts/risk/compare_cross_document_model_runs.py": {
+      "sha256": "0f775ed4acd03a94157975357917b2e6dbf4b62185e974ed06d067138163af22",
+      "bytes": 6776
+    },
+    "scripts/risk/render_cross_document_model_report.py": {
+      "sha256": "aaedd2b0603d01e6fce90334fadb54add88d077566924159e1e5250b418ab12a",
+      "bytes": 4083
+    },
+    "scripts/risk/build_cross_document_scenario_suite.py": {
+      "sha256": "a8102d1863c5b8968ba37abe401b2821eaa2e169d0e2f349418e0abc2d128d46",
+      "bytes": 18254
+    },
+    "scripts/risk/audit_cross_document_scenario_suite.py": {
+      "sha256": "3bdd4d4421e26ce5c837e79d999860339d590d911f07f3954962fde8f3c20f3d",
+      "bytes": 6319
+    },
+    "scripts/risk/normalize_playbook_domains.py": {
+      "sha256": "31547eccb11f8654c4d3e36b9321045f791f2ab7386acfe8d1539d742eca1c4e",
+      "bytes": 6059
+    },
+    "scripts/risk/export_team_pack.py": {
+      "sha256": "908e2547d0927c4e664f8dfa83ef31323d0d5ade6f86d4451d4953df3d141383",
+      "bytes": 6839
+    },
+    "scripts/risk/validate_evaluation_integrity.py": {
+      "sha256": "044ac947db71521bec573e49baf41e649040e4c9b99e20f8f53c9eed11b5f5f1",
+      "bytes": 2881
+    },
+    "scripts/risk/report_phase2_experiment.py": {
+      "sha256": "ab059b452c9b9e5abe24fbf3cf593c853ad3cbf03364730f1bebb9a7fcd4a256",
+      "bytes": 33631
+    },
+    "scripts/risk/run_release_checks.py": {
+      "sha256": "130c29d8c34b55ccc8cf529c260699c49e5fd7274e572d243be50018a87c4dd5",
+      "bytes": 10125
+    },
+    "scripts/risk/smoke_upload_api.py": {
+      "sha256": "3ddbf7b6986702ee131f69db16eb6d18517a32fb8e8da90a030570372b4953d5",
+      "bytes": 3282
+    },
+    "backend/app/core/risk/contract_checks.py": {
+      "sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "bytes": 18909
+    },
+    "backend/app/core/risk/contract_risk_engine.py": {
+      "sha256": "3107e61bc7dba1164de923fe00a3342ba661c3be6d6483c0e6783e79a648056b",
+      "bytes": 9709
+    },
+    "backend/app/core/risk/risk_playbook.py": {
+      "sha256": "900a96bfcd023ab8e1ac00f1c4ff31d3fa03c4ede35b60da1548fd92b491c0f2",
+      "bytes": 11982
+    },
+    "backend/app/core/risk/risk_engine.py": {
+      "sha256": "b0d5ae905cfd0dfbfc1d40c8c28738cb385523bc5503cb7b38ee92d5e7017abd",
+      "bytes": 22282
+    },
+    "backend/app/core/risk/risk_scoring.py": {
+      "sha256": "6d401f459c7f7d7beb307bbdc3c5ba06d8af04bb2285bd6d38b63137099b92ee",
+      "bytes": 16220
+    },
+    "backend/tests/test_contract_checks_batching.py": {
+      "sha256": "510c238521e8a1ed74fc32580dc861b2e7a9dcdcfe8a245ff318f93a696d8411",
+      "bytes": 4124
+    },
+    "backend/tests/test_contract_checks_evaluation.py": {
+      "sha256": "07b1c809433dd8c8fea30416915f0f03da61d21fe93064e223fb06f830a48247",
+      "bytes": 6041
+    },
+    "backend/tests/test_deterministic_cross_checks.py": {
+      "sha256": "155115da192aa7cac3b34b364e9397278b45ee50bb72fa8c2f9187040b95c1e2",
+      "bytes": 1608
+    },
+    "backend/tests/test_cross_clause_candidate_retrieval.py": {
+      "sha256": "80eea40a8635b462c2f543e5866a30fa41086fb561de6317b62fd248e4450c2e",
+      "bytes": 849
+    }
+  },
+  "interpretation": "Includes code/data/docs/results needed to inspect and reproduce the recorded Phase 2 experiments. The custom risk queue is still unannotated human gold; model-silver and synthetic scenario results are diagnostic and must not be called human-gold accuracy.",
+  "zip_sha256": "ca06d68a95064f3574482d9dcd5660341396dcd33dbce54fd5656dccb3ea7bd9",
+  "zip_bytes": 41011323
+}

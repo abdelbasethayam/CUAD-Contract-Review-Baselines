@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-10-09T21:06:41.320825+00:00",
+  "interpretation": "Synthetic plumbing smoke test only. The input is invented. Results do not estimate model accuracy, legal correctness or sensitivity on real contracts.",
+  "http_status": 200,
+  "elapsed_seconds": 171.126,
+  "analysis_id": "56a13430f537613f-fe8f4d863361b393",
+  "run_dir": "data/runs/56a13430f537613f-fe8f4d863361b393",
+  "source_file": "/home/jovyan/CUAD-Contract-Review-Baselines/data/risk/demo_contract_smoke.txt",
+  "source_sha256": "56a13430f537613f4e1421b8eb993658c1d3722604c3e3afca71375054dcd25b",
+  "manifest_source": {
+    "filename": "demo_contract_smoke.txt",
+    "sha256": "56a13430f537613f4e1421b8eb993658c1d3722604c3e3afca71375054dcd25b"
+  },
+  "pipeline_config": {
+    "calibration_hash": null,
+    "code_fingerprint": "21768bdbc8ec2a1bce7a04d7e59a6d09870601e0d4ddf5a4573b5a93a9bdc91d",
+    "embedding_backend": "local_hashing",
+    "embedding_model": "sklearn.HashingVectorizer(n_features=768, ngram_range=(1,2), norm=l2)",
+    "enable_cross_clause": true,
+    "enable_document_checks": true,
+    "legal_knowledge_collection": "legal_knowledge_hashing",
+    "phase": 2,
+    "playbook_hash": "03c41c2bd8d560824facaf4c3b0097060b199678322e465504d5ef0aa4830793",
+    "playbook_path": "data/risk/commercial_clause_risk_playbook.json",
+    "qdrant_collection": "cuad_train_hashing",
+    "risk_context_top_k": 5,
+    "risk_model": "qwen3:8b",
+    "risk_self_consistency_passes": 1,
+    "top_k": 12,
+    "use_context": true,
+    "use_legal_guidance": true,
+    "use_playbook": true
+  },
+  "summary": {
+    "pipeline_status": "COMPLETED",
+    "clause_count": 4,
+    "classified_labels": [
+      {
+        "clause_index": 1,
+        "label": "Uncapped Liability",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 2,
+        "label": "Covenant Not To Sue",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 3,
+        "label": "Renewal Term",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 4,
+        "label": "Irrevocable Or Perpetual License",
+        "classification_status": "VALID_CANDIDATE"
+      }
+    ],
+    "clause_risk_finding_count": 13,
+    "clause_positive_count": 3,
+    "target_clause_evidence_valid_count": 3,
+    "related_clause_evidence_valid_count": 0,
+    "invalid_or_unmapped_positive_evidence_count": 0,
+    "cross_clause_statuses": {
+      "INSUFFICIENT_EVIDENCE": 7,
+      "POTENTIAL_RISK": 2,
+      "NO_RISK": 1
+    },
+    "document_statuses": {
+      "POTENTIAL_RISK": 1,
+      "INSUFFICIENT_EVIDENCE": 2
+    },
+    "cross_or_document_positive_evidence_valid_count": 3,
+    "cross_or_document_positive_evidence_invalid_count": 0,
+    "overall_status": "POTENTIAL_RISK",
+    "overall_risk": "MEDIUM",
+    "deterministic_candidate_signal_ids": [
+      "DET-INCORPORATED-UNREAD",
+      "DET-PRECEDENCE-OVERRIDE"
+    ],
+    "legal_guidance_search_calls": 3,
+    "legal_guidance_matches_total": 9
+  },
+  "positive_clause_findings": [
+    {
+      "target_clause": 1,
+      "check_id": "UNC-1",
+      "risk_domain": "Liability Risk",
+      "risk_type": "Uncapped Monetary Exposure",
+      "evidence_clause_index": 1,
+      "evidence_scope": "target_clause",
+      "evidence": "Supplier's liability is unlimited for all claims and includes indemnification obligations"
+    },
+    {
+      "target_clause": 3,
+      "check_id": "REN-1",
+      "risk_domain": "Termination Risk",
+      "risk_type": "Evergreen Renewal",
+      "evidence_clause_index": 3,
+      "evidence_scope": "target_clause",
+      "evidence": "This Agreement automatically renews for successive one-year terms"
+    },
+    {
+      "target_clause": 4,
+      "check_id": "IPL-1",
+      "risk_domain": "Intellectual Property Risk",
+      "risk_type": "Broad IP License",
+      "evidence_clause_index": 4,
+      "evidence_scope": "target_clause",
+      "evidence": "perpetual, irrevocable, worldwide, transferable license"
+    }
+  ],
+  "valid_related_clause_evidence": [],
+  "positive_cross_document_findings": [
+    {
+      "check_id": "X-10",
+      "scope": "cross_clause",
+      "clause_ids": [
+        1,
+        2
+      ],
+      "evidence_valid": true,
+      "evidence": [
+        {
+          "clause_id": 1,
+          "quote": "Supplier's liability is unlimited for all claims and includes indemnification obligations."
+        },
+        {
+          "clause_id": 2,
+          "quote": "Supplier has no obligation to indemnify Customer for third-party intellectual-property infringement claims."
+        }
+      ]
+    },
+    {
+      "check_id": "X-6",
+      "scope": "cross_clause",
+      "clause_ids": [
+        4,
+        3
+      ],
+      "evidence_valid": true,
+      "evidence": [
+        {
+          "clause_id": 4,
+          "quote": "Supplier's online terms prevail over this Agreement in any conflict and may be updated at any time; no fixed version is attached."
+        },
+        {
+          "clause_id": 3,
+          "quote": "Customer may terminate for material breach only after a 90-day cure period and remains liable for all remaining minimum fees."
+        }
+      ]
+    },
+    {
+      "check_id": "DOC-1",
+      "scope": "document",
+      "clause_ids": [
+        4
+      ],
+      "evidence_valid": true,
+      "evidence": [
+        {
+          "clause_id": 4,
+          "quote": "Supplier's online terms prevail over this Agreement in any conflict and may be updated at any time; no fixed version is attached."
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "http_200": true,
+    "run_completed": true,
+    "source_hash_matches_manifest": true,
+    "all_clause_positive_findings_have_valid_evidence": true,
+    "all_cross_document_positive_findings_have_valid_evidence": true,
+    "run_has_core_artifacts": true
+  },
+  "failed_checks": [],
+  "core_artifact_sha256": {
+    "manifest.json": "b73337e13edbf890a52f30963844d3bd2a280156aef9a931363ee2803b8393d9",
+    "contract_checks.json": "499aa6279df82a456477a366c8ab9b1200ee440cb4e68cdc7fc29c06ecfe1c93",
+    "contract_risk.json": "b86f14642fd685e9863eea3b2a412e862befe61d5a84289c3646ed5667e1e83a",
+    "result.json": "5a3d90155af1dccc467dee90b990919d7d32033abec99802f8376ed05888a866",
+    "risk_findings.csv": "f1ef5e0fccb5ef067c85f376665dcf9eaa0e172d2cc61024fea53bab97321efb",
+    "clauses.csv": "eca1ae1099e23d7a725f8a98075cb707884797508f9ff2ded482317185611eb3",
+    "trace.jsonl": "3a94c58a86a814bd878f91dc2fabf6e41cc0cd717a8a8a34058c6ff642b34f59"
+  }
+}

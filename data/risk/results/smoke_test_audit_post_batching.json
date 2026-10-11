@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-10-09T21:06:41.158596+00:00",
+  "interpretation": "Synthetic plumbing smoke test only. The input is invented. Results do not estimate model accuracy, legal correctness or sensitivity on real contracts.",
+  "http_status": 200,
+  "elapsed_seconds": 577.177,
+  "analysis_id": "abdc407021e71b3b-fcd070f126af256d",
+  "run_dir": "data/runs/abdc407021e71b3b-fcd070f126af256d",
+  "source_file": "/home/jovyan/CUAD-Contract-Review-Baselines/data/risk/demo_contract_for_reproduction.txt",
+  "source_sha256": "abdc407021e71b3bd69aef03197895be5080fb2fa44550c9a0d6a7573446f8c5",
+  "manifest_source": {
+    "filename": "demo_contract_for_reproduction.txt",
+    "sha256": "abdc407021e71b3bd69aef03197895be5080fb2fa44550c9a0d6a7573446f8c5"
+  },
+  "pipeline_config": {
+    "calibration_hash": null,
+    "code_fingerprint": "dd28478e9adc2dc9f63c4eb3e3adae59976b0501e40b986d34470c8d20e6807f",
+    "embedding_backend": "local_hashing",
+    "embedding_model": "sklearn.HashingVectorizer(n_features=768, ngram_range=(1,2), norm=l2)",
+    "enable_cross_clause": true,
+    "enable_document_checks": true,
+    "legal_knowledge_collection": "legal_knowledge_hashing",
+    "phase": 2,
+    "playbook_hash": "03c41c2bd8d560824facaf4c3b0097060b199678322e465504d5ef0aa4830793",
+    "playbook_path": "data/risk/commercial_clause_risk_playbook.json",
+    "qdrant_collection": "cuad_train_hashing",
+    "risk_context_top_k": 5,
+    "risk_model": "qwen3:8b",
+    "risk_self_consistency_passes": 1,
+    "top_k": 12,
+    "use_context": true,
+    "use_legal_guidance": true,
+    "use_playbook": true
+  },
+  "summary": {
+    "pipeline_status": "COMPLETED",
+    "clause_count": 11,
+    "classified_labels": [
+      {
+        "clause_index": 1,
+        "label": "Renewal Term",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 2,
+        "label": "Minimum Commitment",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 3,
+        "label": "Cap On Liability",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 4,
+        "label": "Uncapped Liability",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 5,
+        "label": "Termination For Convenience",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 6,
+        "label": "Ip Ownership Assignment",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 7,
+        "label": "Insurance",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 8,
+        "label": "Anti-Assignment",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 9,
+        "label": "NO_APPLICABLE_LABEL",
+        "classification_status": "NO_APPLICABLE_LABEL"
+      },
+      {
+        "clause_index": 10,
+        "label": "Governing Law",
+        "classification_status": "VALID_CANDIDATE"
+      },
+      {
+        "clause_index": 11,
+        "label": "NO_APPLICABLE_LABEL",
+        "classification_status": "NO_APPLICABLE_LABEL"
+      }
+    ],
+    "clause_risk_finding_count": 28,
+    "clause_positive_count": 9,
+    "target_clause_evidence_valid_count": 9,
+    "related_clause_evidence_valid_count": 0,
+    "invalid_or_unmapped_positive_evidence_count": 0,
+    "cross_clause_statuses": {
+      "POTENTIAL_RISK": 4,
+      "NO_RISK": 2,
+      "INSUFFICIENT_EVIDENCE": 4
+    },
+    "document_statuses": {
+      "INSUFFICIENT_EVIDENCE": 3
+    },
+    "cross_or_document_positive_evidence_valid_count": 4,
+    "cross_or_document_positive_evidence_invalid_count": 0,
+    "overall_status": "POTENTIAL_RISK",
+    "overall_risk": "HIGH",
+    "deterministic_candidate_signal_ids": [
+      "DET-SCOPE-CONFLICT",
+      "DET-EXIT-FAILURE",
+      "DET-REMEDY-MISMATCH",
+      "DET-EVIDENCE-GAP",
+      "DET-PRECEDENCE-GAP",
+      "DET-INCORPORATED-UNREAD",
+      "DET-PRECEDENCE-OVERRIDE",
+      "DET-DISPUTE-MECHANISM-AMBIGUITY"
+    ],
+    "legal_guidance_search_calls": 8,
+    "legal_guidance_matches_total": 24
+  },
+  "positive_clause_findings": [
+    {
+      "target_clause": 1,
+      "check_id": "REN-1",
+      "risk_domain": "Termination Risk",
+      "risk_type": "Evergreen Renewal",
+      "evidence_clause_index": 1,
+      "evidence_scope": "target_clause",
+      "evidence": "The initial term is one year and automatically renews for successive one-year periods"
+    },
+    {
+      "target_clause": 2,
+      "check_id": "MIN-1",
+      "risk_domain": "Commercial Risk",
+      "risk_type": "Minimum Purchase Obligation",
+      "evidence_clause_index": 2,
+      "evidence_scope": "target_clause",
+      "evidence": "Customer commits to a minimum of 100,000 transactions per contract year"
+    },
+    {
+      "target_clause": 3,
+      "check_id": "LOL-4",
+      "risk_domain": "Liability Risk",
+      "risk_type": "Uncapped High-Risk Heads",
+      "evidence_clause_index": 3,
+      "evidence_scope": "target_clause",
+      "evidence": "Except for payment obligations, confidentiality breaches, and indemnification obligations, neither party shall be liable for indirect, incidental, special, consequential, or punitive damages."
+    },
+    {
+      "target_clause": 4,
+      "check_id": "UNC-3",
+      "risk_domain": "Liability Risk",
+      "risk_type": "Uncapped Liability",
+      "evidence_clause_index": 4,
+      "evidence_scope": "target_clause",
+      "evidence": "Supplier shall have no obligation to indemnify Customer for third-party intellectual property infringement claims."
+    },
+    {
+      "target_clause": 5,
+      "check_id": "TFC-3",
+      "risk_domain": "Termination Risk",
+      "risk_type": "Early Exit Triggering Full Commitment",
+      "evidence_clause_index": 5,
+      "evidence_scope": "target_clause",
+      "evidence": "Customer remains liable for all fees for the entire remaining term and all minimum commitments"
+    },
+    {
+      "target_clause": 6,
+      "check_id": "IP-1",
+      "risk_domain": "Intellectual Property Risk",
+      "risk_type": "Unclear Ownership",
+      "evidence_clause_index": 6,
+      "evidence_scope": "target_clause",
+      "evidence": "Supplier retains all right, title, and interest in the Services"
+    },
+    {
+      "target_clause": 6,
+      "check_id": "IP-3",
+      "risk_domain": "Intellectual Property Risk",
+      "risk_type": "Assignment Scope Gap",
+      "evidence_clause_index": 6,
+      "evidence_scope": "target_clause",
+      "evidence": "Customer hereby assigns to Supplier all intellectual property developed in connection with the Services, including Customer materials and pre-existing tools"
+    },
+    {
+      "target_clause": 8,
+      "check_id": "AA-1",
+      "risk_domain": "Assignment / Control Risk",
+      "risk_type": "Unapproved Assignment",
+      "evidence_clause_index": 8,
+      "evidence_scope": "target_clause",
+      "evidence": "Customer may not assign this Agreement without Supplier's prior written consent"
+    },
+    {
+      "target_clause": 8,
+      "check_id": "AA-2",
+      "risk_domain": "Assignment / Control Risk",
+      "risk_type": "Consent Ambiguity",
+      "evidence_clause_index": 8,
+      "evidence_scope": "target_clause",
+      "evidence": "which may be withheld in Supplier's sole discretion"
+    }
+  ],
+  "valid_related_clause_evidence": [],
+  "positive_cross_document_findings": [
+    {
+      "check_id": "X-1",
+      "scope": "cross_clause",
+      "clause_ids": [
+        3,
+        4
+      ],
+      "evidence_valid": true,
+      "evidence": [
+        {
+          "clause_id": 3,
+          "quote": "Except for payment obligations, confidentiality breaches, and indemnification obligations, neither party shall be liable for indirect, incidental, special, consequential, or punitive damages."
+        },
+        {
+          "clause_id": 4,
+          "quote": "Customer shall indemnify, defend, and hold harmless Supplier and its affiliates from any and all claims, losses, damages, liabilities, and expenses arising out of Customer's use of the Services."
+        }
+      ]
+    },
+    {
+      "check_id": "X-10",
+      "scope": "cross_clause",
+      "clause_ids": [
+        3,
+        4
+      ],
+      "evidence_valid": true,
+      "evidence": [
+        {
+          "clause_id": 3,
+          "quote": "Supplier's aggregate liability shall not exceed the fees paid by Customer in the previous one month."
+        },
+        {
+          "clause_id": 4,
+          "quote": "Supplier shall have no obligation to indemnify Customer for third-party intellectual property infringement claims."
+        }
+      ]
+    },
+    {
+      "check_id": "X-4",
+      "scope": "cross_clause",
+      "clause_ids": [
+        5
+      ],
+      "evidence_valid": true,
+      "evidence": [
+        {
+          "clause_id": 5,
+          "quote": "If Customer terminates for convenience, Customer remains liable for all fees for the entire remaining term and all minimum commitments."
+        }
+      ]
+    },
+    {
+      "check_id": "X-9",
+      "scope": "cross_clause",
+      "clause_ids": [
+        2,
+        7
+      ],
+      "evidence_valid": true,
+      "evidence": [
+        {
+          "clause_id": 2,
+          "quote": "Customer commits to a minimum of 100,000 transactions per contract year. Fees paid or payable are non-refundable, including where the service is unavailable for an extended period."
+        },
+        {
+          "clause_id": 7,
+          "quote": "Supplier shall maintain commercially reasonable insurance coverage during the Term and provide certificates upon request. No minimum policy limits are stated in this Agreement."
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "http_200": true,
+    "run_completed": true,
+    "source_hash_matches_manifest": true,
+    "all_clause_positive_findings_have_valid_evidence": true,
+    "all_cross_document_positive_findings_have_valid_evidence": true,
+    "run_has_core_artifacts": true
+  },
+  "failed_checks": [],
+  "core_artifact_sha256": {
+    "manifest.json": "34e464a077745bd0fd3f3d3295687a0f71eb5409e6349f87e9b43e9a4fe25968",
+    "contract_checks.json": "7713cc32a2675aedaf2ea4aa6dc5f6e0e2dc842e070a0b0564a3246547e6b83a",
+    "contract_risk.json": "58903ea79bf8e0154b1d51b32c39327fc3bcb3c0fe90433c3abac13a6692a092",
+    "result.json": "d77c705912b39386b328f197a528a0010ab3019f7ee4cb77f92ce50799f249c5",
+    "risk_findings.csv": "3f56ecca6a9c382ae110c583826500f8c67785d4b6bd4a3a32ee156a2ae746db",
+    "clauses.csv": "b752fe9fdd1ea898ffc7bdf4bfb813452b24d174176ed5f98d54b73ff7cb1e98",
+    "trace.jsonl": "18d6d41ed370118ce97a4f18fd7fabc3445fa0aef354a0d8c9d473d900a81c61"
+  }
+}

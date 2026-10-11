@@ -6,7 +6,7 @@ The purpose of this set is to estimate how well the playbook/model identifies co
 
 Annotate one (contract_id, clause_index, check_id) at a time.
 
-Each annotator records adjudicated_risk (YES/NO), adjudicated_risk_type, adjudicated_severity (LOW/MEDIUM/HIGH), adjudicated_evidence (exact contiguous text), and notes.
+Each annotator independently records annotator_1_* or annotator_2_*: risk (YES/NO), risk type, severity (INFORMATIONAL/LOW/MEDIUM/HIGH/CRITICAL where applicable), exact evidence, and notes. The adjudicated_* fields are reserved for the final adjudicator decision.
 
 ## Blindness
 

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-09T16:41:43.390256+00:00",
+  "status": "PASS",
+  "collection": "cuad_train_hashing",
+  "embedding": {
+    "backend": "sklearn.HashingVectorizer",
+    "dimension": 768,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "alternate_sign": false,
+    "normalization": "l2",
+    "note": "Deterministic local lexical-vector baseline; not a pretrained semantic embedding model."
+  },
+  "source": {
+    "train_csv": "data/splits/train/master_clauses_train.csv",
+    "train_csv_sha256": "baf7bef34bff8f8d7e3c1bb75b031b42730f7cd1234d1a89d52d794e5f3e855f",
+    "test_csv": "data/splits/test/master_clauses_test.csv",
+    "test_csv_sha256": "14ede6e03f6255760f705837b9fb62709b03875985e52a75ee7b5fbc385a9002"
+  },
+  "counts": {
+    "eligible_train_rows": 7004,
+    "indexed_points": 7004,
+    "train_contracts": 383,
+    "test_contracts": 100,
+    "train_test_contract_overlap": 0
+  },
+  "leakage_policy": "Only eligible rows from data/splits/train/master_clauses_train.csv are indexed. No test rows or test labels are inserted."
+}

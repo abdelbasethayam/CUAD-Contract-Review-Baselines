@@ -1,7 +1,8 @@
 import json
 
-from app.core.risk import aggregator, risk_detector
+from app.core.risk import aggregator, contract_risk_engine, risk_detector
 from app.core.risk.knowledge_base import match_risk_domains
+from app.core.risk.risk_engine import _evidence_source, _majority
 from app.models.schemas import ContractClassificationResponse
 
 
@@ -196,9 +197,98 @@ def test_api_response_exposes_contract_assessment_and_clause_findings():
             "overall_status": "POTENTIAL_RISK",
             "overall_risk": "HIGH",
             "affected_clauses": [0],
+            "deterministic_cross_checks": [
+                {
+                    "id": "DET-REMEDY-MISMATCH",
+                    "candidate": True,
+                    "clause_ids": [0],
+                    "evidence": [{"clause_id": 0, "quote": "Liability is unlimited."}],
+                }
+            ],
         },
     )
 
     payload = response.model_dump() if hasattr(response, "model_dump") else response.dict()
     assert payload["contract_risk_assessment"]["overall_risk"] == "HIGH"
-    assert "evidence" not in payload["clauses"][0]
+    assert payload["contract_risk_assessment"]["deterministic_cross_checks"][0]["id"] == "DET-REMEDY-MISMATCH"
+    # Contract evidence is part of the explainability output, not a field to strip.
+    assert payload["clauses"][0]["evidence"] == "Liability is unlimited."
+
+
+def test_evidence_source_identifies_the_exact_related_clause():
+    context = [
+        {"clause_index": 2, "clause_text": "Supplier indemnifies Customer for third-party claims."},
+        {"clause_index": 4, "clause_text": "Supplier's liability is unlimited."},
+    ]
+    source = _evidence_source(
+        "Supplier's liability is unlimited.",
+        "The supplier shall provide services.",
+        1,
+        context,
+    )
+    assert source == {
+        "evidence_clause_index": 4,
+        "evidence_scope": "related_contract_clause",
+    }
+
+    target = _evidence_source(
+        "The supplier shall provide services.",
+        "The supplier shall provide services.",
+        1,
+        context,
+    )
+    assert target == {
+        "evidence_clause_index": 1,
+        "evidence_scope": "target_clause",
+    }
+
+
+def test_single_pass_is_not_misrepresented_as_model_consensus():
+    answer, agreement = _majority([{"answer": "YES"}])
+    assert answer == "YES"
+    assert agreement == 0.0
+
+
+def test_even_split_between_model_passes_abstains():
+    answer, agreement = _majority([
+        {"answer": "YES"},
+        {"answer": "NO"},
+    ])
+    assert answer == "DON'T KNOW"
+    assert agreement == 0.5
+
+
+def test_playbook_domain_is_authoritative_and_taxonomy_matches_are_supplementary():
+    playbook = {
+        "clause_types": {
+            "Insurance": {
+                "checklist": [
+                    {
+                        "id": "INS-1",
+                        "risk_domain": "Insurance Risk",
+                        "risk_subdomain": "Coverage Gap",
+                        "question": "Are insurance limits sufficient?",
+                    }
+                ]
+            }
+        },
+        "cross_clause_checks": [],
+        "document_level_checks": [],
+    }
+    finding = _positive_finding(
+        clause_text="Insurance liability is unlimited and the policy has no stated limits.",
+        predicted_label="Insurance",
+        check_id="INS-1",
+        risk_domain="Insurance Risk",
+        risk_subdomain="Coverage Gap",
+        risk_type="Uncapped Liability",
+        evidence="Insurance liability is unlimited",
+    )
+
+    assessment = contract_risk_engine.aggregate_clause_risks([finding], playbook=playbook)
+
+    assert finding["risk_domain"] == "Insurance Risk"
+    assert finding["risk_domains"] == ["Insurance Risk"]
+    assert finding["risk_subdomain"] == "Coverage Gap"
+    assert "Liability Risk" in finding["taxonomy_suggested_domains"]
+    assert {item["domain"] for item in assessment["risk_domains"]} == {"Insurance Risk"}

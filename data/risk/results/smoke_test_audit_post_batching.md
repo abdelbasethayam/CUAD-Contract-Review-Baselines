@@ -1,0 +1,68 @@
+# End-to-End Upload Smoke Test Audit
+
+**Status:** PASS
+**Interpretation:** Synthetic plumbing test only—not an accuracy benchmark.
+Analysis ID: abdc407021e71b3b-fcd070f126af256d
+Input: /home/jovyan/CUAD-Contract-Review-Baselines/data/risk/demo_contract_for_reproduction.txt
+Input SHA-256: abdc407021e71b3bd69aef03197895be5080fb2fa44550c9a0d6a7573446f8c5
+Runtime seconds: 577.177
+Git commit in manifest: 8c373301b194081ec03d6a2198724b8edb90112e
+Code fingerprint: dd28478e9adc2dc9f63c4eb3e3adae59976b0501e40b986d34470c8d20e6807f
+Playbook hash: 03c41c2bd8d560824facaf4c3b0097060b199678322e465504d5ef0aa4830793
+
+## End-to-end outcome
+
+| Metric | Observed |
+|---|---:|
+| HTTP status | 200 |
+| Pipeline status | COMPLETED |
+| Clauses returned | 11 |
+| Clause-level findings | 28 |
+| Positive clause findings | 9 |
+| Positive quotes in target clause | 9 |
+| Positive quotes from related clause | 0 |
+| Invalid/unmapped positive quotes | 0 |
+| Cross-clause status counts | {"POTENTIAL_RISK": 4, "NO_RISK": 2, "INSUFFICIENT_EVIDENCE": 4} |
+| Document status counts | {"INSUFFICIENT_EVIDENCE": 3} |
+| Valid positive cross/document results | 4 |
+| Overall triage | POTENTIAL_RISK / HIGH |
+| Legal guidance matches | 24 across 8 searches |
+
+## Clause classifications
+- Clause 1: Renewal Term (VALID_CANDIDATE)
+- Clause 2: Minimum Commitment (VALID_CANDIDATE)
+- Clause 3: Cap On Liability (VALID_CANDIDATE)
+- Clause 4: Uncapped Liability (VALID_CANDIDATE)
+- Clause 5: Termination For Convenience (VALID_CANDIDATE)
+- Clause 6: Ip Ownership Assignment (VALID_CANDIDATE)
+- Clause 7: Insurance (VALID_CANDIDATE)
+- Clause 8: Anti-Assignment (VALID_CANDIDATE)
+- Clause 9: NO_APPLICABLE_LABEL (NO_APPLICABLE_LABEL)
+- Clause 10: Governing Law (VALID_CANDIDATE)
+- Clause 11: NO_APPLICABLE_LABEL (NO_APPLICABLE_LABEL)
+
+## Deterministic interaction candidates
+- DET-SCOPE-CONFLICT
+- DET-EXIT-FAILURE
+- DET-REMEDY-MISMATCH
+- DET-EVIDENCE-GAP
+- DET-PRECEDENCE-GAP
+- DET-INCORPORATED-UNREAD
+- DET-PRECEDENCE-OVERRIDE
+- DET-DISPUTE-MECHANISM-AMBIGUITY
+
+## Validation
+- [x] http_200
+- [x] run_completed
+- [x] source_hash_matches_manifest
+- [x] all_clause_positive_findings_have_valid_evidence
+- [x] all_cross_document_positive_findings_have_valid_evidence
+- [x] run_has_core_artifacts
+
+## Limitations observed
+
+- The contract fixture is invented and intentionally contains test stimuli. This is not measured legal-risk accuracy.
+- Model-silver and synthetic fixtures do not replace human adjudication.
+- New runs identify whether exact evidence came from the target clause or a related clause; the source clause ID is preserved.
+- If legal-guidance matches are zero, check that the local Qdrant collection has been populated with the legal knowledge ingestion command before launching the API. This report captures the actual result for this run and does not retroactively change it.
+- Full response, manifest, trace and per-finding exports are under data/runs/abdc407021e71b3b-fcd070f126af256d.

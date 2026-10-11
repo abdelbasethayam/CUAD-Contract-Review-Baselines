@@ -28,7 +28,14 @@ function RiskCard({ finding }) {
       </div>
 
       <div className="risk-grid">
-        <div><span className="field-label">Clause</span><strong>{finding.clause_id ?? "—"}</strong></div>
+        <div><span className="field-label">Finding clause</span><strong>{finding.clause_id ?? "—"}</strong></div>
+        {finding.evidence_clause_index != null && (
+          <div>
+            <span className="field-label">Evidence source clause</span>
+            <strong>{finding.evidence_clause_index}</strong>
+            <span className="field-note">{finding.evidence_scope === "related_contract_clause" ? "Retrieved from another clause in this contract" : "Quote from this clause"}</span>
+          </div>
+        )}
         <div>
           <span className="field-label">Confidence</span>
           <strong>{confidence}</strong>
@@ -207,6 +214,10 @@ function ContractReview() {
         <input type="file" accept=".pdf,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={loading} />
         <button type="submit" disabled={!file || loading}>{loading ? "Analyzing…" : "Analyze contract"}</button>
       </form>
+      <p className="muted" role="note">
+        Privacy notice: LLM inference runs locally, but clause text is sent to the configured Cohere embedding API.
+        Do not upload confidential contracts unless that transfer is authorized. This build is not fully offline.
+      </p>
 
       {error && <div className="error">{error}</div>}
 
@@ -327,6 +338,33 @@ function ContractReview() {
                 ))}
                 {!visibleRisks.length && <div className="panel"><h3>No findings in this view.</h3></div>}
               </div>
+              {(assessment.deterministic_cross_checks || []).length > 0 && (
+                <section className="results">
+                  <div className="section-heading">
+                    <div><div className="eyebrow">Rule-based review candidates</div><h2>Deterministic interaction signals</h2></div>
+                  </div>
+                  <p className="muted">These are conservative candidate signals, not model-verified risk findings or legal conclusions. Review the quoted contract provisions before acting on them.</p>
+                  <div className="risk-stack">
+                    {assessment.deterministic_cross_checks.map((signal) => (
+                      <article className="panel" key={signal.id}>
+                        <div className="clause-card__header">
+                          <div><div className="eyebrow">{signal.id} · {signal.name?.replaceAll("_", " ")}</div><h3>Review candidate</h3></div>
+                          <span className="risk-badge risk-badge--unsupported">REVIEW</span>
+                        </div>
+                        <p>{signal.reason}</p>
+                        {signal.evidence?.length > 0 && (
+                          <div className="evidence-quote">
+                            <strong>Source clauses</strong>
+                            {signal.evidence.map((item, index) => (
+                              <blockquote key={signal.id + "-" + index}>Clause {item.clause_id}: “{item.quote}”</blockquote>
+                            ))}
+                          </div>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
             </section>
           )}
         </>

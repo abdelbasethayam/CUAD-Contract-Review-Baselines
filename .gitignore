@@ -40,3 +40,11 @@ data/runs/
 data/risk/gold/*.csv
 data/risk/gold/*.json
 data/risk/results/
+
+# Machine-local runtime state and generated dependencies
+frontend/node_modules/
+.pytest_cache/
+data/qdrant_local/
+
+# Large derived evaluation export (> GitHub single-file limit); included in the dated reproducibility ZIP
+data/risk/external/cuad_expert_test.jsonl

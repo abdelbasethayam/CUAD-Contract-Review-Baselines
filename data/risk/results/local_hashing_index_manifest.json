@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-09T16:41:47.429778+00:00",
+  "status": "PASS",
+  "embedding_backend": "local_hashing",
+  "embedding_spec": {
+    "implementation": "sklearn.feature_extraction.text.HashingVectorizer",
+    "dimension": 768,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "alternate_sign": false,
+    "normalization": "l2",
+    "caveat": "Lexical-vector retrieval; not a pretrained semantic embedding model."
+  },
+  "qdrant_path": "data/qdrant_local",
+  "cuad_train_collection": "cuad_train_hashing",
+  "legal_knowledge_collection": "legal_knowledge_hashing",
+  "collections": {
+    "cuad_train_hashing": {
+      "point_count": 7004,
+      "scanned_point_count": 7004,
+      "vector_dimension": 768,
+      "metadata_failures": 0
+    },
+    "legal_knowledge_hashing": {
+      "point_count": 19,
+      "scanned_point_count": 19,
+      "vector_dimension": 768,
+      "metadata_failures": 0
+    }
+  },
+  "sources": {
+    "train_index_manifest_sha256": "c299acabf364e3e1d8bec192e7032d645b01865daa5d01ed5d47894393cae29e",
+    "legal_source_registry_sha256": "d5fc3d7596879e8212d7da76d7e0659976c69d3d25a711d9c2639f721373a7f5",
+    "legal_markdown_files": {
+      "backend/data/legal_knowledge/aba/indemnification.md": "eb5af21a3ae9cccc3a83dbbc8508cedb16266e4c1e263373d15bd2fe3f6cf166",
+      "backend/data/legal_knowledge/aba/limitation_of_liability.md": "8233b974262ba42c1a0929e9a101285a9a7bde4435af67af340b109902bb4822",
+      "backend/data/legal_knowledge/aba/termination.md": "1f483973db2f06c31fa9c5f747188f714b4064faca01baacc256b57b2b825ea3",
+      "backend/data/legal_knowledge/iba/indemnification.md": "124203c5f949167e73f757ded2768c37f1c94bc95e0d339fe8eea7e468f69fad",
+      "backend/data/legal_knowledge/icc/force_majeure_hardship.md": "3f1c50ccea99d46d6bda8258d01209a0dd6bdbb450f287df99cd7531371fada8",
+      "backend/data/legal_knowledge/uncitral/arbitration_mediation.md": "f7852ba17eca3d1b3f990fa8125ae2d6b599eb72fbe913d41897e64f377115a3",
+      "backend/data/legal_knowledge/wipo/confidentiality.md": "67e460c2ed19242f00df233064f22b6368a2ab637720be14788ad4bbf45ae788",
+      "backend/data/legal_knowledge/wipo/intellectual_property.md": "77f3bd87989f36a023850b4c7363bc097b57d5e206238aac684b4aeb6db7c24b",
+      "backend/data/legal_knowledge/worldcc/assignment.md": "2280e442e5e6c9c91369993118e5f5e9cb4a463b95fe395ba63e44474ac1dbec",
+      "backend/data/legal_knowledge/worldcc/confidentiality.md": "800155ed3133baa5640bc1363778fa7fed24be38595984fd4a7dd19f3f6e8b5d",
+      "backend/data/legal_knowledge/worldcc/indemnification.md": "93aa88026d901889f1e3c270fd1632452cb4628e2a94af3e4b28c49341a11b60",
+      "backend/data/legal_knowledge/worldcc/insurance.md": "80facac7ebef28ae158e427c35849ecbd0d4e89216038d9d20e01254a4c7cfaa",
+      "backend/data/legal_knowledge/worldcc/intellectual_property.md": "938107581c68982849373928ba4bbe201d9b4be87972f5b75e0842cf26e276b7",
+      "backend/data/legal_knowledge/worldcc/limitation_of_liability.md": "acd68145dc439a5bde102fb61c5662f295dbb312eccbcd249a7ea8887adf3fc5",
+      "backend/data/legal_knowledge/worldcc/payment.md": "56bafb66972804318036154ad654cab0134d1c042463a10ede4c201a921bab95",
+      "backend/data/legal_knowledge/worldcc/termination.md": "591fbdaa18b0711d7718bc1c255e42846eee77d69d657467cceef0f29ac370ea",
+      "backend/data/legal_knowledge/worldcc/warranties.md": "379f36fe9d8444a0cb106580723e7b8be273cce78563a422fcccfbb64187226a"
+    }
+  },
+  "train_test_isolation": {
+    "source_train_csv_sha256": "baf7bef34bff8f8d7e3c1bb75b031b42730f7cd1234d1a89d52d794e5f3e855f",
+    "source_test_csv_sha256": "14ede6e03f6255760f705837b9fb62709b03875985e52a75ee7b5fbc385a9002",
+    "train_test_contract_overlap": 0,
+    "indexed_train_rows": 7004,
+    "test_rows_indexed": 0
+  },
+  "problems": []
+}

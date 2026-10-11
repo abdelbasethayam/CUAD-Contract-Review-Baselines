@@ -1,0 +1,16 @@
+INCOMPLETE AGREEMENT EXTRACT
+Synthetic incomplete-package fixture. Missing attachments must be treated as unread/unknown, not assumed to be absent.
+
+1. LIABILITY. Liability is subject to the cap in Appendix C, but Appendix C was not provided. Another sentence excludes some categories without identifying their limit.
+2. DAMAGES. Any service credits and liquidated damages are defined in the missing Order Form. The cap interaction is not included in the supplied pages.
+3. TERM. The agreement renews as stated in the applicable order, which is not attached. The non-renewal notice deadline is also in the missing order.
+4. EXIT. Termination rights are summarized here, but minimum-commitment and early-exit charges are defined in an unavailable pricing schedule.
+5. TRANSFER. Assignment is governed by the definition of Control in Schedule 4, which is missing. Change-of-control consequences are not supplied.
+6. LICENSE. License duration and post-termination use are set out in an omitted technology schedule.
+7. IP. Ownership and license-back terms are incorporated from an IP schedule that was not included with this copy.
+8. SOFTWARE CONTINUITY. Escrow and transition-support details are in the missing service continuity appendix.
+9. INSURANCE. Coverage limits are specified in the certificate and policy schedule, neither of which was included.
+10. INDEMNIFICATION. The scope and cap treatment of indemnification are in a referenced exhibit not supplied for this review.
+11. ONLINE TERMS. The Services are subject to Supplier's online terms, which may change from time to time; no fixed version is attached to the package.
+12. PRECEDENCE. If provisions conflict, the applicable Order Form and Supplier online terms may govern, but the relevant terms were not provided.
+13. LAW AND DISPUTES. Governing law is set out in the Order Form and forum/dispute procedures in Supplier policies; neither is attached.

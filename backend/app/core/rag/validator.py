@@ -58,9 +58,11 @@ def _call_ollama_validator(prompt: str) -> str:
                     "prompt": prompt,
                     "stream": False,
                     "format": "json",
+                    "think": False,
                     "options": {
                         "temperature": 0,
-                        "num_gpu": 0,
+                        # Respect the configured Ollama server / GPU placement.
+                        # num_gpu=0 forced every clause validation onto the CPU.
                         "use_mmap": True,
                         "num_ctx": 512,  # prompt is tiny, no need for 4096 here
                     },

@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "status": "COMPLETED",
+  "case_count": 39,
+  "expected_case_count": 39,
+  "model_check_batch_size": 4,
+  "model_batches_per_pass": 4,
+  "scenario_types": {
+    "positive": 13,
+    "control": 13,
+    "incomplete": 13
+  },
+  "check_ids_covered": [
+    "DOC-1",
+    "DOC-2",
+    "DOC-3",
+    "X-1",
+    "X-10",
+    "X-2",
+    "X-3",
+    "X-4",
+    "X-5",
+    "X-6",
+    "X-7",
+    "X-8",
+    "X-9"
+  ],
+  "expected_status_counts": {
+    "POTENTIAL_RISK": 14,
+    "NO_RISK": 13,
+    "INSUFFICIENT_EVIDENCE": 12
+  },
+  "observed_status_counts": {
+    "POTENTIAL_RISK": 16,
+    "NO_RISK": 10,
+    "INSUFFICIENT_EVIDENCE": 13,
+    "MISSING": 0
+  },
+  "scenario_status_conformance_count": 27,
+  "scenario_status_conformance_rate": 0.6923076923076923,
+  "scenario_status_conformance_by_type": {
+    "positive": {
+      "cases": 13,
+      "matched": 10,
+      "rate": 0.7692307692307693,
+      "observed_status_counts": {
+        "POTENTIAL_RISK": 10,
+        "NO_RISK": 3,
+        "INSUFFICIENT_EVIDENCE": 0,
+        "MISSING": 0
+      }
+    },
+    "control": {
+      "cases": 13,
+      "matched": 7,
+      "rate": 0.5384615384615384,
+      "observed_status_counts": {
+        "POTENTIAL_RISK": 2,
+        "NO_RISK": 7,
+        "INSUFFICIENT_EVIDENCE": 4,
+        "MISSING": 0
+      }
+    },
+    "incomplete": {
+      "cases": 13,
+      "matched": 10,
+      "rate": 0.7692307692307693,
+      "observed_status_counts": {
+        "POTENTIAL_RISK": 4,
+        "NO_RISK": 0,
+        "INSUFFICIENT_EVIDENCE": 9,
+        "MISSING": 0
+      }
+    }
+  },
+  "scenario_status_conformance_by_check": [
+    {
+      "check_id": "DOC-1",
+      "scope": "document",
+      "risk_domain": "Commercial Risk",
+      "cases": 3,
+      "matched": 3,
+      "rate": 1.0,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "POTENTIAL_RISK"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "POTENTIAL_RISK"
+      ]
+    },
+    {
+      "check_id": "DOC-2",
+      "scope": "document",
+      "risk_domain": "Dispute Resolution Risk",
+      "cases": 3,
+      "matched": 2,
+      "rate": 0.6666666666666666,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "INSUFFICIENT_EVIDENCE",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    {
+      "check_id": "DOC-3",
+      "scope": "document",
+      "risk_domain": "Dispute Resolution Risk",
+      "cases": 3,
+      "matched": 2,
+      "rate": 0.6666666666666666,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "POTENTIAL_RISK"
+      ]
+    },
+    {
+      "check_id": "X-1",
+      "scope": "cross_clause",
+      "risk_domain": "Liability Risk",
+      "cases": 3,
+      "matched": 2,
+      "rate": 0.6666666666666666,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "INSUFFICIENT_EVIDENCE",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    {
+      "check_id": "X-10",
+      "scope": "cross_clause",
+      "risk_domain": "Liability Risk",
+      "cases": 3,
+      "matched": 2,
+      "rate": 0.6666666666666666,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "POTENTIAL_RISK"
+      ]
+    },
+    {
+      "check_id": "X-2",
+      "scope": "cross_clause",
+      "risk_domain": "Financial Risk",
+      "cases": 3,
+      "matched": 1,
+      "rate": 0.3333333333333333,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "NO_RISK",
+        "POTENTIAL_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    {
+      "check_id": "X-3",
+      "scope": "cross_clause",
+      "risk_domain": "Termination Risk",
+      "cases": 3,
+      "matched": 1,
+      "rate": 0.3333333333333333,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    {
+      "check_id": "X-4",
+      "scope": "cross_clause",
+      "risk_domain": "Commercial Risk",
+      "cases": 3,
+      "matched": 2,
+      "rate": 0.6666666666666666,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "INSUFFICIENT_EVIDENCE",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    {
+      "check_id": "X-5",
+      "scope": "cross_clause",
+      "risk_domain": "Assignment / Control Risk",
+      "cases": 3,
+      "matched": 3,
+      "rate": 1.0,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    {
+      "check_id": "X-6",
+      "scope": "cross_clause",
+      "risk_domain": "Intellectual Property Risk",
+      "cases": 3,
+      "matched": 2,
+      "rate": 0.6666666666666666,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "NO_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    {
+      "check_id": "X-7",
+      "scope": "cross_clause",
+      "risk_domain": "Intellectual Property Risk",
+      "cases": 3,
+      "matched": 3,
+      "rate": 1.0,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    {
+      "check_id": "X-8",
+      "scope": "cross_clause",
+      "risk_domain": "Operational Risk",
+      "cases": 3,
+      "matched": 2,
+      "rate": 0.6666666666666666,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "POTENTIAL_RISK"
+      ]
+    },
+    {
+      "check_id": "X-9",
+      "scope": "cross_clause",
+      "risk_domain": "Insurance Risk",
+      "cases": 3,
+      "matched": 2,
+      "rate": 0.6666666666666666,
+      "expected_statuses": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "observed_statuses": [
+        "POTENTIAL_RISK",
+        "POTENTIAL_RISK",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    }
+  ],
+  "metrics_warning": "Scenario-status conformance on synthetic stimuli is not accuracy, precision/recall on real contracts, or legal correctness.",
+  "evidence_exact_all": true,
+  "scenario_run_summaries": [],
+  "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+  "analyzer_code_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+  "runner_code_sha256": "f85e87cf625a268ba421a70f630887851a36d4c1be5a3de30de581b9ebe7f4ad",
+  "summary_generator_code_sha256": "9a1dd5014179cdadf882a81d50d802cb1835c723bcfe1274fc3f51138a93993f",
+  "scenario_suite_manifest_sha256": "ca5cfbc510c7ef7fbd65664de69ac2a788a69d89f2dbcb13c8932f1ea18593cb",
+  "jsonl_sha256": "32e530d1c9de04aa3811fdd17129e957d2fa31e07840da500b2085d4e9f8582c",
+  "csv_sha256": "963e784aefd56295154ebbf9a58d8a1b0d3e154c65dbd74e99449f52fae00dfe",
+  "updated_at_utc": "2026-10-09T21:06:40.522489+00:00"
+}

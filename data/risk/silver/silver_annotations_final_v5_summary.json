@@ -1,0 +1,27 @@
+{
+  "rows": 300,
+  "unique_samples": 300,
+  "unique_checks": 95,
+  "unique_docs": 72,
+  "status": {
+    "MACHINE_DISAGREEMENT": 165,
+    "MACHINE_AGREED": 108,
+    "MACHINE_AGREED_UNCERTAIN": 22,
+    "MACHINE_AGREED_BUT_EVIDENCE_INVALID": 5
+  },
+  "risk": {
+    "UNCERTAIN": 192,
+    "NO": 95,
+    "YES": 13
+  },
+  "partitions": {
+    "locked_test": 150,
+    "calibration": 75,
+    "development": 75
+  },
+  "empty_evidence_on_yes": 0,
+  "protocols": {
+    "silver_v5_blind_parallel": 300
+  },
+  "csv_sha256": "12c618b4617225b9462616edaa553af23c7ac6b2a2e9527e6c0840e9b7d9230f"
+}

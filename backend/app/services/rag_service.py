@@ -11,6 +11,11 @@ from typing import Callable
 import numpy as np
 
 from ..core.config import (
+    EMBEDDING_BACKEND,
+    LOCAL_HASHING_DIM,
+    COHERE_MODEL,
+    QDRANT_COLLECTION,
+    LEGAL_KNOWLEDGE_COLLECTION,
     RISK_CONTEXT_TOP_K,
     RISK_MODEL,
     RISK_SELF_CONSISTENCY_PASSES,
@@ -23,6 +28,7 @@ from ..core.config import (
     RISK_USE_LEGAL_GUIDANCE,
     RISK_USE_PLAYBOOK,
     TOP_K,
+    load_labels,
 )
 from ..core.rag import (
     classify_clause,
@@ -42,7 +48,7 @@ from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_
 from ..core.risk.risk_engine import analyze_clause_risk
 from ..core.risk.risk_playbook import load_playbook
 from ..core.risk.run_store import AnalysisRun, create_or_resume_run, mark_run_complete, mark_run_failed
-from ..core.rag.evidence_compressor import compress_cuad_evidence
+from ..core.risk.evidence_compressor import compress_cuad_evidence
 
 ProgressCallback = Callable[[dict], None]
 _CLASSIFICATION_LOCK = Lock()
@@ -72,7 +78,10 @@ def _trace_callback(run, callback: ProgressCallback | None):
             "status.json",
             {
                 "analysis_id": run.analysis_id,
-                "status": "RUNNING",
+                "status": (
+                    "COMPLETED" if event.get("stage") == "complete"
+                    else ("FAILED" if event.get("stage") == "failed" else "RUNNING")
+                ),
                 "last_stage": event.get("stage", "pipeline"),
                 "last_message": event.get("message", ""),
                 "current": event.get("current"),
@@ -99,11 +108,52 @@ def _file_hash(path: Path) -> str | None:
     return digest.hexdigest()
 
 
+def _code_fingerprint() -> str:
+    """Hash the source files that define the live Phase 2 pipeline."""
+    root = Path(__file__).resolve().parents[3]
+    # Hash complete runtime source trees and the source-of-truth configuration/data.
+    # This avoids a silent same-ID resume when a relevant module (for example a
+    # classifier helper or API schema) changed but was omitted from a hand-maintained list.
+    paths = set()
+    for pattern in ("backend/app/**/*.py", "frontend/src/**/*.js", "frontend/src/**/*.jsx",
+                    "frontend/src/**/*.ts", "frontend/src/**/*.tsx", "frontend/src/**/*.css",
+                    "backend/data/legal_knowledge/**/*.md"):
+        paths.update(root.glob(pattern))
+    paths.update({
+        root / "data/risk/commercial_clause_risk_playbook.json",
+        root / "backend/data/legal_knowledge/risk_taxonomy.json",
+        root / "backend/data/legal_knowledge/source_registry.json",
+        root / "requirements.txt",
+        root / "requirements-dev.txt",
+    })
+    relative_paths = sorted(
+        path.relative_to(root).as_posix()
+        for path in paths
+        if path.is_file()
+    )
+    digest = hashlib.sha256()
+    for relative in relative_paths:
+        path = root / relative
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\\0")
+        if path.is_file():
+            digest.update(path.read_bytes())
+        else:
+            digest.update(b"MISSING")
+        digest.update(b"\\0")
+    return digest.hexdigest()
+
+
 def _pipeline_config(top_k: int, playbook: dict) -> dict:
     return {
         "phase": 2,
+        "code_fingerprint": _code_fingerprint(),
         "top_k": int(top_k),
         "risk_model": RISK_MODEL,
+        "embedding_backend": EMBEDDING_BACKEND,
+        "embedding_model": COHERE_MODEL if EMBEDDING_BACKEND == "cohere" else f"sklearn.HashingVectorizer(n_features={LOCAL_HASHING_DIM}, ngram_range=(1,2), norm=l2)",
+        "qdrant_collection": QDRANT_COLLECTION,
+        "legal_knowledge_collection": LEGAL_KNOWLEDGE_COLLECTION,
         "risk_context_top_k": RISK_CONTEXT_TOP_K,
         "risk_self_consistency_passes": RISK_SELF_CONSISTENCY_PASSES,
         "playbook_hash": playbook.get("playbook_hash"),
@@ -576,7 +626,8 @@ def _classify_contract(
         risk_csv = run.path("risk_findings.csv")
         with risk_csv.open("w", newline="", encoding="utf-8") as handle:
             fields = [
-                "finding_id", "clause_index", "predicted_label", "check_id", "question",
+                "finding_id", "clause_index", "evidence_clause_index", "evidence_scope",
+                "predicted_label", "check_id", "risk_domain", "risk_subdomain", "question",
                 "answer", "risk_status", "risk_type", "risk_level", "raw_support_score",
                 "confidence", "confidence_status", "severity_signal", "severity_status",
                 "ground_truth_status", "why_flagged", "evidence",
