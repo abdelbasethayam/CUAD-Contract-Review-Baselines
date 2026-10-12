@@ -162,6 +162,36 @@ cd backend && uvicorn app.main:app --reload --port 8000
 cd frontend && npm ci && npm run dev
 ```
 
+### Fast local Phase 2 demo
+
+For the quickest demonstration using your Queen's/Ollama/Qdrant resources, configure the service endpoints in the shell and run the included launcher:
+
+```bash
+cd CUAD-Contract-Review-Baselines
+python3 -m pip install -r requirements.txt
+cd frontend && npm ci && cd ..
+
+export OLLAMA_URL=http://<queens-ollama-host>:11434
+export QDRANT_URL=http://<queens-qdrant-host>:6333       # omit when using local data/qdrant_local
+export COHERE_API_KEY=<your-key>                         # needed for the current embedding path
+export OPENROUTER_API_KEY=<your-key>                     # needed only for chatbot questions
+export CORS_ORIGINS=http://localhost:5173
+
+bash scripts/run_local_demo.sh
+```
+
+Open `http://localhost:5173`, upload `examples/phase2_demo_contract.txt`, and wait for the progress stages to finish. This sample deliberately contains an indemnity, an aggressive liability cap, an asymmetric termination right, and underspecified data-security obligations. The Phase 2 result should show clause-level `POTENTIAL_RISK` or `INSUFFICIENT_EVIDENCE` findings with exact contract evidence, a contract-level summary, and `Review required`/`UNCALIBRATED` labels. It is a demonstration of the resolved evidence gate—not a claim that the sample has been lawyer-validated.
+
+Then ask the chatbot questions such as:
+
+```text
+What are the highest-priority review items?
+Which clause contains the liability cap?
+What evidence supports the termination concern?
+```
+
+The Vite launcher now proxies `/documents`, `/query`, and `/health` to the backend, so the GUI and chatbot work from the same local command. If the full pipeline is slow, the backend checkpoints `segments.json`, embeddings, classification, and risk findings under `data/runs/<analysis_id>`; restarting with the same file resumes instead of mixing a new run.
+
 For a production deployment, build the UI (`npm run build`) and copy `frontend/dist` to `backend/static`, then run the API behind HTTPS. Keep API keys server-side, persist `data/runs` on durable storage, configure a non-local Qdrant/Ollama provider, add authentication/tenant isolation, enforce reverse-proxy upload limits, and establish human-adjudicated calibration/evaluation gates before relying on risk scores.
 
 ### Two-day release boundary
