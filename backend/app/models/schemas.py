@@ -146,4 +146,5 @@ class ContractClassificationResponse(BaseModel):
     contract_risk_assessment: ContractRiskAssessment = Field(
         default_factory=ContractRiskAssessment
     )
+    provenance: dict[str, Any] = Field(default_factory=dict)
     downloads: dict[str, str] = Field(default_factory=dict)

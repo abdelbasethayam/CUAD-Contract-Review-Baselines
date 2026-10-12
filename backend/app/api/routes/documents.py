@@ -13,6 +13,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 
 from ...core.config import RUNS_DIR
+from ...core.config import OLLAMA_MODEL, RISK_MODEL
 from ...models.schemas import ContractClassificationResponse
 from ...services.rag_service import classify_contract
 
@@ -66,6 +67,13 @@ def _response(pipeline: dict) -> ContractClassificationResponse:
         clauses=pipeline["clauses"],
         contract_risk_assessment=pipeline["contract_risk_assessment"],
         contract_metadata=pipeline.get("contract_metadata") or {"source_filename": pipeline["filename"], "name": pipeline["filename"]},
+        provenance={
+            "classifier_model": OLLAMA_MODEL,
+            "risk_model": RISK_MODEL,
+            "playbook_hash": (pipeline.get("contract_risk_assessment") or {}).get("playbook_hash"),
+            "document_hash": (pipeline.get("contract_metadata") or {}).get("document_hash"),
+            "analysis_id": analysis_id,
+        },
         downloads={
             name.replace(".", "_"): f"/documents/runs/{analysis_id}/artifact/{name}"
             for name in ("result.json", "contract_risk.json", "risk_findings.jsonl", "risk_findings.csv", "clauses.csv", "classification.jsonl", "manifest.json")

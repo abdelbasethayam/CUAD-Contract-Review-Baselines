@@ -164,6 +164,12 @@ cd frontend && npm ci && npm run dev
 
 For a production deployment, build the UI (`npm run build`) and copy `frontend/dist` to `backend/static`, then run the API behind HTTPS. Keep API keys server-side, persist `data/runs` on durable storage, configure a non-local Qdrant/Ollama provider, add authentication/tenant isolation, enforce reverse-proxy upload limits, and establish human-adjudicated calibration/evaluation gates before relying on risk scores.
 
+### Two-day release boundary
+
+The current release is a **review-assistance prototype**, not an autonomous legal decision system. The critical safeguards included now are: completed-run gating for chat, clause citation validation, refusal of legal-advice/jailbreak requests, lightweight request rate limiting, explicit `Review required` UI messaging, exact contract-evidence checks in the risk pipeline, configurable CORS, upload limits, and run provenance (commit/fingerprint/playbook metadata). Configure `CORS_ORIGINS` to the real HTTPS UI origin before deployment.
+
+The following are intentionally deferred to the next version because they require infrastructure, policy, or independent legal review: lawyer-adjudicated gold labels and calibration, JWT/OAuth tenant isolation, object storage and a metadata database, malware scanning, durable audit/event logs, distributed Qdrant/Ollama, metrics/tracing/alerts, and reviewer accept/reject workflows. Do not present `PLAYBOOK_DERIVED` or `UNCALIBRATED` findings as validated legal-risk probabilities.
+
 ---
 
 ## 7. Project structure (main folders)

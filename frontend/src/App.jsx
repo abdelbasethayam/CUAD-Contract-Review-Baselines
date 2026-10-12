@@ -24,7 +24,7 @@ function ChatPanel({ analysisId }) {
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body.detail || `Assistant request failed (${response.status})`);
-      setMessages((items) => [...items, { role: "assistant", content: body.answer }]);
+      setMessages((items) => [...items, { role: "assistant", content: body.answer, citations: body.citations || [] }]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -43,6 +43,7 @@ function ChatPanel({ analysisId }) {
           <div key={`${message.role}-${index}`} className={`chat-message chat-message--${message.role}`}>
             <span className="chat-message__role">{message.role === "user" ? "You" : "Assistant"}</span>
             <p>{message.content}</p>
+            {message.citations?.length > 0 && <small className="chat-citations">Evidence: {message.citations.map((citation) => `[Clause ${citation.clause_id}]`).join(", ")}</small>}
           </div>
         ))}
         {loading && <div className="chat-message chat-message--assistant"><span className="chat-message__role">Assistant</span><p>Reviewing the extracted clauses…</p></div>}
@@ -282,6 +283,7 @@ function ContractReview() {
       {result && (
         <>
           <ChatPanel analysisId={result.analysis_id} />
+          <div className="review-required" role="status"><strong>Review required</strong><span>Findings are playbook-derived and not independently validated. Confirm evidence and conclusions with qualified counsel before relying on them.</span></div>
           <section className="metadata-card">
             <div>
               <div className="eyebrow">Contract profile</div>

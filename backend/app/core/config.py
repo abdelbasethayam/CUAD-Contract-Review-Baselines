@@ -172,6 +172,14 @@ OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "8192"))
 CLASSIFIER_TEMPERATURE = float(os.getenv("CLASSIFIER_TEMPERATURE", "0.0"))
 CLASSIFIER_TOP_LOGPROBS = int(os.getenv("CLASSIFIER_TOP_LOGPROBS", "20"))
 CLASSIFIER_THINK = os.getenv("CLASSIFIER_THINK", "false").strip().lower() in {"1", "true", "yes"}
+CORS_ORIGINS = tuple(
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174",
+    ).split(",")
+    if origin.strip()
+)
 
 HF_CLASSIFIER_MODEL = os.getenv(
     "HF_CLASSIFIER_MODEL", "Qwen/Qwen2.5-7B-Instruct"
