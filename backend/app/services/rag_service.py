@@ -42,7 +42,7 @@ from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_
 from ..core.risk.risk_engine import analyze_clause_risk
 from ..core.risk.risk_playbook import load_playbook
 from ..core.risk.run_store import AnalysisRun, create_or_resume_run, mark_run_complete, mark_run_failed
-from ..core.rag.evidence_compressor import compress_cuad_evidence
+from ..core.risk.evidence_compressor import compress_cuad_evidence
 
 ProgressCallback = Callable[[dict], None]
 _CLASSIFICATION_LOCK = Lock()

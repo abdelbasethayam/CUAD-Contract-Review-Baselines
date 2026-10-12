@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import queue
-import shutil
 import tempfile
 from pathlib import Path
 from threading import Thread
@@ -19,6 +19,7 @@ from ...services.rag_service import classify_contract
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 ALLOWED_SUFFIXES = {".pdf", ".txt"}
+MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(25 * 1024 * 1024)))
 SAFE_ARTIFACTS = {
     "manifest.json",
     "segments.json",
@@ -42,8 +43,17 @@ def _save_upload(file: UploadFile) -> tuple[Path, str]:
             status_code=400,
             detail=f"Unsupported file type '{suffix}'. Upload a .pdf or .txt file.",
         )
+    total = 0
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        shutil.copyfileobj(file.file, tmp)
+        while chunk := file.file.read(1024 * 1024):
+            total += len(chunk)
+            if total > MAX_UPLOAD_BYTES:
+                Path(tmp.name).unlink(missing_ok=True)
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"File is too large. Maximum upload size is {MAX_UPLOAD_BYTES // (1024 * 1024)} MiB.",
+                )
+            tmp.write(chunk)
     return Path(tmp.name), suffix
 
 

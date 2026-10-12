@@ -2,6 +2,61 @@ import { Component, useMemo, useState } from "react";
 
 const API_URL = "/documents/classify/stream";
 
+function ChatPanel({ analysisId }) {
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  async function ask(event) {
+    event.preventDefault();
+    const trimmed = question.trim();
+    if (!trimmed || loading || !analysisId) return;
+    const history = messages.map(({ role, content }) => ({ role, content }));
+    setMessages((items) => [...items, { role: "user", content: trimmed }]);
+    setQuestion("");
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: trimmed, analysis_id: analysisId, history }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.detail || `Assistant request failed (${response.status})`);
+      setMessages((items) => [...items, { role: "assistant", content: body.answer }]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+  return (
+    <section className="chat-panel" aria-labelledby="chat-title">
+      <div className="section-heading">
+        <div><div className="eyebrow">Grounded assistant</div><h2 id="chat-title">Ask about this contract</h2></div>
+        <span className="chat-note">Answers use this analysis only</span>
+      </div>
+      <div className="chat-messages" aria-live="polite">
+        {!messages.length && <p className="muted">Try “What are the highest-priority risks?” or “Which clause supports the termination concern?”</p>}
+        {messages.map((message, index) => (
+          <div key={`${message.role}-${index}`} className={`chat-message chat-message--${message.role}`}>
+            <span className="chat-message__role">{message.role === "user" ? "You" : "Assistant"}</span>
+            <p>{message.content}</p>
+          </div>
+        ))}
+        {loading && <div className="chat-message chat-message--assistant"><span className="chat-message__role">Assistant</span><p>Reviewing the extracted clauses…</p></div>}
+      </div>
+      {error && <div className="error chat-error">{error}</div>}
+      <form className="chat-form" onSubmit={ask}>
+        <label className="sr-only" htmlFor="contract-question">Ask a question about the contract</label>
+        <input id="contract-question" value={question} maxLength={2000} onChange={(event) => setQuestion(event.target.value)} placeholder="Ask a grounded question…" disabled={loading} />
+        <button type="submit" disabled={!question.trim() || loading}>Ask</button>
+      </form>
+      <p className="chat-disclaimer">Decision support only. Confirm important conclusions with qualified counsel.</p>
+    </section>
+  );
+}
 function RiskBadge({ status, level }) {
   const label = status === "POTENTIAL_RISK"
     ? (level || "POTENTIAL RISK")
@@ -226,6 +281,7 @@ function ContractReview() {
 
       {result && (
         <>
+          <ChatPanel analysisId={result.analysis_id} />
           <section className="metadata-card">
             <div>
               <div className="eyebrow">Contract profile</div>

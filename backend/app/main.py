@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from .api.routes import documents
+from .api.routes import documents, health, query
 
 app = FastAPI(
     title="CUAD Contract Classifier",
@@ -38,11 +38,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.get("/health")
-def health() -> dict:
-    return {"status": "ok"}
-
 
 @app.get("/docs", include_in_schema=False, response_class=HTMLResponse)
 def api_docs() -> str:
@@ -82,6 +77,8 @@ def api_docs() -> str:
 
 
 app.include_router(documents.router)
+app.include_router(query.router)
+app.include_router(health.router)
 
 if FRONTEND_DIST_DIR.exists():
     app.mount("/", StaticFiles(directory=FRONTEND_DIST_DIR, html=True), name="frontend")

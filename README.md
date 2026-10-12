@@ -146,9 +146,27 @@ The repository no longer publishes guessed accuracy ranges for the final pipelin
 
 Use validation for all configuration decisions. Use the untouched test split only after the configuration is frozen.
 
+## 6. Web interface and grounded chatbot
+
+The Vite interface supports PDF/TXT upload, live analysis progress, clause/risk review, downloadable audit artifacts, and a grounded assistant that answers questions about the completed analysis. The assistant is intentionally scoped to the selected `analysis_id`; it must not be treated as a general legal advisor.
+
+Set `OPENROUTER_API_KEY` in `backend/.env` before using the chat panel. The API endpoint is `POST /query` with `{ "analysis_id": "...", "question": "...", "history": [] }`. Answers are generated from the stored `result.json` context, cite clause numbers where possible, and fall back clearly when the evidence is insufficient.
+
+Run locally in two terminals:
+
+```bash
+# API
+cd backend && uvicorn app.main:app --reload --port 8000
+
+# UI
+cd frontend && npm ci && npm run dev
+```
+
+For a production deployment, build the UI (`npm run build`) and copy `frontend/dist` to `backend/static`, then run the API behind HTTPS. Keep API keys server-side, persist `data/runs` on durable storage, configure a non-local Qdrant/Ollama provider, add authentication/tenant isolation, enforce reverse-proxy upload limits, and establish human-adjudicated calibration/evaluation gates before relying on risk scores.
+
 ---
 
-## 6. Project structure (main folders)
+## 7. Project structure (main folders)
 
 ```
 backend/app/core/rag/     # retrieval, prompts, classifier, rules
@@ -163,7 +181,7 @@ Browse on GitHub: https://github.com/abdelbasethayam/CUAD-Contract-Review-Baseli
 
 ---
 
-## 7. Limitations
+## 8. Limitations
 
 - Output is **decision support**, not legal advice.
 - Rare CUAD labels keep **macro-F1** lower than overall accuracy.
@@ -172,7 +190,7 @@ Browse on GitHub: https://github.com/abdelbasethayam/CUAD-Contract-Review-Baseli
 
 ---
 
-## 8. References
+## 9. References
 
 - CUAD dataset (Atticus Project) — contract understanding benchmark  
 - Qwen2.5 / Qwen3 models (Alibaba) — local LLM via Ollama  
@@ -180,7 +198,7 @@ Browse on GitHub: https://github.com/abdelbasethayam/CUAD-Contract-Review-Baseli
 
 ---
 
-## 9. Author
+## 10. Author
 
 - **GitHub:** [abdelbasethayam](https://github.com/abdelbasethayam)  
 - **Project repo:** [CUAD-Contract-Review-Baselines](https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines)
