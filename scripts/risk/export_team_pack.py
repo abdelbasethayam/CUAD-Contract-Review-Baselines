@@ -110,9 +110,10 @@ def main() -> int:
             "source_registry_sha256": digest(REGISTRY),
         },
         "exports": {name: {"sha256": digest(OUT / name)} for name in files},
+        "deterministic_rule_count": len(playbook.get("deterministic_rules") or []),
+        "risk_evidence_policy": "Only exact text from the uploaded contract can support a positive finding; no retrieved CUAD example span is used as risk evidence.",
         "warning": (
-            "Playbook and taxonomy are review guidance, not human gold labels "
-            "or evidence of a fact in an uploaded contract."
+            "Playbook and taxonomy are review guidance, not evidence of a fact in an uploaded contract."
         ),
     }
     (OUT / "export_manifest.json").write_text(
@@ -132,7 +133,8 @@ Source-of-truth playbook version: {manifest['playbook_source_version']}.
 - risk_playbook_exact.json — byte-for-byte copy of the source playbook.
 - risk_taxonomy.json — canonical broad risk domains and guidance.
 - source_registry.json — legal-knowledge source metadata.
-- export_manifest.json — source/export hashes and validation counts.
+- export_manifest.json — source/export hashes, validation counts, and deterministic rule count.
+- The exact playbook JSON also contains the executable deterministic risk predicates.
 
 ## Risk-domain policy
 
@@ -143,11 +145,12 @@ matches are supplementary signals and must not override an explicit domain.
 
 ## Evidence and evaluation caveat
 
-The playbook and taxonomy are **review guidance, not contract evidence and not
-human gold labels**. A positive risk finding must be supported by exact evidence
-from the uploaded contract. The project still requires expert annotation and
-adjudication of its 300-task gold queue before reporting human-gold accuracy for
-the custom risk predicates.
+The playbook and taxonomy are **review guidance, not contract evidence**. A positive
+risk finding must cite exact text from the uploaded contract. Deterministic rules
+are evaluated against the uploaded clause text independently of the CUAD category
+label. Retrieved CUAD training examples are not included in risk prompts or treated
+as risk evidence. Release acceptance measures rule/pipeline conformance, not legal
+risk accuracy or enforceability.
 """,
         encoding="utf-8",
     )
