@@ -1,4 +1,4 @@
-import { Component, useMemo, useState } from "react";
+import { Component, useEffect, useMemo, useState } from "react";
 
 const API_URL = "/documents/classify/stream";
 
@@ -115,6 +115,70 @@ function ContractReview() {
   const [trace, setTrace] = useState([]);
   const [tab, setTab] = useState("overview");
   const [riskFilter, setRiskFilter] = useState("all");
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState(null);
+  const [phase2Metrics, setPhase2Metrics] = useState(null);
+  const [demoNotice, setDemoNotice] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/query/phase2-metrics")
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Metrics unavailable")))
+      .then((data) => { if (!cancelled) setPhase2Metrics(data); })
+      .catch(() => { if (!cancelled) setPhase2Metrics(null); });
+    return () => { cancelled = true; };
+  }, []);
+
+  async function loadSavedDemo() {
+    setError(null);
+    setChatError(null);
+    setDemoNotice(null);
+    setChatMessages([]);
+    setTrace([]);
+    try {
+      const response = await fetch("/query/demo-analysis");
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || "The saved demo analysis is unavailable.");
+      setResult(data);
+      setDemoNotice(data.notice || "Loaded a saved synthetic demo.");
+      setTab("overview");
+      setRiskFilter("all");
+    } catch (err) {
+      setError(err.message || "Could not load the saved demo.");
+    }
+  }
+
+  async function askContract(questionOverride) {
+    const question = String(questionOverride ?? chatInput).trim();
+    if (!result?.analysis_id || !question || chatLoading) return;
+    setChatMessages((messages) => [...messages, { role: "user", text: question }]);
+    setChatInput("");
+    setChatError(null);
+    setChatLoading(true);
+    try {
+      const response = await fetch("/query/contract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analysis_id: result.analysis_id,
+          question,
+          history: chatMessages.slice(-8).map((message) => ({
+            role: message.role,
+            content: message.role === "user" ? message.text : (message.answer || ""),
+          })).filter((message) => message.content.trim()),
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || ("Assistant request failed (" + response.status + ")"));
+      setChatMessages((messages) => [...messages, { role: "assistant", ...data }]);
+    } catch (err) {
+      setChatError(err.message || "The contract assistant could not answer this question.");
+    } finally {
+      setChatLoading(false);
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -123,7 +187,10 @@ function ContractReview() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setDemoNotice(null);
     setTrace([]);
+    setChatMessages([]);
+    setChatError(null);
     setTab("overview");
 
     try {
@@ -213,13 +280,41 @@ function ContractReview() {
       <form className="upload-form" onSubmit={handleSubmit}>
         <input type="file" accept=".pdf,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={loading} />
         <button type="submit" disabled={!file || loading}>{loading ? "Analyzing…" : "Analyze contract"}</button>
+        <button type="button" className="button-secondary" onClick={loadSavedDemo} disabled={loading}>Load saved demo</button>
       </form>
       <p className="muted" role="note">
         Privacy notice: LLM inference runs locally, but clause text is sent to the configured Cohere embedding API.
         Do not upload confidential contracts unless that transfer is authorized. This build is not fully offline.
       </p>
 
-      {error && <div className="error">{error}</div>}
+      <details className="experiment-snapshot" open>
+        <summary>Phase 2 rule-conformance snapshot</summary>
+        <div className="experiment-snapshot__body">
+          <div className="experiment-metrics">
+            <div><strong>{phase2Metrics?.playbook?.deterministic_rule_count ?? "—"}</strong><span>Executable playbook rules</span></div>
+            <div><strong>{phase2Metrics?.playbook?.clause_question_count ?? "—"}</strong><span>Clause-level playbook questions</span></div>
+            <div><strong>{phase2Metrics?.playbook?.cross_clause_question_count ?? "—"}</strong><span>Cross-clause questions</span></div>
+            <div><strong>{phase2Metrics?.playbook?.document_question_count ?? "—"}</strong><span>Document-level questions</span></div>
+            <div><strong>{phase2Metrics?.rule_validation?.status || "NOT_RUN"}</strong><span>Rule configuration / taxonomy validation</span></div>
+            <div><strong>{phase2Metrics?.classification_index_isolation?.status || "NOT_RUN"}</strong><span>Separate CUAD classifier-index isolation</span></div>
+            <div><strong>{phase2Metrics?.release_validation?.status || "NOT_RUN"}</strong><span>Full release validation</span></div>
+            <div><strong>{phase2Metrics?.playbook?.taxonomy_domain_count ?? "—"}</strong><span>Canonical risk domains</span></div>
+          </div>
+          <p>
+            {phase2Metrics ? "Playbook v" + (phase2Metrics.playbook?.source_version || "—") + ". Rule tests and release reports are shown as NOT_RUN until their source scripts execute." : "Could not load the saved Phase 2 configuration and conformance reports."}
+          </p>
+          <p>
+            {phase2Metrics?.separate_cuad_category_baseline?.accuracy == null
+              ? "The separate CUAD clause-category retrieval baseline has not been loaded."
+              : "Separate CUAD category baseline: " + (phase2Metrics.separate_cuad_category_baseline.accuracy * 100).toFixed(1) + "% accuracy and " + (phase2Metrics.separate_cuad_category_baseline.macro_f1 * 100).toFixed(1) + "% macro-F1 across " + (phase2Metrics.separate_cuad_category_baseline.test_clauses ?? "—") + " held-out clauses. These are clause-category metrics, not risk accuracy."}
+          </p>
+          <p><strong>Interpretation:</strong> direct rule hits are review triggers with exact contract quotes. The release reports conformance, rule integrity and evidence provenance—not legal-risk accuracy, enforceability or calibrated probability. A rule miss is not proof that a contract is safe.</p>
+          <p><a href="/query/phase2-metrics" target="_blank" rel="noreferrer">Open metrics JSON</a></p>
+        </div>
+      </details>
+
+      {demoNotice && <p className="demo-notice" role="status">{demoNotice} You can inspect the saved clauses, findings and chatbot immediately.</p>}
+      {error && <div className="error">{error}</div>
 
       {loading && (
         <section className="trace" aria-live="polite">
@@ -255,7 +350,7 @@ function ContractReview() {
               <div><span>Effective date</span><strong>{result.contract_metadata?.effective_date || "Not extracted"}</strong></div>
               <div><span>Expiration date</span><strong>{result.contract_metadata?.expiration_date || "Not extracted"}</strong></div>
               <div><span>Governing law</span><strong>{result.contract_metadata?.governing_law || "Not extracted"}</strong></div>
-              <div><span>Ground truth</span><strong>{assessment.gold_status || "PLAYBOOK_DERIVED"}</strong></div>
+              <div><span>Risk source</span><strong>{assessment.gold_status === "PLAYBOOK_DERIVED" ? "Playbook-derived" : (assessment.gold_status || "Playbook-derived")}</strong></div>
             </div>
           </section>
 
@@ -263,6 +358,7 @@ function ContractReview() {
             <button type="button" className={tab === "overview" ? "tab tab--active" : "tab"} onClick={() => setTab("overview")}>Overview</button>
             <button type="button" className={tab === "clauses" ? "tab tab--active" : "tab"} onClick={() => setTab("clauses")}>Clauses</button>
             <button type="button" className={tab === "risks" ? "tab tab--active" : "tab"} onClick={() => setTab("risks")}>Risks ({potential.length})</button>
+            <button type="button" className={tab === "chat" ? "tab tab--active" : "tab"} onClick={() => setTab("chat")}>Ask this contract</button>
           </nav>
 
           {tab === "overview" && (
@@ -365,6 +461,71 @@ function ContractReview() {
                   </div>
                 </section>
               )}
+            </section>
+          )}
+
+          {tab === "chat" && (
+            <section className="contract-chat">
+              <div className="chat-heading">
+                <div>
+                  <div className="eyebrow">Contract-aware assistant</div>
+                  <h2>Ask questions about {result.contract_metadata?.name || result.filename}</h2>
+                  <p className="muted">Answers use the saved review of this uploaded contract. Quotes are checked against extracted clause text; unsupported answers should abstain.</p>
+                </div>
+                <span className="chat-model">Local model · analysis linked</span>
+              </div>
+
+              <div className="suggested-questions" aria-label="Suggested questions">
+                {[
+                  "Summarize the main obligations in plain English.",
+                  "What are the termination rights and notice periods?",
+                  "What liability limits or exceptions should I review?",
+                  "Who owns the intellectual property created under this agreement?",
+                  "Which findings still need more evidence?",
+                ].map((question) => (
+                  <button key={question} type="button" onClick={() => askContract(question)} disabled={chatLoading}>{question}</button>
+                ))}
+              </div>
+
+              <div className="chat-messages" aria-live="polite" aria-label="Conversation">
+                {!chatMessages.length && (
+                  <div className="chat-empty">
+                    <strong>Ask a question or choose a suggested prompt.</strong>
+                    <span>Try a plain-language explanation, a comparison of clauses, or ask what exact wording triggered a playbook rule.</span>
+                  </div>
+                )}
+                {chatMessages.map((message, index) => (
+                  <article key={String(message.role) + index} className={message.role === "user" ? "chat-message chat-message--user" : "chat-message chat-message--assistant"}>
+                    <div className="chat-message__role">{message.role === "user" ? "You" : "Contract assistant"}{message.insufficient_evidence ? " · evidence limited" : ""}</div>
+                    <p>{message.role === "user" ? message.text : message.answer}</p>
+                    {message.citations?.length > 0 && (
+                      <div className="chat-citations">
+                        <strong>Verified contract evidence</strong>
+                        {message.citations.map((citation, citationIndex) => (
+                          <blockquote key={String(citation.clause_index) + citationIndex}>
+                            <span>Clause {citation.clause_index}{citation.reason ? " · " + citation.reason : ""}</span>
+                            “{citation.quote}”
+                          </blockquote>
+                        ))}
+                      </div>
+                    )}
+                    {message.role === "assistant" && message.disclaimer && <span className="chat-disclaimer">{message.disclaimer}</span>}
+                    {message.follow_up_questions?.length > 0 && (
+                      <div className="chat-followups">
+                        {message.follow_up_questions.map((question) => <button key={question} type="button" onClick={() => askContract(question)} disabled={chatLoading}>{question}</button>)}
+                      </div>
+                    )}
+                  </article>
+                ))}
+                {chatLoading && <div className="chat-thinking"><span className="chat-thinking__dot" /> Checking the relevant contract clauses…</div>}
+              </div>
+
+              {chatError && <div className="error" role="alert">{chatError}</div>}
+              <form className="chat-composer" onSubmit={(event) => { event.preventDefault(); askContract(); }}>
+                <textarea value={chatInput} onChange={(event) => setChatInput(event.target.value)} placeholder="Ask something specific about this contract…" rows={3} maxLength={1200} disabled={chatLoading} aria-label="Question about this contract" />
+                <button type="submit" disabled={chatLoading || !chatInput.trim()}>{chatLoading ? "Thinking…" : "Ask question"}</button>
+              </form>
+              <p className="chat-safety-note">AI-assisted review only, not legal advice. The model may still misinterpret a clause. Risk findings are review triggers, not calibrated probabilities.</p>
             </section>
           )}
         </>
