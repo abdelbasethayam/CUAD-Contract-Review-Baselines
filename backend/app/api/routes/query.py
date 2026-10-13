@@ -6,6 +6,7 @@ not a source of risk evidence.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -105,7 +106,7 @@ def _context_for(
         except (TypeError, ValueError):
             continue
         text = str(clause.get("clause_text") or "")
-        source_texts[index] = text
+        source_texts[index] = text[:2200]
         excerpt = text[:2200]
         if len(text) > len(excerpt):
             excerpt += " …[excerpt truncated; do not infer omitted text]"
@@ -398,15 +399,24 @@ def phase2_metrics() -> dict[str, Any]:
 def load_demo_analysis() -> dict[str, Any]:
     """Load a saved synthetic walkthrough result, never an arbitrary analysis ID."""
     runs_root = Path(RUNS_DIR).resolve()
+    fixture_path = Path(PROJECT_ROOT) / "data" / "risk" / "demo_contract_for_reproduction.txt"
+    if not fixture_path.is_file():
+        raise HTTPException(status_code=404, detail="The repository's synthetic demo fixture is missing.")
+    fixture_hash = hashlib.sha256(fixture_path.read_bytes()).hexdigest()
     candidates: list[tuple[float, dict[str, Any], Path]] = []
     for result_path in runs_root.glob("*/result.json"):
         try:
             data = json.loads(result_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
-        if data.get("filename") != "demo_contract_for_reproduction.txt":
+        if data.get("filename") != fixture_path.name:
             continue
         if not isinstance(data.get("clauses"), list) or len(data["clauses"]) < 5:
+            continue
+        metadata = data.get("contract_metadata") or {}
+        # Filename alone is not sufficient: never expose a different user's upload
+        # merely because it was named like the demo fixture.
+        if metadata.get("document_hash") != fixture_hash:
             continue
         candidates.append((result_path.stat().st_mtime, data, result_path.parent))
 
