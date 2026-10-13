@@ -96,6 +96,7 @@ FILES = [
     "backend/app/core/risk/risk_detector.py",
     "backend/app/core/risk/risk_scoring.py",
     "backend/tests/test_deterministic_playbook_rules.py",
+    "backend/tests/test_rule_first_release_contract.py",
     "backend/tests/test_contract_checks_batching.py",
     "backend/tests/test_contract_checks_evaluation.py",
     "backend/tests/test_deterministic_cross_checks.py",
