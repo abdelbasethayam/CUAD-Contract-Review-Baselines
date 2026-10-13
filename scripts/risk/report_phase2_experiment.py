@@ -77,7 +77,7 @@ def main() -> int:
         {"name": "document_questions_present", "passed": len(playbook.get("document_level_checks") or []) > 0, "value": len(playbook.get("document_level_checks") or [])},
         {"name": "rule_domains_covered_by_taxonomy", "passed": not missing_domains, "value": {"missing": missing_domains, "mapped_rule_domains": dict(domain_counts)}},
         {"name": "rule_validation_report_passes", "passed": rule_report.get("status") == "PASS", "value": {"status": rule_report.get("status"), "checks_passed": rule_report.get("checks_passed"), "checks_total": rule_report.get("checks_total")}},
-        {"name": "classification_index_isolation_passes", "passed": bool(index_report.get("all_passed", index_report.get("status") == "PASS"), "value": {"status": index_report.get("status"), "checks_passed": index_report.get("checks_passed"), "checks_total": index_report.get("checks_total")}},
+        {"name": "classification_index_isolation_passes", "passed": bool(index_report.get("all_passed", index_report.get("status") == "PASS")), "value": {"status": index_report.get("status"), "checks_passed": index_report.get("checks_passed"), "checks_total": index_report.get("checks_total")}},
     ]
     overall = all(item["passed"] for item in checks)
     report = {
