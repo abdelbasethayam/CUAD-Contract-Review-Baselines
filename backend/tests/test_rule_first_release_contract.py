@@ -58,6 +58,7 @@ def test_active_risk_engine_does_not_load_calibration_artifacts():
         assert '"confidence_status": "CALIBRATED"' not in module, name
         assert '"severity_status": "CALIBRATED"' not in module, name
     assert "RISK_CALIBRATION_PATH" not in config
+    assert "RISK_GOLD_PATH" not in config
     assert '"confidence_status": "UNCALIBRATED"' in source
     assert '"confidence_status": "UNCALIBRATED"' in cross_checks
     assert not (ROOT / "backend/app/core/risk/calibration.py").exists()
