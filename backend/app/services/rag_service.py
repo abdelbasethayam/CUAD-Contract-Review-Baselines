@@ -20,7 +20,6 @@ from ..core.config import (
     RISK_MODEL,
     RISK_SELF_CONSISTENCY_PASSES,
     RISK_PLAYBOOK_PATH,
-    RISK_CALIBRATION_PATH,
     RISK_ENABLE_CROSS_CLAUSE,
     RISK_ENABLE_DOCUMENT_CHECKS,
     RUNS_DIR,
@@ -159,7 +158,6 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
         "risk_self_consistency_passes": RISK_SELF_CONSISTENCY_PASSES,
         "playbook_hash": playbook.get("playbook_hash"),
         "playbook_path": str(RISK_PLAYBOOK_PATH),
-        "calibration_hash": _file_hash(RISK_CALIBRATION_PATH),
         "use_playbook": RISK_USE_PLAYBOOK,
         "use_context": RISK_USE_CONTEXT,
         "use_legal_guidance": RISK_USE_LEGAL_GUIDANCE,
@@ -204,7 +202,7 @@ def resume_contract(
     expected = manifest.get("pipeline") or {}
     current = _pipeline_config(int(expected.get("top_k", TOP_K)), load_playbook())
     # Explicit resume must use the same experiment configuration. A changed
-    # playbook/model/calibration file starts a new run instead of mixing artifacts.
+    # playbook hash or deterministic rule version starts a new run instead of mixing artifacts.
     if expected and current != expected:
         raise RuntimeError(
             "Run configuration changed since this analysis started. "
