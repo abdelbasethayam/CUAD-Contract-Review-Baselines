@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,38 @@ def canonical_json(value: Any) -> str:
 
 def playbook_hash(playbook: dict) -> str:
     return hashlib.sha256(canonical_json(playbook).encode("utf-8")).hexdigest()
+
+
+def _normalize_deterministic_rules(raw: dict) -> list[dict]:
+    """Validate executable predicates that inspect only uploaded contract text."""
+    rules: list[dict] = []
+    seen: set[str] = set()
+    for item in (raw.get("deterministic_rules") or []):
+        if not isinstance(item, dict):
+            continue
+        rule_id = str(item.get("id") or "").strip()
+        pattern = str(item.get("pattern") or "").strip()
+        if not rule_id or not pattern or rule_id in seen:
+            raise ValueError("Deterministic playbook rules require unique non-empty IDs and patterns.")
+        try:
+            re.compile(pattern, re.IGNORECASE | re.DOTALL)
+            exclusions = [str(x).strip() for x in (item.get("exclude_patterns") or []) if str(x).strip()]
+            for exclusion in exclusions:
+                re.compile(exclusion, re.IGNORECASE | re.DOTALL)
+        except re.error as exc:
+            raise ValueError(f"Invalid regex in deterministic playbook rule {rule_id}: {exc}") from exc
+        seen.add(rule_id)
+        rules.append({
+            "id": rule_id,
+            "risk_domain": str(item.get("risk_domain") or "").strip() or "Commercial Risk",
+            "risk_type": str(item.get("risk_type") or "").strip() or rule_id,
+            "question": str(item.get("question") or "").strip(),
+            "pattern": pattern,
+            "exclude_patterns": exclusions,
+            "explanation": str(item.get("explanation") or "").strip(),
+            "sources": [str(x).strip() for x in (item.get("sources") or []) if str(x).strip()],
+        })
+    return rules
 
 
 def normalize_playbook(raw: dict) -> dict:
@@ -110,6 +143,7 @@ def normalize_playbook(raw: dict) -> dict:
             for item in (raw.get("document_level_checks") or [])
             if str(item.get("id") or "").strip()
         ],
+        "deterministic_rules": _normalize_deterministic_rules(raw),
         "output_template": raw.get("output_template") or {
             "clause_type": "string",
             "checklist_item_id": "string",
