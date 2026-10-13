@@ -49,10 +49,14 @@ def test_rule_resume_freshness_uses_playbook_hash_and_engine_version():
 
 def test_active_risk_engine_does_not_load_calibration_artifacts():
     source = _read("backend/app/core/risk/risk_engine.py")
+    config = _read("backend/app/core/config.py")
     assert "load_calibration" not in source
     assert "calibrate_risk_probability" not in source
     assert "calibrate_severity" not in source
+    assert "RISK_CALIBRATION_PATH" not in config
     assert '"confidence_status": "UNCALIBRATED"' in source
+    assert not (ROOT / "backend/app/core/risk/calibration.py").exists()
+    assert not (ROOT / "scripts/risk/fit_calibration.py").exists()
 
 
 def test_retired_annotation_queue_tools_and_inputs_are_not_in_release_tree():
