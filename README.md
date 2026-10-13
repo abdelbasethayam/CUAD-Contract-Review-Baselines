@@ -135,7 +135,7 @@ Details: [docs/FINETUNE.md](https://github.com/abdelbasethayam/CUAD-Contract-Rev
 
 ## Phase 2 — Uploadable contract risk review
 
-The repository now contains an end-to-end PDF/TXT upload application that performs clause segmentation, CUAD clause classification, buyer-side playbook risk checks, exact contract-evidence validation, cross-clause/document checks, and contract-level triage. The current interactive profile uses one risk reasoning pass for lower latency; this does not constitute multi-pass agreement, risk confidence remains uncalibrated without human gold, and exact-evidence gating remains enabled. Set `RISK_SELF_CONSISTENCY_PASSES=3` for a slower repeated-pass diagnostic run.
+The repository includes an end-to-end PDF/TXT upload application with clause segmentation, a separate CUAD clause-category classifier, rule-first buyer-side contract-risk screening, exact contract-evidence validation, cross-clause/document questions, and contract-level triage. The seven deterministic risk predicates run against every clause independently of the predicted CUAD label. The risk prompt never receives retrieved CUAD training example spans, and every positive must preserve exact evidence from the uploaded agreement. Rule hits are review triggers, not legal conclusions; severity/confidence are not calibrated.
 
 **Start the UI/API:** configure Ollama and backend/.env, then run bash scripts/start_all.sh. The API health check is curl -fsS http://127.0.0.1:8000/health; the frontend is usually on port 5173.
 
@@ -156,7 +156,7 @@ For a PDF test fixture, run `python scripts/risk/smoke_upload_api.py --file test
 
 Full guides: docs/PHASE2_RISK_PIPELINE.md, docs/PHASE2_REPRODUCIBILITY.md, and docs/PHASE2_PAPER_DRAFT.md. Release validation can be recorded with python scripts/risk/run_release_checks.py.
 
-The risk playbook is review guidance, not legal ground truth. The 300-case risk benchmark is model-generated **silver**, not human gold. Custom-risk accuracy is therefore unavailable; the paper and reports intentionally make no precision/recall/F1 claims for the custom risk predicates.
+Phase 2 release checks are explicitly independent of risk-span annotation datasets. They validate playbook rule definitions, taxonomy coverage, exact-quote provenance, classifier-index isolation, synthetic playbook-question regressions, upload smoke tests, and backend behavior. These are system-conformance checks, not estimates of legal-risk accuracy, enforceability, precision, recall, or F1. See docs/PHASE2_RULE_CONFORMANCE_PROTOCOL.md.
 
 **Privacy and offline mode:** the default `EMBEDDING_BACKEND=cohere` sends clause/query text to Cohere for embeddings and requires network access. For a local-only mode, set `EMBEDDING_BACKEND=local_hashing`, `LOCAL_HASHING_DIM=768`, `QDRANT_COLLECTION=cuad_train_hashing`, and `LEGAL_KNOWLEDGE_COLLECTION=legal_knowledge_hashing` in `backend/.env`, then stop the backend and run `bash scripts/risk/build_local_retrieval_profile.sh`. Restart with `bash scripts/start_all.sh`. This local mode uses deterministic HashingVectorizer/cosine retrieval (lexical-vector baseline), not a pretrained semantic embedding model, and must be evaluated as a separate configuration. Ollama generation and Qdrant remain local; do not upload confidential documents to any network-enabled mode unless the transfer is authorized.
 
