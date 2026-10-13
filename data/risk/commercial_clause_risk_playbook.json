@@ -3194,7 +3194,7 @@
       "risk_domain": "Termination Risk",
       "risk_type": "Immediate or no-notice termination right",
       "question": "Does the clause expressly permit termination immediately or without prior notice?",
-      "pattern": "\\bterminat(?:e|ion)\\b.{0,120}\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b|\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b.{0,120}\\bterminat(?:e|ion)\\b",
+      "pattern": "\\bterminat(?:e|es|ed|ion|ing)\\b.{0,120}\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b|\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b.{0,120}\\bterminat(?:e|es|ed|ion|ing)\\b",
       "exclude_patterns": [
         "\\b(?:may|shall|will|must)\\s+not\\s+terminate\\b.{0,100}\\bwithout (?:prior )?notice\\b"
       ],
@@ -3224,7 +3224,7 @@
       "risk_domain": "Commercial Risk",
       "risk_type": "Full remaining-term fees or minimum commitment after early exit",
       "question": "Does the clause connect early/convenience termination with payment of the full remaining term or minimum commitment?",
-      "pattern": "\\bterminat(?:e|ion)\\b.{0,180}\\b(?:for convenience|early|without cause)\\b.{0,240}\\b(?:full remaining term|remaining term|minimum commitment|remaining fees|all fees for the remainder)\\b|\\b(?:full remaining term|remaining term|minimum commitment|remaining fees|all fees for the remainder)\\b.{0,240}\\bterminat(?:e|ion)\\b.{0,180}\\b(?:for convenience|early|without cause)\\b",
+      "pattern": "\\bterminat(?:e|es|ed|ion|ing)\\b.{0,180}\\b(?:for convenience|early|without cause)\\b.{0,240}\\b(?:full remaining term|remaining term|minimum commitment|remaining fees|all fees for the remainder)\\b|\\b(?:full remaining term|remaining term|minimum commitment|remaining fees|all fees for the remainder)\\b.{0,240}\\bterminat(?:e|es|ed|ion|ing)\\b.{0,180}\\b(?:for convenience|early|without cause)\\b",
       "exclude_patterns": [
         "\\b(?:not|shall not|will not|does not)\\s+(?:be\\s+)?(?:liable for|pay|owe|charge)\\b.{0,100}\\b(?:remaining term|minimum commitment|remaining fees)\\b"
       ],
