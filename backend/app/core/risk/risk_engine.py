@@ -15,7 +15,6 @@ from ..config import (
     RISK_TEMPERATURE,
     RISK_USE_CONTEXT,
     RISK_USE_LEGAL_GUIDANCE,
-    RISK_USE_PLAYBOOK,
     LEGAL_KNOWLEDGE_TOP_K,
 )
 from ..rag.generator import call_ollama
@@ -264,7 +263,7 @@ def analyze_clause_risk(
     qdrant_client=None,
 ) -> list[dict]:
     playbook = playbook or load_playbook()
-    checks = applicable_checks(playbook, clause_type) if RISK_USE_PLAYBOOK else []
+    checks = applicable_checks(playbook, clause_type)
     if not checks:
         checks = [{
             "id": "OPEN-RISK-1",
