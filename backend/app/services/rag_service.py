@@ -46,6 +46,7 @@ from ..core.risk.contract_metadata import extract_contract_metadata
 from ..core.risk.contract_coverage import build_contract_coverage
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
 from ..core.risk.risk_engine import analyze_clause_risk
+from ..core.risk.deterministic_rules import RULE_ENGINE_VERSION
 from ..core.risk.risk_playbook import load_playbook
 from ..core.risk.run_store import AnalysisRun, create_or_resume_run, mark_run_complete, mark_run_failed
 from ..core.risk.evidence_compressor import compress_cuad_evidence
@@ -469,16 +470,25 @@ def _classify_contract(
         for pos, item in enumerate(valid_items):
             idx = int(item["clause_index"])
             label = str(results_by_index[idx].get("predicted_label") or "")
-            finding_ids = {
-                str(key)
-                for key, value in risk_index.items()
+            findings_for_clause = [
+                value for value in risk_index.values()
                 if int(value.get("clause_index", -1)) == idx
+            ]
+            finding_ids = {
+                str(value.get("check_id") or str(value.get("finding_id") or "").rsplit(":", 1)[-1])
+                for value in findings_for_clause
             }
             checks_expected = {
                 str(c.get("id"))
                 for c in (playbook.get("clause_types", {}).get(label, {}).get("checklist") or [])
             }
-            if checks_expected and len(finding_ids) >= len(checks_expected):
+            rule_engine_current = bool(findings_for_clause) and all(
+                (value.get("provenance") or {}).get("rule_engine_version") == RULE_ENGINE_VERSION
+                for value in findings_for_clause
+            )
+            # Do not let extra PR-* rule findings make a resumed run look complete.
+            # Require every expected question ID and the current deterministic-rule version.
+            if checks_expected and checks_expected.issubset(finding_ids) and rule_engine_current:
                 continue
 
             findings = analyze_clause_risk(
