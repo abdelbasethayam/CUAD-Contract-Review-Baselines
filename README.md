@@ -148,6 +148,7 @@ For a PDF test fixture, run `python scripts/risk/smoke_upload_api.py --file test
 **Rebuild the no-network retrieval profile from source:** stop the backend, then run `bash scripts/risk/build_local_retrieval_profile.sh`. This rebuilds both 768-dimensional local hashing indexes, proves train/test/index isolation, checks representative legal guidance retrieval, regenerates the team export/report, and runs the release suite. Start the app afterward with `bash scripts/start_all.sh`. Do not rebuild the embedded Qdrant collections while the backend is running.
 
 **Regenerate reproducible artifacts (without rebuilding indexes):**
+    .venv/bin/python scripts/risk/validate_playbook_rules.py
     .venv/bin/python scripts/risk/validate_evaluation_integrity.py
     .venv/bin/python scripts/risk/normalize_playbook_domains.py
     .venv/bin/python scripts/risk/export_team_pack.py
