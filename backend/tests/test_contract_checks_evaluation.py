@@ -93,7 +93,6 @@ def test_cross_clause_and_document_findings_require_exact_contract_quotes(monkey
             }
         ],
     }
-    monkeypatch.setattr(contract_checks, "load_calibration", lambda: {})
     monkeypatch.setattr(contract_checks, "call_ollama", lambda *args, **kwargs: json.dumps(payload))
 
     cross, document = contract_checks.analyze_contract_checks(
@@ -131,7 +130,6 @@ def test_cross_clause_finding_with_nonexistent_quote_abstains(monkeypatch):
         ],
         "document_findings": [],
     }
-    monkeypatch.setattr(contract_checks, "load_calibration", lambda: {})
     monkeypatch.setattr(contract_checks, "call_ollama", lambda *args, **kwargs: json.dumps(payload))
 
     cross, _ = contract_checks.analyze_contract_checks(
@@ -145,7 +143,6 @@ def test_cross_clause_finding_with_nonexistent_quote_abstains(monkeypatch):
 
 
 def test_omitted_cross_clause_and_document_checks_are_preserved_as_unresolved(monkeypatch):
-    monkeypatch.setattr(contract_checks, "load_calibration", lambda: {})
     monkeypatch.setattr(
         contract_checks,
         "call_ollama",
