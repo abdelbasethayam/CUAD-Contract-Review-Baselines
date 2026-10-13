@@ -1,4 +1,4 @@
-"""Phase 2 clause-level risk engine with explicit provenance and calibration-safe confidence."""
+"""Phase 2 clause-level risk engine with explicit playbook rules and evidence provenance."""
 from __future__ import annotations
 
 import json
@@ -19,7 +19,6 @@ from ..config import (
     LEGAL_KNOWLEDGE_TOP_K,
 )
 from ..rag.generator import call_ollama
-from .calibration import calibrate_risk_probability, calibrate_severity, load_calibration
 from .risk_playbook import applicable_checks, load_playbook, source_records
 from .contract_context import retrieve_related_contract_context
 from .knowledge_base import match_risk_domains, risk_guidance_for_prompt
@@ -265,7 +264,6 @@ def analyze_clause_risk(
     qdrant_client=None,
 ) -> list[dict]:
     playbook = playbook or load_playbook()
-    calibration = load_calibration()
     checks = applicable_checks(playbook, clause_type) if RISK_USE_PLAYBOOK else []
     if not checks:
         checks = [{
@@ -425,12 +423,6 @@ def analyze_clause_risk(
         score_details = score_finding({"risk_type": representative.get("risk_type"), "question": checks_by_id[check_id]["question"], "check_id": check_id, "clause_type": clause_type, "evidence": evidence, "why_flagged": representative.get("why_flagged"), "scope": "clause", "score_components": representative.get("score_components") or {}}) if status == "POTENTIAL_RISK" else None
         severity_score = float(score_details["final_score"]) if score_details and score_details.get("final_score") is not None else None
         severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
-        calibrated_confidence = (
-            calibrate_risk_probability(raw_support, calibration)
-            if status == "POTENTIAL_RISK"
-            else None
-        )
-        calibrated_severity = calibrate_severity(severity_score, calibration)
         source_ids = checks_by_id[check_id].get("sources", [])
         supporting_sources = source_records(playbook, source_ids)
         primary_source = supporting_sources[0] if supporting_sources else {}
@@ -452,7 +444,7 @@ def analyze_clause_risk(
                 "risk_status": status,
                 "risk_type": representative.get("risk_type") if status == "POTENTIAL_RISK" else None,
                 "risk": status == "POTENTIAL_RISK",
-                "risk_level": (calibrated_severity["level"] if calibrated_severity and status == "POTENTIAL_RISK" else (score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None)),
+                "risk_level": (score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None),
                 "severity": score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None,
                 "raw_support_score": raw_support,
                 "severity_score": severity_score,
@@ -464,12 +456,10 @@ def analyze_clause_risk(
                 "score_override_reason": score_details["override_reason"] if score_details else None,
                 "human_review_required": score_details["human_review_required"] if score_details else True,
                 "review_escalation": score_details["escalation"] if score_details else "LEGAL_REVIEW",
-                "confidence": calibrated_confidence,
-                "confidence_status": "CALIBRATED" if calibrated_confidence is not None else "UNCALIBRATED",
-                "severity_status": "CALIBRATED" if calibrated_severity else ("RULE_BASED_TRIAGE" if severity_score is not None else ("INCOMPLETE" if score_details else "UNCALIBRATED")),
-                "severity_probabilities": (
-                    calibrated_severity["probabilities"] if calibrated_severity else {}
-                ),
+                "confidence": None,
+                "confidence_status": "UNCALIBRATED",
+                "severity_status": "RULE_BASED_TRIAGE" if severity_score is not None else ("INCOMPLETE" if score_details else "UNCALIBRATED"),
+                "severity_probabilities": {},
                 "ground_truth_status": "PLAYBOOK_DERIVED",
                 "provenance": {
                     "playbook_hash": playbook.get("playbook_hash"),
