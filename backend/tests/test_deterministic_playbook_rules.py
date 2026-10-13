@@ -162,3 +162,40 @@ def test_direct_rule_finding_survives_contract_level_aggregation():
         item["check_id"] for item in assessment["key_risks"]
     }
     assert assessment["confidence_status"] == "UNCALIBRATED"
+
+
+
+def test_direct_rule_survives_related_clause_retrieval_and_llm_failure(monkeypatch):
+    from app.core.risk import risk_engine
+
+    text = "The Supplier's liability is expressly uncapped under this Agreement."
+
+    def fail_context(**kwargs):
+        raise RuntimeError("synthetic retrieval outage")
+
+    def fail_model(*args, **kwargs):
+        raise RuntimeError("synthetic model outage")
+
+    monkeypatch.setattr(risk_engine, "retrieve_related_contract_context", fail_context)
+    monkeypatch.setattr(risk_engine, "call_ollama", fail_model)
+
+    findings = risk_engine.analyze_clause_risk(
+        clause_index=3,
+        clause_text=text,
+        clause_type="Insurance",
+        query_vector=[0.1, 0.2],
+        contract_clauses=[{
+            "clause_index": 3,
+            "clause_text": text,
+            "predicted_label": "Insurance",
+        }],
+        cohere_client=None,
+        qdrant_client=None,
+        playbook=load_playbook(),
+        passes=1,
+    )
+
+    finding = next(item for item in findings if item.get("check_id") == "PR-UNCAPPED-LIABILITY")
+    assert finding["risk_status"] == "POTENTIAL_RISK"
+    assert finding["evidence"] in text
+    assert finding["provenance"]["source"] == "DETERMINISTIC_PLAYBOOK_RULE"
