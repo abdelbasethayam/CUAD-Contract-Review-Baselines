@@ -34,10 +34,7 @@
     "risk_playbook_exact": {
       "sha256": "f93b6f0a208b28d8583081b7880c4d4b3c1824850614b57ea21c9df458cf08c6"
     },
-    "risk_deterministic_rules": {
-      "sha256": "ec12432556f72cc505b067686ee4939b90b4aafbcae2e2f68977706d14bddb1a"
-    },
-    "risk_deterministic_rules_csv": {
+    "risk_deterministic_rules.csv": {
       "sha256": "ec12432556f72cc505b067686ee4939b90b4aafbcae2e2f68977706d14bddb1a"
     }
   },
