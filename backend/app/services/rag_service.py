@@ -484,6 +484,7 @@ def _classify_contract(
             }
             rule_engine_current = bool(findings_for_clause) and all(
                 (value.get("provenance") or {}).get("rule_engine_version") == RULE_ENGINE_VERSION
+                and (value.get("provenance") or {}).get("playbook_hash") == playbook.get("playbook_hash")
                 for value in findings_for_clause
             )
             # Do not let extra PR-* rule findings make a resumed run look complete.
