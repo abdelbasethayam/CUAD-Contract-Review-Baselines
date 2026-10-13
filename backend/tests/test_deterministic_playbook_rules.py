@@ -120,3 +120,24 @@ def test_playbook_rules_have_taxonomy_domains_and_unique_ids():
         any(key in rule for key in ("training_examples", "retrieved_examples", "example_clause", "silver_evidence"))
         for rule in rules
     )
+
+
+
+def test_neither_party_has_unlimited_liability_is_a_protected_control():
+    text = "Neither party has unlimited liability under this Agreement."
+    assert "PR-UNCAPPED-LIABILITY" not in _ids(_matches(text))
+
+
+def test_may_not_terminate_immediately_is_not_a_positive_trigger():
+    text = "Customer may not terminate this Agreement immediately; written notice and the cure period apply."
+    assert "PR-IMMEDIATE-TERMINATION-NO-NOTICE" not in _ids(_matches(text))
+
+
+def test_explicit_no_perpetual_license_is_not_a_broad_license_trigger():
+    text = "No perpetual license is granted under this Agreement."
+    assert "PR-BROAD-IP-LICENSE" not in _ids(_matches(text))
+
+
+def test_assignment_consent_carveout_is_not_an_absolute_prohibition():
+    text = "Customer may not assign this Agreement under any circumstances without prior written consent."
+    assert "PR-ABSOLUTE-ASSIGNMENT-PROHIBITION" not in _ids(_matches(text))
