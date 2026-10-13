@@ -7,6 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/documents": "http://127.0.0.1:8000",
+      "/query": "http://127.0.0.1:8000",
     },
   },
 });
