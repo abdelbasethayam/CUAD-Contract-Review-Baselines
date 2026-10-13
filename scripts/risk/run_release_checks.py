@@ -48,6 +48,7 @@ def main() -> int:
         raise SystemExit("pytest is not installed; install requirements-dev.txt before release checks.")
     commands = [
         ("compileall", [sys.executable, "-m", "compileall", "-q", "backend/app", "scripts/risk"]),
+        ("playbook_rule_validation", [sys.executable, "scripts/risk/validate_playbook_rules.py"]),
         ("evaluation_integrity", [sys.executable, "scripts/risk/validate_evaluation_integrity.py"]),
         ("playbook_domain_validation", [sys.executable, "scripts/risk/normalize_playbook_domains.py"]),
         ("team_export", [sys.executable, "scripts/risk/export_team_pack.py"]),
@@ -117,8 +118,6 @@ def main() -> int:
         ROOT / "scripts/risk/compare_cross_document_model_runs.py",
         ROOT / "scripts/risk/render_cross_document_model_report.py",
         ROOT / "data/risk/team_export/export_manifest.json",
-        ROOT / "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.csv",
-        ROOT / "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.jsonl",
         ROOT / "data/risk/commercial_clause_risk_playbook.json",
         ROOT / "backend/data/legal_knowledge/risk_taxonomy.json",
         ROOT / "scripts/risk/smoke_upload_api.py",
@@ -132,7 +131,6 @@ def main() -> int:
         ROOT / "docs/PHASE2_REPRODUCIBILITY.md",
         ROOT / "docs/PHASE2_CLAIM_EVIDENCE_MATRIX.md",
         ROOT / "docs/PHASE2_LOGICAL_MODEL.md",
-        ROOT / "data/risk/GOLD_STATUS.md",
         ROOT / "backend/tests/test_contract_checks_batching.py",
     ]
     report = {
@@ -148,9 +146,9 @@ def main() -> int:
             for path in inputs
         },
         "interpretation": (
-            "Release checks validate code/data invariants and unit behavior. "
-            "They do not estimate custom risk accuracy or legal correctness; "
-            "human gold remains unavailable."
+            "Release checks validate executable playbook predicates, exact contract quotes, "
+            "taxonomy coverage, classifier-index isolation, playbook-question regressions and unit behavior. "
+            "No risk-span annotation dataset is used by the risk flagging path or release gates."
         ),
     }
     OUT_DIR.mkdir(parents=True, exist_ok=True)
