@@ -53,3 +53,22 @@ def test_active_risk_engine_does_not_load_calibration_artifacts():
     assert "calibrate_risk_probability" not in source
     assert "calibrate_severity" not in source
     assert '"confidence_status": "UNCALIBRATED"' in source
+
+
+def test_retired_annotation_queue_tools_and_inputs_are_not_in_release_tree():
+    retired_paths = [
+        "scripts/risk/build_absence_gold_queue.py",
+        "scripts/risk/build_gold_queue.py",
+        "scripts/risk/build_silver_queue.py",
+        "scripts/risk/run_gold_evaluation.py",
+        "scripts/risk/run_silver_adjudication.py",
+        "scripts/risk/validate_gold_queue.py",
+        "data/risk/gold/annotation_queue.csv",
+        "data/risk/gold/gold_annotations.csv",
+        "data/risk/silver/silver_queue.csv",
+        "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.csv",
+        "docs/PHASE2_NO_GOLD_EVALUATION_PROTOCOL.md",
+        "data/risk/GOLD_STATUS.md",
+    ]
+    existing = [relative for relative in retired_paths if (ROOT / relative).exists()]
+    assert existing == [], f"Retired annotation workflow is still present: {existing}"
