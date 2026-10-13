@@ -1,9 +1,9 @@
-"""Evidence-grounded clause-level risk analysis.
+"""Legacy evidence-grounded risk detector, now isolated from CUAD example text.
 
-CUAD classification remains candidate-constrained and separate from risk. Risk
-reasoning uses the current clause and semantically related clauses from the
-same uploaded contract as primary evidence. Curated legal guidance and regex
-indicators are supporting signals only.
+Clause-category classification is routing metadata only. Risk evidence must come
+from the current uploaded contract or related clauses from that same contract.
+Executable review triggers live in the commercial playbook; this module never
+loads or prompts on retrieved CUAD training examples.
 """
 
 from __future__ import annotations
@@ -192,19 +192,29 @@ def _build_risk_rules(category: str, indicators: dict, guidance: list[dict]) -> 
 
 
 def detect_legal_indicators(clause_text: str, clause_type: str) -> dict[str, list[str]]:
+    """Find indicator phrases across all categories, independent of predicted label.
+
+    The predicted category is retained as display/routing metadata, but a missed
+    or incorrect CUAD label must not hide a textual risk indicator.
+    """
     category = map_clause_category(clause_type)
-    patterns = list(RISK_INDICATOR_PATTERNS.get(category or "", []))
-    if not category:
-        patterns.extend(GENERIC_RISK_INDICATOR_PATTERNS)
-    matches = [
+    patterns = [
+        pair
+        for category_patterns in RISK_INDICATOR_PATTERNS.values()
+        for pair in category_patterns
+    ]
+    patterns.extend(GENERIC_RISK_INDICATOR_PATTERNS)
+    text = str(clause_text or "")
+    matches = list(dict.fromkeys(
         label
         for label, pattern in patterns
-        if re.search(pattern, str(clause_text or ""), re.IGNORECASE | re.DOTALL)
-    ]
+        if re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+    ))
     return {
         "clause_category": [category] if category else [],
         "matched_indicators": matches,
         "source_documentation": ["backend/data/legal_knowledge/risk_indicators.md"],
+        "indicator_scope": "ALL_RISK_CATEGORIES_NOT_GATED_BY_CUAD_LABEL",
     }
 
 
@@ -230,35 +240,23 @@ def _format_contract_context(context: list[dict]) -> str:
     )
 
 
-def _format_cuad_evidence(evidence: list[dict]) -> str:
-    if not evidence:
-        return "None"
-    return "\n\n".join(
-        f"{index}. Label: {item.get('clause_type')} | score: {item.get('score')}\n"
-        f"   Example: {item.get('clause_text')}"
-        for index, item in enumerate(evidence, start=1)
-    )
-
-
 def build_risk_prompt(
     clause_text: str,
     clause_type: str,
     legal_indicators: dict[str, list[str]],
     guidance: list[dict],
     contract_context: list[dict] | None = None,
-    cuad_evidence: list[dict] | None = None,
-    candidate_labels: list[str] | None = None,
     risk_taxonomy: list[dict] | None = None,
 ) -> str:
     return f"""You are an evidence-grounded contract risk reviewer. This is not legal advice.
 
-Analyze the actual current contract clause first. Related contract chunks are additional contract evidence. CUAD retrieval and legal guidance provide context only; neither is evidence that a risk exists.
+Analyze the uploaded contract clause first. Related clauses from this same uploaded contract are additional contract evidence. The clause category is routing metadata only and must not be treated as evidence.
 
 Rules:
 - Return JSON only.
-- Do not infer a risk solely from a CUAD label, legal guidance, or indicator name.
-- Regex indicators are supporting signals, not a final decision gate.
-- A positive risk finding requires an exact contiguous evidence string copied from the current clause or a related contract chunk.
+- Never use or invent a retrieved training example. This risk stage receives no CUAD example text.
+- Use the playbook/taxonomy and deterministic indicators to identify review questions; only the uploaded contract can establish supporting evidence.
+- A positive finding requires an exact contiguous evidence string copied from the current clause or a related clause in this same uploaded contract.
 - If evidence is missing or insufficient, return INSUFFICIENT_EVIDENCE with risk_level null.
 - Use HIGH, MEDIUM, or LOW only for a validated POTENTIAL_RISK finding; otherwise risk_level must be null.
 - Never include hidden reasoning or reasoning_details in the response.
@@ -266,11 +264,7 @@ Rules:
 Current contract clause:
 {clause_text}
 
-Final CUAD classification: {clause_type}
-Candidate CUAD labels: {json.dumps(candidate_labels or [], ensure_ascii=False)}
-
-CUAD retrieval evidence:
-{_format_cuad_evidence(cuad_evidence or [])}
+Clause category (routing metadata only): {clause_type}
 
 Related contract context:
 {_format_contract_context(contract_context or [])}
@@ -463,8 +457,6 @@ def detect_clause_risk(
     clause_type: str,
     *,
     classification_status: str | None = VALID_CLASSIFICATION_STATUS,
-    cuad_evidence: list[dict] | None = None,
-    candidate_labels: list[str] | None = None,
     contract_context: list[dict] | None = None,
     cohere_client=None,
     qdrant_client=None,
@@ -522,8 +514,6 @@ def detect_clause_risk(
         legal_indicators=indicators,
         guidance=guidance,
         contract_context=context,
-        cuad_evidence=cuad_evidence,
-        candidate_labels=candidate_labels,
         risk_taxonomy=risk_guidance_for_prompt(risk_domains),
     )
     if progress_callback:
