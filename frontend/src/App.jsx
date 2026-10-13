@@ -314,7 +314,7 @@ function ContractReview() {
       </details>
 
       {demoNotice && <p className="demo-notice" role="status">{demoNotice} You can inspect the saved clauses, findings and chatbot immediately.</p>}
-      {error && <div className="error">{error}</div>
+      {error && <div className="error">{error}</div>}
 
       {loading && (
         <section className="trace" aria-live="polite">
