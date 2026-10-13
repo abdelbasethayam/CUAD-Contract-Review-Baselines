@@ -263,6 +263,31 @@ def analyze_clause_risk(
     qdrant_client=None,
 ) -> list[dict]:
     playbook = playbook or load_playbook()
+    # Direct uploaded-text predicates execute before optional retrieval and model
+    # calls. Their findings survive any later context or generation failure.
+    rule_findings = evaluate_playbook_rules(
+        clause_text=clause_text,
+        clause_index=clause_index,
+        clause_type=clause_type,
+        playbook=playbook,
+    )
+    rule_hits = [
+        {
+            "check_id": item.get("check_id"),
+            "risk_domain": item.get("risk_domain"),
+            "risk_type": item.get("risk_type"),
+            "evidence": item.get("evidence"),
+            "why_flagged": item.get("why_flagged"),
+        }
+        for item in rule_findings
+    ]
+    _emit(
+        progress_callback,
+        "deterministic_rules",
+        f"Applied {len(rule_findings)} direct playbook rule trigger(s)",
+        clause_index=clause_index,
+        rule_engine_version=RULE_ENGINE_VERSION,
+    )
     checks = applicable_checks(playbook, clause_type)
     if not checks:
         checks = [{
@@ -274,12 +299,22 @@ def analyze_clause_risk(
 
     context = []
     if RISK_USE_CONTEXT and query_vector and contract_clauses:
-        context = retrieve_related_contract_context(
-            target_clause_index=clause_index,
-            target_vector=query_vector,
-            clauses=contract_clauses,
-            top_k=RISK_CONTEXT_TOP_K,
-        )
+        try:
+            context = retrieve_related_contract_context(
+                target_clause_index=clause_index,
+                target_vector=query_vector,
+                clauses=contract_clauses,
+                top_k=RISK_CONTEXT_TOP_K,
+            )
+        except Exception as exc:
+            # Same-contract retrieval is useful context, but direct playbook
+            # rules still need to run when the retrieval index is unavailable.
+            _emit(
+                progress_callback,
+                "contract_context",
+                f"Related-clause retrieval unavailable; direct rules remain active: {exc}",
+                clause_index=clause_index,
+            )
 
     indicators = (
         detect_legal_indicators(clause_text, clause_type)
@@ -330,29 +365,6 @@ def analyze_clause_risk(
         seen.add(key)
         deduped.append(item)
     guidance = deduped[: max(1, LEGAL_KNOWLEDGE_TOP_K * 2)]
-    rule_findings = evaluate_playbook_rules(
-        clause_text=clause_text,
-        clause_index=clause_index,
-        clause_type=clause_type,
-        playbook=playbook,
-    )
-    rule_hits = [
-        {
-            "check_id": item.get("check_id"),
-            "risk_domain": item.get("risk_domain"),
-            "risk_type": item.get("risk_type"),
-            "evidence": item.get("evidence"),
-            "why_flagged": item.get("why_flagged"),
-        }
-        for item in rule_findings
-    ]
-    _emit(
-        progress_callback,
-        "deterministic_rules",
-        f"Applied {len(rule_findings)} direct playbook rule trigger(s)",
-        clause_index=clause_index,
-        rule_engine_version=RULE_ENGINE_VERSION,
-    )
     prompt = _prompt(
         clause_text=clause_text,
         clause_type=clause_type,
