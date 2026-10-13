@@ -25,7 +25,6 @@ from ..core.config import (
     RUNS_DIR,
     RISK_USE_CONTEXT,
     RISK_USE_LEGAL_GUIDANCE,
-    RISK_USE_PLAYBOOK,
     TOP_K,
     load_labels,
 )
@@ -158,7 +157,7 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
         "risk_self_consistency_passes": RISK_SELF_CONSISTENCY_PASSES,
         "playbook_hash": playbook.get("playbook_hash"),
         "playbook_path": str(RISK_PLAYBOOK_PATH),
-        "use_playbook": RISK_USE_PLAYBOOK,
+        "playbook_questions_enabled": True,
         "use_context": RISK_USE_CONTEXT,
         "use_legal_guidance": RISK_USE_LEGAL_GUIDANCE,
         "enable_cross_clause": RISK_ENABLE_CROSS_CLAUSE,
