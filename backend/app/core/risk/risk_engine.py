@@ -26,6 +26,7 @@ from .knowledge_base import match_risk_domains, risk_guidance_for_prompt
 from ..legal_knowledge.retriever import retrieve_legal_guidance
 from .risk_detector import detect_legal_indicators
 from .risk_scoring import score_finding
+from .deterministic_rules import RULE_ENGINE_VERSION, evaluate_playbook_rules
 
 ProgressCallback = Callable[[dict], None]
 
@@ -100,6 +101,7 @@ def _prompt(
     context: list[dict],
     playbook: dict,
     guidance: list[dict] | None = None,
+    deterministic_rule_hits: list[dict] | None = None,
 ) -> str:
     checklist = [
         {
@@ -132,11 +134,12 @@ Rules:
 5. For DON'T KNOW, explain what evidence is missing.
 6. Risk type must identify the concrete exposure, not just "risk".
 7. Keep reasons concise and audit-friendly.
-8. Return JSON only. No hidden reasoning, no markdown, no extra text.
-9. Each checklist item is a RISK PREDICATE: "answer" the supplied question as written.
-10. Apply the supplied flag_if and do_not_flag_if rules when setting status. Do not treat every YES as a risk.
-11. If the question asks whether a risk condition exists, YES can be POTENTIAL_RISK only when flag_if is satisfied and exact evidence supports it. If flag_if is not satisfied, use NO_RISK.
-12. A mutual/reciprocal clause must not be labeled one-sided when the contract text itself applies the protection to both parties.
+8. No clause-category training examples or retrieved risk text spans are provided to this risk stage; do not invent examples.
+9. Return JSON only. No hidden reasoning, no markdown, no extra text.
+10. Each checklist item is a RISK PREDICATE: answer the supplied question as written.
+11. Apply the supplied flag_if and do_not_flag_if rules when setting status. Do not treat every YES as a risk.
+12. If the question asks whether a risk condition exists, YES can be POTENTIAL_RISK only when flag_if is satisfied and exact evidence supports it. If flag_if is not satisfied, use NO_RISK.
+13. A mutual/reciprocal clause must not be labeled one-sided when the contract text itself applies the protection to both parties.
 
 CURRENT CLAUSE
 ID: {clause_type}
@@ -154,6 +157,11 @@ PLAYBOOK CHECKS
 
 LEGAL GUIDANCE (not contract evidence)
 {json.dumps(guidance or [], indent=2, ensure_ascii=False)}
+
+DETERMINISTIC PLAYBOOK RULE MATCHES FOR THIS UPLOADED CLAUSE
+{json.dumps(deterministic_rule_hits or [], indent=2, ensure_ascii=False)}
+
+These direct pattern matches are review triggers generated from the playbook and exact uploaded clause text. They do not establish enforceability. Do not erase a matching trigger by asserting a legal conclusion; the deterministic rule finding is preserved independently of your answer to the checklist questions.
 
 Return:
 {{
@@ -325,6 +333,29 @@ def analyze_clause_risk(
         seen.add(key)
         deduped.append(item)
     guidance = deduped[: max(1, LEGAL_KNOWLEDGE_TOP_K * 2)]
+    rule_findings = evaluate_playbook_rules(
+        clause_text=clause_text,
+        clause_index=clause_index,
+        clause_type=clause_type,
+        playbook=playbook,
+    )
+    rule_hits = [
+        {
+            "check_id": item.get("check_id"),
+            "risk_domain": item.get("risk_domain"),
+            "risk_type": item.get("risk_type"),
+            "evidence": item.get("evidence"),
+            "why_flagged": item.get("why_flagged"),
+        }
+        for item in rule_findings
+    ]
+    _emit(
+        progress_callback,
+        "deterministic_rules",
+        f"Applied {len(rule_findings)} direct playbook rule trigger(s)",
+        clause_index=clause_index,
+        rule_engine_version=RULE_ENGINE_VERSION,
+    )
     prompt = _prompt(
         clause_text=clause_text,
         clause_type=clause_type,
@@ -333,6 +364,7 @@ def analyze_clause_risk(
         context=context,
         playbook=playbook,
         guidance=guidance,
+        deterministic_rule_hits=rule_hits,
     )
 
     n_passes = max(1, int(passes if passes is not None else RISK_SELF_CONSISTENCY_PASSES))
@@ -441,6 +473,7 @@ def analyze_clause_risk(
                 "ground_truth_status": "PLAYBOOK_DERIVED",
                 "provenance": {
                     "playbook_hash": playbook.get("playbook_hash"),
+                    "rule_engine_version": RULE_ENGINE_VERSION,
                     "check_id": check_id,
                     "source_ids": source_ids,
                     "model": RISK_MODEL,
@@ -496,6 +529,7 @@ def analyze_clause_risk(
                 "ground_truth_status": "PLAYBOOK_DERIVED",
                 "provenance": {
                     "playbook_hash": playbook.get("playbook_hash"),
+                    "rule_engine_version": RULE_ENGINE_VERSION,
                     "check_id": check["id"],
                     "source_ids": check.get("sources", []),
                     "model": RISK_MODEL,
@@ -510,4 +544,7 @@ def analyze_clause_risk(
                 "severity_factors": {},
             }
         )
+    # Keep deterministic playbook flags independently of model answers. A direct
+    # lexical trigger must not disappear because the question-answering model said NO.
+    findings.extend(rule_findings)
     return sorted(findings, key=lambda item: (item["clause_index"], item["check_id"]))
