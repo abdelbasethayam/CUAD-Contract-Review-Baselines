@@ -1,8 +1,8 @@
 """Deterministic Phase 2 risk triage score, overrides, aggregation, and escalation.
 
 The numeric score is an internal review-prioritization instrument. It is not a
-legal standard and is not a probability. Probability is calibrated separately
-against a locked human-adjudicated set.
+legal standard, probability of loss, or conclusion about enforceability. The
+current risk pipeline does not load probability calibration artifacts.
 """
 from __future__ import annotations
 
