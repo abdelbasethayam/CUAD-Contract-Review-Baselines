@@ -13,9 +13,15 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install runtime dependencies
-        run: python -m pip install -q fastapi pydantic requests numpy pandas scikit-learn scipy qdrant-client cohere python-dotenv
+        run: python -m pip install -q pytest fastapi pydantic requests numpy pandas scikit-learn scipy qdrant-client cohere python-dotenv
       - name: Compile Python sources
         run: python -m compileall -q backend scripts data/scripts
+      - name: Validate playbook rule and taxonomy contract
+        run: python scripts/risk/validate_playbook_rules.py
+      - name: Test annotation-independent rule path
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}
+        run: python -m pytest -q backend/tests/test_deterministic_playbook_rules.py backend/tests/test_rule_first_release_contract.py
       - name: Import Phase 2 modules
         run: |
           python - <<'PY'
