@@ -18,10 +18,22 @@ jobs:
         run: python -m compileall -q backend scripts data/scripts
       - name: Validate playbook rule and taxonomy contract
         run: python scripts/risk/validate_playbook_rules.py
-      - name: Test annotation-independent rule path
+      - name: Test annotation-independent rule and contract-check paths
         env:
           PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}
-        run: python -m pytest -q backend/tests/test_deterministic_playbook_rules.py backend/tests/test_rule_first_release_contract.py backend/tests/test_contract_chat.py
+        run: >-
+          python -m pytest -q
+          backend/tests/test_deterministic_playbook_rules.py
+          backend/tests/test_rule_first_release_contract.py
+          backend/tests/test_contract_chat.py
+          backend/tests/test_contract_checks_batching.py
+          backend/tests/test_contract_checks_evaluation.py
+          backend/tests/test_contract_risk_architecture.py
+          backend/tests/test_deterministic_cross_checks.py
+          backend/tests/test_contract_level_assessment.py
+          backend/tests/test_openrouter_pipeline.py
+          backend/tests/test_openrouter_config.py
+          backend/tests/test_legal_knowledge.py
       - name: Import Phase 2 modules
         run: |
           python - <<'PY'
