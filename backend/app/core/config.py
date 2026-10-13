@@ -71,7 +71,6 @@ RISK_ENABLE_CROSS_CLAUSE = os.getenv("RISK_ENABLE_CROSS_CLAUSE", "true").strip()
 RISK_ENABLE_DOCUMENT_CHECKS = os.getenv("RISK_ENABLE_DOCUMENT_CHECKS", "true").strip().lower() in {"1", "true", "yes"}
 
 RISK_GOLD_PATH = RISK_DATA_DIR / "gold" / "gold_annotations.csv"
-RISK_CALIBRATION_PATH = RISK_DATA_DIR / "gold" / "calibration.json"
 RISK_EXTERNAL_BENCHMARKS_PATH = RISK_DATA_DIR / "external_benchmarks.json"
 
 EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "cohere").strip().lower()
