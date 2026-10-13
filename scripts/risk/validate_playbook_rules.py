@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,6 +16,18 @@ if str(ROOT / "backend") not in sys.path:
 from app.core.config import HYBRID_COLLECTION, QDRANT_COLLECTION, QDRANT_PATH
 from app.core.risk.knowledge_base import load_risk_knowledge
 from app.core.risk.risk_playbook import load_playbook
+
+
+def _git_head() -> str | None:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return None
 
 
 def main() -> int:
@@ -99,6 +113,8 @@ def main() -> int:
 
     report = {
         "schema_version": 1,
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "git_head_at_run_time": _git_head(),
         "status": "PASS" if all(item["passed"] for item in results) else "FAIL",
         "evaluation_mode": "PLAYBOOK_RULE_CONFORMANCE",
         "human_gold_required_for_release": False,
