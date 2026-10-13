@@ -80,6 +80,23 @@ def main() -> int:
                 violations.append(f"{path.relative_to(ROOT)} contains {token}")
     check("risk_prompt_path_has_no_cuad_example_injection", not violations, violations)
 
+    active_engine = (ROOT / "backend" / "app" / "core" / "risk" / "risk_engine.py").read_text(encoding="utf-8")
+    calibration_dependencies = ("load_calibration", "calibrate_risk_probability", "calibrate_severity")
+    calibration_violations = [token for token in calibration_dependencies if token in active_engine]
+    check("active_risk_engine_uses_no_calibration_artifacts", not calibration_violations, calibration_violations)
+
+    release_path = ROOT / "scripts" / "risk" / "run_release_checks.py"
+    release_source = release_path.read_text(encoding="utf-8")
+    annotation_path_tokens = (
+        "gold_annotations.csv",
+        "silver_annotations_final_v5",
+        "silver_queue.csv",
+        "gold/annotation_queue.csv",
+        "GOLD_STATUS.md",
+    )
+    release_annotation_refs = [token for token in annotation_path_tokens if token in release_source]
+    check("release_gate_has_no_risk_annotation_inputs", not release_annotation_refs, release_annotation_refs)
+
     report = {
         "schema_version": 1,
         "status": "PASS" if all(item["passed"] for item in results) else "FAIL",
