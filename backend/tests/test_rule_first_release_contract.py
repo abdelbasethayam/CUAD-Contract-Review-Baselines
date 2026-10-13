@@ -49,12 +49,17 @@ def test_rule_resume_freshness_uses_playbook_hash_and_engine_version():
 
 def test_active_risk_engine_does_not_load_calibration_artifacts():
     source = _read("backend/app/core/risk/risk_engine.py")
+    cross_checks = _read("backend/app/core/risk/contract_checks.py")
     config = _read("backend/app/core/config.py")
-    assert "load_calibration" not in source
-    assert "calibrate_risk_probability" not in source
-    assert "calibrate_severity" not in source
+    for name, module in (("risk_engine", source), ("contract_checks", cross_checks)):
+        assert "load_calibration" not in module, name
+        assert "calibrate_risk_probability" not in module, name
+        assert "calibrate_severity" not in module, name
+        assert '"confidence_status": "CALIBRATED"' not in module, name
+        assert '"severity_status": "CALIBRATED"' not in module, name
     assert "RISK_CALIBRATION_PATH" not in config
     assert '"confidence_status": "UNCALIBRATED"' in source
+    assert '"confidence_status": "UNCALIBRATED"' in cross_checks
     assert not (ROOT / "backend/app/core/risk/calibration.py").exists()
     assert not (ROOT / "scripts/risk/fit_calibration.py").exists()
 
