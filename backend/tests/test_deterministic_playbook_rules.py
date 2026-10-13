@@ -141,3 +141,24 @@ def test_explicit_no_perpetual_license_is_not_a_broad_license_trigger():
 def test_assignment_consent_carveout_is_not_an_absolute_prohibition():
     text = "Customer may not assign this Agreement under any circumstances without prior written consent."
     assert "PR-ABSOLUTE-ASSIGNMENT-PROHIBITION" not in _ids(_matches(text))
+
+
+def test_direct_rule_finding_survives_contract_level_aggregation():
+    from app.core.risk.contract_risk_engine import aggregate_clause_risks
+
+    playbook = load_playbook()
+    text = "The Supplier's liability is expressly uncapped under this Agreement."
+    findings = evaluate_playbook_rules(
+        clause_text=text,
+        clause_index=3,
+        clause_type="Insurance",
+        playbook=playbook,
+    )
+    assessment = aggregate_clause_risks(findings, playbook)
+
+    assert assessment["status"] == "POTENTIAL_RISK"
+    assert 3 in assessment["affected_clauses"]
+    assert "PR-UNCAPPED-LIABILITY" in {
+        item["check_id"] for item in assessment["key_risks"]
+    }
+    assert assessment["confidence_status"] == "UNCALIBRATED"
