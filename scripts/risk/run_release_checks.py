@@ -175,7 +175,7 @@ def main() -> int:
         "",
         "## Interpretation",
         "",
-        "These checks validate implementation/data integrity, not custom-risk accuracy. Human-gold annotations are still absent. Review captured stdout/stderr in the JSON file for detailed counts and warnings.",
+        "These checks validate explicit playbook rules, exact evidence provenance, taxonomy coverage, classifier-index isolation, synthetic regressions and operational tests. The release path does not read risk-span annotation datasets and does not estimate legal-risk accuracy. Review captured stdout/stderr in the JSON file for detailed counts and warnings.",
         "",
         "## SHA-256",
         "",
