@@ -50,7 +50,7 @@ RISK_INDICATOR_PATTERNS: dict[str, list[tuple[str, str]]] = {
     "Intellectual Property": [
         ("ownership allocation wording", r"\b(?:own|owns|owned|ownership|belong|belongs|vest|vests)\b.{0,160}\b(?:intellectual property|ip|rights?|technology|inventions?|work product)\b"),
         ("assignment of IP rights", r"\bassign(?:s|ed|ment)?\b.{0,160}\b(?:intellectual property|ip|patents?|copyrights?|trademarks?|technology)\b"),
-        ("broad license scope", r"\blicen[cs](?:e|es|ed|ing)?\b.{0,260}\b(?:worldwide|perpetual|irrevocable|exclusive|sublicen[cs]e|transferable|any purpose)\b"),
+        ("broad license scope", r"\blicen[cs](?:e|es|ed|ing)?\b.{0,260}\b(?:worldwide|perpetual|irrevocable|exclusive|sublicen[cs]e|transferable|any purpose)\b|\b(?:worldwide|perpetual|irrevocable|exclusive|sublicen[cs]e|transferable|any purpose)\b.{0,120}\blicen[cs](?:e|es|ed|ing)?\b"),
         ("unclear license rights", r"\blicen[cs](?:e|es|ed|ing)?\b"),
     ],
     "Confidentiality": [
