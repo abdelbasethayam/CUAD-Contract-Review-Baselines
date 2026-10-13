@@ -72,6 +72,7 @@ FILES = [
     "data/risk/team_export/risk_clause_checks.csv",
     "data/risk/team_export/risk_cross_clause_checks.csv",
     "data/risk/team_export/risk_document_checks.csv",
+    "data/risk/team_export/risk_deterministic_rules.csv",
     "data/risk/team_export/risk_taxonomy.json",
     "data/risk/team_export/source_registry.json",
     "scripts/risk/package_phase2_release.py",
