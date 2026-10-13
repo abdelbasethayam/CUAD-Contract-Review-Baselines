@@ -1,20 +1,24 @@
-# Phase 2 Risk Evaluation Protocol
+# Phase 2 Risk Evaluation Protocol — Rule-First
 
-## Ground-truth hierarchy
-1. **Human/expert benchmark ground truth:** public expert-annotated datasets whose task definitions match the evaluated capability (for example ContractEval for clause-level risk/evidence behavior; ACORD for retrieval; ContractNLI for contract evidence/NLI). These support external validity.
-2. **Project machine-adjudicated silver:** held-out CUAD clauses labeled by an independent judge model plus skeptical verification. Use for diagnostics and model/playbook analysis only.
-3. **Playbook-derived outputs:** policy/rule outputs from `commercial_clause_risk_playbook.json`. Never use as ground truth.
+The current target is explicit playbook-rule and question conformance over uploaded contract text. The playbook provides the review predicates; the contract supplies the evidence. This is a review-prioritization system, not a legal determination.
 
-## Closed-test rule
-The project's locked test subset must not be used to tune prompts, playbook wording, retrieval parameters, thresholds, calibration, or model selection.
+## Release acceptance
+- deterministic rule IDs are unique and every configured regex compiles;
+- rules provide a risk domain, question/risk type and reviewer-facing explanation;
+- every rule domain exists in the canonical taxonomy;
+- direct rule positives return an exact quote from the uploaded clause;
+- the risk prompt path contains no retrieved CUAD training example spans;
+- question-based positives are checked against exact current-contract evidence;
+- cross-clause/document outputs cite existing clause IDs and quote exact text from those clauses;
+- the separate CUAD classification index contains training contracts only and has no train/test overlap;
+- synthetic playbook-question regressions, API smoke tests and backend tests pass.
 
-## Reporting
-Report risk detection, abstention/uncertainty, evidence validity, severity, and contract-cluster uncertainty separately. Do not convert deterministic severity scores into probabilities. Do not claim legal correctness or legal advice.
+## Interpretation
+The report uses implementation invariants, deterministic rule tests, synthetic fixture conformance and evidence-provenance checks. These metrics are not a legal-risk accuracy estimate and should not be described as precision, recall, F1, legal correctness, enforceability or calibrated loss probability. A rule miss is not a statement that a contract is safe.
 
-## Limitation
-Without qualified human adjudicators for the project's custom 37-target risk taxonomy, the project cannot honestly claim a human-gold accuracy estimate for that taxonomy. Any internal number derived from the silver set must be labeled machine-adjudicated/silver and interpreted accordingly.
+## Reproduction
+From the repository root, stop the API backend before checking the embedded Qdrant index and run:
 
+    .venv/bin/python scripts/risk/run_release_checks.py
 
-## Risk-domain assignment policy (playbook v1.1)
-
-Every clause-level, cross-clause, and document-level check has one canonical `risk_domain` selected from the ten domains in `backend/data/legal_knowledge/risk_taxonomy.json`. The check's declared playbook domain is the primary aggregation/routing label. A more specific legacy label is retained as `risk_subdomain`. Keyword-based taxonomy matches are recorded as `taxonomy_suggested_domains` for review and can be a fallback only when a check has no declared domain; they must not silently override an explicit playbook domain. Neither a taxonomy match nor a playbook rule constitutes contract evidence.
+The script writes data/risk/results/release_validation.json and .md and the playbook-rule report under data/risk/results/. Restart the API afterward.
