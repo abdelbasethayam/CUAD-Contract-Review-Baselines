@@ -1,13 +1,13 @@
 {
   "schema_version": 3,
-  "source_version": "1.1",
-  "title": "Commercial Contract Risk Playbook — CUAD 36 + Indemnification (37 clause-risk targets)",
+  "source_version": "1.2",
+  "title": "Commercial Contract Risk Playbook — rule-first screening + 37 clause-risk targets",
   "perspective": "customer_buyer",
   "policy_tier": "D",
   "owner": null,
   "effective_date": null,
   "approval_status": "UNAPPROVED",
-  "disclaimer": "Structural commercial-risk screening only. This playbook is policy/guidance, not legal advice or human gold ground truth. All material findings require exact contractual evidence and, where applicable, legal/source verification.",
+  "disclaimer": "Rule-first commercial contract review prioritization. The deterministic_rules section contains executable text predicates evaluated only against the uploaded contract. A rule match is a review trigger, not a legal conclusion. Checklist questions handle nuanced cases. CUAD classification examples and machine-silver text spans are not risk evidence, are not used to flag risks, and are not required for release.",
   "sources": {
     "P1": {
       "id": "P1",
@@ -3140,6 +3140,111 @@
     "note": "CUAD v1 contains 36 substantive clause categories after excluding five metadata fields. Indemnification is a supplemental risk category and is not counted as a CUAD category."
   },
   "playbook_hash": "9b0a1752c7891857594eade8f10bbb5b7e317559d210a259741cf6a141dc6efb",
-  "version": "1.1",
-  "domain_mapping_note": "Version 1.1 maps every clause, cross-clause, and document-level check to one canonical domain from backend/data/legal_knowledge/risk_taxonomy.json. This is a review-routing taxonomy, not a legal conclusion or gold label. Earlier finer-grained domain labels are preserved as risk_subdomain."
+  "version": "1.2",
+  "domain_mapping_note": "Version 1.1 maps every clause, cross-clause, and document-level check to one canonical domain from backend/data/legal_knowledge/risk_taxonomy.json. This is a review-routing taxonomy, not a legal conclusion or gold label. Earlier finer-grained domain labels are preserved as risk_subdomain.",
+  "deterministic_rules": [
+    {
+      "id": "PR-UNCAPPED-LIABILITY",
+      "risk_domain": "Liability Risk",
+      "risk_type": "Explicit uncapped or unlimited liability wording",
+      "question": "Does the clause expressly connect liability or damages to uncapped, unlimited, or outside-the-cap wording?",
+      "pattern": "\\b(?:liabilit(?:y|ies)|damages?)\\b.{0,100}\\b(?:uncapped|unlimited|without limitation|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap)\\b|\\b(?:uncapped|unlimited|without limitation|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap)\\b.{0,100}\\b(?:liabilit(?:y|ies)|damages?)\\b",
+      "exclude_patterns": [
+        "\\b(?:not|never|shall not|will not|is not|are not)\\s+(?:be\\s+)?(?:uncapped|unlimited)\\b"
+      ],
+      "explanation": "The clause contains express uncapped/unlimited liability language. Flag for buyer-side review of the cap, carve-outs, and monetary exposure; this is not a conclusion that the term is unlawful.",
+      "sources": [
+        "P2",
+        "P4"
+      ]
+    },
+    {
+      "id": "PR-INDEMNITY-OUTSIDE-CAP",
+      "risk_domain": "Liability Risk",
+      "risk_type": "Indemnification stated to be uncapped or outside the liability cap",
+      "question": "Does the clause expressly state that indemnification is uncapped, unlimited, or outside the liability cap?",
+      "pattern": "\\b(?:indemnif(?:y|ication|ity|ies)|hold harmless)\\b.{0,180}\\b(?:uncapped|unlimited|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap|excluded from (?:the )?(?:aggregate )?(?:liability )?cap)\\b|\\b(?:uncapped|unlimited|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap|excluded from (?:the )?(?:aggregate )?(?:liability )?cap)\\b.{0,180}\\b(?:indemnif(?:y|ication|ity|ies)|hold harmless)\\b",
+      "exclude_patterns": [
+        "\\b(?:not|never|shall not|will not|is not|are not)\\s+(?:be\\s+)?(?:uncapped|unlimited)\\b"
+      ],
+      "explanation": "The clause expressly links an indemnity obligation with uncapped or outside-the-cap language. Review the indemnity scope and its coordination with the liability cap.",
+      "sources": [
+        "P2",
+        "P3",
+        "P4"
+      ]
+    },
+    {
+      "id": "PR-LIQUIDATED-DAMAGES-OUTSIDE-CAP",
+      "risk_domain": "Financial Risk",
+      "risk_type": "Liquidated damages stated to be outside the liability cap",
+      "question": "Does the clause expressly put liquidated damages outside or exclude them from the liability cap?",
+      "pattern": "\\bliquidated damages?\\b.{0,180}\\b(?:outside|excluded from|not subject to|not governed by)\\b.{0,60}\\b(?:the )?(?:aggregate )?(?:liability )?cap\\b|\\b(?:outside|excluded from|not subject to|not governed by)\\b.{0,60}\\b(?:the )?(?:aggregate )?(?:liability )?cap\\b.{0,180}\\bliquidated damages?\\b",
+      "exclude_patterns": [
+        "\\b(?:not|never|shall not|will not|are not|is not)\\s+(?:be\\s+)?(?:outside|excluded from|unlimited)\\b"
+      ],
+      "explanation": "The wording expressly separates liquidated damages from a liability cap. Review the cap interaction, calculation method, and potential cumulative exposure.",
+      "sources": [
+        "P2",
+        "P4"
+      ]
+    },
+    {
+      "id": "PR-IMMEDIATE-TERMINATION-NO-NOTICE",
+      "risk_domain": "Termination Risk",
+      "risk_type": "Immediate or no-notice termination right",
+      "question": "Does the clause expressly permit termination immediately or without prior notice?",
+      "pattern": "\\bterminat(?:e|ion)\\b.{0,120}\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b|\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b.{0,120}\\bterminat(?:e|ion)\\b",
+      "exclude_patterns": [
+        "\\b(?:may|shall|will|must)\\s+not\\s+terminate\\b.{0,100}\\bwithout (?:prior )?notice\\b"
+      ],
+      "explanation": "An immediate/no-notice termination right is explicitly present. Check who holds the right, the triggering event, cure protections, and transition consequences.",
+      "sources": [
+        "P5",
+        "P6"
+      ]
+    },
+    {
+      "id": "PR-BROAD-IP-LICENSE",
+      "risk_domain": "Intellectual Property Risk",
+      "risk_type": "Perpetual, irrevocable, worldwide, or sublicensable IP license wording",
+      "question": "Does the clause pair a license with perpetual, irrevocable, worldwide, or sublicensing language?",
+      "pattern": "\\blicen[cs](?:e|es|ed|ing)?\\b.{0,180}\\b(?:perpetual|irrevocable|worldwide|sublicensable|sublicense)\\b|\\b(?:perpetual|irrevocable|worldwide|sublicensable|sublicense)\\b.{0,180}\\blicen[cs](?:e|es|ed|ing)?\\b",
+      "exclude_patterns": [
+        "\\bnon[- ]sublicensable\\b"
+      ],
+      "explanation": "The clause pairs license rights with one or more broad-scope terms. Review purpose, territory, duration, transfer/sublicense rights, ownership, and post-termination effects.",
+      "sources": [
+        "P4",
+        "P5"
+      ]
+    },
+    {
+      "id": "PR-EARLY-EXIT-FULL-TERM-FEES",
+      "risk_domain": "Commercial Risk",
+      "risk_type": "Full remaining-term fees or minimum commitment after early exit",
+      "question": "Does the clause connect early/convenience termination with payment of the full remaining term or minimum commitment?",
+      "pattern": "\\bterminat(?:e|ion)\\b.{0,180}\\b(?:for convenience|early|without cause)\\b.{0,240}\\b(?:full remaining term|remaining term|minimum commitment|remaining fees|all fees for the remainder)\\b|\\b(?:full remaining term|remaining term|minimum commitment|remaining fees|all fees for the remainder)\\b.{0,240}\\bterminat(?:e|ion)\\b.{0,180}\\b(?:for convenience|early|without cause)\\b",
+      "exclude_patterns": [
+        "\\b(?:not|shall not|will not|does not)\\s+(?:be\\s+)?(?:liable for|pay|owe|charge)\\b.{0,100}\\b(?:remaining term|minimum commitment|remaining fees)\\b"
+      ],
+      "explanation": "The clause links early termination to payment for the remaining term or the full minimum commitment. Review pro-rating, mitigation, credits, and exit exceptions.",
+      "sources": [
+        "P5"
+      ]
+    },
+    {
+      "id": "PR-ABSOLUTE-ASSIGNMENT-PROHIBITION",
+      "risk_domain": "Assignment / Control Risk",
+      "risk_type": "Absolute assignment prohibition wording",
+      "question": "Does the clause expressly prohibit assignment under any circumstances or without exception?",
+      "pattern": "\\b(?:absolute(?:ly)?\\s+prohibit(?:ed|s)?|may not|shall not|must not)\\s+assign\\b.{0,140}\\b(?:under any circumstances|in any circumstances|without exception)\\b|\\b(?:under any circumstances|in any circumstances)\\b.{0,140}\\b(?:may not|shall not|must not)\\s+assign\\b",
+      "exclude_patterns": [],
+      "explanation": "The text contains an express absolute assignment prohibition. Review affiliate, internal restructuring, financing, and change-of-control exceptions.",
+      "sources": [
+        "P4",
+        "P5"
+      ]
+    }
+  ]
 }
