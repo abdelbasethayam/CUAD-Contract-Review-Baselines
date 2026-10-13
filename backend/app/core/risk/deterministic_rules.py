@@ -59,10 +59,17 @@ def evaluate_playbook_rules(
         if not evidence or evidence not in text:
             continue
 
+        # Exclusions may describe negation or a carve-out just before/after
+        # the matched phrase. Test a bounded context window, not only the quote.
+        # This avoids counting "may not terminate immediately" or "no perpetual
+        # license" as positive triggers while limiting unrelated distant text.
+        context_start = max(0, match.start() - 180)
+        context_end = min(len(text), match.end() + 180)
+        match_context = text[context_start:context_end]
         excluded = False
         for exclusion in rule.get("exclude_patterns") or []:
             try:
-                if _compile(str(exclusion)).search(evidence):
+                if _compile(str(exclusion)).search(match_context):
                     excluded = True
                     break
             except re.error:
