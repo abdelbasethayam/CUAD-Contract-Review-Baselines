@@ -16,17 +16,12 @@ FILES = [
     "docs/PHASE2_REPRODUCIBILITY.md",
     "docs/PHASE2_CLAIM_EVIDENCE_MATRIX.md",
     "docs/PHASE2_LOGICAL_MODEL.md",
-    "data/risk/GOLD_STATUS.md",
+    "docs/PHASE2_RULE_CONFORMANCE_PROTOCOL.md",
     "data/risk/EVALUATION_PROTOCOL.md",
     "data/risk/EVALUATION_INTEGRITY_REPORT.json",
     "data/risk/commercial_clause_risk_playbook.json",
     "backend/data/legal_knowledge/risk_taxonomy.json",
     "backend/data/legal_knowledge/source_registry.json",
-    "data/risk/gold/annotation_queue.csv",
-    "data/risk/gold/gold_annotations.csv",
-    "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.csv",
-    "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.jsonl",
-    "data/risk/silver/silver_annotations_final_v5_summary.json",
     "data/risk/external/cuad_expert_test.jsonl",
     "data/risk/external/cuad_expert_test.manifest.json",
     "data/risk/evaluation/cross_document_v1/scenario_matrix.jsonl",
@@ -68,6 +63,7 @@ FILES = [
     "data/risk/results/legal_knowledge_retrieval_validation.json",
     "data/risk/results/phase2_reproducible_report.json",
     "data/risk/results/phase2_reproducible_report.md",
+    "data/risk/results/playbook_rule_validation.json",
     "data/risk/results/release_validation.json",
     "data/risk/results/release_validation.md",
     "data/risk/team_export/README.md",
@@ -87,14 +83,18 @@ FILES = [
     "scripts/risk/normalize_playbook_domains.py",
     "scripts/risk/export_team_pack.py",
     "scripts/risk/validate_evaluation_integrity.py",
+    "scripts/risk/validate_playbook_rules.py",
     "scripts/risk/report_phase2_experiment.py",
     "scripts/risk/run_release_checks.py",
     "scripts/risk/smoke_upload_api.py",
     "backend/app/core/risk/contract_checks.py",
     "backend/app/core/risk/contract_risk_engine.py",
     "backend/app/core/risk/risk_playbook.py",
+    "backend/app/core/risk/deterministic_rules.py",
     "backend/app/core/risk/risk_engine.py",
+    "backend/app/core/risk/risk_detector.py",
     "backend/app/core/risk/risk_scoring.py",
+    "backend/tests/test_deterministic_playbook_rules.py",
     "backend/tests/test_contract_checks_batching.py",
     "backend/tests/test_contract_checks_evaluation.py",
     "backend/tests/test_deterministic_cross_checks.py",
@@ -123,9 +123,9 @@ def main() -> int:
         "file_count": len(entries),
         "files": entries,
         "interpretation": (
-            "Includes code/data/docs/results needed to inspect and reproduce the recorded Phase 2 experiments. "
-            "The custom risk queue is still unannotated human gold; model-silver and synthetic scenario results "
-            "are diagnostic and must not be called human-gold accuracy."
+            "Includes code, executable playbook rules, taxonomy, authored regression fixtures, integrity reports, "
+            "test outputs and documentation needed to reproduce the Phase 2 rule-conformance release. "
+            "Risk-span annotation datasets are intentionally excluded from the operational release path."
         ),
     }
     with zipfile.ZipFile(ZIP_PATH, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
