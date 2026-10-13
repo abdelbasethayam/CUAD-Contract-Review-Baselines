@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "created_at_utc": "2026-10-11T01:32:56.179568+00:00",
-  "playbook_source_version": "1.1",
+  "playbook_source_version": "1.2",
   "clause_check_count": 101,
   "cross_clause_check_count": 10,
   "document_check_count": 3,
@@ -32,5 +32,7 @@
       "sha256": "d5fc3d7596879e8212d7da76d7e0659976c69d3d25a711d9c2639f721373a7f5"
     }
   },
-  "warning": "Playbook and taxonomy are review guidance, not human gold labels or evidence of a fact in an uploaded contract."
+  "warning": "Playbook and taxonomy are review guidance, not evidence of a fact in an uploaded contract.",
+  "deterministic_rule_count": 7,
+  "risk_evidence_policy": "Only exact text from the uploaded contract supports a positive finding; no retrieved CUAD example span is used as risk evidence."
 }
