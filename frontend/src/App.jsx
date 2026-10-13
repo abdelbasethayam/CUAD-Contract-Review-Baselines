@@ -42,9 +42,9 @@ function RiskCard({ finding }) {
           <span className="field-note">{finding.confidence_status || "UNCALIBRATED"}</span>
         </div>
         <div>
-          <span className="field-label">Ground truth / provenance</span>
-          <strong>{finding.ground_truth_status || "NOT_AVAILABLE"}</strong>
-          <span className="field-note">Not gold unless manually adjudicated.</span>
+          <span className="field-label">Finding provenance</span>
+          <strong>{finding.provenance?.source === "DETERMINISTIC_PLAYBOOK_RULE" ? "Deterministic playbook rule" : (finding.ground_truth_status || "PLAYBOOK_DERIVED")}</strong>
+          <span className="field-note">Review trigger; not a legal-correctness rating.</span>
         </div>
       </div>
 
