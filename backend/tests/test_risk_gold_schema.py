@@ -154,7 +154,8 @@ def test_legal_proposition_requires_verified_effective_period_not_just_a_source_
         "source_tier": source["source_tier"],
         "effective_date_status": source["effective_date_status"],
         "retrieval_date": source["retrieval_date"],
-        "verification_status": source["verification_status"]
+        "verification_status": source["verification_status"],
+        "applicability_basis": "Synthetic fixture: authority is within the stated jurisdiction and statutory subject-matter scope."
     }]
     problems = _validate(record, {record["contract_id"]: text})
     assert any("authority_effective_period_not_verified" in item for item in problems)
@@ -171,3 +172,54 @@ def test_gold_validator_rejects_record_decision_that_differs_from_adjudication()
     record["evidence"] = []
     problems = _validate(record, {record["contract_id"]: text})
     assert any("record_decision_must_match_adjudication" in item for item in problems)
+
+def test_legal_proposition_rejects_authority_from_a_different_state():
+    _, _, catalog, _, text, record = _fixtures()
+    source = next(item for item in catalog["authorities"] if item["authority_id"] == "NY_UCC_2_719")
+    record["review_target"] = "LEGAL_PROPOSITION"
+    record["governing_law"] = {
+        "status": "VERIFIED",
+        "declared_law": "Delaware law",
+        "resolved_law": "US-DE",
+        "relevant_date": "2026-10-17",
+        "verification_basis": "Synthetic fixture for jurisdiction mismatch regression."
+    }
+    record["authority_refs"] = [{
+        "authority_id": source["authority_id"],
+        "citation": source["citation"],
+        "pinpoint": source["pinpoint"],
+        "jurisdiction": source["jurisdiction"],
+        "source_tier": source["source_tier"],
+        "effective_date_status": source["effective_date_status"],
+        "retrieval_date": source["retrieval_date"],
+        "verification_status": source["verification_status"],
+        "applicability_basis": "Deliberately incompatible New York authority for a Delaware-governed contract."
+    }]
+    problems = _validate(record, {record["contract_id"]: text})
+    assert any("authority_jurisdiction_mismatch" in item for item in problems)
+
+
+def test_legal_proposition_rejects_source_whose_official_text_was_not_verified():
+    _, _, catalog, _, text, record = _fixtures()
+    source = next(item for item in catalog["authorities"] if item["authority_id"] == "CA_BPC_16600")
+    record["review_target"] = "LEGAL_PROPOSITION"
+    record["governing_law"] = {
+        "status": "VERIFIED",
+        "declared_law": "California law",
+        "resolved_law": "US-CA",
+        "relevant_date": "2026-10-17",
+        "verification_basis": "Synthetic fixture for source-verification regression."
+    }
+    record["authority_refs"] = [{
+        "authority_id": source["authority_id"],
+        "citation": source["citation"],
+        "pinpoint": source["pinpoint"],
+        "jurisdiction": source["jurisdiction"],
+        "source_tier": source["source_tier"],
+        "effective_date_status": source["effective_date_status"],
+        "retrieval_date": source["retrieval_date"],
+        "verification_status": source["verification_status"],
+        "applicability_basis": "Deliberately unverified official-text lead."
+    }]
+    problems = _validate(record, {record["contract_id"]: text})
+    assert any("authority_source_verification_not_cleared" in item for item in problems)
