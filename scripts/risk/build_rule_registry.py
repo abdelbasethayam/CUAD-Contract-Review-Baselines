@@ -187,13 +187,24 @@ def _source_registry(playbook: dict[str, Any]) -> dict[str, Any]:
             "missing_metadata": override.get("missing_metadata", ["source_authority_review"]),
             "metadata_note": override.get("metadata_note", "Legacy source metadata requires review."),
         })
+    verified_pinpoint_count = sum(
+        1 for item in result
+        if item.get("citation_status") == "VERIFIED_PINPOINT"
+        and str(item.get("pinpoint_citation") or "").strip()
+    )
+    if verified_pinpoint_count == 0:
+        registry_status = "INCOMPLETE_SOURCE_CITATIONS"
+    elif verified_pinpoint_count == len(result):
+        registry_status = "ALL_PINPOINT_CITATIONS_VERIFIED"
+    else:
+        registry_status = "PARTIALLY_VERIFIED_SOURCE_CITATIONS"
     return {
         "schema_version": SCHEMA_VERSION,
         "registry_version": REGISTRY_VERSION,
         "source_playbook_hash": str(playbook.get("_source_blob_sha") or ""),
-        "status": "INCOMPLETE_SOURCE_CITATIONS",
+        "status": registry_status,
         "source_count": len(result),
-        "verified_pinpoint_source_count": sum(1 for item in result if item["citation_status"] == "VERIFIED_PINPOINT"),
+        "verified_pinpoint_source_count": verified_pinpoint_count,
         "sources": result,
     }
 
@@ -233,6 +244,11 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
                     "affected_clause_ids_required": False,
                 },
                 "source_ids": sorted(set(str(x) for x in (item.get("sources") or []))),
+                "validation_status": item.get("validation_status"),
+                "approval_status": item.get("approval_status"),
+                "execution_status": item.get("execution_status"),
+                "execution_eligible": item.get("execution_eligible"),
+                "review_governance": item.get("review_governance"),
                 "rationale": item.get("rationale") or "Review trigger inherited from the unapproved baseline playbook; not a legal conclusion.",
                 "positive_examples": item.get("positive_examples") or [],
                 "negative_examples": item.get("negative_examples") or [],
@@ -271,6 +287,11 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
                 "affected_clause_ids_required": True,
             },
             "source_ids": sorted(set(str(x) for x in (item.get("sources") or []))),
+                "validation_status": item.get("validation_status"),
+                "approval_status": item.get("approval_status"),
+                "execution_status": item.get("execution_status"),
+                "execution_eligible": item.get("execution_eligible"),
+                "review_governance": item.get("review_governance"),
             "rationale": "Cross-clause candidate check; semantic conflict must be independently established.",
             "positive_examples": [],
             "negative_examples": [],
@@ -309,6 +330,11 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
                 "affected_clause_ids_required": True,
             },
             "source_ids": sorted(set(str(x) for x in (item.get("sources") or []))),
+                "validation_status": item.get("validation_status"),
+                "approval_status": item.get("approval_status"),
+                "execution_status": item.get("execution_status"),
+                "execution_eligible": item.get("execution_eligible"),
+                "review_governance": item.get("review_governance"),
             "rationale": "Document-package review trigger; absence from an incomplete upload is not proof of absence from the signed agreement.",
             "positive_examples": [],
             "negative_examples": [],
@@ -347,6 +373,11 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
                 "affected_clause_ids_required": False,
             },
             "source_ids": sorted(set(str(x) for x in (item.get("sources") or []))),
+                "validation_status": item.get("validation_status"),
+                "approval_status": item.get("approval_status"),
+                "execution_status": item.get("execution_status"),
+                "execution_eligible": item.get("execution_eligible"),
+                "review_governance": item.get("review_governance"),
             "rationale": str(item.get("explanation") or "Textual trigger only; requires reviewer interpretation."),
             "positive_examples": item.get("positive_examples") or [],
             "negative_examples": item.get("negative_examples") or [],
@@ -439,7 +470,21 @@ def _record(
     }
     jurisdiction_scope = list(rule.get("jurisdiction_scope") or ["UNSPECIFIED"])
     jurisdiction_status = "UNRESOLVED" if any(str(x).upper() == "UNSPECIFIED" for x in jurisdiction_scope) else "DECLARED_NOT_VERIFIED"
-    return {
+    validation_status = str(rule.get("validation_status") or "DRAFT_UNVALIDATED") if not candidate else "DRAFT_UNVALIDATED"
+    approval_status = str(rule.get("approval_status") or playbook.get("approval_status") or "UNAPPROVED")
+    default_execution_status = "APPROVED_FOR_EXECUTION" if validation_status == "APPROVED" else "PILOT_REVIEW_ONLY"
+    execution_status = (
+        str(rule.get("execution_status") or default_execution_status)
+        if not candidate else "DISABLED_UNVALIDATED_CANDIDATE"
+    )
+    raw_execution_eligible = rule.get("execution_eligible")
+    execution_eligible = (
+        bool(raw_execution_eligible)
+        if raw_execution_eligible is not None
+        else (validation_status != "REJECTED" if not candidate else False)
+    )
+    review_governance = rule.get("review_governance") if not candidate else None
+    record = {
         "schema_version": SCHEMA_VERSION,
         "rule_id": record_id,
         "base_rule_key": registry_key,
@@ -480,14 +525,17 @@ def _record(
             "model_self_reported_confidence_allowed": False,
         },
         "regression_cases": rule.get("regression_cases") or {"positive": [], "negative": [], "edge": []},
-        "validation_status": "DRAFT_UNVALIDATED",
-        "approval_status": str(playbook.get("approval_status") or "UNAPPROVED"),
-        "execution_status": "DISABLED_UNVALIDATED_CANDIDATE" if candidate else "PILOT_REVIEW_ONLY",
-        "execution_eligible": not candidate,
+        "validation_status": validation_status,
+        "approval_status": approval_status,
+        "execution_status": execution_status,
+        "execution_eligible": execution_eligible,
         "legal_conclusion_allowed": False,
         "source_playbook_hash": str(playbook.get("_source_blob_sha") or ""),
         "candidate_note": candidate_profile.get("note") if candidate else None,
     }
+    if review_governance is not None:
+        record["review_governance"] = review_governance
+    return record
 
 def _candidate_record(rule: dict[str, Any], playbook: dict[str, Any], profile: dict[str, str]) -> dict[str, Any]:
     category = rule.get("clause_type")
@@ -550,7 +598,12 @@ def build_artifacts(playbook: dict[str, Any]) -> tuple[str, str, str]:
         "candidate_profiles": CONTRACT_PROFILES,
         "source_count": len(source_registry["sources"]),
         "verified_pinpoint_source_count": source_registry["verified_pinpoint_source_count"],
-        "production_approved_rule_count": sum(1 for item in base_records if item["validation_status"] == "APPROVED"),
+        "production_approved_rule_count": sum(
+            1 for item in base_records
+            if item["validation_status"] == "APPROVED"
+            and item["approval_status"] == "APPROVED"
+            and item["execution_eligible"]
+        ),
         "interpretation": (
             "The registry contains baseline rule records and disabled context-specific candidates. "
             "Candidate records are not new approved legal rules. Current baseline rules are review-only "
