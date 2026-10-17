@@ -68,6 +68,7 @@
           "authority_id",
           "title",
           "citation",
+          "retrieval_date",
           "source_type",
           "jurisdiction",
           "source_tier",
@@ -127,6 +128,10 @@
           "scope_limit": {
             "type": "string",
             "minLength": 1
+          },
+          "retrieval_date": {
+            "type": "string",
+            "format": "date"
           }
         },
         "additionalProperties": false
