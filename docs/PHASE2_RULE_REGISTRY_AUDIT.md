@@ -84,6 +84,16 @@ The new `data/risk/rule_review_queue.csv` contains one work item per actual base
 
 **Current exception-coverage result: 7 of 121 base rules have complete positive/negative/edge suites; 114 remain incomplete.** The current source/jurisdiction audit also finds 36 rules with no linked source, 85 with incomplete or missing pinpoint citations, zero rules with verified pinpoint citations, and zero rules with verified jurisdiction scope (all 121 remain unresolved). The validator reports these coverage gaps explicitly. Incomplete exception suites block rule approval; approval also requires separate reviewer identities and decisions, an independent adjudicator, verified jurisdiction/source scope, and an approval basis. The global playbook remains `UNAPPROVED`; the review queue is an operational backlog, not evidence of legal correctness.
 
+## 37-clause jurisdiction and authority mapping — 2026-10-17
+
+The initial legal-scope decision is U.S. commercial contracts, aligned to the existing CUAD-derived 37-clause taxonomy. This is a research scope, not an assumption that every dataset contract is governed by U.S. law. The supplemental `data/risk/authority_catalog.json` contains 32 traceable authority records; `data/risk/clause_authority_map.json` maps all 37 categories and explicitly limits the relevance of each authority. The rule review queue now carries these references and scope notes for the 101 clause checks; cross-clause, document-level, and regex rules are separately marked for context-specific authority review.
+
+Six categories have no universal primary statute identified in this initial catalog: Audit Rights, Insurance, Post-Termination Services, Non-Disparagement, ROFR/ROFO/ROFN, and Indemnification. These are not silently treated as statute-backed legal rules. Their review triggers remain commercial/contract-text checks until relevant jurisdiction-specific law is established. UCC references are restricted to their statutory scope, especially sale-of-goods transactions; they are not generalized to every SaaS or services agreement.
+
+The authority catalog is not a 50-state survey. The Delaware Supreme Court non-compete opinion is available through a republication host and requires official-docket and subsequent-history checks before any rule approval. The FTC's 2024 nationwide non-compete rule is explicitly not treated as current enforceable law following the agency's 2025 vacatur action. All categories still have `legal_conclusion_allowed=false`.
+
+The new `scripts/risk/validate_clause_authority_map.py` checks the catalog schemas, exact 37-category coverage, source identifiers, HTTPS provenance, authority host class, retrieval dates, and explicit no-universal-authority notes. This is a structural coverage gate, not proof of legal correctness. The Q1 research design is documented in `docs/PHASE2_Q1_PAPER_PROTOCOL.md`.
+
 ## Release sequence
 
 1. Select and document the first supported jurisdiction(s), contract types, buyer/seller perspective, and effective-date policy.
