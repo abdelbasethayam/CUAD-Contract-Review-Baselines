@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -11,6 +12,8 @@ from app.core.risk.risk_playbook import load_playbook
 from app.core.risk.risk_engine import _support_score
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts" / "risk"))
+from build_rule_registry import _source_registry
 
 
 def _valid_artifact(**overrides):
@@ -211,3 +214,38 @@ def test_rule_schema_requires_independent_adjudication_before_approval():
     invalid = approved.copy()
     invalid.pop("review_governance")
     assert not validator.is_valid(invalid)
+
+def test_source_registry_uses_verified_metadata_from_governed_playbook_input():
+    source = {
+        "citation": "Synthetic authority fixture for registry unit testing.",
+        "source_url": "https://example.test/authority",
+        "source_tier": "A",
+        "authority_status": "BINDING_PRIMARY_AUTHORITY",
+        "jurisdiction": "US-CA",
+        "contract_type": "commercial_general",
+        "effective_date": "2026-01-01",
+        "effective_date_status": "VERIFIED",
+        "pinpoint_citation": "Synthetic § 1, paragraph 2",
+        "retrieval_date": "2026-10-17",
+        "citation_status": "VERIFIED_PINPOINT",
+        "license_status": "PUBLIC_DOMAIN",
+        "transferability": "US-CA only",
+        "can_support_legal_conclusion": True,
+        "missing_metadata": [],
+        "metadata_note": "Synthetic test data only."
+    }
+    registry = _source_registry({"sources": {"SYNTHETIC_TEST_SOURCE": source}})
+    item = registry["sources"][0]
+
+    assert registry["verified_pinpoint_source_count"] == 1
+    assert registry["status"] == "ALL_PINPOINT_CITATIONS_VERIFIED"
+    assert item["source_tier"] == "A"
+    assert item["jurisdiction"] == "US-CA"
+    assert item["pinpoint_citation"] == "Synthetic § 1, paragraph 2"
+    assert item["retrieval_date"] == "2026-10-17"
+    assert item["can_support_legal_conclusion"] is True
+
+    source_without_retrieval_date = {**source, "retrieval_date": None}
+    incomplete = _source_registry({"sources": {"SYNTHETIC_TEST_SOURCE": source_without_retrieval_date}})
+    assert incomplete["verified_pinpoint_source_count"] == 0
+    assert incomplete["status"] == "INCOMPLETE_SOURCE_CITATIONS"
