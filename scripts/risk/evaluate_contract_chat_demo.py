@@ -23,6 +23,10 @@ QUESTIONS = [
         "question": "How does the supplier liability cap compare with the customer's cap?",
         "must_cite_terms": ["ten times", "previous one month"],
         "must_answer_one_of": [["ten times", "10 times"], ["one month", "monthly"]],
+        "must_answer_relations": [
+            {"entity": "customer", "facts": ["ten times", "10 times"]},
+            {"entity": "supplier", "facts": ["one month", "monthly"]},
+        ],
         "must_answer_all": [],
     },
     {
@@ -30,6 +34,10 @@ QUESTIONS = [
         "question": "What termination rights does each party have?",
         "must_cite_terms": ["immediately", "90 days"],
         "must_answer_one_of": [["immediately", "immediate"], ["90 days", "ninety days"]],
+        "must_answer_relations": [
+            {"entity": "supplier", "facts": ["immediately", "immediate"]},
+            {"entity": "customer", "facts": ["90 days", "ninety days"]},
+        ],
         "must_answer_all": [],
     },
     {
@@ -50,6 +58,36 @@ def _normalize(value: Any) -> str:
 
 def _contains_any(text: str, alternatives: list[str]) -> bool:
     return any(_normalize(item) in text for item in alternatives)
+
+
+def _fact_attributed_to_entity(
+    text: str,
+    expected_entity: str,
+    facts: list[str],
+    *,
+    window: int = 100,
+) -> bool:
+    """Check that a fact is mentioned nearer its expected contract party than the other party."""
+    entity_patterns = {
+        "customer": re.compile(r"\bcustomer(?:'s)?\b"),
+        "supplier": re.compile(r"\bsupplier(?:'s)?\b"),
+    }
+    expected_pattern = entity_patterns.get(expected_entity)
+    if expected_pattern is None:
+        return False
+    for fact in facts:
+        for fact_match in re.finditer(re.escape(_normalize(fact)), text):
+            fact_center = (fact_match.start() + fact_match.end()) / 2
+            start = max(0, fact_match.start() - window)
+            end = min(len(text), fact_match.end() + window)
+            mentions = []
+            for entity, pattern in entity_patterns.items():
+                for entity_match in pattern.finditer(text, start, end):
+                    entity_center = (entity_match.start() + entity_match.end()) / 2
+                    mentions.append((abs(entity_center - fact_center), entity))
+            if mentions and min(mentions, key=lambda item: item[0])[1] == expected_entity:
+                return True
+    return False
 
 
 def _evaluate_question(
@@ -87,6 +125,14 @@ def _evaluate_question(
         "answer_contains_expected_concepts": all(
             _contains_any(normalized_answer, alternatives)
             for alternatives in spec["must_answer_one_of"]
+        ),
+        "party_fact_attribution_correct": all(
+            _fact_attributed_to_entity(
+                normalized_answer,
+                relation["entity"],
+                relation["facts"],
+            )
+            for relation in spec.get("must_answer_relations", [])
         ),
     }
     return {
