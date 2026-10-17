@@ -6,6 +6,7 @@ from app.core.risk.confidence_calibration import (
     confidence_from_support_score,
 )
 from app.core.risk.risk_playbook import load_playbook
+from app.core.risk.risk_engine import _support_score
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -155,3 +156,13 @@ def test_confidence_artifact_status_string_alone_cannot_bypass_audit_gates(tmp_p
     )
     assert result["confidence"] is None
     assert result["confidence_status"] == "CALIBRATION_AUDIT_GATES_FAILED"
+
+
+def test_raw_support_feature_does_not_reward_yes_over_no():
+    yes = _support_score(answer="YES", evidence_ok=True, agreement=0.8, indicator_match=True)
+    no = _support_score(answer="NO", evidence_ok=True, agreement=0.8, indicator_match=True)
+    unknown = _support_score(answer="DON'T KNOW", evidence_ok=True, agreement=1.0, indicator_match=True)
+
+    assert yes == no
+    assert 0.0 <= yes <= 1.0
+    assert unknown == 0.0
