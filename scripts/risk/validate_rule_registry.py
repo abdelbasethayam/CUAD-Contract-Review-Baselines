@@ -24,6 +24,88 @@ from build_rule_registry import (
 RULE_SCHEMA_PATH = ROOT / "data" / "risk" / "rule_registry.schema.json"
 SOURCE_SCHEMA_PATH = ROOT / "data" / "risk" / "source_registry.schema.json"
 
+def _rule_lifecycle_problems(item: dict[str, object]) -> list[str]:
+    """Return governance violations for a single base rule without mutating it."""
+    problems: list[str] = []
+    if item.get("record_kind") != "BASE_RULE":
+        return problems
+    status = item.get("validation_status")
+    approval_status = item.get("approval_status")
+    execution_status = item.get("execution_status")
+    eligible = item.get("execution_eligible") is True
+    governance = item.get("review_governance") or {}
+    if status in {"ADJUDICATED", "APPROVED"}:
+        raw_reviewers = governance.get("reviewer_ids") or []
+        reviewers = [
+            str(reviewer).strip()
+            for reviewer in raw_reviewers
+            if isinstance(reviewer, str) and reviewer.strip()
+        ] if isinstance(raw_reviewers, list) else []
+        raw_decisions = governance.get("reviewer_decisions") or []
+        decisions = [decision for decision in raw_decisions if isinstance(decision, dict)] if isinstance(raw_decisions, list) else []
+        decision_ids = [str(decision.get("reviewer_id") or "").strip() for decision in decisions]
+        valid_decision_labels = {"POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE", "NOT_APPLICABLE"}
+        adjudicator = str(governance.get("adjudicator_id") or "").strip()
+        if (
+            governance.get("status") != status
+            or len(set(reviewers)) < 2
+            or len(reviewers) != len(raw_reviewers)
+            or len(decisions) < 2
+            or len(set(decision_ids)) != len(decision_ids)
+            or set(decision_ids) != set(reviewers)
+            or any(
+                decision.get("decision") not in valid_decision_labels
+                or not str(decision.get("rationale") or "").strip()
+                or not str(decision.get("reviewed_at") or "").strip()
+                for decision in decisions
+            )
+            or not adjudicator
+            or adjudicator in set(reviewers)
+            or not str(governance.get("adjudication_reference") or "").strip()
+            or not str(governance.get("adjudicated_at") or "").strip()
+        ):
+            problems.append(f"independent_adjudication_metadata_incomplete:{item.get('rule_id')}")
+    if status == "APPROVED":
+        if (
+            approval_status != "APPROVED"
+            or execution_status != "APPROVED_FOR_EXECUTION"
+            or not eligible
+            or not str(governance.get("approved_by") or "").strip()
+            or not str(governance.get("approved_at") or "").strip()
+            or not str(governance.get("approval_basis") or "").strip()
+        ):
+            problems.append(f"approved_rule_missing_approval_gate:{item.get('rule_id')}")
+        cases = item.get("regression_cases") or {}
+        if not cases.get("positive") or not cases.get("negative") or not cases.get("edge"):
+            problems.append(f"approved_rule_missing_positive_negative_edge_tests:{item.get('rule_id')}")
+        scope = [str(value).strip().upper() for value in (item.get("jurisdiction_scope") or [])]
+        if item.get("jurisdiction_status") != "VERIFIED" or not scope or any(value in {"", "UNSPECIFIED", "UNKNOWN"} for value in scope):
+            problems.append(f"approved_rule_jurisdiction_not_verified:{item.get('rule_id')}")
+        authority_sources = (item.get("legal_authority") or {}).get("sources") or []
+        if not authority_sources or any(
+            source.get("citation_status") != "VERIFIED_PINPOINT"
+            or not str(source.get("pinpoint_citation") or "").strip()
+            or not str(source.get("retrieval_date") or "").strip()
+            or str(source.get("jurisdiction") or "").strip().upper() in {
+                "", "UNSPECIFIED", "NON_JURISDICTIONAL_PRACTICE",
+                "NON_JURISDICTIONAL_DRAFTING_GUIDANCE",
+                "NOT_APPLICABLE_NONLEGAL_GUIDANCE",
+            }
+            or str(source.get("effective_date_status") or "").strip().upper() not in {
+                "VERIFIED", "VERIFIED_FOR_RELEVANT_PERIOD", "NOT_APPLICABLE",
+            }
+            for source in authority_sources
+        ):
+            problems.append(f"approved_rule_source_scope_not_verified:{item.get('rule_id')}")
+    elif approval_status == "APPROVED" or execution_status == "APPROVED_FOR_EXECUTION":
+        problems.append(f"rule_approval_state_inconsistent:{item.get('rule_id')}")
+    if status == "REJECTED" and eligible:
+        problems.append(f"rejected_rule_execution_enabled:{item.get('rule_id')}")
+    if item.get("legal_conclusion_allowed") is not False:
+        problems.append(f"rule_must_not_emit_legal_conclusion:{item.get('rule_id')}")
+    return problems
+
+
 def main() -> int:
     playbook = json.loads(PLAYBOOK_PATH.read_text(encoding="utf-8"))
     expected_registry, expected_sources, expected_manifest = build_artifacts(playbook)
@@ -94,82 +176,7 @@ def main() -> int:
     if any(item["execution_eligible"] for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"):
         problems.append("candidate_rule_enabled_for_execution")
     for item in records:
-        if item.get("record_kind") != "BASE_RULE":
-            continue
-        status = item.get("validation_status")
-        approval_status = item.get("approval_status")
-        execution_status = item.get("execution_status")
-        eligible = item.get("execution_eligible") is True
-        governance = item.get("review_governance") or {}
-        if status in {"ADJUDICATED", "APPROVED"}:
-            raw_reviewers = governance.get("reviewer_ids") or []
-            reviewers = [
-                str(reviewer).strip()
-                for reviewer in raw_reviewers
-                if isinstance(reviewer, str) and reviewer.strip()
-            ] if isinstance(raw_reviewers, list) else []
-            raw_decisions = governance.get("reviewer_decisions") or []
-            decisions = [decision for decision in raw_decisions if isinstance(decision, dict)] if isinstance(raw_decisions, list) else []
-            decision_ids = [str(decision.get("reviewer_id") or "").strip() for decision in decisions]
-            valid_decision_labels = {"POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE", "NOT_APPLICABLE"}
-            adjudicator = str(governance.get("adjudicator_id") or "").strip()
-            if (
-                governance.get("status") != status
-                or len(set(reviewers)) < 2
-                or len(reviewers) != len(raw_reviewers)
-                or len(decisions) < 2
-                or len(set(decision_ids)) != len(decision_ids)
-                or set(decision_ids) != set(reviewers)
-                or any(
-                    decision.get("decision") not in valid_decision_labels
-                    or not str(decision.get("rationale") or "").strip()
-                    or not str(decision.get("reviewed_at") or "").strip()
-                    for decision in decisions
-                )
-                or not adjudicator
-                or adjudicator in set(reviewers)
-                or not str(governance.get("adjudication_reference") or "").strip()
-                or not str(governance.get("adjudicated_at") or "").strip()
-            ):
-                problems.append(f"independent_adjudication_metadata_incomplete:{item.get('rule_id')}")
-        if status == "APPROVED":
-            if (
-                approval_status != "APPROVED"
-                or execution_status != "APPROVED_FOR_EXECUTION"
-                or not eligible
-                or not str(governance.get("approved_by") or "").strip()
-                or not str(governance.get("approved_at") or "").strip()
-                or not str(governance.get("approval_basis") or "").strip()
-            ):
-                problems.append(f"approved_rule_missing_approval_gate:{item.get('rule_id')}")
-            cases = item.get("regression_cases") or {}
-            if not cases.get("positive") or not cases.get("negative") or not cases.get("edge"):
-                problems.append(f"approved_rule_missing_positive_negative_edge_tests:{item.get('rule_id')}")
-            scope = [str(value).strip().upper() for value in (item.get("jurisdiction_scope") or [])]
-            if item.get("jurisdiction_status") != "VERIFIED" or not scope or any(value in {"", "UNSPECIFIED", "UNKNOWN"} for value in scope):
-                problems.append(f"approved_rule_jurisdiction_not_verified:{item.get('rule_id')}")
-            authority_sources = (item.get("legal_authority") or {}).get("sources") or []
-            if not authority_sources or any(
-                source.get("citation_status") != "VERIFIED_PINPOINT"
-                or not str(source.get("pinpoint_citation") or "").strip()
-                or not str(source.get("retrieval_date") or "").strip()
-                or str(source.get("jurisdiction") or "").strip().upper() in {
-                    "", "UNSPECIFIED", "NON_JURISDICTIONAL_PRACTICE",
-                    "NON_JURISDICTIONAL_DRAFTING_GUIDANCE",
-                    "NOT_APPLICABLE_NONLEGAL_GUIDANCE",
-                }
-                or str(source.get("effective_date_status") or "").strip().upper() not in {
-                    "VERIFIED", "VERIFIED_FOR_RELEVANT_PERIOD", "NOT_APPLICABLE",
-                }
-                for source in authority_sources
-            ):
-                problems.append(f"approved_rule_source_scope_not_verified:{item.get('rule_id')}")
-        elif approval_status == "APPROVED" or execution_status == "APPROVED_FOR_EXECUTION":
-            problems.append(f"rule_approval_state_inconsistent:{item.get('rule_id')}")
-        if status == "REJECTED" and eligible:
-            problems.append(f"rejected_rule_execution_enabled:{item.get('rule_id')}")
-        if item.get("legal_conclusion_allowed") is not False:
-            problems.append(f"rule_must_not_emit_legal_conclusion:{item.get('rule_id')}")
+        problems.extend(_rule_lifecycle_problems(item))
     for item in records:
         if item["record_kind"] != "BASE_RULE" or item.get("rule_family") != "DETERMINISTIC_REGEX":
             continue
