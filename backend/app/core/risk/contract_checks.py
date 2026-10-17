@@ -144,11 +144,23 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
             status = str(item.get("status") or "").strip().upper()
             if status not in {"POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE"}:
                 status = "POTENTIAL_RISK" if answer == "YES" else ("NO_RISK" if answer == "NO" else "INSUFFICIENT_EVIDENCE")
-            ids = [int(x) for x in (item.get("clause_ids") or []) if str(x).lstrip("-").isdigit()]
+            ids = []
+            for raw_id in (item.get("clause_ids") or []):
+                try:
+                    clause_id = int(raw_id)
+                except (TypeError, ValueError, OverflowError):
+                    continue
+                if clause_id not in ids:
+                    ids.append(clause_id)
             evidence = []
             for ev in item.get("evidence") or []:
-                if isinstance(ev, dict) and str(ev.get("quote") or "").strip():
-                    evidence.append({"clause_id": ev.get("clause_id"), "quote": str(ev["quote"]).strip()})
+                if not isinstance(ev, dict) or not str(ev.get("quote") or "").strip():
+                    continue
+                try:
+                    evidence_clause_id = int(ev.get("clause_id"))
+                except (TypeError, ValueError, OverflowError):
+                    continue
+                evidence.append({"clause_id": evidence_clause_id, "quote": str(ev["quote"]).strip()})
             factors = item.get("score_components") if isinstance(item.get("score_components"), dict) else (item.get("severity_factors") if isinstance(item.get("severity_factors"), dict) else {})
             out.append({
                 "check_id": check_id,
@@ -237,17 +249,25 @@ def analyze_contract_checks(
         by_source = {str(item.get("id")): item for item in source_items}
         results = []
         for check_id, records in by_id.items():
-            answer, agreement = _majority(records)
+            answer, agreement = _majority(records, expected_passes=n_passes)
             rep = next((x for x in records if x["answer"] == answer), records[0])
+            evidence_ids = {
+                int(ev["clause_id"])
+                for ev in rep["evidence"]
+                if ev.get("clause_id") is not None
+            }
+            declared_ids = set(rep["clause_ids"])
+            # Evidence must be present, exact, source-addressable, and consistent
+            # with the finding's declared affected clauses. Otherwise abstain.
             evidence_ok = bool(rep["evidence"]) and all(
-                int(ev.get("clause_id", -1)) in contract_lookup
+                int(ev["clause_id"]) in contract_lookup
                 and _evidence_valid(
                     str(ev.get("quote") or ""),
-                    str(contract_lookup[int(ev.get("clause_id"))].get("clause_text") or ""),
+                    str(contract_lookup[int(ev["clause_id"])].get("clause_text") or ""),
                     [],
                 )
                 for ev in rep["evidence"]
-            )
+            ) and evidence_ids.issubset(declared_ids)
             if answer == "YES":
                 status = "POTENTIAL_RISK" if evidence_ok else "INSUFFICIENT_EVIDENCE"
             elif answer == "NO":
@@ -317,6 +337,8 @@ def analyze_contract_checks(
                     "source_ids": check.get("sources", []),
                     "model": RISK_MODEL,
                     "passes": len(records),
+                    "expected_passes": n_passes,
+                    "missing_passes": max(0, n_passes - len(records)),
                     "agreement": agreement,
                     "check_batch_size": check_batch_size,
                     "model_batches_per_pass": len(batches),
