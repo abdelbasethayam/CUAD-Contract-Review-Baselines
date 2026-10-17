@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_version": "0.1.0",
-  "source_playbook_hash": "2f1e1df2da5fdc2f72c661bc5e84dd171b56bf65",
+  "registry_version": "0.2.0",
+  "source_playbook_hash": "f562696a6e4d109343468dc7e755c3f4f30b6a0a",
   "policy_status": "UNAPPROVED",
   "execution_mode": "PILOT_REVIEW_ONLY",
   "base_rule_count": 121,
