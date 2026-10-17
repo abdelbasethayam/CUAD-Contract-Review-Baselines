@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import re
 from collections import Counter, defaultdict
 from typing import Callable
@@ -121,12 +122,20 @@ def _severity_signal(factors: dict) -> float | None:
 
 
 def _support_score(*, answer: str, evidence_ok: bool, agreement: float, indicator_match: bool) -> float:
-    if answer not in {"YES", "NO", "DON'T KNOW"}:
+    """Uncalibrated evidence-support feature; deliberately independent of YES/NO direction."""
+    if answer not in {"YES", "NO"}:
         return 0.0
-    base = 1.0 if answer == "YES" else (0.55 if answer == "DON'T KNOW" else 0.25)
-    evidence_component = 0.30 if evidence_ok else 0.0
-    indicator_component = 0.10 if indicator_match else 0.0
-    return round(min(1.0, 0.60 * base + evidence_component + 0.10 * agreement + indicator_component), 4)
+    try:
+        agreement_value = float(agreement)
+    except (TypeError, ValueError):
+        agreement_value = 0.0
+    if not math.isfinite(agreement_value):
+        agreement_value = 0.0
+    agreement_value = max(0.0, min(1.0, agreement_value))
+    evidence_component = 0.50 if evidence_ok else 0.0
+    agreement_component = 0.30 * agreement_value
+    indicator_component = 0.20 if indicator_match else 0.0
+    return round(min(1.0, evidence_component + agreement_component + indicator_component), 4)
 
 
 def _prompt(
