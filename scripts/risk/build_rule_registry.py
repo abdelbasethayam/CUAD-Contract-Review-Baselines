@@ -450,7 +450,7 @@ def _candidate_record(rule: dict[str, Any], playbook: dict[str, Any], profile: d
         "execution_status": "DISABLED_UNVALIDATED_CANDIDATE",
         "execution_eligible": False,
         "legal_conclusion_allowed": False,
-        "source_playbook_hash": str(playbook.get("playbook_hash") or ""),
+        "source_playbook_hash": str(playbook.get("_source_blob_sha") or ""),
     }
 
 def build_artifacts(playbook: dict[str, Any]) -> tuple[str, str, str]:
@@ -470,7 +470,7 @@ def build_artifacts(playbook: dict[str, Any]) -> tuple[str, str, str]:
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "registry_version": REGISTRY_VERSION,
-        "source_playbook_hash": str(playbook.get("playbook_hash") or ""),
+        "source_playbook_hash": str(playbook.get("_source_blob_sha") or ""),
         "policy_status": str(playbook.get("approval_status") or "UNAPPROVED"),
         "execution_mode": "PILOT_REVIEW_ONLY",
         "base_rule_count": len(base_records),
