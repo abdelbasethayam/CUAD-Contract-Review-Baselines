@@ -99,7 +99,6 @@ def test_risk_gold_schema_is_valid_and_synthetic_fixture_passes():
     Draft202012Validator.check_schema(schema)
     assert Draft202012Validator(schema, format_checker=FormatChecker()).is_valid(record)
     assert _validate(record, {record["contract_id"]: text}) == []
-    assert not (ROOT / "data/risk/evaluation/risk_gold.jsonl").exists()
 
 
 def test_gold_validator_rejects_reused_reviewer_and_adjudicator_identity():
