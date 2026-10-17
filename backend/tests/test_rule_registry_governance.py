@@ -15,6 +15,7 @@ from app.core.risk.risk_engine import _support_score
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "risk"))
 from build_rule_registry import _source_registry
+from validate_rule_registry import _rule_lifecycle_problems
 
 
 def _valid_artifact(**overrides):
@@ -293,3 +294,77 @@ def test_review_queue_covers_every_base_rule_and_surfaces_missing_case_suites():
     assert len(complete) == expected_complete
     assert len(incomplete) == len(queue) - len(complete)
     assert all("AUTHOR_POSITIVE_NEGATIVE_EDGE_CASES" in row["next_action"] for row in incomplete)
+
+def _approved_rule_fixture():
+    records = [
+        json.loads(line)
+        for line in (ROOT / "data/risk/rule_registry.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    rule = next(item.copy() for item in records if item["record_kind"] == "BASE_RULE")
+    rule.update({
+        "validation_status": "APPROVED",
+        "approval_status": "APPROVED",
+        "execution_status": "APPROVED_FOR_EXECUTION",
+        "execution_eligible": True,
+        "legal_conclusion_allowed": False,
+        "jurisdiction_scope": ["US-CA"],
+        "jurisdiction_status": "VERIFIED",
+        "regression_cases": {
+            "positive": [{"contract_text": "Synthetic positive case.", "expected": "POTENTIAL_RISK"}],
+            "negative": [{"contract_text": "Synthetic protected control.", "expected": "NO_RISK"}],
+            "edge": [{"contract_text": "Synthetic ambiguity case.", "expected": "INSUFFICIENT_EVIDENCE"}],
+        },
+        "legal_authority": {
+            "sources": [{
+                "source_id": "SYNTHETIC_TEST_SOURCE",
+                "citation_status": "VERIFIED_PINPOINT",
+                "pinpoint_citation": "Synthetic § 1, paragraph 2",
+                "retrieval_date": "2026-10-17",
+                "jurisdiction": "US-CA",
+                "effective_date_status": "VERIFIED",
+            }]
+        },
+        "review_governance": {
+            "status": "APPROVED",
+            "reviewer_ids": ["reviewer-a", "reviewer-b"],
+            "reviewer_decisions": [
+                {
+                    "reviewer_id": "reviewer-a",
+                    "decision": "POTENTIAL_RISK",
+                    "rationale": "The trigger appears to match.",
+                    "reviewed_at": "2026-10-17T00:10:00Z",
+                },
+                {
+                    "reviewer_id": "reviewer-b",
+                    "decision": "INSUFFICIENT_EVIDENCE",
+                    "rationale": "The exception requires adjudication.",
+                    "reviewed_at": "2026-10-17T00:15:00Z",
+                },
+            ],
+            "adjudicator_id": "independent-adjudicator",
+            "adjudication_reference": "ADJ-2026-001",
+            "adjudicated_at": "2026-10-17T00:20:00Z",
+            "approved_by": "policy-owner",
+            "approved_at": "2026-10-17T00:30:00Z",
+            "approval_basis": "Synthetic test fixture only.",
+        },
+    })
+    return rule
+
+
+def test_approval_lifecycle_rejects_rules_without_verified_scope_and_exception_cases():
+    rule = _approved_rule_fixture()
+    rule["jurisdiction_status"] = "UNRESOLVED"
+    rule["jurisdiction_scope"] = ["UNSPECIFIED"]
+    rule["regression_cases"] = {"positive": [], "negative": [], "edge": []}
+    rule["legal_authority"] = {"sources": []}
+
+    problems = _rule_lifecycle_problems(rule)
+    assert any("approved_rule_missing_positive_negative_edge_tests" in item for item in problems)
+    assert any("approved_rule_jurisdiction_not_verified" in item for item in problems)
+    assert any("approved_rule_source_scope_not_verified" in item for item in problems)
+
+
+def test_approval_lifecycle_accepts_a_fully_adjudicated_test_fixture():
+    assert _rule_lifecycle_problems(_approved_rule_fixture()) == []
