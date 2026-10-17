@@ -286,3 +286,62 @@ def test_contract_chat_parses_string_false_without_treating_it_as_truthy(monkeyp
     assert response.status_code == 200, response.text
     assert response.json()["insufficient_evidence"] is False
     assert response.json()["citations"][0]["quote"] == clause_text
+
+def test_contract_chat_abstains_if_any_citation_is_unverifiable(monkeypatch, tmp_path):
+    analysis_id = "0123456789abcdef-0123456789abcdef"
+    run_root = tmp_path / analysis_id
+    run_root.mkdir()
+    source = "Supplier shall maintain commercially reasonable insurance coverage during the Term."
+    (run_root / "result.json").write_text(json.dumps({
+        "analysis_id": analysis_id,
+        "clauses": [{"clause_index": 7, "clause_text": source, "predicted_label": "Insurance"}],
+        "contract_risk_assessment": {},
+    }), encoding="utf-8")
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(query, "_call_local_chat", lambda *args, **kwargs: json.dumps({
+        "answer": "The supplier must maintain insurance with a $10 million minimum limit.",
+        "insufficient_evidence": False,
+        "citations": [
+            {"clause_index": 7, "quote": source, "reason": "Insurance obligation."},
+            {"clause_index": 7, "quote": "The supplier must maintain $10 million coverage.", "reason": "Invented limit."},
+        ],
+        "follow_up_questions": [],
+    }))
+    response = TestClient(app).post("/query/contract", json={
+        "analysis_id": analysis_id,
+        "question": "What insurance limit must the supplier maintain?",
+    })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["insufficient_evidence"] is True
+    assert "one or more" in data["answer"]
+    assert len(data["citations"]) == 1
+    assert data["citations"][0]["quote"] == source
+
+
+def test_contract_chat_answers_product_help_without_model_or_contract_claims(monkeypatch, tmp_path):
+    analysis_id = "0123456789abcdef-0123456789abcdef"
+    run_root = tmp_path / analysis_id
+    run_root.mkdir()
+    (run_root / "result.json").write_text(json.dumps({
+        "analysis_id": analysis_id,
+        "clauses": [{"clause_index": 1, "clause_text": "Supplier may terminate with notice.", "predicted_label": "Termination"}],
+        "contract_risk_assessment": {},
+    }), encoding="utf-8")
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+
+    def model_must_not_be_called(*args, **kwargs):
+        raise AssertionError("Product-help intent should not depend on Ollama.")
+
+    monkeypatch.setattr(query, "_call_local_chat", model_must_not_be_called)
+    response = TestClient(app).post("/query/contract", json={
+        "analysis_id": analysis_id,
+        "question": "What can you do with this contract?",
+    })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["model"] == "DETERMINISTIC_HELP"
+    assert data["insufficient_evidence"] is False
+    assert data["citations"] == []
+    assert "summarize the agreement" in data["answer"]
+    assert "not legal advice" in data["disclaimer"]
