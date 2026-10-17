@@ -569,7 +569,7 @@ def _candidate_record(rule: dict[str, Any], playbook: dict[str, Any], profile: d
         ],
         "candidate_note": profile["note"],
         "validation_status": "DRAFT_UNVALIDATED",
-        "approval_status": str(playbook.get("approval_status") or "UNAPPROVED"),
+        "approval_status": "UNAPPROVED",
         "execution_status": "DISABLED_UNVALIDATED_CANDIDATE",
         "execution_eligible": False,
         "legal_conclusion_allowed": False,
