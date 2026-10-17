@@ -135,6 +135,32 @@ def _select_clauses(
     direct_terms = {term.lower() for term in _WORDS.findall(question)} - _STOP
     terms = _question_terms(question)
     expanded_terms = terms - direct_terms
+    # Use inverse-document-frequency weights so a discriminative term such as
+    # "data" outweighs generic terms such as "customer". Keep expansions weaker
+    # than literal query terms so a broad synonym family cannot dominate intent.
+    corpus_words = []
+    for item in clauses:
+        if not isinstance(item, dict):
+            continue
+        item_text = str(item.get("clause_text") or "")
+        item_label = str(item.get("predicted_label") or item.get("clause_type") or "")
+        item_heading = str(item.get("heading") or item.get("section_path") or "")
+        item_findings = " ".join(
+            str(finding.get("risk_type") or finding.get("question") or "") + " " +
+            str(finding.get("why_flagged") or "") + " " +
+            str(finding.get("risk_status") or "")
+            for finding in item.get("risk_findings") or [] if isinstance(finding, dict)
+        )
+        corpus_words.append(set(_WORDS.findall(item_text + " " + item_label + " " + item_heading + " " + item_findings)))
+    document_frequency: dict[str, int] = {}
+    for item_words in corpus_words:
+        for term in item_words:
+            document_frequency[term] = document_frequency.get(term, 0) + 1
+    document_count = max(1, len(corpus_words))
+
+    def term_weight(term: str) -> float:
+        return (document_count + 1) / (document_frequency.get(term, 0) + 1)
+
     risk_intent = bool(_RISK_INTENT.search(question))
     overview_intent = bool(_OVERVIEW_INTENT.search(question))
     scored = []
@@ -152,7 +178,7 @@ def _select_clauses(
             for item in findings
         )
         words = {term.lower() for term in _WORDS.findall(text + " " + label + " " + heading + " " + finding_text)}
-        score = 5 * len(direct_terms & words) + len(expanded_terms & words)
+        score = 5 * sum(term_weight(term) for term in direct_terms & words) + 0.25 * sum(term_weight(term) for term in expanded_terms & words)
         if risk_intent:
             score += 4 * sum(1 for item in findings if item.get("risk_status") == "POTENTIAL_RISK")
             score += 2 * sum(1 for item in findings if item.get("risk_status") == "INSUFFICIENT_EVIDENCE")
