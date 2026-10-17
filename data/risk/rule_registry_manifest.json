@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": "0.2.0",
+  "registry_version": "0.3.0",
   "source_playbook_hash": "841e5aba29f12e1a0aee667ddec949dd199b36ba",
   "policy_status": "UNAPPROVED",
   "execution_mode": "PILOT_REVIEW_ONLY",
