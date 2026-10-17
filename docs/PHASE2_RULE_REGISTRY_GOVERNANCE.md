@@ -18,6 +18,15 @@ The repository baseline remains `UNAPPROVED`. Runtime may use base rules only as
 
 Each record contains stable identity and family; perspective; contract-type and jurisdiction scope; explicit applicability status; question/trigger/counterconditions/dependencies; evidence requirements and clause identity; source IDs; source completeness; a non-severity impact note; confidence/calibration policy; regression-case slots; validation/approval status; and an execution gate.
 
+## Source tier definitions
+
+- **A — Primary authority:** legislation, regulations, or binding court/tribunal decisions, verified for the exact jurisdiction, effective period, proposition, and pinpoint.
+- **B — Authoritative or professional secondary material:** official regulator guidance, standards, recognized drafting/risk-management treatises, or professional practice material. Binding effect must not be implied.
+- **C — Empirical or scholarly support:** peer-reviewed research, validated industry reports, or transparent empirical studies. Supports factual/market claims, not binding-law conclusions.
+- **D — Internal or unverified hypothesis:** general market-practice assertions, synthetic examples, unverified summaries, or proposed rules. Cannot support a legal conclusion.
+
+Tier is metadata about source type, not a universal rank of legal force. Even a Tier A source is not applicable unless jurisdiction, effective date, and proposition match. A Tier B treatise is not converted into law by receiving a high source tier.
+
 ## Source metadata policy
 
 All legacy source IDs are represented with explicit fields, including nulls and a machine-readable reason for missing information. Missing fields are not filled with guesses. Current source citations are incomplete: no legacy record has a verified pinpoint citation. In particular, a generic Practical Law reference, a general publisher homepage, a drafting treatise without edition/page, a market-practice assertion, or an unsourced doctrine note cannot support a binding legal conclusion.
