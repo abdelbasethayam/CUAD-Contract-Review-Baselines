@@ -74,6 +74,7 @@ Do not use HIGH/MEDIUM/LOW as if these were scientific measurements. If a severi
 - Every source record has a retrievable URL, exact pinpoint, jurisdiction, source tier, retrieval date, and currentness/effective-date status.
 - Each approved rule has a verified applicability scope and positive/negative/edge regression suite.
 - Each adjudicated rule has two independent reviewer records and a separate adjudicator record.
+- Legal-proposition records include an applicability basis per authority, compatible jurisdiction, official-source verification, and verified effective-period status.
 - The test set is contract-disjoint and frozen; results cannot be used to tune thresholds.
 - Confidence artifact passes preregistered calibration and uncertainty gates; otherwise confidence stays null.
 - Full Python test suite, authority-map validator, registry reproducibility checks, frontend build, and release checks pass.
