@@ -102,6 +102,26 @@ This system is a contract-review prioritization tool, not legal advice and not a
 
 The acceptance metrics establish software behavior, rule conformance, evidence provenance and reproducibility. They do not estimate legal-risk accuracy, recall over every possible exposure, enforceability, or realized loss. These limitations should be stated explicitly rather than assigning risk-accuracy numbers to metrics that measure a different task.
 
+## 8. Jurisdiction-aware authority provenance
+
+The first legal research scope is U.S. commercial contracts, aligned to the existing 37-category taxonomy. This scope is not a presumption that every source contract is governed by U.S. law. The system must first extract the governing-law and forum provisions and identify whether the transaction concerns goods, services/software, intellectual property, employment-related restrictions, or another subject matter.
+
+A versioned authority catalog now contains 32 traceable records from the U.S. Code, New York Senate, Delaware Code, the Federal Trade Commission, and one Delaware Supreme Court opinion hosted on a republication site. Each record carries its citation and pinpoint, jurisdiction, source tier, retrieval date, effective-date/currentness status, and a scope limitation. The rule registry embeds this authority metadata on each base rule, and the manifest pins the authority-map and authority-catalog hashes. The 1,936 context-profile records inherit their base rule's authority metadata; they are disabled applicability candidates, not 1,936 independent validated legal rules.
+
+The companion authority map covers all 37 clause categories. Thirty-one categories have at least one limited authority lead; six explicitly have no universal primary statute identified in this initial catalog: audit rights, insurance, post-termination services, non-disparagement, ROFR/ROFO/ROFN, and indemnification. This is a scoped research decision, not a claim that no law can ever apply. Those categories remain commercial-review triggers until the contract facts identify a relevant jurisdiction-specific statute or case.
+
+New York and Delaware UCC references are confined to their statutory scope, particularly sales of goods. They are not generalized to every SaaS, software-licensing, employment, or services contract. The FTC's 2024 nationwide Non-Compete Clause Rule is not represented as current enforceable law following the agency's 2025 vacatur action. The Delaware non-compete opinion is marked as a pleading-stage decision and requires an official docket copy and subsequent-history check before any rule approval.
+
+Every mapped rule remains a review trigger, with `legal_conclusion_allowed=false`. A statute link is not a legal conclusion: approval still requires verification of the precise proposition, governing law, relevant date, pinpoint, statutory exceptions, and contract facts. The authority mapping closes a structural traceability gap; it does not establish that the risk rule is correct.
+
+## 9. Adjudicated gold protocol and publication readiness
+
+A machine-readable gold schema and annotation guide now define the evaluation unit, exact contract evidence, reviewer decisions, adjudication, governing-law status, authority references, dataset versioning, and contract/template-disjoint train/calibration/test splits. Two reviewers must label independently, and a separate adjudicator must resolve disagreements. Evidence quotes carry source offsets and hashes; the validator can compare those offsets against the normalized contract text. Legal-proposition labels are rejected unless governing law and the relevant date are verified and source effective-period checks pass.
+
+The schema-only CI gate is not a gold-set result. The repository does not yet contain a project-specific adjudicated risk-gold dataset, so no risk precision/recall, legal correctness, or calibrated confidence claim is reported. The current implementation audit reports 7 of 121 base rules with complete positive/negative/edge regression suites; 114 remain incomplete. This is a material limitation that must be resolved before an empirical Q1 submission.
+
+A defensible empirical paper must evaluate clause presence separately from buyer-side commercial risk, evidence correctness, cross-clause conflict detection, jurisdiction resolution, abstention, and calibration. CUAD can evaluate clause detection/localization, ContractNLI can evaluate contract inference and evidence, and ACORD can evaluate retrieval relevance; none is a substitute for adjudicated legal-risk labels. Report contract-clustered confidence intervals, per-clause metrics, false-positive rates on negative controls, evidence-span correctness, and calibration metrics only where sample size supports them. Do not describe software-test pass rates as legal-risk accuracy.
+
 ## References
 
 - CUAD: The Atticus Project. Contract Understanding Atticus Dataset. https://www.atticusprojectai.org/cuad/
