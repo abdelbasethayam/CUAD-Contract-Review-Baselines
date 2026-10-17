@@ -408,7 +408,7 @@ function ContractReview() {
           <div className="release-banner__copy">
             <span className="step-tag">RELEASE GATE · TRANSPARENT STATUS</span>
             <h2>{phase2Metrics.production_release_readiness.status === "BLOCKED" ? "Production release is blocked" : "Production approval still requires review"}</h2>
-            <p>{phase2Metrics.production_release_readiness.production_approved_rule_count ?? 0} individually approved rules. {phase2Metrics.production_release_readiness.complete_rule_test_suites ?? 0} of {phase2Metrics.production_release_readiness.base_rule_count ?? "—"} base rules have complete positive, negative, and edge-case suites. CI success is not legal validation.</p>
+            <p>{phase2Metrics.production_release_readiness.production_approved_rule_count ?? 0} individually approved rules. {phase2Metrics.production_release_readiness.complete_rule_test_suites ?? 0} of {phase2Metrics.production_release_readiness.base_rule_count ?? "—"} base rules have complete positive, negative, and edge-case suites; {phase2Metrics.production_release_readiness.rules_without_authority_refs ?? 0} still need context-specific authority mapping. CI success is not legal validation.</p>
           </div>
           <div className="release-banner__stat">
             <strong>{phase2Metrics.production_release_readiness.status}</strong>
@@ -432,6 +432,7 @@ function ContractReview() {
             <div><strong>{phase2Metrics?.classification_index_isolation?.status || "NOT_RUN"}</strong><span>Separate CUAD classifier-index isolation</span></div>
             <div><strong>{phase2Metrics?.release_validation?.status || "NOT_RUN"}</strong><span>Recorded release-check run</span></div>
             <div><strong>{phase2Metrics?.production_release_readiness?.status || "NOT_CHECKED"}</strong><span>Production release readiness</span></div>
+            <div><strong>{phase2Metrics?.production_release_readiness ? (phase2Metrics.production_release_readiness.rules_with_authority_refs + "/" + phase2Metrics.production_release_readiness.base_rule_count) : "—"}</strong><span>Base rules with authority mapping</span></div>
             <div><strong>{phase2Metrics?.playbook?.taxonomy_domain_count ?? "—"}</strong><span>Canonical risk domains</span></div>
           </div>
           <p>
