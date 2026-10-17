@@ -1,13 +1,13 @@
-"""Evidence-constrained contract-level risk aggregation."""
+"""Evidence-constrained contract-level review status aggregation.
 
+This module intentionally does not assign ordinal severity labels or infer a
+contract-level confidence probability. Those quantities were not supported by
+an adjudicated benchmark. Confidence, if calibrated, belongs to individual
+YES/NO predictions and is not an impact score.
+"""
 from __future__ import annotations
 
-import json
-
-from ..rag.generator import call_ollama
 from .knowledge_base import match_risk_domains
-
-LEVEL_RANK = {"NONE": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}
 
 
 def _contract_texts(findings: list[dict]) -> list[str]:
@@ -24,8 +24,8 @@ def _contract_texts(findings: list[dict]) -> list[str]:
 
 
 def _valid_evidence(evidence: str, findings: list[dict]) -> bool:
-    evidence = str(evidence or "").strip()
-    return bool(evidence and any(evidence in text for text in _contract_texts(findings)))
+    quote = str(evidence or "").strip()
+    return bool(quote and any(quote in text for text in _contract_texts(findings)))
 
 
 def _positive_findings(findings: list[dict]) -> list[dict]:
@@ -47,34 +47,21 @@ def _positive_findings(findings: list[dict]) -> list[dict]:
                 )
                 if item.get("risk_domain")
             ]
-        valid.append(
-            {
-                "clause_id": finding.get("clause_index"),
-                "clause_text": finding.get("clause_text", ""),
-                "evidence": evidence,
-                "risk_type": finding.get("risk_type") or "Contract Risk Finding",
-                "risk_level": finding.get("risk_level") if finding.get("risk_level") in LEVEL_RANK else None,
-                "risk_domains": list(dict.fromkeys(domains)),
-                "reason": finding.get("reason", ""),
-                "legal_knowledge": finding.get("legal_knowledge") or [],
-            }
-        )
+        valid.append({
+            "clause_id": finding.get("clause_index"),
+            "clause_text": finding.get("clause_text", ""),
+            "evidence": evidence,
+            "risk_type": finding.get("risk_type") or "Contract Risk Finding",
+            "risk_domains": list(dict.fromkeys(domains)),
+            "reason": finding.get("reason") or finding.get("why_flagged") or "",
+            "legal_knowledge": finding.get("legal_knowledge") or [],
+            "confidence": finding.get("confidence"),
+            "confidence_status": finding.get("confidence_status", "UNCALIBRATED"),
+            "confidence_target": finding.get("confidence_target", "PREDICTION_CORRECTNESS"),
+            "provenance": finding.get("provenance") or {},
+            "supporting_sources": finding.get("supporting_sources") or [],
+        })
     return valid
-
-
-def _deterministic_level(positive: list[dict]) -> str | None:
-    explicit = [item["risk_level"] for item in positive if item.get("risk_level")]
-    if explicit:
-        return max(explicit, key=lambda level: LEVEL_RANK[level])
-
-    domains = {domain for item in positive for domain in item.get("risk_domains", [])}
-    types = {item.get("risk_type") for item in positive}
-    financial_interaction = {"Financial Risk", "Liability Risk"}.issubset(domains)
-    if financial_interaction or len(positive) >= 3 or len(types) >= 3:
-        return "HIGH"
-    if len(positive) >= 2 or len(domains) >= 2:
-        return "MEDIUM"
-    return "LOW"
 
 
 def _recommendations(positive: list[dict]) -> list[str]:
@@ -101,101 +88,66 @@ def _supporting_clause_findings(findings: list[dict]) -> list[dict]:
             "risk_type": item.get("risk_type"),
             "risk_domains": item.get("risk_domains") or [],
             "evidence": item.get("evidence") or "",
-            "reason": item.get("reason") or "",
+            "reason": item.get("reason") or item.get("why_flagged") or "",
+            "confidence": item.get("confidence"),
+            "confidence_status": item.get("confidence_status", "UNCALIBRATED"),
+            "confidence_target": item.get("confidence_target", "PREDICTION_CORRECTNESS"),
         }
         for item in findings
     ]
 
 
-def _synthesis_prompt(positive: list[dict], deterministic_level: str) -> str:
-    return f"""You are synthesizing a contract-level risk assessment from validated evidence.
-Return JSON only. Do not add evidence, clause IDs, or risk domains that are not present below.
-Legal guidance is context only, never contract evidence. Do not expose reasoning_details or hidden reasoning.
+def aggregate_contract_risk(findings: list[dict], *, use_llm: bool = False) -> dict:
+    """Return evidence-supported categorical status without severity synthesis.
 
-Deterministic evidence-backed findings:
-{json.dumps(positive, indent=2, ensure_ascii=False)}
-
-Evidence-backed deterministic level: {deterministic_level}
-
-Return:
-{{
-  "overall_risk": "HIGH | MEDIUM | LOW",
-  "reason": "concise synthesis grounded only in the listed findings",
-  "recommendations": ["review point"]
-}}
-"""
-
-
-def _safe_llm_synthesis(positive: list[dict], deterministic_level: str) -> dict | None:
-    try:
-        raw = call_ollama(_synthesis_prompt(positive, deterministic_level))
-        parsed = json.loads(raw)
-        if not isinstance(parsed, dict):
-            return None
-        level = parsed.get("overall_risk")
-        reason = str(parsed.get("reason") or "").strip()
-        recommendations = parsed.get("recommendations")
-        if level not in {"HIGH", "MEDIUM", "LOW"} or not reason:
-            return None
-        if not isinstance(recommendations, list):
-            recommendations = []
-        return {
-            "overall_risk": level,
-            "reason": reason,
-            "recommendations": [str(item) for item in recommendations if str(item).strip()],
-        }
-    except Exception:
-        return None
-
-
-def aggregate_contract_risk(findings: list[dict], *, use_llm: bool = True) -> dict:
-    """Aggregate clause findings without averaging scores or trusting prose.
-
-    Only exact evidence already validated against uploaded-contract text is
-    eligible for a positive contract-level result.
+    The legacy use_llm argument is accepted for compatibility but deliberately
+    ignored: free-form LLM synthesis must not invent severity or contract-level
+    probabilities. This summary is not a legal opinion or a risk-free guarantee.
     """
+    del use_llm
     positive = _positive_findings(findings)
     insufficient = any(item.get("risk_status") == "INSUFFICIENT_EVIDENCE" for item in findings)
     if not positive:
         status = "INSUFFICIENT_EVIDENCE" if insufficient else "NO_RISK"
         return {
             "overall_status": status,
-            "overall_risk": None,
+            "overall_risk": status,
+            "overall_confidence": None,
+            "confidence_status": "NOT_CALIBRATED_FOR_CONTRACT_LEVEL",
+            "confidence_target": "PREDICTION_CORRECTNESS",
             "risk_domains": [],
             "key_risks": [],
             "risk_summary": [],
             "evidence": [],
             "affected_clauses": [],
             "reason": (
-                "Available contract evidence was insufficient to support a contract-level risk finding."
+                "Available contract evidence was insufficient to resolve one or more applicable checks."
                 if insufficient
-                else "No evidence-supported contract-level risk finding was identified."
+                else "No evidence-supported contract-level risk finding was identified by the completed checks. This is not a guarantee that the contract is risk-free."
             ),
             "recommendations": [],
             "supporting_legal_guidance": [],
             "supporting_clause_findings": _supporting_clause_findings(findings),
-            "synthesis_provider": "none",
+            "synthesis_provider": "categorical_evidence_aggregation",
+            "severity_status": "DEPRECATED_NOT_USED",
         }
 
-    deterministic_level = _deterministic_level(positive)
     risk_domains = list(dict.fromkeys(domain for item in positive for domain in item.get("risk_domains", [])))
     evidence = [
-        {
-            "clause_id": item["clause_id"],
-            "text": item["evidence"],
-            "risk_type": item["risk_type"],
-        }
+        {"clause_id": item["clause_id"], "text": item["evidence"], "risk_type": item["risk_type"]}
         for item in positive
     ]
     key_risks = [
         {
             "risk_type": item["risk_type"],
-            "level": item.get("risk_level") or deterministic_level,
             "reason": item["reason"],
-            "evidence": [
-                {"clause_id": item["clause_id"], "text": item["evidence"]}
-            ],
+            "evidence": [{"clause_id": item["clause_id"], "text": item["evidence"]}],
             "risk_domains": item["risk_domains"],
+            "confidence": item.get("confidence"),
+            "confidence_status": item.get("confidence_status"),
+            "confidence_target": item.get("confidence_target"),
+            "provenance": item.get("provenance"),
+            "supporting_sources": item.get("supporting_sources"),
         }
         for item in positive
     ]
@@ -205,18 +157,21 @@ def aggregate_contract_risk(findings: list[dict], *, use_llm: bool = True) -> di
             if guidance_item not in guidance:
                 guidance.append(guidance_item)
 
-    synthesis = _safe_llm_synthesis(positive, deterministic_level) if use_llm else None
     return {
         "overall_status": "POTENTIAL_RISK",
-        "overall_risk": synthesis["overall_risk"] if synthesis else deterministic_level,
+        "overall_risk": "POTENTIAL_RISK",
+        "overall_confidence": None,
+        "confidence_status": "NOT_CALIBRATED_FOR_CONTRACT_LEVEL",
+        "confidence_target": "PREDICTION_CORRECTNESS",
         "risk_domains": risk_domains,
         "key_risks": key_risks,
         "risk_summary": key_risks,
         "evidence": evidence,
         "affected_clauses": [item["clause_id"] for item in positive],
-        "reason": synthesis["reason"] if synthesis else "Multiple evidence-backed clause findings were aggregated using severity, domain interaction, and supporting-clause count.",
-        "recommendations": synthesis["recommendations"] if synthesis and synthesis["recommendations"] else _recommendations(positive),
+        "reason": "One or more evidence-supported review findings were identified. Clause-level confidence, when calibrated, estimates prediction correctness only; this contract summary does not estimate severity or aggregate probability.",
+        "recommendations": _recommendations(positive),
         "supporting_legal_guidance": guidance,
         "supporting_clause_findings": _supporting_clause_findings(findings),
-        "synthesis_provider": "ollama" if synthesis else "deterministic_fallback",
+        "synthesis_provider": "categorical_evidence_aggregation",
+        "severity_status": "DEPRECATED_NOT_USED",
     }
