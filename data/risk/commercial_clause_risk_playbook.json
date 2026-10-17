@@ -3158,7 +3158,28 @@
       "sources": [
         "P2",
         "P4"
-      ]
+      ],
+      "regression_cases": {
+        "positive": [
+          "The supplier's liability for damages is unlimited."
+        ],
+        "negative": [
+          "The supplier's liability is capped at fees paid.",
+          "Neither party shall have unlimited liability."
+        ],
+        "edge": [
+          {
+            "text": "The supplier's liability is capped except that liability for fraud is unlimited.",
+            "expected_match": true,
+            "reason": "An express uncapped carve-out still requires review."
+          },
+          {
+            "text": "The supplier's liability shall not be unlimited.",
+            "expected_match": false,
+            "reason": "Negated unlimited-liability language."
+          }
+        ]
+      }
     },
     {
       "id": "PR-INDEMNITY-OUTSIDE-CAP",
@@ -3177,7 +3198,23 @@
         "P2",
         "P3",
         "P4"
-      ]
+      ],
+      "regression_cases": {
+        "positive": [
+          "Supplier's indemnification obligations are excluded from the aggregate liability cap."
+        ],
+        "negative": [
+          "All indemnification obligations are subject to the aggregate liability cap.",
+          "Indemnification is not outside the liability cap."
+        ],
+        "edge": [
+          {
+            "text": "Indemnity obligations are excluded from the cap only for IP claims.",
+            "expected_match": true,
+            "reason": "A scoped indemnity carve-out remains a review trigger."
+          }
+        ]
+      }
     },
     {
       "id": "PR-LIQUIDATED-DAMAGES-OUTSIDE-CAP",
@@ -3194,7 +3231,23 @@
       "sources": [
         "P2",
         "P4"
-      ]
+      ],
+      "regression_cases": {
+        "positive": [
+          "Liquidated damages are excluded from the liability cap."
+        ],
+        "negative": [
+          "Liquidated damages are subject to the liability cap.",
+          "Liquidated damages are not outside the liability cap."
+        ],
+        "edge": [
+          {
+            "text": "Liquidated damages are not governed by the liability cap.",
+            "expected_match": true,
+            "reason": "The clause expressly excludes the amount from cap governance."
+          }
+        ]
+      }
     },
     {
       "id": "PR-IMMEDIATE-TERMINATION-NO-NOTICE",
@@ -3204,13 +3257,30 @@
       "pattern": "\\bterminat(?:e|es|ed|ion|ing)\\b.{0,120}\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b|\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b.{0,120}\\bterminat(?:e|es|ed|ion|ing)\\b",
       "exclude_patterns": [
         "\\b(?:may not|shall not|must not|cannot|can not)\\b.{0,60}\\bterminat(?:e|es|ed|ion|ing)\\b.{0,80}\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b",
-        "\\bterminat(?:e|es|ed|ion|ing)\\b.{0,100}\\bonly after\\b.{0,80}\\b(?:notice|cure period|opportunity to cure)\\b"
+        "\\bterminat(?:e|es|ed|ion|ing)\\b.{0,100}\\bonly after\\b.{0,80}\\b(?:notice|cure period|opportunity to cure)\\b",
+        "\\b(?:neither party|no party)\\b.{0,100}\\bterminat(?:e|es|ed|ion|ing)\\b.{0,80}\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b"
       ],
       "explanation": "An immediate/no-notice termination right is explicitly present. Check who holds the right, the triggering event, cure protections, and transition consequences.",
       "sources": [
         "P5",
         "P6"
-      ]
+      ],
+      "regression_cases": {
+        "positive": [
+          "Either party may terminate immediately without prior notice."
+        ],
+        "negative": [
+          "Termination is permitted only after written notice and a cure period.",
+          "Neither party may terminate immediately without prior notice."
+        ],
+        "edge": [
+          {
+            "text": "Either party may terminate with immediate effect after a material breach.",
+            "expected_match": true,
+            "reason": "The immediate-effect right is still a review trigger; assess the trigger and cure rights."
+          }
+        ]
+      }
     },
     {
       "id": "PR-BROAD-IP-LICENSE",
@@ -3227,7 +3297,23 @@
       "sources": [
         "P4",
         "P5"
-      ]
+      ],
+      "regression_cases": {
+        "positive": [
+          "Customer grants Supplier a perpetual, irrevocable worldwide license to use the materials."
+        ],
+        "negative": [
+          "No perpetual license is granted.",
+          "The license is non-sublicensable."
+        ],
+        "edge": [
+          {
+            "text": "The license is perpetual only for the period required to exercise surviving rights.",
+            "expected_match": true,
+            "reason": "Scope and survival must be checked even when the stated purpose is narrow."
+          }
+        ]
+      }
     },
     {
       "id": "PR-EARLY-EXIT-FULL-TERM-FEES",
@@ -3242,22 +3328,62 @@
       "explanation": "The clause links early termination to payment for the remaining term or the full minimum commitment. Review pro-rating, mitigation, credits, and exit exceptions.",
       "sources": [
         "P5"
-      ]
+      ],
+      "regression_cases": {
+        "positive": [
+          "If Customer terminates early for convenience, Customer must pay all fees for the remaining term.",
+          "Early termination without cause requires payment of the minimum commitment."
+        ],
+        "negative": [
+          "Customer will not owe remaining fees after early termination.",
+          "No minimum commitment applies after early termination."
+        ],
+        "edge": [
+          {
+            "text": "Termination for convenience requires payment of all fees for the remainder of the term.",
+            "expected_match": true,
+            "reason": "Potential remaining-term exposure requires review of credits and mitigation."
+          }
+        ]
+      }
     },
     {
       "id": "PR-ABSOLUTE-ASSIGNMENT-PROHIBITION",
       "risk_domain": "Assignment / Control Risk",
       "risk_type": "Absolute assignment prohibition wording",
       "question": "Does the clause expressly prohibit assignment under any circumstances or without exception?",
-      "pattern": "\\b(?:absolute(?:ly)?\\s+prohibit(?:ed|s)?|may not|shall not|must not)\\s+assign\\b.{0,140}\\b(?:under any circumstances|in any circumstances|without exception)\\b|\\b(?:under any circumstances|in any circumstances)\\b.{0,140}\\b(?:may not|shall not|must not)\\s+assign\\b",
+      "pattern": "\\b(?:absolute(?:ly)?\\s+prohibit(?:ed|s)?|may not|shall not|must not)\\s+assign\\b.{0,140}\\b(?:under any circumstances|in any circumstances|without exception)\\b|\\b(?:under any circumstances|in any circumstances)\\b.{0,140}\\b(?:may not|shall not|must not)\\s+assign\\b|\\bno assignment\\b.{0,100}\\b(?:under any circumstances|in any circumstances|without exception)\\b",
       "exclude_patterns": [
-        "\\b(?:except|unless|subject to|with (?:prior )?written consent|without (?:prior )?written consent|with consent)\\b"
+        "\\b(?:except|unless|subject to|with (?:prior )?written consent|without (?:prior )?written consent|with consent)\\b",
+        "\\bno assignment\\b.{0,100}\\b(?:except|unless|subject to|with (?:prior )?written consent)\\b"
       ],
       "explanation": "The text contains an express absolute assignment prohibition. Review affiliate, internal restructuring, financing, and change-of-control exceptions.",
       "sources": [
         "P4",
         "P5"
-      ]
+      ],
+      "regression_cases": {
+        "positive": [
+          "Customer shall not assign this Agreement under any circumstances.",
+          "Customer may not assign this Agreement under any circumstances."
+        ],
+        "negative": [
+          "Customer shall not assign this Agreement without prior written consent.",
+          "Assignment is permitted with prior written consent."
+        ],
+        "edge": [
+          {
+            "text": "No assignment is permitted under any circumstances.",
+            "expected_match": true,
+            "reason": "An absolute noun-form prohibition should also trigger review."
+          },
+          {
+            "text": "No assignment is permitted without exception, except for affiliates.",
+            "expected_match": false,
+            "reason": "The express exception prevents classification as absolute."
+          }
+        ]
+      }
     }
   ]
 }
