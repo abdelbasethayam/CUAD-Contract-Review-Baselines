@@ -129,8 +129,15 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         overall_raw_score = triage["overall_score"]
         overall_confidence = None
         confidence_status = "UNCALIBRATED"
-        overall_risk = triage["overall_severity"]
+        incomplete_positive_scores = triage["overall_severity"] is None
+        overall_risk = "UNSCORED" if incomplete_positive_scores else triage["overall_severity"]
         reason = (
+            "Evidence-supported review findings were identified. At least one positive "
+            "finding lacks a complete, validated scoring basis, so no aggregate contract "
+            "severity is reported. Individual scores are review-triage heuristics, not "
+            "calibrated probabilities or legal conclusions."
+            if incomplete_positive_scores
+            else
             "One or more contract provisions contain evidence-supported "
             "review findings. Contract severity is a deterministic triage "
             "score with explicit interaction overrides; it is not legal advice "
@@ -184,7 +191,11 @@ def aggregate_clause_risks(findings: list[dict], playbook: dict | None = None) -
         "confidence_status": confidence_status,
         "overall_raw_risk_score": overall_raw_score,
         "overall_raw_score_semantics": "deterministic 0-20 triage score; not a probability",
-        "severity_status": "RULE_BASED_TRIAGE",
+        "severity_status": (
+            "INCOMPLETE"
+            if positive and triage["overall_severity"] is None
+            else "RULE_BASED_TRIAGE"
+        ),
         "risk_domains": domain_summary,
         "key_risks": key_risks,
         "affected_clauses": affected,
