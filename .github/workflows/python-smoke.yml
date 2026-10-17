@@ -54,9 +54,14 @@ jobs:
           assert _evidence_valid("bounded liability", "a bounded liability cap", [])
           assert score_finding({"risk_type": "uncapped liability", "question": "test"})["severity"] is None
           assert _severity_signal({"exposure_magnitude": 4, "likelihood_uncertainty": 3, "scope_duration": 2, "control_weakness": 1}) is None
+          import json
+          from pathlib import Path
           active = load_playbook()
-          assert active["rule_registry"]["base_rule_count"] == 121
-          assert active["rule_registry"]["candidate_rule_count"] == 1936
+          manifest = json.loads(Path("data/risk/rule_registry_manifest.json").read_text(encoding="utf-8"))
+          assert active["rule_registry"]["base_rule_count"] == manifest["base_rule_count"]
+          assert active["rule_registry"]["candidate_rule_count"] == manifest["candidate_rule_count"]
+          assert manifest["candidate_rule_count"] == manifest["base_rule_count"] * manifest["candidate_profile_count"]
+          assert manifest["candidate_rule_count"] >= 1000
           assert confidence_from_support_score(0.8, playbook_hash=active["playbook_hash"])["confidence"] is None
           print("Phase 2 imports OK")
           PY
