@@ -161,12 +161,18 @@ def test_contract_chat_retrieval_expands_legal_synonyms_and_prioritizes_risk_fin
         {"clause_index": 3, "predicted_label": "Termination", "clause_text": "Supplier may terminate immediately for any breach.", "risk_findings": [
             {"risk_status": "POTENTIAL_RISK", "risk_type": "Unequal termination rights", "why_flagged": "Immediate termination is one-sided."}
         ]},
+        {"clause_index": 4, "predicted_label": "Insurance", "clause_text": "No minimum policy limits are stated.", "risk_findings": [
+            {"risk_status": "INSUFFICIENT_EVIDENCE", "risk_type": "Minimum policy limits unclear", "why_flagged": "The contract does not state a minimum coverage amount."}
+        ]},
     ]
     selected = query._select_clauses(clauses, "How is supplier liability capped?")
     assert selected[0]["clause_index"] == 2
 
     selected = query._select_clauses(clauses, "What are the main risks?")
     assert selected[0]["clause_index"] == 3
+
+    selected = query._select_clauses(clauses, "Which findings still need more evidence?")
+    assert selected[0]["clause_index"] == 4
 
 
 def test_contract_chat_fails_closed_when_contract_question_has_no_verified_citation(monkeypatch, tmp_path):
