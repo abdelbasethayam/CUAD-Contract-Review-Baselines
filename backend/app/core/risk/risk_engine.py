@@ -115,11 +115,9 @@ def _factor(value: object) -> float | None:
 
 
 def _severity_signal(factors: dict) -> float | None:
-    values = [_factor(factors.get(key)) for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")]
-    values = [v for v in values if v is not None]
-    if len(values) < 3:
-        return None
-    return round(sum(values) / 20.0, 4) if all(v is not None for v in values) else None
+    """Deprecated compatibility shim. Severity signals are no longer emitted."""
+    del factors
+    return None
 
 
 def _support_score(*, answer: str, evidence_ok: bool, agreement: float, indicator_match: bool) -> float:
