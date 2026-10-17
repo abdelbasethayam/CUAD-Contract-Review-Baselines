@@ -264,3 +264,27 @@ def test_source_registry_uses_verified_metadata_from_governed_playbook_input():
     incomplete = _source_registry({"sources": {"SYNTHETIC_TEST_SOURCE": source_without_retrieval_date}})
     assert incomplete["verified_pinpoint_source_count"] == 0
     assert incomplete["status"] == "INCOMPLETE_SOURCE_CITATIONS"
+
+def test_review_queue_covers_every_base_rule_and_surfaces_missing_case_suites():
+    manifest = json.loads((ROOT / "data/risk/rule_registry_manifest.json").read_text(encoding="utf-8"))
+    records = [
+        json.loads(line)
+        for line in (ROOT / "data/risk/rule_registry.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    base_ids = {
+        item["rule_id"]
+        for item in records
+        if item["record_kind"] == "BASE_RULE"
+    }
+    with (ROOT / "data/risk/rule_review_queue.csv").open(encoding="utf-8", newline="") as handle:
+        queue = list(csv.DictReader(handle))
+
+    assert len(queue) == manifest["base_rule_count"]
+    assert {row["rule_id"] for row in queue} == base_ids
+    assert all(row["source_playbook_hash"] == manifest["source_playbook_hash"] for row in queue)
+    incomplete = [row for row in queue if row["case_suite_status"] == "INCOMPLETE"]
+    complete = [row for row in queue if row["case_suite_status"] == "COMPLETE"]
+    assert len(complete) == 7
+    assert len(incomplete) == len(queue) - len(complete)
+    assert all("AUTHOR_POSITIVE_NEGATIVE_EDGE_CASES" in row["next_action"] for row in incomplete)
