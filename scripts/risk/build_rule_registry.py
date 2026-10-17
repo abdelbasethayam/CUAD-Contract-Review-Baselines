@@ -348,9 +348,9 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
             },
             "source_ids": sorted(set(str(x) for x in (item.get("sources") or []))),
             "rationale": str(item.get("explanation") or "Textual trigger only; requires reviewer interpretation."),
-            "positive_examples": [],
-            "negative_examples": [],
-            "regression_cases": {"positive": [], "negative": [], "edge": []},
+            "positive_examples": item.get("positive_examples") or [],
+            "negative_examples": item.get("negative_examples") or [],
+            "regression_cases": item.get("regression_cases") or {"positive": [], "negative": [], "edge": []},
         })
     return rules
 
