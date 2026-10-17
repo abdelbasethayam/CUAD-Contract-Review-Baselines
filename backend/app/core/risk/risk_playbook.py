@@ -323,6 +323,12 @@ def _registry_public_metadata(record: dict) -> dict:
         "jurisdiction_review_required": bool(record.get("jurisdiction_review_required", True)),
         "source_status": record.get("source_status") or "INCOMPLETE_SOURCE_CITATION",
         "source_ids": record.get("source_ids") or [],
+        "source_tier": record.get("source_tier") or [],
+        "authority_jurisdictions": record.get("authority_jurisdictions") or [],
+        "effective_dates": record.get("effective_dates") or [],
+        "pinpoint_citations": record.get("pinpoint_citations") or [],
+        "citation_status": record.get("citation_status") or "INCOMPLETE_SOURCE_CITATION",
+        "legal_authority": record.get("legal_authority") or {},
         "legal_conclusion_allowed": False,
         "source_playbook_hash": record.get("source_playbook_hash"),
     }
