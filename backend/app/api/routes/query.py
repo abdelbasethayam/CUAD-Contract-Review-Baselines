@@ -79,6 +79,12 @@ _CONCEPT_EXPANSIONS: dict[str, set[str]] = {
     r"\bterminat(?:e|ion|ing)?\b|\bcancel(?:lation|led|ing)?\b|\bwalk away\b|\bexit\b|\bend(?:ing)?\s+(?:the\s+)?agreement\b": {
         "terminate", "termination", "cancel", "cancellation", "notice", "cure", "breach", "convenience", "renewal", "expire", "expiration", "transition", "survive", "exit", "early"
     },
+    r"\bvendor\b|\bprovider\b|\bservice provider\b": {
+        "supplier", "vendor", "provider", "service", "supplier's"
+    },
+    r"\bclient\b|\bbuyer\b|\bcustomer\b": {
+        "customer", "client", "buyer", "party", "parties"
+    },
     r"\bliabilit|\bdamag(?:e|es)\b|\bloss(?:es)?\b|\bindirect\b|\bcap(?:ped)?\b": {
         "liability", "damages", "losses", "cap", "capped", "uncapped", "aggregate", "indirect", "consequential", "limit", "limitation", "exception", "indemnification"
     },
