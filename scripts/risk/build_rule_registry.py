@@ -157,6 +157,10 @@ JURISDICTION_SENSITIVE_TERMS = (
 def _canonical(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
+def _git_blob_sha(data: bytes) -> str:
+    import hashlib
+    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\\0" + data).hexdigest()
+
 def _source_registry(playbook: dict[str, Any]) -> dict[str, Any]:
     result = []
     for source_id, raw in sorted((playbook.get("sources") or {}).items()):
@@ -186,7 +190,7 @@ def _source_registry(playbook: dict[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "registry_version": REGISTRY_VERSION,
-        "source_playbook_hash": str(playbook.get("playbook_hash") or ""),
+        "source_playbook_hash": str(playbook.get("_source_blob_sha") or ""),
         "status": "INCOMPLETE_SOURCE_CITATIONS",
         "source_count": len(result),
         "verified_pinpoint_source_count": sum(1 for item in result if item["citation_status"] == "VERIFIED_PINPOINT"),
@@ -418,7 +422,7 @@ def _record(rule: dict[str, Any], playbook: dict[str, Any], *, candidate_profile
         "execution_status": "DISABLED_UNVALIDATED_CANDIDATE" if candidate else "PILOT_REVIEW_ONLY",
         "execution_eligible": not candidate,
         "legal_conclusion_allowed": False,
-        "source_playbook_hash": str(playbook.get("playbook_hash") or ""),
+        "source_playbook_hash": str(playbook.get("_source_blob_sha") or ""),
         "candidate_note": candidate_profile.get("note") if candidate else None,
     }
 
@@ -450,6 +454,10 @@ def _candidate_record(rule: dict[str, Any], playbook: dict[str, Any], profile: d
     }
 
 def build_artifacts(playbook: dict[str, Any]) -> tuple[str, str, str]:
+    # Git blob SHA is computed over the exact committed file bytes, so changing
+    # any rule invalidates the generated registry even if a declared field is stale.
+    playbook = dict(playbook)
+    playbook["_source_blob_sha"] = _git_blob_sha(PLAYBOOK_PATH.read_bytes())
     base_rules = _base_inputs(playbook)
     base_records = [_record(rule, playbook) for rule in base_rules]
     candidate_records = [
