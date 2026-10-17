@@ -258,7 +258,6 @@ def _parse(raw: str, valid_ids: set[str]) -> list[dict]:
             answer = "DON'T KNOW"
         if status not in VALID_STATUS:
             status = "POTENTIAL_RISK" if answer == "YES" else ("NO_RISK" if answer == "NO" else "INSUFFICIENT_EVIDENCE")
-        factors = item.get("score_components") if isinstance(item.get("score_components"), dict) else (item.get("severity_factors") if isinstance(item.get("severity_factors"), dict) else {})
         out.append(
             {
                 "check_id": check_id,
@@ -267,10 +266,6 @@ def _parse(raw: str, valid_ids: set[str]) -> list[dict]:
                 "risk_type": str(item.get("risk_type") or "").strip() or None,
                 "evidence": str(item.get("evidence") or "").strip(),
                 "why_flagged": str(item.get("why_flagged") or "").strip(),
-                "score_components": {
-                    key: _factor(factors.get(key))
-                    for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")
-                },
             }
         )
     return out
