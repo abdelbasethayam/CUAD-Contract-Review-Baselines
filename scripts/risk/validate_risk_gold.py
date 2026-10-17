@@ -41,7 +41,7 @@ def _jurisdiction_codes(value: str) -> set[str]:
         "CALIFORNIA LAW": "US-CA",
     }
     normalized = aliases.get(normalized, normalized)
-    return set(re.findall(r"\\bUS-[A-Z]{2,8}\\b", normalized))
+    return set(re.findall(r"\bUS-[A-Z]{2,8}\b", normalized))
 
 
 def _authority_jurisdiction_compatible(resolved_law: str, authority_jurisdiction: str) -> bool:
