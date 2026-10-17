@@ -460,7 +460,7 @@ def test_chatbot_semantic_evaluator_checks_all_required_concepts_and_clause_cita
     spec = {
         "id": "indemnity_cap",
         "question": "Does indemnity fall under the aggregate liability cap?",
-        "must_cite_terms": ["indemnification obligations", "aggregate liability exceed", "Customer shall indemnify"],
+        "must_cite_terms": ["indemnification obligations", "aggregate liability shall not exceed", "Customer shall indemnify"],
         "must_cite_clause_indices": [3, 4],
         "must_answer_one_of": [["ambiguous", "unclear"], ["aggregate liability caps", "aggregate caps"]],
         "must_answer_all": [["indemnification", "indemnity"]],
