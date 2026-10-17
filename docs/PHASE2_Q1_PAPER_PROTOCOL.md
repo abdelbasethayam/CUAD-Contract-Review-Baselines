@@ -63,6 +63,12 @@ Compare:
 
 Report macro and per-class metrics; micro averages alone can hide failures in rare clause types. Use contract-clustered bootstrap confidence intervals, and paired tests for baseline comparisons. Predefine multiplicity handling and the release threshold before opening the test set.
 
+## Conversational QA evaluation boundary
+
+The contract-linked chatbot is a user-interface capability, not a substitute for the risk-finding evaluation above. Its six-question synthetic-demo smoke suite checks (1) correct party attribution for asymmetric liability caps, (2) party-specific termination rights, (3) abstention on unresolved governing law, (4) insurance limits that are not stated, (5) post-termination data export versus unspecified retention/deletion, and (6) the ambiguity between indemnification wording and aggregate liability caps. Each response must cite exact text from the cited clause; required clause coverage is checked for cross-clause questions. A separate retrieval regression suite checks explicit clause references, synonym handling, and abstention when no relevant clause is found.
+
+These checks are **engineering smoke tests only**: the questions are hand-authored, synthetic, small in number, and not a representative or statistically powered sample. Do not report their pass rate as chatbot accuracy or as evidence of legal correctness. Before any research claim about conversational QA, create a separate frozen, contract-disjoint question-answer benchmark; have qualified annotators independently label answer correctness, source support, clause selection, party attribution, uncertainty handling, and omission/hallucination errors; adjudicate disagreements; and report per-category results with confidence intervals. Keep model-assisted responses and source-only fallback responses as separate conditions.
+
 ## Confidence and severity
 
 The system's confidence, if released, means **the calibrated probability that the finding's YES/NO label agrees with the adjudicated review label for the evaluated population**. It is not probability of litigation, monetary loss, breach, enforceability, or legal correctness outside the evaluated population. If calibration gates fail or the population shifts, confidence is null and the system abstains.
