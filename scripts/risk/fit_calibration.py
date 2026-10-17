@@ -33,7 +33,8 @@ REQUIRED = {
     "contract_id", "finding_id", "check_id", "playbook_hash",
     "support_score_version", "predicted_risk", "adjudicated_risk",
     "raw_support_score", "split", "adjudication_status",
-    "annotator_1_risk", "annotator_2_risk", "adjudicator_id", "adjudication_notes",
+    "annotator_1_id", "annotator_1_risk", "annotator_2_id", "annotator_2_risk",
+    "adjudicator_id", "adjudication_notes",
 }
 
 
@@ -80,6 +81,8 @@ def _prepare(path: Path, current_playbook_hash: str) -> tuple[list[dict], list[s
         gold = _yes_no(row.get("adjudicated_risk"))
         annotator_1 = _yes_no(row.get("annotator_1_risk"))
         annotator_2 = _yes_no(row.get("annotator_2_risk"))
+        annotator_1_id = str(row.get("annotator_1_id") or "").strip()
+        annotator_2_id = str(row.get("annotator_2_id") or "").strip()
         adjudicator_id = str(row.get("adjudicator_id") or "").strip()
         adjudication_notes = str(row.get("adjudication_notes") or "").strip()
         if predicted is None or gold is None:
@@ -87,6 +90,9 @@ def _prepare(path: Path, current_playbook_hash: str) -> tuple[list[dict], list[s
             continue
         if annotator_1 is None or annotator_2 is None:
             problems.append(f"line_{line_number}:both_independent_annotator_labels_required")
+            continue
+        if not annotator_1_id or not annotator_2_id or annotator_1_id == annotator_2_id:
+            problems.append(f"line_{line_number}:two_distinct_annotator_identities_required")
             continue
         if not adjudicator_id:
             problems.append(f"line_{line_number}:adjudicator_identity_required")
