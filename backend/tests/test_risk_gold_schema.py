@@ -163,3 +163,11 @@ def test_gold_validator_fails_closed_when_normalized_contract_text_is_missing():
     _, _, _, _, _, record = _fixtures()
     problems = _validate(record, {})
     assert any("normalized_text_missing_for_contract" in item for item in problems)
+
+def test_gold_validator_rejects_record_decision_that_differs_from_adjudication():
+    _, _, _, _, text, record = _fixtures()
+    record["decision"] = "NO_RISK"
+    record["evidence_basis"] = "ABSENCE_AFTER_DOCUMENT_SCAN"
+    record["evidence"] = []
+    problems = _validate(record, {record["contract_id"]: text})
+    assert any("record_decision_must_match_adjudication" in item for item in problems)
