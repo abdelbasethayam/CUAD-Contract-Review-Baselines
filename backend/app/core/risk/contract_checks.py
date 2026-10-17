@@ -76,6 +76,8 @@ Rules:
 - Do not treat a CUAD label, checklist, or source as contract evidence.
 - If evidence is insufficient, return INSUFFICIENT_EVIDENCE.
 - Do not infer external law or enforceability.
+- If a rule is unapproved, jurisdiction scope is unresolved, or source citations are incomplete, describe a review concern only and require human legal review.
+- Do not emit ordinal severity labels, numerical severity scores, or model-self-reported confidence.
 - Return JSON only.
 
 CLAUSES
@@ -100,8 +102,7 @@ Return:
       "risk_type": "specific exposure or null",
       "clause_ids": [1, 2],
       "evidence": [{{"clause_id": 1, "quote": "exact quote"}}],
-      "why_flagged": "concise explanation",
-      "score_components": {{"exposure_magnitude": 0, "likelihood_uncertainty": 0, "scope_duration": 0, "control_weakness": 0}}
+      "why_flagged": "concise explanation"
     }}
   ],
   "document_findings": [
@@ -112,8 +113,7 @@ Return:
       "risk_type": "specific exposure or null",
       "clause_ids": [1],
       "evidence": [{{"clause_id": 1, "quote": "exact quote"}}],
-      "why_flagged": "concise explanation",
-      "score_components": {{"exposure_magnitude": 0, "likelihood_uncertainty": 0, "scope_duration": 0, "control_weakness": 0}}
+      "why_flagged": "concise explanation"
     }}
   ]
 }}
