@@ -186,10 +186,13 @@ def _select_clauses(
 
     risk_intent = bool(_RISK_INTENT.search(question))
     overview_intent = bool(_OVERVIEW_INTENT.search(question))
-    explicit_clause_indices = {
-        int(match.group(1))
-        for match in re.finditer(r"\b(?:clause|section|paragraph|provision)\s+(\d{1,4})\b", question, re.I)
-    }
+    explicit_clause_indices: set[int] = set()
+    for match in re.finditer(
+        r"\b(?:clauses?|sections?|paragraphs?|provisions?)\s+(\d{1,4}(?:\s*(?:,|and|&)\s*\d{1,4})*)",
+        question,
+        re.I,
+    ):
+        explicit_clause_indices.update(int(value) for value in re.findall(r"\d{1,4}", match.group(1)))
     scored = []
     for order, clause in enumerate(clauses):
         if not isinstance(clause, dict):
