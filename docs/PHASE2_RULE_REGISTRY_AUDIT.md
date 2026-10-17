@@ -76,6 +76,16 @@ All seven deterministic regex rules have positive, negative, and edge-case fixtu
 
 Registry reproducibility, schema validation, exception fixtures, API tests, and frontend build establish software conformance. They do not demonstrate precision/recall against lawyer labels, agreement between reviewers, enforceability, or realized financial-loss prediction.
 
+### F-08 - Trigger polarity and duplicate check IDs
+
+**Status:** MITIGATED IN RUNTIME; REGRESSION TESTED
+
+A code-path review found that positive clause findings were accepted only when the model answer was YES. Existing rules also use NO, missing, silent, and future-tense-only trigger conditions. Supported negative answers could therefore be downgraded to insufficient evidence. The customer and employee non-solicitation categories also reused NS-1 and NS-2, while runtime selection deduplicated on the bare ID. Three prompts were open-ended even though the response schema only accepts YES, NO, or DON'T KNOW.
+
+The runtime now checks answer polarity against the rule's trigger wording, namespaces duplicate non-solicitation IDs by category, and normalizes those three prompts to binary questions. Provenance records the base check ID, category, expected trigger answer, and polarity-policy version. Regression tests cover these paths.
+
+This is a compatibility mitigation for legacy wording, not validation of the underlying policy. The rules still need explicit authoring metadata and independent legal/policy adjudication.
+
 ## Release sequence
 
 1. Select and document the first supported jurisdiction(s), contract types, buyer/seller perspective, and effective-date policy.
