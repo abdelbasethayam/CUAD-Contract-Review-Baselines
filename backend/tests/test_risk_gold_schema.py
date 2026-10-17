@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "risk"))
-from validate_risk_gold import SCHEMA_PATH, validate_records  # noqa: E402
+from validate_risk_gold import SCHEMA_PATH, _authority_jurisdiction_compatible, validate_records  # noqa: E402
 
 
 def _load_json(path):
@@ -223,3 +223,10 @@ def test_legal_proposition_rejects_source_whose_official_text_was_not_verified()
     }]
     problems = _validate(record, {record["contract_id"]: text})
     assert any("authority_source_verification_not_cleared" in item for item in problems)
+
+def test_jurisdiction_matcher_allows_compatible_federal_law_and_rejects_other_state_law():
+    assert _authority_jurisdiction_compatible("US-DE", "US-FEDERAL")
+    assert _authority_jurisdiction_compatible("US-DE", "US-DE")
+    assert _authority_jurisdiction_compatible("US-DE + US-FEDERAL", "US-FEDERAL")
+    assert not _authority_jurisdiction_compatible("US-DE", "US-NY")
+    assert not _authority_jurisdiction_compatible("unresolved", "US-FEDERAL")
