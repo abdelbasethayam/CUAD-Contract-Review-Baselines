@@ -22,7 +22,13 @@ Produce a clean 2–3 minute walkthrough of the CUAD Contract Review workspace. 
    ollama run qwen3:8b
    ```
 
-   Exit the interactive model session after it has loaded if needed; keep the Ollama service running. Send one test question before the take. If Ollama is unavailable, the chatbot intentionally falls back to verified source excerpts and labels that response as a source-only fallback—it does not pretend to have interpreted the contract.
+   Exit the interactive model session after it has loaded if needed; keep the Ollama service running. Before recording, run the three-question semantic/citation smoke check:
+
+   ```bash
+   python scripts/risk/evaluate_contract_chat_demo.py --out data/risk/results/contract_chat_demo_evaluation.json
+   ```
+
+   The script checks liability-cap comparison, termination rights, governing-law uncertainty, and citation provenance. Fix any failure before presenting the chatbot as working. If Ollama is unavailable, the chatbot intentionally falls back to verified source excerpts and labels that response as a source-only fallback—it does not pretend to have interpreted the contract.
 6. Close unrelated tabs, browser developer tools, and desktop notifications. Use a 1920×1080 capture, browser zoom around 90–100%, and wait for the API status to show **API connected**.
 
 ## Demo flow (about 2 minutes)
@@ -50,7 +56,7 @@ Open **Risks** and show:
 - The broad customer indemnity and missing supplier IP-infringement indemnity.
 - The changing online terms and precedence clause.
 
-Open one finding and read the exact quoted provision. Explain that each item is a review candidate, not a legal conclusion. Use the **Clauses** tab if you want to show the surrounding language.
+Open one finding and read the exact quoted provision. Explain that each item is a review candidate, not a legal conclusion. Use the **Clauses** tab to search for a section heading or phrase and show the surrounding language.
 
 ### 1:25–1:55 — Ask the contract
 
