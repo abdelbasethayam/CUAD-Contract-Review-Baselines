@@ -95,9 +95,47 @@ def main() -> int:
     check("risk_prompt_path_has_no_cuad_example_injection", not violations, violations)
 
     active_engine = (ROOT / "backend" / "app" / "core" / "risk" / "risk_engine.py").read_text(encoding="utf-8")
-    calibration_dependencies = ("load_calibration", "calibrate_risk_probability", "calibrate_severity")
-    calibration_violations = [token for token in calibration_dependencies if token in active_engine]
-    check("active_risk_engine_uses_no_calibration_artifacts", not calibration_violations, calibration_violations)
+    cross_checks = (ROOT / "backend" / "app" / "core" / "risk" / "contract_checks.py").read_text(encoding="utf-8")
+    calibrator = (ROOT / "backend" / "app" / "core" / "risk" / "confidence_calibration.py").read_text(encoding="utf-8")
+    fitter_path = ROOT / "scripts" / "risk" / "fit_calibration.py"
+    fitter = fitter_path.read_text(encoding="utf-8") if fitter_path.exists() else ""
+    calibration_violations = []
+    for name, source in (("risk_engine", active_engine), ("contract_checks", cross_checks)):
+        if "confidence_from_support_score" not in source:
+            calibration_violations.append(f"{name}:missing_fail_closed_calibrator")
+    for token in (
+        "VALIDATED_ON_LOCKED_TEST",
+        "PREDICTION_CORRECTNESS",
+        "SUPPORT_SCORE_VERSION",
+        "CALIBRATION_STALE_FOR_PLAYBOOK",
+        "CALIBRATION_AUDIT_GATES_FAILED",
+    ):
+        if token not in calibrator:
+            calibration_violations.append(f"calibrator:missing_{token}")
+    for token in (
+        "annotator_1_id",
+        "annotator_2_id",
+        "adjudicator_id",
+        "contract_disjoint_calibration_test",
+        "brier_improvement_over_baseline",
+    ):
+        if token not in fitter:
+            calibration_violations.append(f"fitter:missing_{token}")
+    check(
+        "active_risk_engine_uses_fail_closed_confidence_calibration",
+        not calibration_violations,
+        calibration_violations,
+    )
+
+    severity_sources = (
+        active_engine,
+        cross_checks,
+        (ROOT / "backend" / "app" / "core" / "risk" / "risk_scoring.py").read_text(encoding="utf-8"),
+        (ROOT / "backend" / "app" / "core" / "risk" / "contract_risk_engine.py").read_text(encoding="utf-8"),
+    )
+    severity_tokens = ('"severity": "HIGH"', '"severity": "MEDIUM"', '"severity": "LOW"', '"overall_severity": "HIGH"', '"overall_severity": "CRITICAL"')
+    severity_violations = [token for source in severity_sources for token in severity_tokens if token in source]
+    check("ordinal_severity_labels_not_generated", not severity_violations, severity_violations)
 
     release_path = ROOT / "scripts" / "risk" / "run_release_checks.py"
     release_source = release_path.read_text(encoding="utf-8")
@@ -117,7 +155,11 @@ def main() -> int:
         "git_head_at_run_time": _git_head(),
         "status": "PASS" if all(item["passed"] for item in results) else "FAIL",
         "evaluation_mode": "PLAYBOOK_RULE_CONFORMANCE",
-        "human_gold_required_for_release": False,
+        "human_gold_required_for_pilot_rule_conformance": False,
+        "human_gold_required_for_calibrated_confidence": True,
+        "human_gold_required_for_production_approval": True,
+        "policy_status": (playbook.get("rule_registry") or {}).get("policy_status", "UNAPPROVED"),
+        "execution_mode": (playbook.get("rule_registry") or {}).get("status", "PILOT_REVIEW_ONLY"),
         "risk_span_dataset_used_for_flagging": False,
         "fine_tuning_used": False,
         "rule_count": len(rules),
