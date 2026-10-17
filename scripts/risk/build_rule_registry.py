@@ -17,7 +17,7 @@ PLAYBOOK_PATH = ROOT / "data" / "risk" / "commercial_clause_risk_playbook.json"
 REGISTRY_PATH = ROOT / "data" / "risk" / "rule_registry.jsonl"
 SOURCE_REGISTRY_PATH = ROOT / "data" / "risk" / "source_registry.json"
 MANIFEST_PATH = ROOT / "data" / "risk" / "rule_registry_manifest.json"
-REGISTRY_VERSION = "0.2.0"
+REGISTRY_VERSION = "0.3.0"
 SCHEMA_VERSION = 1
 
 CONTRACT_PROFILES = [
