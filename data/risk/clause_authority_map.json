@@ -355,7 +355,7 @@
       "authority_ids": [],
       "authority_coverage_status": "NO_UNIVERSAL_PRIMARY_AUTHORITY_IDENTIFIED",
       "jurisdiction_policy": "CONTRACT_AND_SECTOR_FACTS_REQUIRED",
-      "scope_note": "Transition assistance, data return, migration, deletion, and continued support are generally contract-specific commercial obligations. Determine applicable privacy, security, regulated-sector, and IP rules from the actual facts.",
+      "scope_note": "No universal U.S. commercial-contract statute creates a general transition-services duty. Transition assistance, data return, migration, deletion, and continued support are generally contract-specific commercial obligations. Determine applicable privacy, security, regulated-sector, and IP rules from the actual facts.",
       "legal_conclusion_allowed": false,
       "required_context": [
         "exact contract quote and clause location",
