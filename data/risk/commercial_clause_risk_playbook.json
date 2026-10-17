@@ -3186,7 +3186,7 @@
       "risk_domain": "Liability Risk",
       "risk_type": "Indemnification stated to be uncapped or outside the liability cap",
       "question": "Does the clause expressly state that indemnification is uncapped, unlimited, or outside the liability cap?",
-      "pattern": "\\b(?:indemnif(?:y|ication|ity|ies)|hold harmless)\\b.{0,180}\\b(?:uncapped|unlimited|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap|excluded from (?:the )?(?:aggregate )?(?:liability )?cap)\\b|\\b(?:uncapped|unlimited|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap|excluded from (?:the )?(?:aggregate )?(?:liability )?cap)\\b.{0,180}\\b(?:indemnif(?:y|ication|ity|ies)|hold harmless)\\b",
+      "pattern": "\\b(?:(?:indemnif(?:y|ication|ity|ies)|indemnity)|hold harmless)\\b.{0,180}\\b(?:uncapped|unlimited|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap|excluded from (?:the )?(?:aggregate )?(?:liability )?cap)\\b|\\b(?:uncapped|unlimited|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap|excluded from (?:the )?(?:aggregate )?(?:liability )?cap)\\b.{0,180}\\b(?:(?:indemnif(?:y|ication|ity|ies)|indemnity)|hold harmless)\\b",
       "exclude_patterns": [
         "\\b(?:not|never|shall not|will not|is not|are not)\\s+(?:be\\s+)?(?:uncapped|unlimited)\\b",
         "\\bnot\\s+excluded from\\b",
