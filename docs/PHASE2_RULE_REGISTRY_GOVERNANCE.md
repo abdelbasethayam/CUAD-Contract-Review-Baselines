@@ -84,3 +84,16 @@ Finding: CUAD labels clause presence, not whether a clause is risky; ContractNLI
 
 ### Orchestrator decision
 The only safe immediate status is **PILOT_REVIEW_ONLY / UNAPPROVED**. The registry can scale the review backlog, but production approval requires real sources, target-jurisdiction decisions, regression counterexamples, dual annotation, adjudication, and a passing locked test.
+
+## Authority mapping and research scope
+
+The supplemental authority layer is intentionally separate from a rule's approval state:
+
+- `data/risk/authority_catalog.json`: 32 traceable authority records with per-record retrieval dates, pinpoint citations, source tiers, currentness notes, and scope limits.
+- `data/risk/clause_authority_map.json`: one entry for every one of the 37 taxonomy categories. Six entries explicitly state that no universal primary statute has been identified; their triggers remain commercial/contract-text checks pending applicable law.
+- `data/risk/rule_review_queue.csv`: each clause-check work item carries the relevant authority IDs and scope notes. The 20 cross-clause/document/regex work items are marked for context-specific authority review.
+- `scripts/risk/validate_clause_authority_map.py`: CI validates schema, exact taxonomy coverage, source provenance, references, and explicit no-universal-authority notes.
+- `docs/PHASE2_JURISDICTION_POLICY.md` records the U.S. initial scope and prevents NY/Delaware UCC provisions from being applied to all services/SaaS contracts.
+- `docs/PHASE2_Q1_PAPER_PROTOCOL.md` sets out the gold-label protocol, task-matched benchmarks, contract-disjoint evaluation, calibration metrics, and publication limitations.
+
+These files close the **structural taxonomy-to-authority mapping gap**, not the substantive legal-validation gap. They do not promote any rule to approved status. The initial scope is not a 50-state survey, the Delaware non-compete opinion requires official docket/subsequent-history review, and the old playbook source registry still needs rule-by-rule replacement/verification. CI runs every test file in `backend/tests`, not only the former smoke subset.
