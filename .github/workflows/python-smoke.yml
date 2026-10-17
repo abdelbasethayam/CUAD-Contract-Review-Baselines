@@ -18,6 +18,10 @@ jobs:
         run: python -m compileall -q backend scripts data/scripts
       - name: Validate playbook rule and taxonomy contract
         run: python scripts/risk/validate_playbook_rules.py
+      - name: Validate governed registry reproducibility and source metadata
+        run: |
+          python scripts/risk/build_rule_registry.py --check
+          python scripts/risk/validate_rule_registry.py
       - name: Test annotation-independent rule and contract-check paths
         env:
           PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}
@@ -30,6 +34,7 @@ jobs:
           backend/tests/test_contract_checks_evaluation.py
           backend/tests/test_contract_risk_architecture.py
           backend/tests/test_phase2_evidence_integrity_hardening.py
+          backend/tests/test_rule_registry_governance.py
           backend/tests/test_deterministic_cross_checks.py
           backend/tests/test_contract_level_assessment.py
           backend/tests/test_openrouter_pipeline.py
@@ -39,13 +44,18 @@ jobs:
         run: |
           python - <<'PY'
           from backend.app.models.schemas import ContractClassificationResponse, RiskFinding
-          from backend.app.core.risk.risk_playbook import starter_playbook
+          from backend.app.core.risk.risk_playbook import load_playbook, starter_playbook
+          from backend.app.core.risk.confidence_calibration import confidence_from_support_score
           from backend.app.core.risk.contract_risk_engine import aggregate_clause_risks
           from backend.app.core.risk.risk_scoring import score_finding
           from backend.app.core.risk.risk_engine import _evidence_valid, _severity_signal
           assert starter_playbook()["playbook_hash"]
           assert _evidence_valid("bounded liability", "a bounded liability cap", [])
-          assert score_finding({"risk_type": "uncapped liability", "question": "test", "score_components": {"exposure_magnitude": 5, "likelihood_uncertainty": 5, "scope_duration": 5, "control_weakness": 5}})["severity"] == "CRITICAL"
-          assert _severity_signal({"exposure_magnitude": 4, "likelihood_uncertainty": 3, "scope_duration": 2, "control_weakness": 1}) == 0.5
+          assert score_finding({"risk_type": "uncapped liability", "question": "test"})["severity"] is None
+          assert _severity_signal({"exposure_magnitude": 4, "likelihood_uncertainty": 3, "scope_duration": 2, "control_weakness": 1}) is None
+          active = load_playbook()
+          assert active["rule_registry"]["base_rule_count"] == 121
+          assert active["rule_registry"]["candidate_rule_count"] == 1936
+          assert confidence_from_support_score(0.8, playbook_hash=active["playbook_hash"])["confidence"] is None
           print("Phase 2 imports OK")
           PY
