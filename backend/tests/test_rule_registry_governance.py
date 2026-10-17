@@ -29,6 +29,7 @@ def _valid_artifact(**overrides):
         "locked_test_metrics": {
             "brier_calibrated": 0.10,
             "brier_constant_prevalence_baseline": 0.25,
+            "brier_improvement_ci_95": [0.01, 0.20],
             "ece_10_bins": 0.05,
             "test_correct_count": 70,
             "test_incorrect_count": 30,
@@ -140,6 +141,7 @@ def test_confidence_artifact_status_string_alone_cannot_bypass_audit_gates(tmp_p
         json.dumps(_valid_artifact(locked_test_metrics={
             "brier_calibrated": 0.30,
             "brier_constant_prevalence_baseline": 0.25,
+            "brier_improvement_ci_95": [-0.10, 0.01],
             "ece_10_bins": 0.20,
             "test_correct_count": 70,
             "test_incorrect_count": 30,
