@@ -50,6 +50,12 @@ def main() -> int:
         problems.append("candidate_rule_enabled_for_execution")
     if any(item["validation_status"] != "DRAFT_UNVALIDATED" for item in records):
         problems.append("unreviewed_rule_misrepresented_as_validated")
+    for item in records:
+        if item["record_kind"] != "BASE_RULE" or item.get("rule_family") != "DETERMINISTIC_REGEX":
+            continue
+        cases = item.get("regression_cases") or {}
+        if not cases.get("positive") or not cases.get("negative") or not cases.get("edge"):
+            problems.append(f"deterministic_rule_missing_positive_negative_or_edge_cases:{item.get('base_rule_id')}")
     source_ids = {item["source_id"] for item in sources["sources"]}
     if any(set(item.get("source_ids") or []) - source_ids for item in records):
         problems.append("dangling_source_reference")
