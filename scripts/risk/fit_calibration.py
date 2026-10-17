@@ -62,6 +62,50 @@ def _brier(y: np.ndarray, p: np.ndarray) -> float:
     return float(np.mean((y - p) ** 2))
 
 
+def _cluster_bootstrap_calibration_metrics(
+    y: np.ndarray,
+    probabilities: np.ndarray,
+    baseline_probabilities: np.ndarray,
+    contract_ids: list[str],
+    *,
+    iterations: int = 1000,
+    seed: int = 20261017,
+) -> dict[str, object]:
+    """Estimate metric uncertainty by resampling whole contracts, not findings."""
+    ids = np.asarray(contract_ids, dtype=object)
+    unique_contracts = np.unique(ids)
+    grouped_indices = {
+        contract_id: np.flatnonzero(ids == contract_id)
+        for contract_id in unique_contracts
+    }
+    rng = np.random.default_rng(seed)
+    improvements: list[float] = []
+    eces: list[float] = []
+    for _ in range(iterations):
+        sampled_contracts = rng.choice(unique_contracts, size=len(unique_contracts), replace=True)
+        indices = np.concatenate([grouped_indices[contract_id] for contract_id in sampled_contracts])
+        improvements.append(
+            _brier(y[indices], baseline_probabilities[indices])
+            - _brier(y[indices], probabilities[indices])
+        )
+        eces.append(_ece(y[indices], probabilities[indices]))
+    improvement_interval = np.percentile(np.asarray(improvements), [2.5, 97.5])
+    ece_interval = np.percentile(np.asarray(eces), [2.5, 97.5])
+    return {
+        "iterations": iterations,
+        "seed": seed,
+        "resampling_unit": "contract",
+        "brier_improvement_ci_95": [
+            float(improvement_interval[0]),
+            float(improvement_interval[1]),
+        ],
+        "ece_10_bins_ci_95": [
+            float(ece_interval[0]),
+            float(ece_interval[1]),
+        ],
+    }
+
+
 def _prepare(path: Path, current_playbook_hash: str) -> tuple[list[dict], list[str]]:
     problems = []
     with path.open(encoding="utf-8-sig", newline="") as handle:
@@ -196,24 +240,44 @@ def main() -> int:
     coefficient = float(model.coef_[0][0])
     intercept = float(model.intercept_[0])
     test_prob = model.predict_proba(test_x)[:, 1]
-    prevalence = float(np.mean(test_y))
-    baseline_prob = np.full_like(test_y, prevalence)
+    # Estimate the baseline prevalence from calibration data only. Using test
+    # labels to choose the baseline would leak locked-test information.
+    calibration_prevalence = float(np.mean(cal_y))
+    test_prevalence = float(np.mean(test_y))
+    baseline_prob = np.full_like(test_y, calibration_prevalence)
     calibrated_brier = _brier(test_y, test_prob)
     baseline_brier = _brier(test_y, baseline_prob)
     calibrated_ece = _ece(test_y, test_prob)
+    bootstrap = _cluster_bootstrap_calibration_metrics(
+        test_y,
+        test_prob,
+        baseline_prob,
+        [row["contract_id"] for row in test],
+    )
+    improvement_ci = bootstrap["brier_improvement_ci_95"]
     test_metrics = {
         "brier_calibrated": calibrated_brier,
         "brier_constant_prevalence_baseline": baseline_brier,
         "brier_improvement_over_baseline": baseline_brier - calibrated_brier,
+        "brier_improvement_ci_95": improvement_ci,
         "ece_10_bins": calibrated_ece,
-        "test_prevalence_of_correct_predictions": prevalence,
+        "ece_10_bins_ci_95": bootstrap["ece_10_bins_ci_95"],
+        "bootstrap": bootstrap,
+        "baseline_prevalence_from_calibration_split": calibration_prevalence,
+        "test_prevalence_of_correct_predictions": test_prevalence,
         "test_correct_count": int(np.sum(test_y)),
         "test_incorrect_count": int(len(test_y) - np.sum(test_y)),
     }
     report["locked_test_metrics"] = test_metrics
-    if not (calibrated_brier < baseline_brier and calibrated_ece <= 0.15):
+    if not (
+        calibrated_brier < baseline_brier
+        and float(improvement_ci[0]) > 0.0
+        and calibrated_ece <= 0.15
+    ):
         report["status"] = "BLOCKED"
-        report["failed_gates"] = ["calibrator_did_not_beat_constant_baseline_or_ece_exceeded_0.15"]
+        report["failed_gates"] = [
+            "calibrator_must_beat_calibration_prevalence_baseline_with_positive_contract_bootstrap_ci_and_ece_at_most_0.15"
+        ]
         print(json.dumps(report, indent=2))
         return 2
 
