@@ -22,6 +22,7 @@ jobs:
         run: |
           python scripts/risk/build_rule_registry.py --check
           python scripts/risk/validate_rule_registry.py
+          python scripts/risk/build_rule_review_queue.py --check
       - name: Test annotation-independent rule and contract-check paths
         env:
           PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}
