@@ -194,6 +194,10 @@ The two TXT runs use the same synthetic agreement but different self-consistency
 
 The original three-pass TXT fixture yielded three positive clause findings and three evidence-valid positive cross/document findings. The pre-batching current-code TXT smoke yielded 28 clause risk findings, with X-10 and X-4 classified as POTENTIAL_RISK and DOC-1 as POTENTIAL_RISK. The updated batching analyzer also yielded 28 clause findings; its cross-clause statuses were 4 POTENTIAL_RISK, 2 NO_RISK and 4 INSUFFICIENT_EVIDENCE, while all 3 document-level checks abstained as INSUFFICIENT_EVIDENCE. All positive cross/document evidence passed the quote audit. The PDF fixture returned no applicable CUAD labels and unresolved cross/document checks; this is an abstention/segmentation diagnostic, not evidence of classification accuracy. None of these fixtures is a representative sample and the risks are not human-validated. Audit records: `data/risk/results/smoke_test_audit.json`, `smoke_test_audit_pdf.json`, `smoke_test_audit_fast.json`, `smoke_test_audit_current.json`, and `smoke_test_audit_post_batching.json`.
 
+#### Post-index live upload regression (2026-10-11)
+
+After rebuilding the local hashing indexes, we restarted the backend and ran fresh TXT/PDF uploads through the live API. Both returned HTTP 200, completed, matched source hashes to their manifests, persisted the required artifacts, and passed **6/6** evidence/artifact gates. The synthetic TXT fixture processed 11 clauses and produced 28 clause-level findings; its contract-level status was `POTENTIAL_RISK` / `HIGH`, with four positive cross/document findings passing exact-evidence validation (28.08 s). The repository PDF fixture processed two clauses, had no positive clause findings, and returned `INSUFFICIENT_EVIDENCE` overall (13.53 s). This verifies end-to-end plumbing after index rebuild, not accuracy, legal correctness, or performance on representative contracts. The full run and audit artifacts are in `data/risk/results/live_upload_smoke_post_index_20261011.md` and the paired `smoke_upload_api_live_20261011_post_index.*.json` / `smoke_test_audit_live_post_index_*.json` files.
+
 ### 5.5 Offline local-hashing CUAD retrieval baseline
 
 We evaluated the local-only retrieval profile separately from the prior Cohere/retrieval-conditioned SLM configuration. Eligible clause rows exclude CUAD metadata fields. The index contains 7,004 training rows from 383 contracts; held-out evaluation contains 1,679 clauses from 92 contracts. The split is contract-disjoint with zero training/test contract overlap. The vectorizer is a deterministic, stateless 768-dimensional `HashingVectorizer` using unigrams and bigrams, `alternate_sign=False`, and L2 normalization; nearest-neighbor ranking is cosine similarity via sparse dot products. The implementation and parameter semantics follow the [scikit-learn HashingVectorizer API documentation](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.HashingVectorizer.html).
@@ -221,6 +225,31 @@ Small repository pilots should also remain visible but be treated as exploratory
 
 A separate older metadata-heavy retrieval artifact reports exact-match 0.0 and is not used as a Phase 2 baseline because its task definition is different. Repository comparison and caveats are regenerated in data/risk/results/phase2_reproducible_report.md.
 
+### 5.7 Metamorphic consistency diagnostics without custom gold
+
+A separate 10-case authored metamorphic suite evaluated whether the local `qwen3:8b` risk checker behaved consistently under controlled changes. The suite passed **6/10 (60%)** of its predeclared relation checks. The original liability-cap stress case produced `POTENTIAL_RISK` with exact quotes. Removing liability/insurance/indemnification/liquidated-damages context and removing context required for the interaction produced `INSUFFICIENT_EVIDENCE`. Scope narrowing, clause-order reversal, and duplication of an unrelated critical-software clause preserved the expected relation. The system failed two negation/repair checks by continuing to flag liability-cap risk even though indemnification and liquidated damages were expressly included within the cap; the explanation incorrectly used the higher insurance limit as evidence of an uncapped-liability interaction. The X-4 termination/minimum-commitment baseline also abstained instead of detecting the constructed stress case, so the paired repair is not counted as a successful transition.
+
+| Diagnostic group | Result | Interpretation |
+|---|---:|---|
+| Baseline positive, exact evidence | Pass | The constructed positive was detected with exact quotes |
+| Evidence deletion / missing context | Pass | The model abstained when key context was removed |
+| Scope change | Pass | The rationale/evidence preserved the narrowed scope |
+| Clause-order invariance | Pass | Status stayed consistent after reordering |
+| Unrelated-duplicate invariance | Pass | Status stayed consistent after unrelated duplication |
+| Negation/control and liability-cap repair | Fail | False positive persisted despite explicit controls |
+| X-4 baseline detection | Fail | The constructed termination interaction was missed/abstained |
+| **Overall relation checks** | **6/10 (60%)** | **Development diagnostic, not accuracy** |
+
+These tests were authored for development and are not a locked held-out benchmark. The failure cases are preserved in `data/risk/results/metamorphic_diagnostics.md`; no threshold was tuned to make this suite appear successful.
+
+### 5.8 Two-model rubric-judge diagnostics
+
+Two locally served models (`qwen3:8b` and `llama3.1:8b`) independently assessed the 39 existing synthetic cross-clause/document outputs, yielding **78/78 structured judgments**. A deterministic substring audit found all 16/16 positive findings with evidence quotes exact for each judge. On fields where both judges returned a boolean, descriptive agreement was 26/26 for whether the finding was supported, 12/12 for the cross-clause interaction, and 18/18 for uncertainty handling.
+
+Neither model marked a finding as unsupported (`claim_supported=false`) in this sample. That result, together with incomplete rubric fields and the `llama3.1:8b` tendency to use its `concerns` field to restate contract risks rather than criticize the model's reasoning, indicates the judge protocol is not calibrated and may be lenient. The observed 100% agreement on comparable fields is **not** a measure of accuracy or judge reliability. Without a human-calibrated probe set, these outputs are useful for review prioritization and diagnostic triage only. Per-case outputs, prompt hashes, missing fields, and caveats are retained in `data/risk/results/llm_judge_diagnostics.json` and `.md`.
+
+The human-gold queue remains empty at 0/300. Neither diagnostic was promoted into human labels or used to claim custom-risk precision, recall, F1, calibration, or legal correctness.
+
 ## 6. Reproducibility and Artifacts
 
 Key files:
@@ -236,6 +265,9 @@ Key files:
 - data/risk/results/cross_document_scenario_audit.json/.md — explicit cross/document fixture integrity and coverage validation.
 - data/risk/results/cross_document_model_scenarios.jsonl/.csv and _summary.json — current model outputs for the 39 synthetic scenarios; conformance is reported as a diagnostic, not accuracy.
 - data/risk/results/cross_document_model_scenario_comparison.json/.md — one-shot versus batched ablation across the same 39 scenario IDs.
+- data/risk/results/metamorphic_diagnostics.json/.md — 10 controlled relation checks with evidence-gate results and retained counterexamples.
+- data/risk/results/live_upload_smoke_post_index_20261011.md — fresh TXT/PDF upload regression after local hashing-index rebuild.
+- data/risk/results/llm_judge_diagnostics.json/.md — 78 two-model rubric judgments, exact-quote audit, prompt hashes, and descriptive pairwise agreement.
 - data/risk/results/smoke_upload_api_current_20261009.json and smoke_test_audit_current.json/.md — pre-batching current-code upload, with six evidence/artifact gates.
 - data/risk/results/smoke_upload_api_post_batching_20261009.json and smoke_test_audit_post_batching.json/.md — updated batching-engine TXT upload, source-hash verification, clause/cross/document results, trace, and six-gate audit.
 - data/risk/results/local_hashing_cuad_index_manifest.json — 7,004-point train-only offline CUAD index build record.
@@ -258,7 +290,7 @@ The run manifest stores the source SHA-256, pipeline settings, normalized playbo
 
 ## Evaluation protocol without human gold
 
-Because no custom-risk gold labels have been adjudicated, the implementation and reporting workaround is specified in [`docs/PHASE2_NO_GOLD_EVALUATION_PROTOCOL.md`](PHASE2_NO_GOLD_EVALUATION_PROTOCOL.md). It separates deterministic invariants, synthetic fixture conformance, proposed metamorphic tests, machine-judge diagnostics, machine-silver disagreement, and aligned external clause-classification benchmarks. None is presented as a substitute measurement of custom-risk accuracy.
+Because no custom-risk gold labels have been adjudicated, the implementation and reporting workaround is specified in [`docs/PHASE2_NO_GOLD_EVALUATION_PROTOCOL.md`](PHASE2_NO_GOLD_EVALUATION_PROTOCOL.md). It separates deterministic invariants, synthetic fixture conformance, executed metamorphic diagnostics, two-model rubric-judge diagnostics, machine-silver disagreement, and aligned external clause-classification benchmarks. None is presented as a substitute measurement of custom-risk accuracy.
 
 ## 7. Limitations and Threats to Validity
 

@@ -1,8 +1,8 @@
 # Phase 2 Reproducible Experiment Report
 
 **Validation: PASS**  
-Generated (UTC): 2026-10-11T01:33:08.663708+00:00
-Git HEAD at report time: ae90391b260146f941fd0a4d4979a25fa4ce2cd3
+Generated (UTC): 2026-10-17T18:08:37.516441+00:00
+Git HEAD at report time: c92bae36aedfd424e3a9487622eff4f0379d2089
 
 > This report is not a legal correctness evaluation. Custom-risk accuracy remains unavailable because the human gold queue has no adjudicated labels.
 

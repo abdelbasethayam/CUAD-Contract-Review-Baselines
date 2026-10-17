@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-10-11T01:32:59.052108+00:00",
+  "generated_at_utc": "2026-10-17T18:08:27.901391+00:00",
   "interpretation": "Synthetic plumbing smoke test only. The input is invented. Results do not estimate model accuracy, legal correctness or sensitivity on real contracts.",
   "http_status": 200,
   "elapsed_seconds": 16.222,
@@ -289,12 +289,12 @@
   },
   "failed_checks": [],
   "core_artifact_sha256": {
-    "manifest.json": "34e464a077745bd0fd3f3d3295687a0f71eb5409e6349f87e9b43e9a4fe25968",
+    "manifest.json": "41281177580298bdc930fa9315a7576ea7eb8d1c3a74c3189d55c2285526d686",
     "contract_checks.json": "7713cc32a2675aedaf2ea4aa6dc5f6e0e2dc842e070a0b0564a3246547e6b83a",
     "contract_risk.json": "58903ea79bf8e0154b1d51b32c39327fc3bcb3c0fe90433c3abac13a6692a092",
-    "result.json": "d77c705912b39386b328f197a528a0010ab3019f7ee4cb77f92ce50799f249c5",
-    "risk_findings.csv": "3f56ecca6a9c382ae110c583826500f8c67785d4b6bd4a3a32ee156a2ae746db",
-    "clauses.csv": "b752fe9fdd1ea898ffc7bdf4bfb813452b24d174176ed5f98d54b73ff7cb1e98",
-    "trace.jsonl": "18d6d41ed370118ce97a4f18fd7fabc3445fa0aef354a0d8c9d473d900a81c61"
+    "result.json": "d9570f4b9b924d8bf6f77d7e27061f7fbab4cf8193798fc0e7abade08d62a7ad",
+    "risk_findings.csv": "d68d662bc5e049b0b6555164e4384480ac603a5f356feab22946ded6d5342702",
+    "clauses.csv": "d9198db553437f1dcb0a00220040ad8523c117d733b6a18fa8692da85f3f443f",
+    "trace.jsonl": "9493323162b881b1dd850d8f81e16130b779a0db9bfb728766c5d627662cd6e9"
   }
 }

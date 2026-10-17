@@ -1,6 +1,6 @@
 # Phase 2 Evaluation Without Human Gold Labels
 
-**Status:** current no-gold evaluation protocol and reporting guardrails; the metamorphic scenario expansion below is the next evaluation extension. This is not a substitute claim of legal-risk accuracy.
+**Status:** executable no-gold diagnostic protocol. The metamorphic runner and two-model rubric-judge runner are implemented; their generated result artifacts are stored separately from human-gold fields. This is not a substitute claim of legal-risk accuracy.
 
 ## Why the missing gold set is not a reason to stop
 
@@ -67,6 +67,50 @@ Use CUAD's external expert-derived labels only for the aligned clause-category/p
 | Machine silver | YES/NO/UNCERTAIN, agreement and abstention counts | Model-consensus diagnostics only |
 | CUAD benchmark | category metrics on held-out contracts | Clause classification only |
 | Human gold | currently 0/300 adjudicated | No custom-risk accuracy claim available |
+
+## Executable diagnostics and reproduction
+
+Run from the repository root with the project virtual environment active:
+
+```bash
+PYTHONPATH="$PWD:$PWD/backend" .venv/bin/python scripts/risk/run_metamorphic_diagnostics.py
+PYTHONPATH="$PWD:$PWD/backend" .venv/bin/python scripts/risk/run_llm_judge_diagnostics.py
+.venv/bin/python scripts/risk/report_phase2_experiment.py
+```
+
+The metamorphic runner checkpoints its JSON after each case so a disconnected remote session does not discard completed cases. It records expected relations, observed status, exact-evidence checks, elapsed time, and hashes for the fixture, playbook, analyzer, and runner. The current set is a **development diagnostic**, not a locked held-out benchmark; repeated tuning against it must not be described as independent test performance.
+
+The judge runner uses two separately prompted local models (`qwen3:8b` and `llama3.1:8b`) on the existing 39 synthetic cases. Judges do not receive authored expected statuses or scenario rationales. Exact quote existence is verified locally and deterministically; semantic support, interaction support, and uncertainty handling are judge-assessed. The JSON and Markdown outputs preserve per-judge results, prompt hashes, missing outputs, concerns, and pairwise agreement. This agreement is descriptive only because no human-calibrated judge probe set exists.
+
+Artifacts:
+
+- `data/risk/results/metamorphic_diagnostics.json` and `.md`
+- `data/risk/results/llm_judge_diagnostics.json` and `.md`
+- `data/risk/results/phase2_reproducible_report.json` and `.md`
+
+Neither diagnostic runner writes to or fills `gold_annotations.csv`. The human-gold count remains zero until independent human annotations are actually collected.
+
+## Current run results (2026-10-11)
+
+### Metamorphic consistency checks
+
+The executable runner evaluated 10 authored transformations against the configured local `qwen3:8b` model. **6/10 relation checks passed (60%)**. The baseline positive liability-cap case produced `POTENTIAL_RISK` with exact quotes; evidence deletion and missing context produced `INSUFFICIENT_EVIDENCE`; narrowing the scope, reversing clause order, and duplicating an unrelated clause preserved the expected relation. The model failed the negation/control and liability-cap repair checks by retaining `POTENTIAL_RISK`, partly conflating the liability cap with a higher insurance limit. The X-4 stress baseline itself returned `INSUFFICIENT_EVIDENCE`, so its paired repair is correctly counted as a failure: a non-positive repair result is not evidence of sensitivity when the original positive case was missed.
+
+These are development diagnostics over authored fixtures, not an independent held-out set. The observed failure cases are retained as counterexamples rather than tuned away or recoded as correct.
+
+### Two-model rubric diagnostics
+
+Both `qwen3:8b` and `llama3.1:8b` returned 39/39 structured judgments (78/78 total records). A deterministic substring audit found all 16/16 positive findings with evidence quotes exact for each judge. On non-null rubric fields, descriptive pairwise agreement was 26/26 for `claim_supported`, 12/12 for `interaction_supported`, and 18/18 for `uncertainty_appropriate`.
+
+The judges marked no observed finding as `claim_supported=false`; both therefore appear lenient on this sample. `llama3.1:8b` also sometimes used the `concerns` field to describe the underlying contract risk rather than a defect in the model's finding. These are material judge-rubric limitations. Do not interpret the 100% agreement among comparable fields as accuracy or judge reliability; there is no human-calibrated probe set, and the two models may share blind spots. Use the results to prioritize manual review, identify abstentions and preserve evidence audits—not to validate risk correctness.
+
+### Post-index end-to-end upload regression
+
+After rebuilding the local CUAD and legal-knowledge hashing indexes, the backend was restarted and fresh TXT/PDF uploads were tested. Both returned HTTP 200, completed, matched source hashes to manifests, persisted core artifacts, and passed all six API/evidence/artifact gates. The TXT fixture processed 11 clauses and produced 28 clause findings plus four evidence-valid positive cross/document findings (`POTENTIAL_RISK` / `HIGH` overall); the PDF fixture processed two clauses, produced no positive clause findings, and abstained as `INSUFFICIENT_EVIDENCE`. These are synthetic plumbing regressions only. Full outputs and audits are recorded in `data/risk/results/live_upload_smoke_post_index_20261011.md` and the associated JSON artifacts.
+
+### Human-gold status
+
+Human-gold annotations remain **0/300**. Neither the metamorphic outputs nor the judge outputs were written into `gold_annotations.csv`; no human labels were synthesized.
 
 ## Release decision
 

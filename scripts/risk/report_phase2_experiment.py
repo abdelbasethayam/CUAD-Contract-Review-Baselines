@@ -34,6 +34,10 @@ CROSS_DOCUMENT_ANALYZER = ROOT / "backend" / "app" / "core" / "risk" / "contract
 CROSS_DOCUMENT_MODEL_RUNNER = ROOT / "scripts" / "risk" / "run_cross_document_model_scenarios.py"
 CROSS_DOCUMENT_COMPARISON_JSON = ROOT / "data" / "risk" / "results" / "cross_document_model_scenario_comparison.json"
 CROSS_DOCUMENT_COMPARISON_MD = ROOT / "data" / "risk" / "results" / "cross_document_model_scenario_comparison.md"
+METAMORPHIC_DIAGNOSTICS = ROOT / "data" / "risk" / "results" / "metamorphic_diagnostics.json"
+LLM_JUDGE_DIAGNOSTICS = ROOT / "data" / "risk" / "results" / "llm_judge_diagnostics.json"
+METAMORPHIC_RUNNER = ROOT / "scripts" / "risk" / "run_metamorphic_diagnostics.py"
+LLM_JUDGE_RUNNER = ROOT / "scripts" / "risk" / "run_llm_judge_diagnostics.py"
 SMOKE_RUNS = {
     "txt_three_pass": (ROOT / "data/risk/results/smoke_upload_api_result.json", ROOT / "data/risk/results/smoke_test_audit.json"),
     "pdf_three_pass": (ROOT / "data/risk/results/smoke_upload_api_pdf_result.json", ROOT / "data/risk/results/smoke_test_audit_pdf.json"),
@@ -41,6 +45,11 @@ SMOKE_RUNS = {
     "txt_current_20261009": (ROOT / "data/risk/results/smoke_upload_api_current_20261009.json", ROOT / "data/risk/results/smoke_test_audit_current.json"),
     "txt_post_batching_20261009": (ROOT / "data/risk/results/smoke_upload_api_post_batching_20261009.json", ROOT / "data/risk/results/smoke_test_audit_post_batching.json"),
 }
+POST_INDEX_SMOKES = {
+    "txt_post_index_20261011": (ROOT / "data/risk/results/smoke_upload_api_live_20261011_post_index.txt.json", ROOT / "data/risk/results/smoke_test_audit_live_post_index_txt.json"),
+    "pdf_post_index_20261011": (ROOT / "data/risk/results/smoke_upload_api_live_20261011_post_index.pdf.json", ROOT / "data/risk/results/smoke_test_audit_live_post_index_pdf.json"),
+}
+POST_INDEX_SMOKE_REPORT = ROOT / "data/risk/results/live_upload_smoke_post_index_20261011.md"
 OUT_DIR = ROOT / "data" / "risk" / "results"
 
 
@@ -97,6 +106,8 @@ def main() -> int:
     cross_document_audit = json.loads(CROSS_DOCUMENT_AUDIT.read_text(encoding="utf-8")) if CROSS_DOCUMENT_AUDIT.exists() else None
     cross_document_model_summary = json.loads(CROSS_DOCUMENT_MODEL_SUMMARY.read_text(encoding="utf-8")) if CROSS_DOCUMENT_MODEL_SUMMARY.exists() else None
     cross_document_comparison = json.loads(CROSS_DOCUMENT_COMPARISON_JSON.read_text(encoding="utf-8")) if CROSS_DOCUMENT_COMPARISON_JSON.exists() else None
+    metamorphic_diagnostics = json.loads(METAMORPHIC_DIAGNOSTICS.read_text(encoding="utf-8")) if METAMORPHIC_DIAGNOSTICS.exists() else None
+    llm_judge_diagnostics = json.loads(LLM_JUDGE_DIAGNOSTICS.read_text(encoding="utf-8")) if LLM_JUDGE_DIAGNOSTICS.exists() else None
     smoke_run_summaries = {}
     for run_name, (result_path, audit_path) in SMOKE_RUNS.items():
         if result_path.exists() and audit_path.exists():
@@ -121,6 +132,27 @@ def main() -> int:
                 "overall_status": audit_summary.get("overall_status"),
                 "overall_risk": audit_summary.get("overall_risk"),
                 "audit_status": smoke_audit.get("status"),
+                "audit_passed": bool(smoke_audit.get("checks")) and all(bool(value) for value in smoke_audit.get("checks", {}).values()) and not smoke_audit.get("failed_checks"),
+                "not_an_accuracy_measurement": True,
+            }
+
+    post_index_smoke_summaries = {}
+    for run_name, (result_path, audit_path) in POST_INDEX_SMOKES.items():
+        if result_path.exists() and audit_path.exists():
+            smoke_result = json.loads(result_path.read_text(encoding="utf-8"))
+            smoke_audit = json.loads(audit_path.read_text(encoding="utf-8"))
+            response = smoke_result.get("response") or {}
+            audit_summary = smoke_audit.get("summary") or {}
+            post_index_smoke_summaries[run_name] = {
+                "result_path": str(result_path.relative_to(ROOT)), "audit_path": str(audit_path.relative_to(ROOT)),
+                "result_sha256": sha256(result_path), "audit_sha256": sha256(audit_path),
+                "http_status": smoke_result.get("http_status"), "elapsed_seconds": smoke_result.get("elapsed_seconds"),
+                "analysis_id": response.get("analysis_id"), "pipeline_status": response.get("pipeline_status"),
+                "clause_count": response.get("total_clauses"), "clause_risk_finding_count": audit_summary.get("clause_risk_finding_count"),
+                "cross_clause_statuses": audit_summary.get("cross_clause_statuses"), "document_statuses": audit_summary.get("document_statuses"),
+                "cross_or_document_positive_evidence_valid_count": audit_summary.get("cross_or_document_positive_evidence_valid_count"),
+                "overall_status": audit_summary.get("overall_status"), "overall_risk": audit_summary.get("overall_risk"),
+                "checks": smoke_audit.get("checks") or {},
                 "audit_passed": bool(smoke_audit.get("checks")) and all(bool(value) for value in smoke_audit.get("checks", {}).values()) and not smoke_audit.get("failed_checks"),
                 "not_an_accuracy_measurement": True,
             }
@@ -179,6 +211,9 @@ def main() -> int:
         "cross_document_model_analyzer_hash_current_and_runner_traced": bool(cross_document_model_summary) and cross_document_model_summary.get("analyzer_code_sha256") == sha256(CROSS_DOCUMENT_ANALYZER) and bool(cross_document_model_summary.get("runner_code_sha256")) and cross_document_model_summary.get("summary_generator_code_sha256") == sha256(CROSS_DOCUMENT_MODEL_RUNNER),
         "cross_document_batching_ablation_complete": bool(cross_document_comparison) and cross_document_comparison.get("status") == "COMPLETED" and cross_document_comparison.get("case_count") == 39 and cross_document_comparison.get("same_case_set") is True and len(cross_document_comparison.get("status_changes", [])) <= 39,
         "five_recorded_upload_smoke_audits_pass": len(smoke_run_summaries) == 5 and all(item["audit_passed"] for item in smoke_run_summaries.values()),
+        "metamorphic_diagnostics_present_and_provenanced": bool(metamorphic_diagnostics) and metamorphic_diagnostics.get("status") == "COMPLETED" and metamorphic_diagnostics.get("case_count") == len(metamorphic_diagnostics.get("case_results") or []) and all(x.get("expected_relation") and x.get("runner_sha256") for x in metamorphic_diagnostics.get("case_results") or []),
+        "llm_judge_diagnostics_present_and_provenanced": bool(llm_judge_diagnostics) and llm_judge_diagnostics.get("status") in {"COMPLETED", "PARTIAL"} and llm_judge_diagnostics.get("judge_record_count", 0) == len(llm_judge_diagnostics.get("results") or []) and len(llm_judge_diagnostics.get("judge_models") or []) >= 2,
+        "post_index_live_txt_pdf_uploads_pass": len(post_index_smoke_summaries) == 2 and all(item["audit_passed"] and item["http_status"] == 200 and item["pipeline_status"] == "COMPLETED" for item in post_index_smoke_summaries.values()),
     }
     failed = [name for name, passed in checks.items() if not passed]
 
@@ -208,6 +243,8 @@ def main() -> int:
             "cross_document_model_scenarios_csv": str(CROSS_DOCUMENT_MODEL_CSV.relative_to(ROOT)) if CROSS_DOCUMENT_MODEL_CSV.exists() else None,
             "cross_document_model_scenarios_summary": str(CROSS_DOCUMENT_MODEL_SUMMARY.relative_to(ROOT)) if CROSS_DOCUMENT_MODEL_SUMMARY.exists() else None,
             "upload_smoke_runs": {name: {"result": str(paths[0].relative_to(ROOT)), "audit": str(paths[1].relative_to(ROOT))} for name, paths in SMOKE_RUNS.items()},
+            "post_index_live_upload_smoke_runs": {name: {"result": str(paths[0].relative_to(ROOT)), "audit": str(paths[1].relative_to(ROOT))} for name, paths in POST_INDEX_SMOKES.items()},
+            "post_index_live_upload_smoke_report": str(POST_INDEX_SMOKE_REPORT.relative_to(ROOT)) if POST_INDEX_SMOKE_REPORT.exists() else None,
         },
         "hashes": {
             "silver_csv_sha256": sha256(SILVER_CSV),
@@ -228,10 +265,17 @@ def main() -> int:
             "cross_document_model_scenarios_summary_sha256": sha256(CROSS_DOCUMENT_MODEL_SUMMARY) if CROSS_DOCUMENT_MODEL_SUMMARY.exists() else None,
             "cross_document_model_scenario_comparison_json_sha256": sha256(CROSS_DOCUMENT_COMPARISON_JSON) if CROSS_DOCUMENT_COMPARISON_JSON.exists() else None,
             "cross_document_model_scenario_comparison_md_sha256": sha256(CROSS_DOCUMENT_COMPARISON_MD) if CROSS_DOCUMENT_COMPARISON_MD.exists() else None,
+            "metamorphic_diagnostics_sha256": sha256(METAMORPHIC_DIAGNOSTICS) if METAMORPHIC_DIAGNOSTICS.exists() else None,
+            "llm_judge_diagnostics_sha256": sha256(LLM_JUDGE_DIAGNOSTICS) if LLM_JUDGE_DIAGNOSTICS.exists() else None,
+            "metamorphic_runner_sha256": sha256(METAMORPHIC_RUNNER) if METAMORPHIC_RUNNER.exists() else None,
+            "llm_judge_runner_sha256": sha256(LLM_JUDGE_RUNNER) if LLM_JUDGE_RUNNER.exists() else None,
             "cross_document_analyzer_code_sha256": sha256(CROSS_DOCUMENT_ANALYZER),
             "cross_document_runner_code_sha256": sha256(CROSS_DOCUMENT_MODEL_RUNNER),
             "upload_smoke_run_hashes": {name: {"result_sha256": sha256(paths[0]), "audit_sha256": sha256(paths[1])} for name, paths in SMOKE_RUNS.items() if paths[0].exists() and paths[1].exists()},
+            "post_index_live_upload_smoke_hashes": {name: {"result_sha256": sha256(paths[0]), "audit_sha256": sha256(paths[1])} for name, paths in POST_INDEX_SMOKES.items() if paths[0].exists() and paths[1].exists()},
+            "post_index_live_upload_smoke_report_sha256": sha256(POST_INDEX_SMOKE_REPORT) if POST_INDEX_SMOKE_REPORT.exists() else None,
         },
+        "post_index_live_upload_smoke_tests": {"interpretation": "Fresh synthetic TXT/PDF regression after local hashing-index rebuild; verifies plumbing/evidence gates only, not risk accuracy.", "report_path": str(POST_INDEX_SMOKE_REPORT.relative_to(ROOT)) if POST_INDEX_SMOKE_REPORT.exists() else None, "runs": post_index_smoke_summaries},
         "upload_smoke_tests": {
             "interpretation": "Pipeline integration diagnostics only; synthetic/repository fixtures do not measure risk accuracy or legal correctness.",
             "runs": smoke_run_summaries,
@@ -247,6 +291,13 @@ def main() -> int:
             "batching_ablation_comparison": cross_document_comparison,
             "batching_ablation_comparison_path": str(CROSS_DOCUMENT_COMPARISON_JSON.relative_to(ROOT)) if CROSS_DOCUMENT_COMPARISON_JSON.exists() else None,
             "batching_ablation_comparison_markdown_path": str(CROSS_DOCUMENT_COMPARISON_MD.relative_to(ROOT)) if CROSS_DOCUMENT_COMPARISON_MD.exists() else None,
+        },
+        "no_gold_diagnostics": {
+            "interpretation": "Metamorphic relation checks and two-model rubric judging are diagnostics only; neither substitutes for human gold or establishes legal-risk accuracy.",
+            "metamorphic": metamorphic_diagnostics,
+            "metamorphic_report_path": str((OUT_DIR / "metamorphic_diagnostics.md").relative_to(ROOT)) if (OUT_DIR / "metamorphic_diagnostics.md").exists() else None,
+            "llm_judge": llm_judge_diagnostics,
+            "llm_judge_report_path": str((OUT_DIR / "llm_judge_diagnostics.md").relative_to(ROOT)) if (OUT_DIR / "llm_judge_diagnostics.md").exists() else None,
         },
         "retrieval_profile": {
             "active_server_embedding_backend": "local_hashing" if local_profile and local_profile.get("status") == "PASS" else None,

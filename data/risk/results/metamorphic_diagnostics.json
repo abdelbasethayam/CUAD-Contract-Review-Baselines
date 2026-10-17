@@ -1,0 +1,289 @@
+{
+  "schema_version": 1,
+  "status": "COMPLETED",
+  "created_at_utc": "2026-10-17T18:02:01.298630+00:00",
+  "evaluation_type": "METAMORPHIC_CONSISTENCY_NOT_ACCURACY",
+  "case_count": 10,
+  "relation_pass_count": 4,
+  "relation_pass_rate": 0.4,
+  "case_results": [
+    {
+      "case_id": "X1-BASELINE",
+      "description": "Original risk-stress fixture",
+      "target_check": "X-1",
+      "expected_relation": "POTENTIAL_RISK expected for constructed stress case; exact evidence required.",
+      "observed_status": "INSUFFICIENT_EVIDENCE",
+      "observed_answer": "DON'T KNOW",
+      "why_flagged": "No usable model answer was returned.",
+      "evidence": [],
+      "evidence_quotes_exact": [],
+      "evidence_all_exact": false,
+      "relation_pass": false,
+      "elapsed_seconds": 43.913,
+      "clause_count": 13,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    },
+    {
+      "case_id": "X1-EVIDENCE-DELETION",
+      "description": "Remove every liability/insurance/indemnification/liquidated-damages section",
+      "target_check": "X-1",
+      "expected_relation": "Must not assert POTENTIAL_RISK for X-1 without new evidence from remaining clauses.",
+      "observed_status": "INSUFFICIENT_EVIDENCE",
+      "observed_answer": "DON'T KNOW",
+      "why_flagged": "No usable model answer was returned.",
+      "evidence": [],
+      "evidence_quotes_exact": [],
+      "evidence_all_exact": false,
+      "relation_pass": true,
+      "elapsed_seconds": 54.109,
+      "clause_count": 9,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    },
+    {
+      "case_id": "X1-NEGATION-CONTROL",
+      "description": "Make all liability heads including indemnification and liquidated damages subject to cap",
+      "target_check": "X-1",
+      "expected_relation": "Should move away from POTENTIAL_RISK; NO_RISK or abstention is acceptable.",
+      "observed_status": "POTENTIAL_RISK",
+      "observed_answer": "YES",
+      "why_flagged": "The liability cap explicitly includes indemnification and liquidated damages, but the clause on insurance states a higher required insurance limit ($150,000) than the liability cap ($100,000), creating a potential inconsistency or overlap between capped and uncapped liability heads.",
+      "evidence": [
+        {
+          "clause_id": 0,
+          "quote": "Supplier liability is capped at $100,000, including indemnification obligations and liquidated damages."
+        },
+        {
+          "clause_id": 1,
+          "quote": "Liquidated damages for delay are expressly subject to and included within the liability cap."
+        },
+        {
+          "clause_id": 9,
+          "quote": "Indemnification obligations are expressly subject to and included within the liability cap."
+        }
+      ],
+      "evidence_quotes_exact": [
+        true,
+        true,
+        true
+      ],
+      "evidence_all_exact": true,
+      "relation_pass": false,
+      "elapsed_seconds": 33.149,
+      "clause_count": 13,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    },
+    {
+      "case_id": "X1-SCOPE-CHANGE",
+      "description": "Narrow the exception to third-party indemnification only",
+      "target_check": "X-1",
+      "expected_relation": "If positive, rationale must preserve the narrowed scope; otherwise abstain.",
+      "observed_status": "POTENTIAL_RISK",
+      "observed_answer": "YES",
+      "why_flagged": "The liquidated damages are explicitly outside the liability cap, which creates a potential inconsistency or unclear overlap between capped and uncapped liability heads.",
+      "evidence": [
+        {
+          "clause_id": 0,
+          "quote": "Supplier liability is capped at $100,000, except that third-party indemnification obligations only are outside the cap; all other liability heads are capped."
+        },
+        {
+          "clause_id": 1,
+          "quote": "Supplier shall pay $1,000,000 in liquidated damages for delay, and those liquidated damages are expressly outside the cap."
+        }
+      ],
+      "evidence_quotes_exact": [
+        true,
+        true
+      ],
+      "evidence_all_exact": true,
+      "relation_pass": true,
+      "elapsed_seconds": 30.939,
+      "clause_count": 13,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    },
+    {
+      "case_id": "X1-REPAIR",
+      "description": "Same liability-cap repair as negation/control insertion",
+      "target_check": "X-1",
+      "expected_relation": "Should move away from POTENTIAL_RISK; NO_RISK or abstention is acceptable.",
+      "observed_status": "POTENTIAL_RISK",
+      "observed_answer": "YES",
+      "why_flagged": "The liability cap explicitly includes indemnification and liquidated damages, but the clause also states that no liability head is outside or uncapped. This creates an ambiguity about whether the cap applies to all liability heads or if there are exceptions, which could lead to inconsistent or unclear overlap between capped and uncapped liability heads.",
+      "evidence": [
+        {
+          "clause_id": 0,
+          "quote": "Supplier liability is capped at $100,000, including indemnification obligations and liquidated damages. No liability head is outside or uncapped under this Agreement."
+        },
+        {
+          "clause_id": 1,
+          "quote": "Liquidated damages for delay are expressly subject to and included within the liability cap."
+        },
+        {
+          "clause_id": 9,
+          "quote": "Indemnification obligations are expressly subject to and included within the liability cap."
+        }
+      ],
+      "evidence_quotes_exact": [
+        true,
+        true,
+        true
+      ],
+      "evidence_all_exact": true,
+      "relation_pass": false,
+      "elapsed_seconds": 31.661,
+      "clause_count": 13,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    },
+    {
+      "case_id": "X1-MISSING-CONTEXT",
+      "description": "Remove all sections needed to compare cap and exceptions",
+      "target_check": "X-1",
+      "expected_relation": "Should abstain or report NO_RISK, not claim a supported positive interaction.",
+      "observed_status": "INSUFFICIENT_EVIDENCE",
+      "observed_answer": "DON'T KNOW",
+      "why_flagged": "No usable model answer was returned.",
+      "evidence": [],
+      "evidence_quotes_exact": [],
+      "evidence_all_exact": false,
+      "relation_pass": true,
+      "elapsed_seconds": 34.578,
+      "clause_count": 9,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    },
+    {
+      "case_id": "X1-ORDER-INVARIANCE",
+      "description": "Reverse the independent clause order",
+      "target_check": "X-1",
+      "expected_relation": "Status should match baseline; evidence locators may change.",
+      "observed_status": "POTENTIAL_RISK",
+      "observed_answer": "YES",
+      "why_flagged": "The liquidated damages are explicitly outside the liability cap, but the clause also states that other liability heads are capped, creating an overlap and potential inconsistency in liability treatment.",
+      "evidence": [
+        {
+          "clause_id": 11,
+          "quote": "2. LIQUIDATED DAMAGES. Supplier shall pay $1,000,000 in liquidated damages for delay, and those liquidated damages are expressly outside the cap."
+        },
+        {
+          "clause_id": 12,
+          "quote": "1. LIABILITY CAP. Supplier liability is capped at $100,000, except that indemnification obligations and liquidated damages are uncapped and remain outside the cap. Other liability heads are capped, creating overlap between capped and uncapped heads."
+        }
+      ],
+      "evidence_quotes_exact": [
+        true,
+        true
+      ],
+      "evidence_all_exact": true,
+      "relation_pass": false,
+      "elapsed_seconds": 34.019,
+      "clause_count": 13,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    },
+    {
+      "case_id": "X1-DUPLICATE-UNRELATED",
+      "description": "Duplicate the unrelated critical-software clause",
+      "target_check": "X-1",
+      "expected_relation": "Status should match baseline; unrelated duplication should not create a new X-1 risk.",
+      "observed_status": "INSUFFICIENT_EVIDENCE",
+      "observed_answer": "DON'T KNOW",
+      "why_flagged": "No usable model answer was returned.",
+      "evidence": [],
+      "evidence_quotes_exact": [],
+      "evidence_all_exact": false,
+      "relation_pass": true,
+      "elapsed_seconds": 38.212,
+      "clause_count": 14,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    },
+    {
+      "case_id": "X4-BASELINE",
+      "description": "Original early-termination/minimum-commitment interaction",
+      "target_check": "X-4",
+      "expected_relation": "Constructed stress case expected POTENTIAL_RISK; exact evidence required.",
+      "observed_status": "INSUFFICIENT_EVIDENCE",
+      "observed_answer": "DON'T KNOW",
+      "why_flagged": "No usable model answer was returned.",
+      "evidence": [],
+      "evidence_quotes_exact": [],
+      "evidence_all_exact": false,
+      "relation_pass": false,
+      "elapsed_seconds": 36.848,
+      "clause_count": 13,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    },
+    {
+      "case_id": "X4-EXIT-REPAIR",
+      "description": "Remove post-termination future minimums/fees",
+      "target_check": "X-4",
+      "expected_relation": "Should move away from POTENTIAL_RISK; NO_RISK or abstention is acceptable.",
+      "observed_status": "INSUFFICIENT_EVIDENCE",
+      "observed_answer": "DON'T KNOW",
+      "why_flagged": "No usable model answer was returned.",
+      "evidence": [],
+      "evidence_quotes_exact": [],
+      "evidence_all_exact": false,
+      "relation_pass": false,
+      "elapsed_seconds": 37.571,
+      "clause_count": 13,
+      "fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+      "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+      "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+      "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+      "model_config": "qwen3:8b",
+      "label_provenance": "AUTHORED_METAMORPHIC_SPECIFICATION_NOT_HUMAN_GOLD"
+    }
+  ],
+  "model_config": "qwen3:8b",
+  "source_fixture_sha256": "c67f5c7e3dee8eaa295d4ea823da9212e2308609d155ecb0b5f528ed9edbff6c",
+  "playbook_sha256": "e677e1d1e88deb1f9c2cb30c0cd994b1b6835cda593804c807941a11c5e04440",
+  "analyzer_sha256": "860fb72c34c0bf9d8eecdc7247fe13d85b050821039f517346b820b17494a7a9",
+  "runner_sha256": "8f017943079e27d7e8965880e976ebf6058b72069f7c9bd35c4354190dd2d79d",
+  "limitations": [
+    "Authored transformations test specified relationships, not legal correctness.",
+    "The LLM is nondeterministic; a failed relation is a counterexample to investigate, not a gold-label error.",
+    "No human-gold labels were used."
+  ]
+}
