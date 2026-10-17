@@ -620,7 +620,15 @@ function ContractReview() {
                   <h2>Ask questions about {result.contract_metadata?.name || result.filename}</h2>
                   <p className="muted">Answers are grounded in this analysis. Each material contract claim should cite exact wording; if the source does not support an answer, the assistant should say so rather than guess.</p>
                 </div>
-                <span className="chat-model">{chatMessages.some((message) => message.model === "EXTRACTIVE_FALLBACK") ? "Source-only fallback" : chatMessages.some((message) => message.model === "DETERMINISTIC_HELP") ? "Product help" : "Contract-linked assistant"}</span>
+                <div className="chat-heading__actions">
+                  <span className="chat-model">{chatMessages.some((message) => message.model === "EXTRACTIVE_FALLBACK") ? "Source-only fallback" : chatMessages.some((message) => message.model === "DETERMINISTIC_HELP") ? "Product help" : chatMessages.some((message) => message.model === "RETRIEVAL_ABSTENTION") ? "Evidence-first abstention" : "Contract-linked assistant"}</span>
+                  <button
+                    type="button"
+                    className="chat-clear-button"
+                    onClick={() => { setChatMessages([]); setChatError(null); setChatInput(""); }}
+                    disabled={!chatMessages.length || chatLoading}
+                  >Clear conversation</button>
+                </div>
               </div>
 
               <div className="suggested-questions" aria-label="Suggested questions">
