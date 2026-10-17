@@ -81,7 +81,7 @@ Do not use HIGH/MEDIUM/LOW as if these were scientific measurements. If a severi
 
 ## Current state and publication boundary
 
-The repository now contains a 32-record authority catalog, a complete structural map for all 37 clause categories, and tests/CI gates for those artifacts. This closes taxonomy-to-authority *mapping coverage*, not legal validation. Six categories explicitly have no universal primary statute in the initial catalog; they remain contract-specific research items. The old playbook source registry and base rules remain unapproved, and no project-specific adjudicated gold set or validated confidence artifact is available. Consequently, this protocol must not be presented as experimental results, legal validation, or a guaranteed Q1 publication.
+The repository now contains a 33-record authority catalog, a complete structural map for all 37 clause categories, and tests/CI gates for those artifacts. This closes taxonomy-to-authority *mapping coverage*, not legal validation. Six categories explicitly have no universal primary statute in the initial catalog; they remain contract-specific research items. The old playbook source registry and base rules remain unapproved, and no project-specific adjudicated gold set or validated confidence artifact is available. Consequently, this protocol must not be presented as experimental results, legal validation, or a guaranteed Q1 publication.
 
 ## References
 
