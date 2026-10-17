@@ -51,22 +51,27 @@ def test_rule_resume_freshness_uses_playbook_hash_engine_version_and_pass_comple
     assert 'payload.get("playbook_hash") != playbook.get("playbook_hash")' in source
 
 
-def test_active_risk_engine_does_not_load_calibration_artifacts():
+def test_active_risk_engine_uses_fail_closed_confidence_calibration():
     source = _read("backend/app/core/risk/risk_engine.py")
     cross_checks = _read("backend/app/core/risk/contract_checks.py")
+    calibrator = _read("backend/app/core/risk/confidence_calibration.py")
+    fitter = _read("scripts/risk/fit_calibration.py")
     config = _read("backend/app/core/config.py")
     for name, module in (("risk_engine", source), ("contract_checks", cross_checks)):
-        assert "load_calibration" not in module, name
-        assert "calibrate_risk_probability" not in module, name
+        assert "confidence_from_support_score" in module, name
         assert "calibrate_severity" not in module, name
-        assert '"confidence_status": "CALIBRATED"' not in module, name
         assert '"severity_status": "CALIBRATED"' not in module, name
+        assert '"severity_status": "DEPRECATED_NOT_USED"' in module, name
+    assert "VALIDATED_ON_LOCKED_TEST" in calibrator
+    assert "CALIBRATION_STALE_FOR_PLAYBOOK" in calibrator
+    assert "PREDICTION_CORRECTNESS" in calibrator
+    assert "contract_disjoint_calibration_test" in fitter
+    assert "annotator_1_risk" in fitter and "annotator_2_risk" in fitter
     assert "RISK_CALIBRATION_PATH" not in config
     assert "RISK_GOLD_PATH" not in config
-    assert '"confidence_status": "UNCALIBRATED"' in source
-    assert '"confidence_status": "UNCALIBRATED"' in cross_checks
     assert not (ROOT / "backend/app/core/risk/calibration.py").exists()
-    assert not (ROOT / "scripts/risk/fit_calibration.py").exists()
+    assert (ROOT / "scripts/risk/fit_calibration.py").exists()
+    assert not (ROOT / "data/risk/calibration/confidence_calibration.json").exists()
 
 
 def test_retired_annotation_queue_tools_and_inputs_are_not_in_release_tree():
