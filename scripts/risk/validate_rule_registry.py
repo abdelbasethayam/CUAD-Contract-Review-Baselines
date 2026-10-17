@@ -66,14 +66,46 @@ def main() -> int:
         "rule_id", "base_rule_key", "base_rule_id", "record_kind", "rule_family",
         "title", "risk_domain", "perspective", "contract_type_profile", "contract_type_scope",
         "jurisdiction_scope", "jurisdiction_status", "decision_logic", "evidence_contract",
-        "source_ids", "source_status", "severity_rationale", "confidence_policy",
-        "regression_cases", "validation_status", "approval_status", "execution_status",
-        "execution_eligible", "legal_conclusion_allowed", "source_playbook_hash",
+        "source_ids", "source_status", "source_tier", "authority_jurisdictions",
+        "effective_dates", "pinpoint_citations", "citation_status", "legal_authority",
+        "severity_rationale", "confidence_policy", "regression_cases", "validation_status",
+        "approval_status", "execution_status", "execution_eligible",
+        "legal_conclusion_allowed", "source_playbook_hash",
     }
     if any(required_rule_fields - set(item) for item in records if item["record_kind"] == "BASE_RULE"):
         problems.append("base_rule_missing_required_structured_fields")
+    for item in records:
+        if item["record_kind"] != "BASE_RULE":
+            continue
+        authority = item.get("legal_authority") or {}
+        authority_sources = authority.get("sources") or []
+        authority_ids = {str(source.get("source_id")) for source in authority_sources}
+        if authority_ids != set(str(source_id) for source_id in (item.get("source_ids") or [])):
+            problems.append(f"rule_authority_reference_mismatch:{item.get('rule_id')}")
+        for source in authority_sources:
+            required_authority_fields = {
+                "source_id", "source_title", "source_url", "source_tier",
+                "authority_status", "jurisdiction", "effective_date",
+                "effective_date_status", "pinpoint_citation", "citation_status",
+                "retrieval_date", "license_status", "transferability",
+                "can_support_legal_conclusion",
+            }
+            if required_authority_fields - set(source):
+                problems.append(f"rule_authority_metadata_incomplete:{item.get('rule_id')}:{source.get('source_id')}")
+            if source.get("can_support_legal_conclusion") and (
+                not source.get("pinpoint_citation") or source.get("citation_status") != "VERIFIED_PINPOINT"
+            ):
+                problems.append(f"rule_has_unverified_legal_authority:{item.get('rule_id')}:{source.get('source_id')}")
+        if authority.get("can_support_legal_conclusion") is True and not authority_sources:
+            problems.append(f"rule_legal_conclusion_without_source:{item.get('rule_id')}")
     if any(not item.get("inherits_from_base_rule") or not item.get("inherited_fields") for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"):
         problems.append("candidate_inheritance_contract_missing")
+    required_inherited_fields = {
+        "source_tier", "authority_jurisdictions", "effective_dates",
+        "pinpoint_citations", "citation_status", "legal_authority",
+    }
+    if any(required_inherited_fields - set(item.get("inherited_fields") or []) for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"):
+        problems.append("candidate_missing_source_authority_inheritance")
     required_source_fields = {
         "source_id", "source_title", "source_url", "source_tier", "authority_status",
         "jurisdiction", "contract_type", "effective_date", "effective_date_status",
