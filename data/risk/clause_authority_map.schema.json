@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "37-clause authority mapping schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "map_version",
+    "taxonomy_source",
+    "taxonomy_count",
+    "authority_catalog_path",
+    "default_rule",
+    "clauses"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "map_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "taxonomy_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "taxonomy_count": {
+      "const": 37
+    },
+    "authority_catalog_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "default_rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clauses": {
+      "type": "array",
+      "minItems": 37,
+      "maxItems": 37,
+      "items": {
+        "type": "object",
+        "required": [
+          "clause_type",
+          "review_trigger_class",
+          "authority_ids",
+          "authority_coverage_status",
+          "jurisdiction_policy",
+          "scope_note",
+          "legal_conclusion_allowed",
+          "required_context",
+          "review_status"
+        ],
+        "properties": {
+          "clause_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "review_trigger_class": {
+            "const": "CONTRACT_TEXT_REVIEW_TRIGGER"
+          },
+          "authority_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "authority_coverage_status": {
+            "enum": [
+              "LIMITED_PRIMARY_AUTHORITY_LINKED",
+              "NO_UNIVERSAL_PRIMARY_AUTHORITY_IDENTIFIED"
+            ]
+          },
+          "jurisdiction_policy": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope_note": {
+            "type": "string",
+            "minLength": 1
+          },
+          "legal_conclusion_allowed": {
+            "const": false
+          },
+          "required_context": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "review_status": {
+            "const": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
