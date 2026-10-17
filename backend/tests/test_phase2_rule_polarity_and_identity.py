@@ -44,3 +44,58 @@ def test_duplicate_non_solicit_ids_are_stable_and_distinct():
         "No-Solicit Of Employees",
     }
     assert all(item.get("rule_registry_metadata", {}).get("rule_id") for item in duplicates)
+
+
+def test_negative_trigger_can_return_supported_positive_finding(monkeypatch):
+    import json
+    from app.core.risk import risk_engine
+
+    clause = "The supplier may audit the customer at any time."
+    playbook = {
+        "playbook_hash": "synthetic-negative-trigger",
+        "sources": {},
+        "rule_registry": {"status": "PILOT_REVIEW_ONLY"},
+        "clause_types": {
+            "Audit Rights": {
+                "checklist": [{
+                    "id": "AUD-2",
+                    "question": "Are notice, frequency, and confidentiality protections for audits stated?",
+                    "flag_if": "No",
+                    "do_not_flag_if": [],
+                    "sources": [],
+                    "risk_domain": "Compliance Risk",
+                }]
+            }
+        },
+        "deterministic_rules": [],
+    }
+    response = json.dumps({
+        "checks": [{
+            "check_id": "AUD-2",
+            "answer": "NO",
+            "status": "POTENTIAL_RISK",
+            "risk_type": "Unbounded audit access",
+            "evidence": clause,
+            "why_flagged": "The text grants unrestricted audit access without the listed safeguards.",
+        }]
+    })
+    monkeypatch.setattr(risk_engine, "call_ollama", lambda *args, **kwargs: response)
+    monkeypatch.setattr(risk_engine, "retrieve_related_contract_context", lambda *args, **kwargs: [])
+    monkeypatch.setattr(risk_engine, "detect_legal_indicators", lambda *args, **kwargs: {"matched_indicators": []})
+    monkeypatch.setattr(risk_engine, "retrieve_legal_guidance", lambda *args, **kwargs: [])
+
+    findings = risk_engine.analyze_clause_risk(
+        clause_index=1,
+        clause_text=clause,
+        clause_type="Audit Rights",
+        query_vector=None,
+        contract_clauses=[],
+        playbook=playbook,
+        passes=1,
+    )
+    finding = next(item for item in findings if item["check_id"] == "AUD-2")
+    assert finding["answer"] == "NO"
+    assert finding["risk_status"] == "POTENTIAL_RISK"
+    assert finding["risk"] is True
+    assert finding["evidence_source_status"] == "VERIFIED"
+    assert finding["provenance"]["risk_trigger_answer"] == "NO"
