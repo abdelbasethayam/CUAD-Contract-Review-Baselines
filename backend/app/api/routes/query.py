@@ -152,7 +152,7 @@ def _select_clauses(
             for item in findings
         )
         words = {term.lower() for term in _WORDS.findall(text + " " + label + " " + heading + " " + finding_text)}
-        score = 3 * len(direct_terms & words) + len(expanded_terms & words)
+        score = 5 * len(direct_terms & words) + len(expanded_terms & words)
         if risk_intent:
             score += 4 * sum(1 for item in findings if item.get("risk_status") == "POTENTIAL_RISK")
             score += 2 * sum(1 for item in findings if item.get("risk_status") == "INSUFFICIENT_EVIDENCE")
