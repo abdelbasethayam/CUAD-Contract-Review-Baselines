@@ -12,7 +12,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-SUPPORT_SCORE_VERSION = "support-score-v1"
+SUPPORT_SCORE_VERSION = "support-score-v2-evidence-agreement-indicator"
 CALIBRATION_ARTIFACT = (
     Path(__file__).resolve().parents[4]
     / "data" / "risk" / "calibration" / "confidence_calibration.json"
