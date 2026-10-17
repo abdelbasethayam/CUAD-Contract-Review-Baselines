@@ -173,6 +173,18 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
     }
 
 
+def _csv_safe_rows(rows: list[dict]) -> list[dict]:
+    """Serialize nested audit fields as JSON so exported CSV remains machine-readable."""
+    safe_rows: list[dict] = []
+    for row in rows:
+        safe = dict(row)
+        for key, value in safe.items():
+            if isinstance(value, (dict, list)):
+                safe[key] = json.dumps(value, ensure_ascii=False, sort_keys=True)
+        safe_rows.append(safe)
+    return safe_rows
+
+
 def _clause_risk_checkpoint_is_complete(
     findings: list[dict],
     expected_check_ids: set[str],
@@ -611,6 +623,12 @@ def _classify_contract(
             row["risk_status"] = "POTENTIAL_RISK" if positives else (
                 "INSUFFICIENT_EVIDENCE" if unresolved else "NO_RISK"
             )
+            row["risk_evidence_clause_index"] = None
+            row["risk_evidence_scope"] = None
+            row["risk_evidence_source_status"] = None
+            row["risk_evidence_clause_candidates"] = []
+            row["risk_supporting_sources"] = []
+            row["risk_score_interpretation"] = None
             if positives:
                 best = max(
                     positives,
@@ -627,6 +645,12 @@ def _classify_contract(
                 row["risk_severity_signal"] = best.get("severity_signal")
                 row["risk_severity_status"] = best.get("severity_status", "UNCALIBRATED")
                 row["risk_provenance"] = best.get("provenance", {})
+                row["risk_evidence_clause_index"] = best.get("evidence_clause_index")
+                row["risk_evidence_scope"] = best.get("evidence_scope")
+                row["risk_evidence_source_status"] = best.get("evidence_source_status")
+                row["risk_evidence_clause_candidates"] = best.get("evidence_clause_candidates", [])
+                row["risk_supporting_sources"] = best.get("supporting_sources", [])
+                row["risk_score_interpretation"] = (best.get("provenance") or {}).get("score_interpretation")
                 row["why_flagged"] = best.get("why_flagged", "")
                 row["evidence"] = best.get("evidence", "")
             else:
@@ -730,24 +754,33 @@ def _classify_contract(
                 "clause_index", "clause_text", "predicted_label", "classification_status",
                 "classification_confidence", "risk_status", "risk", "risk_type",
                 "risk_level", "risk_confidence", "risk_confidence_status",
-                "risk_severity_signal", "risk_severity_status", "why_flagged", "evidence",
+                "risk_severity_signal", "risk_severity_status", "risk_evidence_clause_index",
+                "risk_evidence_scope", "risk_evidence_source_status", "risk_evidence_clause_candidates",
+                "risk_supporting_sources", "risk_score_interpretation", "risk_provenance",
+                "why_flagged", "evidence",
             ]
             writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
             writer.writeheader()
-            writer.writerows(clause_rows)
+            writer.writerows(_csv_safe_rows(clause_rows))
 
         risk_csv = run.path("risk_findings.csv")
         with risk_csv.open("w", newline="", encoding="utf-8") as handle:
             fields = [
-                "finding_id", "clause_index", "evidence_clause_index", "evidence_scope",
+                "finding_id", "scope", "clause_index", "clause_ids", "evidence_clause_index",
+                "evidence_scope", "evidence_source_status", "evidence_clause_candidates",
                 "predicted_label", "check_id", "risk_domain", "risk_subdomain", "question",
                 "answer", "risk_status", "risk_type", "risk_level", "raw_support_score",
                 "confidence", "confidence_status", "severity_signal", "severity_status",
-                "ground_truth_status", "why_flagged", "evidence",
+                "ground_truth_status", "source_tier", "jurisdiction", "effective_date",
+                "contract_type", "source_title", "source_url", "retrieval_date",
+                "supporting_quote_or_paraphrase", "supporting_sources", "provenance",
+                "score_component_source", "score_interpretation", "score_version",
+                "base_score", "final_score", "score_components_raw", "score_modifiers",
+                "human_review_required", "review_escalation", "why_flagged", "evidence",
             ]
             writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
             writer.writeheader()
-            writer.writerows(all_risk_findings + cross_findings + document_findings)
+            writer.writerows(_csv_safe_rows(all_risk_findings + cross_findings + document_findings))
 
         # Persist final status and a compact machine-readable result snapshot.
         clauses_out = []
