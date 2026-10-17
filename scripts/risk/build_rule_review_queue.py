@@ -154,7 +154,7 @@ def build_queue_text() -> tuple[str, int, int]:
             )
         )
         validation_status = str(rule.get("validation_status") or "DRAFT_UNVALIDATED")
-        approval_status = str(rule.get("approval_status") or playbook.get("approval_status") or "UNAPPROVED")
+        approval_status = str(rule.get("approval_status") or "UNAPPROVED")
         governance = rule.get("review_governance") if isinstance(rule.get("review_governance"), dict) else {}
         reviewer_1 = _reviewer_decision(governance, 1)
         reviewer_2 = _reviewer_decision(governance, 2)
