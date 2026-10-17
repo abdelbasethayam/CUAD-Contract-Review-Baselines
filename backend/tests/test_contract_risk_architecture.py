@@ -229,6 +229,8 @@ def test_evidence_source_identifies_the_exact_related_clause():
     assert source == {
         "evidence_clause_index": 4,
         "evidence_scope": "related_contract_clause",
+        "evidence_source_status": "VERIFIED",
+        "evidence_clause_candidates": [4],
     }
 
     target = _evidence_source(
@@ -240,6 +242,8 @@ def test_evidence_source_identifies_the_exact_related_clause():
     assert target == {
         "evidence_clause_index": 1,
         "evidence_scope": "target_clause",
+        "evidence_source_status": "VERIFIED",
+        "evidence_clause_candidates": [1],
     }
 
 
