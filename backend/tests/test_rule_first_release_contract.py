@@ -197,7 +197,11 @@ def test_csv_exports_nested_evidence_and_citations_as_json():
     source_row = {
         "evidence": [{"clause_id": 4, "quote": "Liability is capped."}],
         "supporting_sources": [{"id": "P2", "source_title": "Practice note"}],
-        "provenance": {"score_interpretation": "triage only"},
+        "provenance": {
+            "score_component_source": "LLM_SELF_REPORTED_UNVALIDATED",
+            "score_interpretation": "triage only",
+            "score_version": "test-score-v1",
+        },
     }
 
     row = _csv_safe_rows([source_row])[0]
@@ -205,3 +209,6 @@ def test_csv_exports_nested_evidence_and_citations_as_json():
     assert json.loads(row["evidence"]) == source_row["evidence"]
     assert json.loads(row["supporting_sources"]) == source_row["supporting_sources"]
     assert json.loads(row["provenance"]) == source_row["provenance"]
+    assert row["score_component_source"] == "LLM_SELF_REPORTED_UNVALIDATED"
+    assert row["score_interpretation"] == "triage only"
+    assert row["score_version"] == "test-score-v1"
