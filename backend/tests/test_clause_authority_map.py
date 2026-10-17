@@ -142,7 +142,6 @@ def test_rule_review_queue_contains_authority_mapping_for_all_clause_rules():
             assert source["authority_status"]
             assert source["effective_date_status"]
             assert catalog_by_id[source["authority_id"]]["url"] == source["url"]
-            assert source["effective_date_status"]
     assert all(json.loads(row["authority_map_ids_json"]) is not None for row in queue)
     assert all(
         json.loads(row["authority_sources_json"]) == []
