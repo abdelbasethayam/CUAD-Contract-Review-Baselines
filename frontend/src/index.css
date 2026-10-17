@@ -706,14 +706,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .step-tag { color: #168176; font-size: .62rem; font-weight: 850; letter-spacing: .13em; }
 .intake-note { color: #8593a0; font-size: .72rem; }
 .upload-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
-.file-picker { display: flex; align-items: center; gap: 13px; min-width: 0; min-height: 78px; padding: 14px 16px; border: 1px dashed #b8cbd5; border-radius: 13px; background: #f8fbfc; cursor: pointer; }
+.file-picker { position: relative; display: flex; align-items: center; gap: 13px; min-width: 0; min-height: 78px; padding: 14px 16px; border: 1px dashed #b8cbd5; border-radius: 13px; background: #f8fbfc; cursor: pointer; }
 .file-picker:hover { border-color: #168176; background: #f0f9f6; }
 .file-picker__icon { display: grid; place-items: center; flex: 0 0 39px; height: 39px; border-radius: 11px; color: #167c72; background: #e2f3ee; font-size: 1.55rem; font-weight: 500; }
 .file-picker__copy { display: grid; gap: 4px; min-width: 0; }
 .file-picker__copy strong { overflow: hidden; color: #233b4f; font-size: .84rem; text-overflow: ellipsis; white-space: nowrap; }
 .file-picker__copy small { color: #7d8c99; font-size: .71rem; }
 .file-picker__button { margin-left: auto; padding: 8px 11px; border: 1px solid #d5e0e7; border-radius: 8px; color: #4f6677; background: #fff; font-size: .7rem; font-weight: 750; white-space: nowrap; }
-.file-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.file-picker input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; pointer-events: auto; }\n.file-picker:focus-within { outline: 3px solid rgba(22,124,114,.22); outline-offset: 3px; }
 .upload-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 9px; }
 .upload-actions > button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 43px; padding: 11px 15px; border-radius: 10px; background: #147c71; box-shadow: 0 6px 14px rgba(20,124,113,.15); font-size: .79rem; white-space: nowrap; }
 .upload-actions > button:hover:not(:disabled) { transform: translateY(-1px); background: #116b62; box-shadow: 0 8px 18px rgba(20,124,113,.22); }
