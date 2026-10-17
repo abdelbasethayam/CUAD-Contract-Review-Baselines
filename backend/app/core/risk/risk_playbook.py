@@ -286,12 +286,13 @@ _GENERIC_PLAYBOOK_KEYWORDS = {
 
 
 def _keyword_matches_clause(clause_text: str, keyword: str) -> bool:
-    phrase = re.sub(r"\\s+", " ", str(keyword or "").strip().lower())
+    phrase = re.sub(r"\s+", " ", str(keyword or "").strip().lower())
     if not phrase or phrase in _GENERIC_PLAYBOOK_KEYWORDS:
         return False
     if len(phrase.split()) == 1 and phrase not in _STRONG_RISK_KEYWORDS:
         return False
-    pattern = r"(?<!\\w)" + re.escape(phrase).replace(r"\\ ", r"\\s+") + r"(?!\\w)"
+    phrase_pattern = r"\s+".join(re.escape(part) for part in phrase.split())
+    pattern = r"(?<!\w)" + phrase_pattern + r"(?!\w)"
     return bool(re.search(pattern, str(clause_text or ""), flags=re.IGNORECASE))
 
 
