@@ -178,6 +178,11 @@ def _csv_safe_rows(rows: list[dict]) -> list[dict]:
     safe_rows: list[dict] = []
     for row in rows:
         safe = dict(row)
+        provenance = safe.get("provenance") or safe.get("risk_provenance") or {}
+        if isinstance(provenance, dict):
+            for key in ("score_component_source", "score_interpretation", "score_version"):
+                if safe.get(key) is None and provenance.get(key) is not None:
+                    safe[key] = provenance[key]
         for key, value in safe.items():
             if isinstance(value, (dict, list)):
                 safe[key] = json.dumps(value, ensure_ascii=False, sort_keys=True)
