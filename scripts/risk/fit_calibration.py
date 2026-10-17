@@ -97,6 +97,9 @@ def _prepare(path: Path, current_playbook_hash: str) -> tuple[list[dict], list[s
         if not adjudicator_id:
             problems.append(f"line_{line_number}:adjudicator_identity_required")
             continue
+        if adjudicator_id in {annotator_1_id, annotator_2_id}:
+            problems.append(f"line_{line_number}:adjudicator_must_be_independent_of_both_annotators")
+            continue
         if (annotator_1 != annotator_2 or gold not in {annotator_1, annotator_2}) and not adjudication_notes:
             problems.append(f"line_{line_number}:disagreement_or_override_requires_adjudication_notes")
             continue
@@ -217,7 +220,12 @@ def main() -> int:
     artifact = {
         "schema_version": 1,
         "calibration_version": "prediction-correctness-logistic-v1",
+        "fit_script_version": "confidence-fit-v1",
+        "annotation_protocol_version": "dual-annotator-independent-adjudicator-v1",
         "calibration_status": "VALIDATED_ON_LOCKED_TEST",
+        "dual_annotator_required": True,
+        "adjudicator_required": True,
+        "contract_disjoint": True,
         "target": "PREDICTION_CORRECTNESS",
         "target_definition": "Probability that the system's predicted YES/NO risk decision matches the adjudicated reviewer label.",
         "model_type": "logistic_sigmoid",
