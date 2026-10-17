@@ -173,6 +173,68 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
     }
 
 
+def _apply_clause_risk_summary(row: dict, findings: list[dict]) -> dict:
+    """Replace the visible clause-level risk summary without leaking stale prior findings."""
+    positives = [
+        item for item in findings
+        if item.get("risk_status") == "POTENTIAL_RISK" and item.get("risk")
+    ]
+    unresolved = [
+        item for item in findings
+        if item.get("risk_status") == "INSUFFICIENT_EVIDENCE"
+    ]
+    row["risk_findings"] = findings
+    row["risk_status"] = "POTENTIAL_RISK" if positives else (
+        "INSUFFICIENT_EVIDENCE" if unresolved else "NO_RISK"
+    )
+    row.update({
+        "risk": False,
+        "risk_type": None,
+        "risk_level": None,
+        "risk_confidence": None,
+        "risk_confidence_status": "UNCALIBRATED",
+        "risk_severity_signal": None,
+        "risk_severity_status": "INCOMPLETE" if unresolved else None,
+        "risk_provenance": {},
+        "risk_evidence_clause_index": None,
+        "risk_evidence_scope": None,
+        "risk_evidence_source_status": None,
+        "risk_evidence_clause_candidates": [],
+        "risk_supporting_sources": [],
+        "risk_score_interpretation": None,
+        "why_flagged": "",
+        "evidence": "",
+    })
+    if positives:
+        best = max(
+            positives,
+            key=lambda item: (
+                float(item.get("raw_support_score") or 0.0),
+                float(item.get("severity_signal") or 0.0),
+            ),
+        )
+        provenance = best.get("provenance") or {}
+        row.update({
+            "risk": True,
+            "risk_type": best.get("risk_type"),
+            "risk_level": best.get("risk_level"),
+            "risk_confidence": best.get("confidence"),
+            "risk_confidence_status": best.get("confidence_status", "UNCALIBRATED"),
+            "risk_severity_signal": best.get("severity_signal"),
+            "risk_severity_status": best.get("severity_status", "UNCALIBRATED"),
+            "risk_provenance": provenance,
+            "risk_evidence_clause_index": best.get("evidence_clause_index"),
+            "risk_evidence_scope": best.get("evidence_scope"),
+            "risk_evidence_source_status": best.get("evidence_source_status"),
+            "risk_evidence_clause_candidates": best.get("evidence_clause_candidates", []),
+            "risk_supporting_sources": best.get("supporting_sources", []),
+            "risk_score_interpretation": provenance.get("score_interpretation"),
+            "why_flagged": best.get("why_flagged", ""),
+            "evidence": best.get("evidence", ""),
+        })
+    return row
+
+
 def _csv_safe_rows(rows: list[dict]) -> list[dict]:
     """Serialize nested audit fields as JSON so exported CSV remains machine-readable."""
     safe_rows: list[dict] = []
@@ -621,45 +683,7 @@ def _classify_contract(
                     handle.write(json.dumps(finding, ensure_ascii=False) + "\n")
             tmp.replace(target)
 
-            row = results_by_index[idx]
-            row["risk_findings"] = findings
-            positives = [x for x in findings if x.get("risk_status") == "POTENTIAL_RISK" and x.get("risk")]
-            unresolved = [x for x in findings if x.get("risk_status") == "INSUFFICIENT_EVIDENCE"]
-            row["risk_status"] = "POTENTIAL_RISK" if positives else (
-                "INSUFFICIENT_EVIDENCE" if unresolved else "NO_RISK"
-            )
-            row["risk_evidence_clause_index"] = None
-            row["risk_evidence_scope"] = None
-            row["risk_evidence_source_status"] = None
-            row["risk_evidence_clause_candidates"] = []
-            row["risk_supporting_sources"] = []
-            row["risk_score_interpretation"] = None
-            if positives:
-                best = max(
-                    positives,
-                    key=lambda x: (
-                        float(x.get("raw_support_score") or 0.0),
-                        float(x.get("severity_signal") or 0.0),
-                    ),
-                )
-                row["risk"] = True
-                row["risk_type"] = best.get("risk_type")
-                row["risk_level"] = best.get("risk_level")
-                row["risk_confidence"] = best.get("confidence")
-                row["risk_confidence_status"] = best.get("confidence_status", "UNCALIBRATED")
-                row["risk_severity_signal"] = best.get("severity_signal")
-                row["risk_severity_status"] = best.get("severity_status", "UNCALIBRATED")
-                row["risk_provenance"] = best.get("provenance", {})
-                row["risk_evidence_clause_index"] = best.get("evidence_clause_index")
-                row["risk_evidence_scope"] = best.get("evidence_scope")
-                row["risk_evidence_source_status"] = best.get("evidence_source_status")
-                row["risk_evidence_clause_candidates"] = best.get("evidence_clause_candidates", [])
-                row["risk_supporting_sources"] = best.get("supporting_sources", [])
-                row["risk_score_interpretation"] = (best.get("provenance") or {}).get("score_interpretation")
-                row["why_flagged"] = best.get("why_flagged", "")
-                row["evidence"] = best.get("evidence", "")
-            else:
-                row["risk"] = False
+            row = _apply_clause_risk_summary(results_by_index[idx], findings)
 
             # Rewrite the clause record atomically so the GUI sees a coherent row
             # after a restart.
