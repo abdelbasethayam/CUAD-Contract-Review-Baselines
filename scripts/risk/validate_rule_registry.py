@@ -108,11 +108,24 @@ def main() -> int:
                 for reviewer in raw_reviewers
                 if isinstance(reviewer, str) and reviewer.strip()
             ] if isinstance(raw_reviewers, list) else []
+            raw_decisions = governance.get("reviewer_decisions") or []
+            decisions = [decision for decision in raw_decisions if isinstance(decision, dict)] if isinstance(raw_decisions, list) else []
+            decision_ids = [str(decision.get("reviewer_id") or "").strip() for decision in decisions]
+            valid_decision_labels = {"POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE", "NOT_APPLICABLE"}
             adjudicator = str(governance.get("adjudicator_id") or "").strip()
             if (
                 governance.get("status") != status
                 or len(set(reviewers)) < 2
                 or len(reviewers) != len(raw_reviewers)
+                or len(decisions) < 2
+                or len(set(decision_ids)) != len(decision_ids)
+                or set(decision_ids) != set(reviewers)
+                or any(
+                    decision.get("decision") not in valid_decision_labels
+                    or not str(decision.get("rationale") or "").strip()
+                    or not str(decision.get("reviewed_at") or "").strip()
+                    for decision in decisions
+                )
                 or not adjudicator
                 or adjudicator in set(reviewers)
                 or not str(governance.get("adjudication_reference") or "").strip()
