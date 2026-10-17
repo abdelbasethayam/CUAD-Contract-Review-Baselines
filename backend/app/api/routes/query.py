@@ -230,11 +230,7 @@ def _select_clauses(
     # Never fill a failed retrieval with arbitrary clauses. Broad summaries are
     # the only intentional exception because they need topic coverage by design.
     # A user can still retrieve a provision explicitly by saying "clause 3".
-    if (
-        not overview_intent
-        and not explicit_clause_indices
-        and not any(score > 0 for score, _, _ in scored)
-    ):
+    if not overview_intent and not any(score > 0 for score, _, _ in scored):
         return []
     if overview_intent and len(scored) > limit:
         # Preserve topic coverage in broad questions rather than returning only the first N clauses.
