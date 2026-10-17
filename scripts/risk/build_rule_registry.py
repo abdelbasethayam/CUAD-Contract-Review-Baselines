@@ -209,7 +209,7 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
                 "risk_subdomain": item.get("risk_subdomain"),
                 "risk_type": item.get("risk_type"),
                 "perspective": str(item.get("perspective") or playbook.get("perspective") or "customer_buyer"),
-                "contract_type_scope": item.get("applies_when") or ["unspecified_commercial_contract"],
+                "contract_type_scope": ["unspecified_commercial_contract"],
                 "jurisdiction_scope": item.get("jurisdiction_scope") or ["UNSPECIFIED"],
                 "decision_logic": {
                     "question": str(item.get("question") or ""),
