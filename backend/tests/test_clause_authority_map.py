@@ -76,6 +76,10 @@ def test_authority_catalog_has_traceable_source_provenance_and_no_unreferenced_r
     assert all(item["url"].startswith("https://") for item in by_id.values())
     assert all(item["pinpoint"].strip() for item in by_id.values())
     assert all(item["retrieval_date"] == catalog["retrieval_date"] for item in by_id.values())
+    assert all(item["jurisdiction"].strip() for item in by_id.values())
+    assert all(item["source_tier"] in {"A", "B"} for item in by_id.values())
+    assert all(item["authority_status"].strip() for item in by_id.values())
+    assert all(item["effective_date_status"].strip() for item in by_id.values())
     assert all(item["scope_limit"].strip() for item in by_id.values())
 
 
@@ -135,6 +139,9 @@ def test_rule_review_queue_contains_authority_mapping_for_all_clause_rules():
             assert source["jurisdiction"]
             assert source["source_tier"] in {"A", "B"}
             assert source["retrieval_date"] == catalog["retrieval_date"]
+            assert source["authority_status"]
+            assert source["effective_date_status"]
+            assert catalog_by_id[source["authority_id"]]["url"] == source["url"]
             assert source["effective_date_status"]
     assert all(json.loads(row["authority_map_ids_json"]) is not None for row in queue)
     assert all(
