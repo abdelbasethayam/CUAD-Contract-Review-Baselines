@@ -94,6 +94,14 @@ The 33-record catalog deliberately distinguishes source retrieval from legal ver
 
 The new `scripts/risk/validate_clause_authority_map.py` checks the catalog schemas, exact 37-category coverage, source identifiers, HTTPS provenance, authority host class, retrieval dates, and explicit no-universal-authority notes. This is a structural coverage gate, not proof of legal correctness. The Q1 research design is documented in `docs/PHASE2_Q1_PAPER_PROTOCOL.md`.
 
+### F-08 - Trigger polarity and duplicate check IDs
+
+**Status:** MITIGATED IN RUNTIME; REGRESSION TESTED
+
+The risk engine previously accepted a positive finding only when the model answer was YES. Some valid playbook triggers describe missing protections, unclear terms, or one-sided rights and therefore correctly answer NO. Customer and employee non-solicitation checks also reused IDs, which could cause one rule to suppress another. A few checklist questions were open-ended despite the YES/NO/DON'T KNOW response schema.
+
+The runtime now infers and records the trigger polarity, validates positive findings against that polarity and exact evidence, namespaces duplicate IDs by category, and normalizes the affected prompts to binary questions. These are compatibility mitigations for legacy playbook wording, not independent legal validation. Rules still require explicit metadata, exception tests, and independent review.
+
 ## Release sequence
 
 1. Select and document the first supported jurisdiction(s), contract types, buyer/seller perspective, and effective-date policy.
