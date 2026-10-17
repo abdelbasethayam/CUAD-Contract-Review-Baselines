@@ -338,7 +338,7 @@ def analyze_clause_risk(
         clause_index=clause_index,
         rule_engine_version=RULE_ENGINE_VERSION,
     )
-    checks = applicable_checks(playbook, clause_type)
+    checks = applicable_checks(playbook, clause_type, clause_text=clause_text)
     if not checks:
         checks = [{
             "id": "OPEN-RISK-1",
