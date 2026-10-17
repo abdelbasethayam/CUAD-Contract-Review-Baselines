@@ -100,6 +100,8 @@ def validate_records(
             end = item.get("end_char")
             if isinstance(start, int) and isinstance(end, int) and end <= start:
                 problems.append(f"invalid_evidence_offsets:{record_id}:{evidence_index}")
+            if normalized_text_by_contract is not None and contract_id not in normalized_text_by_contract:
+                problems.append(f"normalized_text_missing_for_contract:{record_id}:{contract_id}")
             text = (normalized_text_by_contract or {}).get(contract_id)
             if text is not None:
                 if _sha256(text) != record.get("normalized_text_sha256"):
@@ -194,12 +196,23 @@ def main() -> int:
     }
     records = _load_jsonl(args.input)
     normalized_text_by_contract = {}
+    missing_text_files = []
     for record in records:
         contract_id = str(record.get("contract_id") or "")
         if contract_id and contract_id not in normalized_text_by_contract:
             text_path = args.normalized_text_dir / f"{contract_id}.txt"
             if text_path.is_file():
                 normalized_text_by_contract[contract_id] = text_path.read_text(encoding="utf-8")
+            else:
+                missing_text_files.append(str(text_path))
+    if missing_text_files:
+        print(json.dumps({
+            "status": "FAIL",
+            "record_count": len(records),
+            "missing_normalized_text_files": sorted(set(missing_text_files)),
+            "legal_accuracy_claim_allowed": False,
+        }, indent=2, ensure_ascii=False))
+        return 1
     problems = validate_records(
         records,
         schema=schema,
