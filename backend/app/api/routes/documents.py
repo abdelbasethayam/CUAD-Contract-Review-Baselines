@@ -6,6 +6,7 @@ import json
 import queue
 import shutil
 import tempfile
+import re
 from pathlib import Path
 from threading import Thread
 
@@ -33,6 +34,17 @@ SAFE_ARTIFACTS = {
     "clauses.csv",
     "risk_findings.csv",
 }
+_ANALYSIS_ID = re.compile(r"^[0-9a-f]{16}-[0-9a-f]{16}$")
+
+
+def _run_root(analysis_id: str) -> Path:
+    if not _ANALYSIS_ID.fullmatch(analysis_id):
+        raise HTTPException(status_code=400, detail="Invalid analysis ID.")
+    runs_root = Path(RUNS_DIR).resolve()
+    root = (runs_root / analysis_id).resolve()
+    if runs_root not in root.parents:
+        raise HTTPException(status_code=400, detail="Invalid analysis ID.")
+    return root
 
 
 def _save_upload(file: UploadFile) -> tuple[Path, str]:
@@ -118,7 +130,17 @@ async def classify_document_stream(file: UploadFile = File(...)):
             "message": "Upload received; starting resumable analysis",
         }) + "\n\n"
         while True:
-            event = await asyncio.to_thread(events.get)
+            try:
+                event = await asyncio.to_thread(events.get, True, 15)
+            except queue.Empty:
+                # Keep proxies and browsers from treating a long model call as
+                # a dead connection. This does not alter the analysis itself.
+                yield "data: " + json.dumps({
+                    "type": "heartbeat",
+                    "stage": "running",
+                    "message": "Analysis is still running",
+                }) + "\n\n"
+                continue
             if event is None:
                 break
             yield "data: " + json.dumps(event, ensure_ascii=False) + "\n\n"
@@ -132,7 +154,7 @@ async def classify_document_stream(file: UploadFile = File(...)):
 
 @router.get("/runs/{analysis_id}")
 def get_run(analysis_id: str):
-    root = Path(RUNS_DIR) / analysis_id
+    root = _run_root(analysis_id)
     result_path = root / "result.json"
     manifest_path = root / "manifest.json"
     if not root.exists():
@@ -154,7 +176,7 @@ def get_run(analysis_id: str):
 def download_artifact(analysis_id: str, artifact: str):
     if artifact not in SAFE_ARTIFACTS or Path(artifact).name != artifact:
         raise HTTPException(status_code=400, detail="Artifact is not allowed.")
-    root = (Path(RUNS_DIR) / analysis_id).resolve()
+    root = _run_root(analysis_id)
     candidate = (root / artifact).resolve()
     if root not in candidate.parents and candidate != root:
         raise HTTPException(status_code=400, detail="Invalid artifact path.")
