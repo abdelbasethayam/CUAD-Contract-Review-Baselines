@@ -265,3 +265,28 @@ def test_demo_contract_endpoint_downloads_repository_fixture(monkeypatch, tmp_pa
     assert response.status_code == 200
     assert "text/plain" in response.headers["content-type"]
     assert response.content == fixture_path.read_bytes()
+
+def test_contract_chat_parses_string_false_without_treating_it_as_truthy(monkeypatch, tmp_path):
+    analysis_id = "0123456789abcdef-0123456789abcdef"
+    run_root = tmp_path / analysis_id
+    run_root.mkdir()
+    clause_text = "Supplier shall maintain commercially reasonable insurance coverage during the Term."
+    (run_root / "result.json").write_text(json.dumps({
+        "analysis_id": analysis_id,
+        "clauses": [{"clause_index": 7, "clause_text": clause_text, "predicted_label": "Insurance"}],
+        "contract_risk_assessment": {},
+    }), encoding="utf-8")
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(query, "_call_local_chat", lambda *args, **kwargs: json.dumps({
+        "answer": "The supplier must maintain insurance during the agreement term.",
+        "insufficient_evidence": "false",
+        "citations": [{"clause_index": 7, "quote": clause_text, "reason": "Insurance obligation."}],
+        "follow_up_questions": [],
+    }))
+    response = TestClient(app).post("/query/contract", json={
+        "analysis_id": analysis_id,
+        "question": "What insurance must the supplier maintain?",
+    })
+    assert response.status_code == 200, response.text
+    assert response.json()["insufficient_evidence"] is False
+    assert response.json()["citations"][0]["quote"] == clause_text
