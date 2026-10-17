@@ -308,9 +308,20 @@ def main() -> int:
         counts["rules"] += 1
         counts["complete_exception_suites"] += int(complete)
 
+    source_and_jurisdiction_coverage = {
+        "rules_with_linked_sources": sum(bool(item.get("source_ids")) for item in base_rules),
+        "rules_without_linked_sources": sum(not bool(item.get("source_ids")) for item in base_rules),
+        "rules_with_verified_pinpoint_citations": sum(item.get("citation_status") == "VERIFIED_PINPOINT" for item in base_rules),
+        "rules_with_incomplete_or_missing_citations": sum(item.get("citation_status") != "VERIFIED_PINPOINT" for item in base_rules),
+        "rules_with_verified_jurisdiction": sum(item.get("jurisdiction_status") == "VERIFIED" for item in base_rules),
+        "rules_with_declared_but_unverified_jurisdiction": sum(item.get("jurisdiction_status") == "DECLARED_NOT_VERIFIED" for item in base_rules),
+        "rules_with_unresolved_jurisdiction": sum(item.get("jurisdiction_status") == "UNRESOLVED" for item in base_rules),
+    }
+
     report = {
         "status": "PASS" if not problems else "FAIL",
         "base_rule_count": manifest["base_rule_count"],
+        "source_and_jurisdiction_coverage": source_and_jurisdiction_coverage,
         "rule_test_coverage": {
             "base_rules": len(base_rules),
             "complete_positive_negative_edge_suites": complete_exception_suite_count,
