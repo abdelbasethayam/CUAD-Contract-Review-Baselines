@@ -322,7 +322,7 @@ function ContractReview() {
     const query = clauseSearch.trim().toLowerCase();
     if (!query) return clauses;
     return clauses.filter((clause) =>
-      [clause.predicted_label, clause.heading, clause.section_path, clause.clause_text]
+      [clause.clause_index, clause.predicted_label, clause.heading, clause.section_path, clause.clause_text]
         .some((value) => String(value || "").toLowerCase().includes(query))
     );
   }, [clauses, clauseSearch]);
@@ -347,6 +347,12 @@ function ContractReview() {
   const visibleRisks = riskFilter === "potential"
     ? potential
     : riskFilter === "uncertain" ? uncertain : allRisks;
+  function openCitedClause(clauseIndex) {
+    const clause = clauses.find((item) => String(item.clause_index) === String(clauseIndex));
+    setTab("clauses");
+    setClauseSearch(clause?.heading || clause?.section_path || String(clauseIndex));
+  }
+
   const latestAssistantMessage = [...chatMessages].reverse().find((message) => message.role === "assistant");
   const chatModeLabel = latestAssistantMessage?.model === "EXTRACTIVE_FALLBACK"
     ? "Source-only fallback"
@@ -681,6 +687,7 @@ function ContractReview() {
                           <blockquote key={String(citation.clause_index) + citationIndex}>
                             <span>Clause {citation.clause_index}{citation.reason ? " · " + citation.reason : ""}</span>
                             “{citation.quote}”
+                             <button type="button" className="citation-open-button" onClick={() => openCitedClause(citation.clause_index)}>Open clause →</button>
                           </blockquote>
                         ))}
                       </div>
