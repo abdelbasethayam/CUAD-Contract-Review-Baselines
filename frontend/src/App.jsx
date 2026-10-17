@@ -181,13 +181,25 @@ function ContractReview() {
   }, []);
 
   useEffect(() => {
+    if (apiStatus !== "online") return undefined;
     let cancelled = false;
-    fetch("/query/phase2-metrics")
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Metrics unavailable")))
-      .then((data) => { if (!cancelled) setPhase2Metrics(data); })
-      .catch(() => { if (!cancelled) setPhase2Metrics(null); });
-    return () => { cancelled = true; };
-  }, []);
+    const loadMetrics = async () => {
+      try {
+        const response = await fetch("/query/phase2-metrics", { cache: "no-store" });
+        if (!response.ok) throw new Error("Metrics unavailable");
+        const data = await response.json();
+        if (!cancelled) setPhase2Metrics(data);
+      } catch {
+        if (!cancelled) setPhase2Metrics(null);
+      }
+    };
+    loadMetrics();
+    const intervalId = window.setInterval(loadMetrics, 30000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [apiStatus]);
 
   async function loadSavedDemo() {
     if (demoLoading || loading) return;
