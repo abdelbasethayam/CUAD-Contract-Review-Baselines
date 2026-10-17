@@ -165,7 +165,7 @@ def test_contract_chat_retrieval_expands_legal_synonyms_and_prioritizes_risk_fin
             {"risk_status": "POTENTIAL_RISK", "risk_type": "Unequal termination rights", "why_flagged": "Immediate termination is one-sided."}
         ]},
     ]
-    selected = query._select_clauses(clauses, "What exposure does the supplier liability cap create?")
+    selected = query._select_clauses(clauses, "How is supplier liability capped?")
     assert selected[0]["clause_index"] == 2
 
     selected = query._select_clauses(clauses, "What are the main risks?")
