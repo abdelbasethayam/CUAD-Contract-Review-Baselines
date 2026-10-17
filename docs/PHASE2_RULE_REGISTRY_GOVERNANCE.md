@@ -14,6 +14,14 @@ The baseline playbook currently contains 101 clause checks, 10 cross-clause chec
 
 The repository baseline remains `UNAPPROVED`. Runtime may use base rules only as pilot review triggers. No generated context candidate is eligible for execution. Do not mark a rule approved merely because CI passes.
 
+### Independent adjudication and approval record
+
+A rule marked `ADJUDICATED` or `APPROVED` must include a `review_governance` record with at least two distinct reviewer identities, a separate adjudicator identity, an adjudication reference, and an adjudication timestamp. The adjudicator cannot be either annotator/reviewer. An `APPROVED` rule additionally requires an approver, approval timestamp, and written approval basis. Approval is blocked unless the rule has positive, negative, and edge-case regression examples, a verified jurisdiction scope, and source pinpoints with retrieval provenance and a verified effective-date status (or an explicit not-applicable determination). Rejected rules must be execution-disabled.
+
+These controls approve a specific review trigger for its declared scope; they do **not** enable legal conclusions. The schema keeps `legal_conclusion_allowed=false` for every rule. The validator also checks the record against the committed JSON Schema instead of relying only on field-presence checks.
+
+Registry counts are computed from the playbook and configured contract profiles rather than frozen at 121 rules. The current snapshot is still 121 base rules and 1,936 disabled applicability candidates (2,057 total records). A verified pinpoint count requires both a pinpoint and retrieval date; profile candidates are not counted as new rules.
+
 ## Required rule record
 
 Each record contains stable identity and family; perspective; contract-type and jurisdiction scope; explicit applicability status; question/trigger/counterconditions/dependencies; evidence requirements and clause identity; source IDs; source completeness; a non-severity impact note; confidence/calibration policy; regression-case slots; validation/approval status; and an execution gate.
