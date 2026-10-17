@@ -78,7 +78,7 @@ QUESTIONS = [
     {
         "id": "indemnity_and_liability_cap_interaction",
         "question": "Does the agreement clearly say whether indemnification obligations are subject to the aggregate liability caps?",
-        "must_cite_terms": ["indemnification obligations", "aggregate liability exceed", "Customer shall indemnify"],
+        "must_cite_terms": ["indemnification obligations", "aggregate liability shall not exceed", "Customer shall indemnify"],
         "must_cite_clause_indices": [3, 4],
         "must_answer_one_of": [
             ["unclear", "ambiguous", "does not expressly state", "does not expressly say", "not clear"],
