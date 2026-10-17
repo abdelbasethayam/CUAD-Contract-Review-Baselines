@@ -39,3 +39,27 @@ def test_explicit_unread_online_terms_and_precedence_become_review_candidates():
         assert signal["candidate"] is True
         assert signal["evidence"]
         assert all(item["quote"] for item in signal["evidence"])
+
+
+
+def test_cross_clause_candidates_use_contract_text_when_cuad_labels_are_wrong():
+    clauses = [
+        {
+            "clause_index": 1,
+            "predicted_label": "Insurance",
+            "clause_text": "Supplier liability shall not exceed fees paid in the prior month.",
+        },
+        {
+            "clause_index": 2,
+            "predicted_label": "Governing Law",
+            "clause_text": "Supplier indemnifies Customer for all claims outside any liability cap.",
+        },
+    ]
+
+    signals = run_deterministic_cross_checks(clauses)
+    by_id = {item["id"]: item for item in signals}
+
+    assert "DET-REMEDY-MISMATCH" in by_id
+    finding = by_id["DET-REMEDY-MISMATCH"]
+    assert finding["candidate"] is True
+    assert {item["clause_id"] for item in finding["evidence"]} == {1, 2}
