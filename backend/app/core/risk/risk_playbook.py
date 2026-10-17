@@ -482,15 +482,32 @@ def applicable_checks(
             if any(_keyword_matches_clause(text, keyword) for keyword in keywords):
                 matched_categories.append(name)
 
+    # Duplicate legacy IDs exist across customer and employee non-solicitation.
+    # Namespace those runtime IDs by category while retaining their original IDs.
+    categories_by_id: dict[str, set[str]] = {}
+    for category, payload in clause_types.items():
+        for item in payload.get("checklist") or []:
+            item_id = str(item.get("id") or "").strip()
+            if item_id:
+                categories_by_id.setdefault(item_id, set()).add(category)
+    duplicate_ids = {item_id for item_id, categories in categories_by_id.items() if len(categories) > 1}
+
     checks: list[dict] = []
-    seen_ids: set[str] = set()
+    seen_rules: set[tuple[str, str]] = set()
     for name in matched_categories:
         payload = clause_types.get(name) or {}
-        for check in payload.get("checklist") or []:
-            check_id = str(check.get("id") or "").strip()
-            if not check_id or check_id in seen_ids:
+        for original in payload.get("checklist") or []:
+            base_id = str(original.get("id") or "").strip()
+            key = (name, base_id)
+            if not base_id or key in seen_rules:
                 continue
-            seen_ids.add(check_id)
+            seen_rules.add(key)
+            check = dict(original)
+            check["_playbook_category"] = name
+            check["_base_check_id"] = base_id
+            if base_id in duplicate_ids:
+                category_slug = re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
+                check["id"] = f"{base_id}@{category_slug}"
             checks.append(check)
     return checks
 
