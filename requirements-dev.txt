@@ -1,0 +1,2 @@
+# Development/test-only dependencies (install after requirements.txt)
+pytest>=8.0,<9

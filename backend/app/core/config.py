@@ -65,23 +65,23 @@ RISK_TEMPERATURE = float(os.getenv("RISK_TEMPERATURE", "0.0"))
 RISK_MAX_TOKENS = int(os.getenv("RISK_MAX_TOKENS", "1800"))
 RISK_SELF_CONSISTENCY_PASSES = int(os.getenv("RISK_SELF_CONSISTENCY_PASSES", "3"))
 RISK_CONTEXT_TOP_K = int(os.getenv("RISK_CONTEXT_TOP_K", "5"))
-RISK_USE_PLAYBOOK = os.getenv("RISK_USE_PLAYBOOK", "true").strip().lower() in {"1", "true", "yes"}
 RISK_USE_CONTEXT = os.getenv("RISK_USE_CONTEXT", "true").strip().lower() in {"1", "true", "yes"}
 RISK_USE_LEGAL_GUIDANCE = os.getenv("RISK_USE_LEGAL_GUIDANCE", "true").strip().lower() in {"1", "true", "yes"}
 RISK_ENABLE_CROSS_CLAUSE = os.getenv("RISK_ENABLE_CROSS_CLAUSE", "true").strip().lower() in {"1", "true", "yes"}
 RISK_ENABLE_DOCUMENT_CHECKS = os.getenv("RISK_ENABLE_DOCUMENT_CHECKS", "true").strip().lower() in {"1", "true", "yes"}
 
-RISK_GOLD_PATH = RISK_DATA_DIR / "gold" / "gold_annotations.csv"
-RISK_CALIBRATION_PATH = RISK_DATA_DIR / "gold" / "calibration.json"
 RISK_EXTERNAL_BENCHMARKS_PATH = RISK_DATA_DIR / "external_benchmarks.json"
 
+EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "cohere").strip().lower()
+LOCAL_HASHING_DIM = int(os.getenv("LOCAL_HASHING_DIM", "768"))
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 COHERE_MODEL = os.getenv(
     "COHERE_MODEL",
     os.getenv("COHERE_EMBED_MODEL", "embed-english-v3.0"),
 )
 COHERE_EMBED_BATCH_SIZE = int(os.getenv("COHERE_BATCH_SIZE", "96"))
-COHERE_MAX_RETRY_ATTEMPTS = int(os.getenv("COHERE_MAX_RETRY_ATTEMPTS", "8"))
+COHERE_TIMEOUT_SECONDS = float(os.getenv("COHERE_TIMEOUT_SECONDS", "45"))
+COHERE_MAX_RETRY_ATTEMPTS = int(os.getenv("COHERE_MAX_RETRY_ATTEMPTS", "3"))
 
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
@@ -172,14 +172,6 @@ OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "8192"))
 CLASSIFIER_TEMPERATURE = float(os.getenv("CLASSIFIER_TEMPERATURE", "0.0"))
 CLASSIFIER_TOP_LOGPROBS = int(os.getenv("CLASSIFIER_TOP_LOGPROBS", "20"))
 CLASSIFIER_THINK = os.getenv("CLASSIFIER_THINK", "false").strip().lower() in {"1", "true", "yes"}
-CORS_ORIGINS = tuple(
-    origin.strip()
-    for origin in os.getenv(
-        "CORS_ORIGINS",
-        "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174",
-    ).split(",")
-    if origin.strip()
-)
 
 HF_CLASSIFIER_MODEL = os.getenv(
     "HF_CLASSIFIER_MODEL", "Qwen/Qwen2.5-7B-Instruct"

@@ -1,107 +1,71 @@
-# Phase 2 — Evidence-grounded contract risk analysis
+# Phase 2 — Rule-First, Evidence-Grounded Contract Risk Screening
 
-## End-to-end flow
+## Purpose
 
-```text
-upload
-  -> persistent content-addressed run
-  -> document extraction / clause segmentation
-  -> CUAD classification
-  -> clause-level playbook checks
-      -> deterministic indicators
-      -> same-contract context
-      -> local Qwen risk reasoning
-      -> exact evidence validation
-      -> self-consistency
-  -> cross-clause checks
-  -> document-level checks
-  -> deterministic contract aggregation
-  -> calibrated confidence/severity when a gold calibration file exists
-  -> result.json + machine-readable audit artifacts + GUI
-```
+The system prioritizes commercial contract provisions for review. It does not provide legal advice or decide enforceability. The clause-category classifier and the risk screener are separate components: the classifier predicts what kind of provision a clause resembles, while Phase 2 checks explicit buyer-side conditions defined by the risk playbook.
 
-## Playbook
+## End-to-end path
 
-The team's commercial risk checklist is stored as policy. It currently contains 24 clause types, 63 clause-specific checks, 10 cross-clause checks, 3 document checks, and 7 source references.
+    Upload PDF/TXT
+      -> extract and segment contract
+      -> separate CUAD clause-category classification
+      -> deterministic playbook-rule scan over every clause, independent of classifier label
+      -> playbook question + flag_if / do_not_flag_if for nuanced checks
+      -> optional related-clause retrieval from the same uploaded contract
+      -> optional legal/practice guidance as context only
+      -> exact contract-quote validation
+      -> 10 cross-clause questions + 3 document-level questions
+      -> canonical risk-domain routing and deterministic review triage
+      -> evidence-linked report, CSV/JSONL, trace and manifest
 
-Import the supplied JSON or RAR archive before a full run:
+The risk prompt never receives retrieved CUAD training example spans. CUAD examples are used by the separate category classifier only, and never as contract evidence. No risk flag is fine-tuned from text-span examples.
 
-```bash
-python scripts/risk/import_playbook.py /path/to/commercial_clause_risk_checklists.json
-```
+## Source of truth
 
-Do not call playbook-derived findings human gold. The run labels them PLAYBOOK_DERIVED and stores the playbook hash.
+The source playbook is data/risk/commercial_clause_risk_playbook.json, version 1.2. It contains 37 clause targets, 101 clause-level checklist questions, 10 cross-clause checks, 3 document-level checks, and 7 initial deterministic predicates. All domains map to the ten canonical domains in backend/data/legal_knowledge/risk_taxonomy.json.
 
-## Gold protocol
+The deterministic predicates run against every uploaded clause even if clause classification is wrong or unknown. They cover explicit uncapped liability, indemnification outside the cap, liquidated damages outside the cap, immediate/no-notice termination, broad-scope IP license wording, early-exit remaining-term fees, and absolute assignment prohibitions. Positive outputs include the rule ID, exact matching contract substring, short explanation, domain, playbook hash and rule-engine version.
 
-Build a blinded annotation queue from the 410-contract training split:
+These predicates are an explicit starter set. They are intended to be transparent and testable, not exhaustive. A match is a review trigger. A non-match is not proof that a clause is risk-free.
 
-```bash
-python scripts/risk/build_gold_queue.py --n 300
-```
+## Role of the question stage
 
-Two annotators independently label risk, type, severity and exact evidence. Adjudicate disagreements. Keep a locked evaluation subset that is not used for calibration or tuning.
+The playbook's question stage handles nuance that compact pattern rules cannot resolve. For each applicable check, the model receives the actual clause and optional related clauses from the same uploaded agreement. The question's flag condition sets the risk polarity; the model is not allowed to infer a risk from a label, a source note or an indicator alone. If there is not enough uploaded-contract evidence, the result remains unresolved.
 
-Calibration:
+Legal/practice source material can provide explanatory context, but it is not evidence that the agreement contains the term being discussed. The source evidence must be copied from the uploaded contract and validated against the clause text.
 
-```bash
-python scripts/risk/fit_calibration.py --csv data/risk/gold/adjudicated_predictions.csv
-```
+## Evidence contract and visible states
 
-The runtime then maps the raw support diagnostic into calibrated risk probability and ordinal severity probabilities using the persisted isotonic curves.
+- POTENTIAL_RISK: a deterministic rule triggered or a playbook question met its flag condition and exact uploaded-contract evidence was retained.
+- NO_RISK: available contract text supports that the applicable question's flag condition is not met.
+- INSUFFICIENT_EVIDENCE: the condition cannot be resolved from the provided package or the evidence is incomplete.
+- ERROR: a check failed to execute or return usable structured output.
 
-## Metrics and statistical tests
+Cross-clause/document positives require existing clause IDs plus exact quotes that appear in those cited clauses. Missing schedules or URL-incorporated terms are treated as unread/unavailable rather than assumed absent.
 
-`scripts/risk/evaluate.py` reports binary classification metrics, AUROC, PR-AUC, Brier, ECE, specificity, MCC, macro-F1, contract-level metrics, ordinal severity MAE, macro-F1, quadratic weighted kappa, Spearman correlation, evidence exact-match/token-F1, and inter-annotator kappa when annotation columns are present.
+## Release and evaluation
 
-Confidence intervals use contract-level bootstrap because clauses from the same contract are correlated. Paired model comparison supports exact McNemar and paired contract-cluster bootstrap of accuracy difference.
+Release checks validate:
+1. unique rule IDs, compiling regex/exclusion patterns, required fields, and canonical taxonomy mapping;
+2. no CUAD example spans injected into either risk prompt path;
+3. exact-quote preservation for direct rule triggers;
+4. training-only payloads for the separate CUAD classification index, with no held-out contract overlap;
+5. playbook-domain normalization and team export;
+6. positive/control/incomplete synthetic playbook-question regression fixtures;
+7. recorded TXT/PDF smoke results and backend tests.
 
-## Ablation matrix
+The corresponding report is data/risk/results/phase2_reproducible_report.md. It intentionally reports rule and system conformance, not legal-risk accuracy. There is no custom-risk annotation dataset in the operational risk or release path.
 
-Run and compare at minimum:
+Run the full release suite from the repository root, with the backend stopped before Qdrant integrity validation:
 
-| ID | Configuration |
-|---|---|
-| A | deterministic playbook/indicator rules only |
-| B | LLM risk reasoning without playbook checklist |
-| C | LLM + playbook |
-| D | C + same-contract semantic context |
-| E | D + retrieved legal guidance |
-| F | E + self-consistency |
-| G | F + calibrated confidence/severity |
-| H | cross-clause checks enabled vs disabled |
-| I | document-level checks enabled vs disabled |
+    .venv/bin/python scripts/risk/run_release_checks.py
 
-Do not choose thresholds from the locked gold test.
+Then restart the app with bash scripts/start_all.sh and check http://127.0.0.1:8000/health. The API must be stopped when the embedded Qdrant index-isolation validator runs because the local storage uses an exclusive lock.
 
-## Resumability
+## Findings and triage
 
-Each run is stored under `data/runs/<analysis_id>/`.
+Risk severity is a deterministic review-prioritization signal, not a calibrated probability of loss or a legal standard. Every positive display should show the source clause, exact quotation, rule/check ID and concise explanation. Unmatched patterns should never be presented as proof of safety.
 
-Key artifacts:
+## Privacy
 
-- `manifest.json` — source hash, pipeline settings, playbook hash, environment and status
-- `source.<ext>` — persistent input copy
-- `segments.json` — extraction/segmentation checkpoint
-- `validated.json` — validation checkpoint
-- `embeddings.npy` — clause embedding checkpoint
-- `classification.jsonl` — one record per completed clause
-- `risk_findings.jsonl` — one record per completed playbook check
-- `contract_checks.json` — cross/document checks
-- `contract_risk.json` — final aggregate
-- `result.json` — API/GUI result snapshot
-- `trace.jsonl` — live trace persisted for replay
-
-Resume a stopped run:
-
-```bash
-python scripts/run_pipeline.py resume <analysis_id>
-```
-
-The run id is derived from the source SHA-256 and pipeline configuration fingerprint. Changing the playbook/model/config produces a new run rather than silently reusing stale results.
-
-## Full stack
-
-Start FastAPI with the normal project command and build the React frontend as already documented in the root README. The browser now exposes Overview, Clauses, and Risks tabs plus audit-artifact downloads.
-
-Production uploads do not have independent ground truth. The UI therefore says so explicitly instead of displaying the model's own result as 'ground truth'. Gold labels are only attached in evaluation datasets.
+The embedding profile determines whether query/clause embeddings are local or sent to an external provider. The local hashing option is deterministic lexical retrieval, not a pretrained semantic model. Confirm the live embedding configuration before uploading confidential agreements.

@@ -1,0 +1,491 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Adjudicated contract-risk gold record",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_id",
+    "contract_id",
+    "source_document_sha256",
+    "normalized_text_sha256",
+    "clause_type",
+    "rule_id",
+    "review_target",
+    "perspective",
+    "contract_type",
+    "governing_law",
+    "decision",
+    "evidence_basis",
+    "evidence",
+    "authority_refs",
+    "reviewer_1",
+    "reviewer_2",
+    "adjudication",
+    "split",
+    "near_duplicate_group_id",
+    "dataset_version",
+    "annotation_guide_version"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "contract_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "source_document_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "normalized_text_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "clause_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rule_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "review_target": {
+      "enum": [
+        "CLAUSE_PRESENCE",
+        "COMMERCIAL_REVIEW_TRIGGER",
+        "CROSS_CLAUSE_CONFLICT",
+        "LEGAL_PROPOSITION"
+      ]
+    },
+    "perspective": {
+      "enum": [
+        "customer_buyer",
+        "supplier_seller",
+        "neutral",
+        "other"
+      ]
+    },
+    "contract_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "governing_law": {
+      "type": "object",
+      "required": [
+        "status",
+        "declared_law",
+        "resolved_law",
+        "relevant_date",
+        "verification_basis"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "VERIFIED",
+            "DECLARED_ONLY",
+            "UNRESOLVED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "declared_law": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resolved_law": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "relevant_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "verification_basis": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "decision": {
+      "enum": [
+        "POTENTIAL_RISK",
+        "NO_RISK",
+        "INSUFFICIENT_EVIDENCE",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "evidence_basis": {
+      "enum": [
+        "EXACT_QUOTE",
+        "ABSENCE_AFTER_DOCUMENT_SCAN",
+        "CONTRADICTORY_CONTEXT",
+        "INSUFFICIENT_SOURCE",
+        "NOT_APPLICABLE_REASON"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "clause_id",
+          "start_char",
+          "end_char",
+          "quote",
+          "quote_sha256"
+        ],
+        "properties": {
+          "clause_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_char": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_char": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quote_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "page": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "authority_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "authority_id",
+          "citation",
+          "pinpoint",
+          "jurisdiction",
+          "source_tier",
+          "effective_date_status",
+          "retrieval_date",
+          "verification_status",
+          "applicability_basis"
+        ],
+        "properties": {
+          "authority_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "citation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pinpoint": {
+            "type": "string",
+            "minLength": 1
+          },
+          "jurisdiction": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_tier": {
+            "enum": [
+              "A",
+              "B"
+            ]
+          },
+          "effective_date_status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieval_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "verification_status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "applicability_basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "reviewer_1": {
+      "type": "object",
+      "required": [
+        "reviewer_id",
+        "decision",
+        "rationale",
+        "reviewed_at"
+      ],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "enum": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "reviewer_2": {
+      "type": "object",
+      "required": [
+        "reviewer_id",
+        "decision",
+        "rationale",
+        "reviewed_at"
+      ],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "enum": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "adjudication": {
+      "type": "object",
+      "required": [
+        "adjudicator_id",
+        "final_decision",
+        "rationale",
+        "adjudicated_at",
+        "adjudication_reference"
+      ],
+      "properties": {
+        "adjudicator_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "final_decision": {
+          "enum": [
+            "POTENTIAL_RISK",
+            "NO_RISK",
+            "INSUFFICIENT_EVIDENCE",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adjudicated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "adjudication_reference": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "split": {
+      "enum": [
+        "TRAIN",
+        "CALIBRATION",
+        "TEST"
+      ]
+    },
+    "near_duplicate_group_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "dataset_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "annotation_guide_version": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "POTENTIAL_RISK"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidence_basis": {
+            "const": "EXACT_QUOTE"
+          },
+          "evidence": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "NO_RISK"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidence_basis": {
+            "enum": [
+              "EXACT_QUOTE",
+              "ABSENCE_AFTER_DOCUMENT_SCAN"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "INSUFFICIENT_EVIDENCE"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidence_basis": {
+            "enum": [
+              "CONTRADICTORY_CONTEXT",
+              "INSUFFICIENT_SOURCE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "NOT_APPLICABLE"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidence_basis": {
+            "const": "NOT_APPLICABLE_REASON"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "review_target": {
+            "const": "LEGAL_PROPOSITION"
+          }
+        },
+        "required": [
+          "review_target"
+        ]
+      },
+      "then": {
+        "required": [
+          "governing_law",
+          "authority_refs"
+        ],
+        "properties": {
+          "governing_law": {
+            "properties": {
+              "status": {
+                "const": "VERIFIED"
+              },
+              "resolved_law": {
+                "type": "string",
+                "minLength": 1
+              },
+              "relevant_date": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          },
+          "authority_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

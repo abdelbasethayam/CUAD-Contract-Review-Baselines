@@ -1,0 +1,12 @@
+{
+  "schema_version": 2,
+  "status": "NOT_RUN",
+  "validation_scope": "PLAYBOOK_RULE_CONFORMANCE_AND_CLASSIFICATION_INDEX_ISOLATION",
+  "started_at_utc": null,
+  "finished_at_utc": null,
+  "elapsed_seconds": null,
+  "git_head_at_run_time": null,
+  "checks": [],
+  "hashes": {},
+  "interpretation": "Placeholder only after changing the Phase 2 evaluation protocol. Run scripts/risk/run_release_checks.py with the backend stopped to regenerate the release report. The release suite validates playbook rules, taxonomy coverage, exact contract quotes, classification-index isolation, synthetic playbook-question regression fixtures, upload smoke tests and backend tests. It does not read custom risk-span annotation datasets or estimate legal-risk accuracy."
+}

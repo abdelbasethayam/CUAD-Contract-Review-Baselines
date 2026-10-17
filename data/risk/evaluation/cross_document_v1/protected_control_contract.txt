@@ -1,0 +1,16 @@
+BALANCED SOFTWARE SERVICES AGREEMENT
+Synthetic regression fixture. Not legal advice.
+
+1. LIABILITY CAP. The aggregate liability of either party for all claims under this Agreement, including indemnification and liquidated damages, shall not exceed the greater of fees paid in the preceding twelve months or $1,000,000. No liability is uncapped unless expressly listed in the signed amendment.
+2. LIQUIDATED DAMAGES. Any liquidated damages are the exclusive monetary remedy for the specified delay and count toward the aggregate liability cap; the agreed amount shall not exceed $50,000.
+3. TERM AND RENEWAL. The initial term is one year. Either party may give written notice of non-renewal at least thirty days before the end of the then-current term.
+4. CONVENIENCE TERMINATION. Either party may terminate for convenience on thirty days' written notice. After the effective termination date, no future minimum commitment or remaining-term fees are due; unused prepaid fees are prorated.
+5. ASSIGNMENT AND CHANGE OF CONTROL. Either party may assign to an affiliate or successor in a merger or sale of substantially all assets on written notice. The same standard applies to a change of control; no inconsistent consent rule applies.
+6. LICENSE DURATION. The license to use the Services continues only during the subscription term. On termination it ends, except that Customer may export its data for ninety days.
+7. IP OWNERSHIP. Customer owns its pre-existing materials and customer-specific deliverables. Supplier receives only a limited license to provide the Services. No assignment occurs without a signed schedule that identifies the assigned IP and grants Customer a perpetual, irrevocable license-back.
+8. SOFTWARE CONTINUITY. For the identified business-critical software, Supplier maintains source-code escrow, tests releases quarterly, and provides transition support for ninety days after termination.
+9. INSURANCE. Supplier shall maintain $5,000,000 of relevant insurance. The aggregate liability cap is $1,000,000, and coverage limits do not reduce or expand the cap.
+10. INDEMNIFICATION. Each party's indemnification obligations are subject to the same aggregate cap, claim notice, defense-control and settlement-consent requirements. No indemnity is outside the cap.
+11. INCORPORATED MATERIALS. Every incorporated schedule and policy is attached by name, date and version. No external web terms are incorporated by reference.
+12. ORDER OF PRECEDENCE. In a conflict, this signed Agreement prevails over an Order Form, schedule or other document unless a later amendment is signed by both parties and explicitly names the clause it replaces.
+13. LAW AND DISPUTES. This Agreement is governed by New York law; exclusive venue is the state and federal courts in New York County. No inconsistent online forum or arbitration procedure applies.

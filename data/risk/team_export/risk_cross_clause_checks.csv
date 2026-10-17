@@ -1,0 +1,11 @@
+﻿id,pair,risk_domain,risk_subdomain,risk_type,question,flag_if,do_not_flag_if,dependencies,jurisdiction_scope,sources
+X-1,"[""Limitation of Liability"",""Uncapped Liability""]",Liability Risk,,,Is there an inconsistency or unclear overlap between capped and uncapped liability heads?,Yes,,,,"[""P2"",""P4""]"
+X-2,"[""Limitation of Liability"",""Liquidated Damages""]",Financial Risk,,,"Are liquidated damages silent, conflicting, or outside the liability cap?",Yes,,,,"[""P2"",""P4""]"
+X-3,"[""Renewal Term"",""Notice Period to Terminate Renewal""]",Termination Risk,,,Is the renewal or non-renewal notice deadline not calculable or outside the current term?,Yes,,,,"[""P5"",""P6""]"
+X-4,"[""Termination for Convenience"",""Minimum Commitment""]",Commercial Risk,,,Does early exit still trigger the full minimum commitment or a heavy fee?,Yes,,,,"[""P5""]"
+X-5,"[""Anti-Assignment"",""Change of Control""]",Assignment / Control Risk,,,Do anti-assignment and change-of-control clauses impose materially different consent standards or consequences for the same corporate event?,Yes,,,,"[""P4"",""P5""]"
+X-6,"[""Irrevocable or Perpetual License"",""Termination for Convenience""]",Intellectual Property Risk,,,Is a perpetual or irrevocable license inconsistent with the contract's termination rights?,Yes,,,,"[""P4"",""P5""]"
+X-7,"[""IP Ownership Assignment"",""License Grant""]",Intellectual Property Risk,,,Does IP assignment leave the other party's license without a clear source of continuing rights?,Yes,,,,"[""P5""]"
+X-8,"[""License Grant"",""Source Code Escrow""]",Operational Risk,,,"Is there a business-critical software license with no escrow, continuity, or post-termination support?",Yes,,,,"[""P5"",""P6""]"
+X-9,"[""Limitation of Liability"",""Insurance""]",Insurance Risk,,,Does the liability cap or residual exposure exceed required insurance limits?,Yes,,,,"[""P2"",""P6""]"
+X-10,"[""Limitation of Liability"",""Indemnification""]",Liability Risk,,,Is indemnification outside the liability cap or otherwise left as potentially uncapped?,Yes,,,,"[""P2"",""P3""]"

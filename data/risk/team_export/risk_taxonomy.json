@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "purpose": "Structured risk guidance only; never use this file as contract evidence.",
+  "risk_domains": [
+    {
+      "risk_domain": "Financial Risk",
+      "risk_types": ["Liquidated Damages Exposure", "Uncapped Monetary Exposure", "Payment Uncertainty"],
+      "description": "Potential financial loss, penalties, fees, or uncapped monetary obligations.",
+      "indicators": ["liquidated damages", "penalty", "fine", "uncapped", "unlimited", "fees", "payment", "costs", "damages"],
+      "severity_guidance": "Increase concern when exposure is fixed, escalating, uncapped, or supported by multiple clauses.",
+      "mitigation_guidance": "Review caps, calculation mechanics, exclusions, notice, cure, and payment controls.",
+      "related_cuad_categories": ["Liquidated Damages", "Payment Terms", "Indemnification", "Limitation Of Liability"]
+    },
+    {
+      "risk_domain": "Liability Risk",
+      "risk_types": ["Uncapped Liability", "Broad Damages Exposure", "Broad Indemnification"],
+      "description": "Potentially disproportionate or unlimited responsibility for losses, claims, or damages.",
+      "indicators": ["liability", "indemnify", "hold harmless", "consequential damages", "third-party claims", "without limitation"],
+      "severity_guidance": "Increase concern where caps, carve-outs, claim scope, or defense controls are absent or broad.",
+      "mitigation_guidance": "Review cap structure, carve-outs, claim scope, defense control, and exclusions.",
+      "related_cuad_categories": ["Limitation Of Liability", "Indemnification", "Insurance"]
+    },
+    {
+      "risk_domain": "Termination Risk",
+      "risk_types": ["Unilateral Termination", "Immediate Termination", "Weak Cure Mechanics"],
+      "description": "Potential operational or commercial disruption caused by termination rights or process.",
+      "indicators": ["terminate", "termination", "without notice", "immediately", "cure", "renewal", "survival"],
+      "severity_guidance": "Increase concern where termination is immediate, unilateral, without cause, or lacks cure and transition controls.",
+      "mitigation_guidance": "Review notice, cause, cure, transition, survival, and post-termination obligations.",
+      "related_cuad_categories": ["Termination For Convenience", "Termination For Breach", "Renewal Term"]
+    },
+    {
+      "risk_domain": "Operational Risk",
+      "risk_types": ["Service Disruption", "Performance Obligation Ambiguity", "Transition Risk"],
+      "description": "Potential interruption, unclear performance, or inability to transition contractual operations.",
+      "indicators": ["service levels", "delivery", "transition", "suspend", "availability", "performance", "notice"],
+      "severity_guidance": "Increase concern where operational obligations are broad, unclear, or tied to suspension or termination.",
+      "mitigation_guidance": "Review measurable obligations, remedies, transition support, and continuity controls.",
+      "related_cuad_categories": ["Service Level Agreement", "Termination", "Supply Agreement"]
+    },
+    {
+      "risk_domain": "Compliance Risk",
+      "risk_types": ["Regulatory Compliance Exposure", "Audit and Reporting Gap"],
+      "description": "Potential failure to meet legal, regulatory, audit, reporting, or policy obligations.",
+      "indicators": ["compliance", "law", "regulation", "audit", "records", "report", "government"],
+      "severity_guidance": "Increase concern where obligations are mandatory, broad, uncapped, or lack verification and remediation.",
+      "mitigation_guidance": "Review applicable laws, audit scope, records, notice, remediation, and allocation of responsibility.",
+      "related_cuad_categories": ["Audit Rights", "Governing Law", "Regulatory Compliance"]
+    },
+    {
+      "risk_domain": "Insurance Risk",
+      "risk_types": ["Coverage Gap", "Insufficient Limits", "Certificate and Additional Insured Gap"],
+      "description": "Potential inability of insurance requirements to support contractual exposure.",
+      "indicators": ["insurance", "coverage", "policy", "certificate", "additional insured", "limits", "maintain"],
+      "severity_guidance": "Increase concern where coverage, limits, policy duration, proof, or additional-insured requirements are unclear.",
+      "mitigation_guidance": "Review policy types, limits, duration, certificates, additional insured status, and notice of cancellation.",
+      "related_cuad_categories": ["Insurance"]
+    },
+    {
+      "risk_domain": "Intellectual Property Risk",
+      "risk_types": ["Broad IP License", "Unclear Ownership", "Assignment Scope Gap"],
+      "description": "Potential loss of control, ownership, or clarity over intellectual property rights.",
+      "indicators": ["intellectual property", "license", "ownership", "assign", "worldwide", "perpetual", "irrevocable", "sublicense"],
+      "severity_guidance": "Increase concern where rights are broad, perpetual, exclusive, transferable, or unclear in subject matter.",
+      "mitigation_guidance": "Review subject matter, scope, territory, duration, exclusivity, ownership, and sublicensing.",
+      "related_cuad_categories": ["License Grant", "IP Ownership Assignment", "Intellectual Property"]
+    },
+    {
+      "risk_domain": "Assignment / Control Risk",
+      "risk_types": ["Change of Control Restriction", "Unapproved Assignment", "Consent Ambiguity"],
+      "description": "Potential inability to transfer, reorganize, or control contractual rights and obligations.",
+      "indicators": ["assignment", "assign", "transfer", "affiliate", "change of control", "consent", "control"],
+      "severity_guidance": "Increase concern where consent is broad, unilateral, unclear, or triggered by ordinary corporate events.",
+      "mitigation_guidance": "Review permitted transfers, affiliates, control changes, consent standards, and termination consequences.",
+      "related_cuad_categories": ["Anti-Assignment", "Change Of Control"]
+    },
+    {
+      "risk_domain": "Dispute Resolution Risk",
+      "risk_types": ["Unclear Dispute Mechanics", "Governing Law Mismatch", "Arbitration Cost Exposure"],
+      "description": "Potential uncertainty or cost in enforcing rights and resolving disputes.",
+      "indicators": ["arbitration", "mediation", "dispute", "governing law", "venue", "jurisdiction", "costs"],
+      "severity_guidance": "Increase concern where forum, rules, seat, costs, notice, or governing law are unclear or conflicting.",
+      "mitigation_guidance": "Review forum, seat, rules, governing law, escalation, confidentiality, and cost allocation.",
+      "related_cuad_categories": ["Arbitration", "Governing Law", "Dispute Resolution"]
+    },
+    {
+      "risk_domain": "Commercial Risk",
+      "risk_types": ["Exclusivity Constraint", "Minimum Commitment", "Pricing and Renewal Exposure"],
+      "description": "Potential restriction or imbalance affecting commercial flexibility and economics.",
+      "indicators": ["exclusive", "exclusivity", "minimum commitment", "price", "renewal", "volume", "discount"],
+      "severity_guidance": "Increase concern where commitments are fixed, automatic, exclusive, or difficult to exit.",
+      "mitigation_guidance": "Review scope, duration, minimums, adjustment rights, renewal notice, and exit mechanics.",
+      "related_cuad_categories": ["Exclusivity", "Minimum Commitment", "Renewal Term", "Prices And Charges"]
+    }
+  ]
+}

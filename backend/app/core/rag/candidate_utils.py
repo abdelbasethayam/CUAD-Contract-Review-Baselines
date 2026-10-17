@@ -62,9 +62,9 @@ def fuse_confidence(
     """Simple calibrated-ish confidence in [0, 1] for logging / UI."""
     base = 0.0
     if retrieval_score is not None:
-        # Map cosine-ish scores into 0-1 with a soft floor at min_retrieval
-        base = max(0.0, min(1.0, (float(retrieval_score) - min_retrieval) / max(1e-6, 1.0 - min_retrieval)))
-        base = 0.35 + 0.50 * base
+        # Use the actual retrieval score as the conservative base; do not add
+        # an artificial confidence floor to a weak match when the model abstains.
+        base = max(0.0, min(1.0, float(retrieval_score)))
     if model_valid:
         base = max(base, 0.45)
     if rule_agrees and model_valid:

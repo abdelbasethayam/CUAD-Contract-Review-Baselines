@@ -1,0 +1,42 @@
+{
+  "report_version": "phase2-playbook-rule-report-v1",
+  "generated_at_utc": null,
+  "git_head_at_report_time": null,
+  "status": "NOT_RUN",
+  "evaluation_mode": "PLAYBOOK_RULE_CONFORMANCE",
+  "annotation_datasets_read": false,
+  "risk_text_span_dataset_used_for_flagging": false,
+  "fine_tuning_used": false,
+  "playbook": {
+    "title": "Commercial Contract Risk Playbook — rule-first screening",
+    "source_version": "1.2",
+    "clause_type_count": 37,
+    "clause_question_count": 101,
+    "cross_clause_check_count": 10,
+    "document_check_count": 3,
+    "deterministic_rule_count": 7
+  },
+  "taxonomy": {
+    "domain_count": 10,
+    "domains": []
+  },
+  "classification_index_isolation": {
+    "status": "NOT_RUN",
+    "checks_passed": null,
+    "checks_total": null,
+    "train_contracts": null,
+    "test_contracts": null,
+    "train_clause_rows": null,
+    "test_clause_rows": null
+  },
+  "rule_validation": {
+    "status": "NOT_RUN",
+    "checks_passed": null,
+    "checks_total": null,
+    "checks": []
+  },
+  "checks": [],
+  "checks_passed": 0,
+  "checks_total": 0,
+  "interpretation": "Placeholder only. Run scripts/risk/run_release_checks.py with the backend stopped to regenerate this report from the active playbook-rule validator and classification-index isolation checks. The current risk path and release report do not read custom risk-span annotation datasets."
+}

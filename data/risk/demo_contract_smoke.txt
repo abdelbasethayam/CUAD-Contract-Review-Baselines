@@ -1,0 +1,14 @@
+SAMPLE SOFTWARE SERVICES AGREEMENT — SYNTHETIC TEST FIXTURE
+This fictional agreement is created only to test the contract-review pipeline.
+
+1. LIABILITY
+Customer's aggregate liability shall not exceed fees paid in the prior month. Supplier's liability is unlimited for all claims and includes indemnification obligations.
+
+2. INDEMNIFICATION
+Customer shall indemnify and defend Supplier against any and all claims. Supplier has no obligation to indemnify Customer for third-party intellectual-property infringement claims.
+
+3. TERM AND TERMINATION
+This Agreement automatically renews for successive one-year terms unless Customer gives notice 120 days before renewal. Supplier may terminate immediately for any breach. Customer may terminate for material breach only after a 90-day cure period and remains liable for all remaining minimum fees.
+
+4. INTELLECTUAL PROPERTY AND PRECEDENCE
+Supplier grants Customer a perpetual, irrevocable, worldwide, transferable license to use, modify and distribute the software. Supplier's online terms prevail over this Agreement in any conflict and may be updated at any time; no fixed version is attached.

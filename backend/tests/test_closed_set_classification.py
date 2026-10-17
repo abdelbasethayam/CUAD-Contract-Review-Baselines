@@ -10,6 +10,8 @@ DEFINITIONS = {
 
 
 def _classify(monkeypatch, retrieved, response, *, response_side_effect=None):
+    # Isolate closed-set model parsing from the separate high-precision rule path.
+    monkeypatch.setattr(generator, "high_precision_rule_label", lambda *args, **kwargs: None)
     monkeypatch.setattr(generator, "retrieve_similar", lambda *args, **kwargs: retrieved)
     if response_side_effect is not None:
         monkeypatch.setattr(
@@ -88,6 +90,7 @@ def test_empty_retrieval_abstains_even_if_model_returns_a_label(monkeypatch):
         retrieval_calls.append(kwargs.get("top_k"))
         return []
 
+    monkeypatch.setattr(generator, "high_precision_rule_label", lambda *args, **kwargs: None)
     monkeypatch.setattr(generator, "retrieve_similar", fake_retrieve)
     monkeypatch.setattr(generator, "call_ollama", lambda prompt: '{"clause_type":"Insurance"}')
 
@@ -97,6 +100,7 @@ def test_empty_retrieval_abstains_even_if_model_returns_a_label(monkeypatch):
         qdrant_client=object(),
         labels=LABELS,
         label_definitions=DEFINITIONS,
+        top_k=5,
     )
 
     assert retrieval_calls == [5, 10]
@@ -122,6 +126,7 @@ def test_multiple_similar_labels_remain_deduplicated_and_ranked(monkeypatch):
 
 
 def test_empty_retrieval_and_provider_failure_use_deterministic_full_set_fallback(monkeypatch):
+    monkeypatch.setattr(generator, "high_precision_rule_label", lambda *args, **kwargs: None)
     monkeypatch.setattr(generator, "retrieve_similar", lambda *args, **kwargs: [])
 
     def fail_provider(prompt):

@@ -26,6 +26,7 @@ OFFICIAL_HOSTS = {
     "www.nysenate.gov",
     "nysenate.gov",
     "delcode.delaware.gov",
+    "leginfo.legislature.ca.gov",
     "www.ftc.gov",
     "ftc.gov",
 }

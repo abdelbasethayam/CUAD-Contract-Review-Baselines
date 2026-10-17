@@ -14,13 +14,15 @@ class RiskFinding(BaseModel):
     risk_status: str = "INSUFFICIENT_EVIDENCE"
     risk: bool = False
     risk_type: str | None = None
-    risk_level: str | None = None
-    raw_support_score: float | None = None
-    severity_signal: float | None = None
-    confidence: float | None = None
+    risk_level: str | None = Field(default=None, description="Deprecated: ordinal severity labels are not used.")
+    raw_support_score: float | None = Field(default=None, description="Uncalibrated diagnostic support signal; not a probability.")
+    severity_signal: float | None = Field(default=None, description="Deprecated: ordinal severity signals are not used.")
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0, description="Calibrated probability that the predicted YES/NO finding matches adjudicated reviewer labels; null until a validated artifact exists.")
     confidence_status: str = "UNCALIBRATED"
-    severity_status: str = "UNCALIBRATED"
-    severity_probabilities: dict[str, float] = Field(default_factory=dict)
+    confidence_target: str = "PREDICTION_CORRECTNESS"
+    confidence_calibration_version: str | None = None
+    severity_status: str = "DEPRECATED_NOT_USED"
+    severity_probabilities: dict[str, float] = Field(default_factory=dict, description="Deprecated; no severity probabilities are generated.")
     ground_truth_status: str = "NOT_AVAILABLE"
     why_flagged: str = ""
     evidence: str = ""
@@ -50,12 +52,15 @@ class RiskFinding(BaseModel):
 
 class ContractRiskAssessment(BaseModel):
     status: str = "NOT_AVAILABLE"
-    overall_risk: str | None = None
-    overall_confidence: float | None = None
-    confidence_status: str = "UNCALIBRATED"
-    overall_raw_risk_score: float | None = None
-    severity_status: str = "UNCALIBRATED"
+    overall_risk: str | None = Field(default=None, description="Categorical review outcome such as POTENTIAL_RISK, NO_RISK, or INSUFFICIENT_EVIDENCE; not a severity label.")
+    overall_confidence: float | None = Field(default=None, description="No contract-level probability is emitted without a separately validated contract-level calibrator.")
+    confidence_status: str = "NOT_CALIBRATED_FOR_CONTRACT_LEVEL"
+    confidence_target: str = "PREDICTION_CORRECTNESS"
+    overall_raw_risk_score: float | None = Field(default=None, description="Deprecated; contract-level severity scoring is disabled.")
+    severity_status: str = "DEPRECATED_NOT_USED"
+    rule_registry: dict[str, Any] = Field(default_factory=dict)
     risk_domains: list[dict[str, Any]] = Field(default_factory=list)
+    deterministic_cross_checks: list[dict[str, Any]] = Field(default_factory=list)
     key_risks: list[dict[str, Any]] = Field(default_factory=list)
     affected_clauses: list[int] = Field(default_factory=list)
     reason: str = ""
@@ -65,12 +70,12 @@ class ContractRiskAssessment(BaseModel):
     cross_clause_findings: list[dict[str, Any]] = Field(default_factory=list)
     document_findings: list[dict[str, Any]] = Field(default_factory=list)
     unresolved_check_count: int = 0
-    overall_score: int | None = None
-    overall_severity: str | None = None
+    overall_score: int | None = Field(default=None, description="Deprecated: contract-level numeric severity score is not generated.")
+    overall_severity: str | None = Field(default=None, description="Deprecated: ordinal severity labels are not generated.")
     aggregation_adjustments: list[dict[str, Any]] = Field(default_factory=list)
     human_review_required: bool = False
-    high_count: int = 0
-    critical_count: int = 0
+    high_count: int = Field(default=0, description="Deprecated compatibility field; always zero.")
+    critical_count: int = Field(default=0, description="Deprecated compatibility field; always zero.")
 
 
 class ContractMetadata(BaseModel):
@@ -126,11 +131,14 @@ class ClauseResult(BaseModel):
     risk_status: str = "NOT_ANALYZED"
     risk: bool = False
     risk_type: str | None = None
-    risk_level: str | None = None
-    risk_confidence: float | None = None
+    risk_level: str | None = Field(default=None, description="Deprecated: ordinal severity labels are not used.")
+    risk_confidence: float | None = Field(default=None, ge=0.0, le=1.0, description="Calibrated prediction-correctness probability when available.")
     risk_confidence_status: str = "UNCALIBRATED"
-    risk_severity_signal: float | None = None
-    risk_severity_status: str = "UNCALIBRATED"
+    risk_confidence_target: str = "PREDICTION_CORRECTNESS"
+    risk_confidence_calibration_version: str | None = None
+    risk_raw_support_score: float | None = Field(default=None, description="Uncalibrated support diagnostic; not a probability.")
+    risk_severity_signal: float | None = Field(default=None, description="Deprecated.")
+    risk_severity_status: str = "DEPRECATED_NOT_USED"
     risk_provenance: dict[str, Any] = Field(default_factory=dict)
     why_flagged: str = ""
     evidence: str = ""
@@ -146,5 +154,4 @@ class ContractClassificationResponse(BaseModel):
     contract_risk_assessment: ContractRiskAssessment = Field(
         default_factory=ContractRiskAssessment
     )
-    provenance: dict[str, Any] = Field(default_factory=dict)
     downloads: dict[str, str] = Field(default_factory=dict)

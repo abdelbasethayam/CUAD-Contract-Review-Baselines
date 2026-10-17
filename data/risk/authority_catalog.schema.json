@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Authority catalog schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "catalog_version",
+    "retrieval_date",
+    "purpose",
+    "jurisdiction_policy",
+    "authorities"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "catalog_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retrieval_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "jurisdiction_policy": {
+      "type": "object",
+      "required": [
+        "primary_dataset_alignment",
+        "initial_scope",
+        "selection_rule",
+        "legal_conclusion_policy",
+        "explicit_out_of_scope"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "primary_dataset_alignment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "initial_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selection_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "legal_conclusion_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "explicit_out_of_scope": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "authorities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "authority_id",
+          "title",
+          "citation",
+          "retrieval_date",
+          "source_type",
+          "jurisdiction",
+          "source_tier",
+          "url",
+          "pinpoint",
+          "verification_status",
+          "currentness_status",
+          "scope_limit",
+          "authority_status",
+          "effective_date",
+          "effective_date_status"
+        ],
+        "properties": {
+          "authority_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "citation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_type": {
+            "enum": [
+              "FEDERAL_STATUTE",
+              "STATE_STATUTE",
+              "REGULATOR_STATUS_NOTICE",
+              "PRIMARY_COURT_OPINION_REPUBLISHED"
+            ]
+          },
+          "jurisdiction": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_tier": {
+            "enum": [
+              "A",
+              "B"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "pinpoint": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification_status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "currentness_status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope_limit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieval_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "authority_status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "effective_date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "effective_date_status": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

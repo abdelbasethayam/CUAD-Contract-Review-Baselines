@@ -1,13 +1,13 @@
 {
   "schema_version": 3,
-  "source_version": "1.0",
-  "title": "Commercial Contract Risk Playbook — CUAD 36 + Indemnification (37 clause-risk targets)",
+  "source_version": "1.2",
+  "title": "Commercial Contract Risk Playbook — rule-first screening + 37 clause-risk targets",
   "perspective": "customer_buyer",
   "policy_tier": "D",
   "owner": null,
   "effective_date": null,
   "approval_status": "UNAPPROVED",
-  "disclaimer": "Structural commercial-risk screening only. This playbook is policy/guidance, not legal advice or human gold ground truth. All material findings require exact contractual evidence and, where applicable, legal/source verification.",
+  "disclaimer": "Rule-first commercial contract review prioritization. The deterministic_rules section contains executable text predicates evaluated only against the uploaded contract. A rule match is a review trigger, not a legal conclusion. Checklist questions handle nuanced cases. CUAD classification examples and machine-silver text spans are not risk evidence, are not used to flag risks, and are not required for release.",
   "sources": {
     "P1": {
       "id": "P1",
@@ -57,7 +57,7 @@
       "checklist": [
         {
           "id": "AA-1",
-          "risk_domain": null,
+          "risk_domain": "Assignment / Control Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -81,7 +81,7 @@
         },
         {
           "id": "AA-2",
-          "risk_domain": null,
+          "risk_domain": "Assignment / Control Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -105,7 +105,7 @@
         },
         {
           "id": "AA-3",
-          "risk_domain": null,
+          "risk_domain": "Assignment / Control Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -141,7 +141,7 @@
       "checklist": [
         {
           "id": "AUD-1",
-          "risk_domain": null,
+          "risk_domain": "Compliance Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -166,7 +166,7 @@
         },
         {
           "id": "AUD-2",
-          "risk_domain": null,
+          "risk_domain": "Compliance Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -207,12 +207,12 @@
       "checklist": [
         {
           "id": "LOL-1",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
-          "question": "Is there an express monetary or fee-based liability cap?",
-          "flag_if": "No",
+          "question": "Is there no express monetary or fee-based liability cap?",
+          "flag_if": "Yes",
           "do_not_flag_if": [],
           "required_evidence": [
             "Relevant contract text supporting the finding"
@@ -233,7 +233,7 @@
         },
         {
           "id": "LOL-2",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -258,12 +258,12 @@
         },
         {
           "id": "LOL-3",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
-          "question": "Is the cap tied to a meaningful measure (for example about 12 months of fees) rather than a nominal fixed sum?",
-          "flag_if": "Nominal or very low fixed cap relative to deal value or exposure",
+          "question": "Is the liability cap nominal or very low relative to deal value or exposure?",
+          "flag_if": "Yes",
           "do_not_flag_if": [],
           "required_evidence": [
             "Relevant contract text supporting the finding"
@@ -283,12 +283,12 @@
         },
         {
           "id": "LOL-4",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
-          "question": "Are high-risk heads carved out (IP, confidentiality/data, fraud, willful misconduct, gross negligence)?",
-          "flag_if": "None or weak carve-outs",
+          "question": "Are high-risk heads missing from the liability-cap carve-outs (for example IP, confidentiality/data, fraud, willful misconduct, gross negligence)?",
+          "flag_if": "Yes",
           "do_not_flag_if": [],
           "required_evidence": [
             "Relevant contract text supporting the finding"
@@ -308,13 +308,15 @@
         },
         {
           "id": "LOL-5",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
-          "question": "Does the clause exclude consequential or indirect damages in a one-sided way against the reviewing party?",
+          "question": "Is the exclusion of consequential or indirect damages one-sided against the reviewing party?",
           "flag_if": "Yes",
-          "do_not_flag_if": [],
+          "do_not_flag_if": [
+            "The exclusion applies reciprocally to both parties, such as language stating 'neither party' or equivalent mutual treatment."
+          ],
           "required_evidence": [
             "Relevant contract text supporting the finding"
           ],
@@ -345,7 +347,7 @@
       "checklist": [
         {
           "id": "COC-1",
-          "risk_domain": null,
+          "risk_domain": "Assignment / Control Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -369,7 +371,7 @@
         },
         {
           "id": "COC-2",
-          "risk_domain": null,
+          "risk_domain": "Assignment / Control Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -406,7 +408,7 @@
       "checklist": [
         {
           "id": "EXC-1",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -430,7 +432,7 @@
         },
         {
           "id": "EXC-2",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -465,7 +467,7 @@
       "checklist": [
         {
           "id": "GOV-1",
-          "risk_domain": null,
+          "risk_domain": "Dispute Resolution Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -489,7 +491,7 @@
         },
         {
           "id": "GOV-2",
-          "risk_domain": null,
+          "risk_domain": "Dispute Resolution Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -526,7 +528,7 @@
       "checklist": [
         {
           "id": "INS-1",
-          "risk_domain": null,
+          "risk_domain": "Insurance Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -551,7 +553,7 @@
         },
         {
           "id": "INS-2",
-          "risk_domain": null,
+          "risk_domain": "Insurance Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -590,7 +592,7 @@
       "checklist": [
         {
           "id": "IP-1",
-          "risk_domain": null,
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -615,7 +617,7 @@
         },
         {
           "id": "IP-2",
-          "risk_domain": null,
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -640,7 +642,7 @@
         },
         {
           "id": "IP-3",
-          "risk_domain": null,
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -664,7 +666,7 @@
         },
         {
           "id": "IP-4",
-          "risk_domain": null,
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -697,7 +699,8 @@
       ],
       "checklist": [
         {
-          "id": "IPL-1",          "risk_domain": null,
+          "id": "IPL-1",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -721,7 +724,7 @@
         },
         {
           "id": "IPL-2",
-          "risk_domain": null,
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -746,7 +749,7 @@
         },
         {
           "id": "IPL-3",
-          "risk_domain": null,
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -784,7 +787,7 @@
       "checklist": [
         {
           "id": "LIC-1",
-          "risk_domain": null,
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -809,7 +812,7 @@
         },
         {
           "id": "LIC-2",
-          "risk_domain": null,
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -833,7 +836,7 @@
         },
         {
           "id": "LIC-3",
-          "risk_domain": null,
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -868,7 +871,7 @@
       "checklist": [
         {
           "id": "LD-1",
-          "risk_domain": null,
+          "risk_domain": "Financial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -893,7 +896,7 @@
         },
         {
           "id": "LD-2",
-          "risk_domain": null,
+          "risk_domain": "Financial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -930,7 +933,7 @@
       "checklist": [
         {
           "id": "MIN-1",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -955,7 +958,7 @@
         },
         {
           "id": "MIN-2",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -992,7 +995,7 @@
       "checklist": [
         {
           "id": "MFN-1",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1017,7 +1020,7 @@
         },
         {
           "id": "MFN-2",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1054,7 +1057,7 @@
       "checklist": [
         {
           "id": "NC-1",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1079,7 +1082,7 @@
         },
         {
           "id": "NC-2",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1116,7 +1119,7 @@
       "checklist": [
         {
           "id": "NS-1",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1140,7 +1143,7 @@
         },
         {
           "id": "NS-2",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1178,7 +1181,7 @@
       "checklist": [
         {
           "id": "NS-1",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1202,7 +1205,7 @@
         },
         {
           "id": "NS-2",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1239,7 +1242,7 @@
       "checklist": [
         {
           "id": "NOT-1",
-          "risk_domain": null,
+          "risk_domain": "Termination Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1264,7 +1267,7 @@
         },
         {
           "id": "NOT-2",
-          "risk_domain": null,
+          "risk_domain": "Termination Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1289,7 +1292,7 @@
         },
         {
           "id": "NOT-3",
-          "risk_domain": null,
+          "risk_domain": "Termination Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1326,7 +1329,7 @@
       "checklist": [
         {
           "id": "PTS-1",
-          "risk_domain": null,
+          "risk_domain": "Operational Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1351,7 +1354,7 @@
         },
         {
           "id": "PTS-2",
-          "risk_domain": null,
+          "risk_domain": "Operational Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1388,7 +1391,7 @@
       "checklist": [
         {
           "id": "PR-1",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1396,7 +1399,8 @@
           "flag_if": "Yes",
           "do_not_flag_if": [],
           "required_evidence": [
-            "Relevant contract text supporting the finding"          ],
+            "Relevant contract text supporting the finding"
+          ],
           "evidence_location": "clause",
           "severity_factors": [],
           "dependencies": [],
@@ -1412,7 +1416,7 @@
         },
         {
           "id": "PR-2",
-          "risk_domain": null,
+          "risk_domain": "Commercial Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1448,7 +1452,7 @@
       "checklist": [
         {
           "id": "REN-1",
-          "risk_domain": null,
+          "risk_domain": "Termination Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1473,7 +1477,7 @@
         },
         {
           "id": "REN-2",
-          "risk_domain": null,
+          "risk_domain": "Termination Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1498,7 +1502,7 @@
         },
         {
           "id": "REN-3",
-          "risk_domain": null,
+          "risk_domain": "Termination Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1534,7 +1538,7 @@
       "checklist": [
         {
           "id": "ESC-1",
-          "risk_domain": null,
+          "risk_domain": "Operational Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1559,7 +1563,7 @@
         },
         {
           "id": "ESC-2",
-          "risk_domain": null,
+          "risk_domain": "Operational Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1596,7 +1600,7 @@
       "checklist": [
         {
           "id": "TFC-1",
-          "risk_domain": null,
+          "risk_domain": "Termination Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1621,7 +1625,7 @@
         },
         {
           "id": "TFC-2",
-          "risk_domain": null,
+          "risk_domain": "Termination Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1646,7 +1650,7 @@
         },
         {
           "id": "TFC-3",
-          "risk_domain": null,
+          "risk_domain": "Termination Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1683,7 +1687,7 @@
       "checklist": [
         {
           "id": "UNC-1",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1708,7 +1712,7 @@
         },
         {
           "id": "UNC-2",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1733,7 +1737,7 @@
         },
         {
           "id": "UNC-3",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1758,7 +1762,7 @@
         },
         {
           "id": "UNC-4",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1797,7 +1801,7 @@
       "checklist": [
         {
           "id": "WAR-1",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1822,7 +1826,7 @@
         },
         {
           "id": "WAR-2",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1857,7 +1861,7 @@
       "checklist": [
         {
           "id": "AFFLS-1",
-          "risk_domain": "IP / Licensing / Scope",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1875,11 +1879,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "IP / Licensing / Scope"
         },
         {
           "id": "AFFLS-2",
-          "risk_domain": "IP / Licensing / Scope",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1897,11 +1902,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "IP / Licensing / Scope"
         },
         {
           "id": "AFFLS-3",
-          "risk_domain": "IP / Licensing / Scope",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1919,7 +1925,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "IP / Licensing / Scope"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -1934,7 +1941,7 @@
       "checklist": [
         {
           "id": "AFFLR-1",
-          "risk_domain": "IP / Chain of Title",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1952,11 +1959,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "IP / Chain of Title"
         },
         {
           "id": "AFFLR-2",
-          "risk_domain": "IP / Chain of Title",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1974,11 +1982,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "IP / Chain of Title"
         },
         {
           "id": "AFFLR-3",
-          "risk_domain": "IP / Chain of Title",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -1996,7 +2005,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "IP / Chain of Title"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2011,7 +2021,7 @@
       "checklist": [
         {
           "id": "CRE-1",
-          "risk_domain": "Competitive Restrictions",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2029,11 +2039,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Competitive Restrictions"
         },
         {
           "id": "CRE-2",
-          "risk_domain": "Competitive Restrictions",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2051,11 +2062,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Competitive Restrictions"
         },
         {
           "id": "CRE-3",
-          "risk_domain": "Competitive Restrictions",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2073,7 +2085,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Competitive Restrictions"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2088,14 +2101,15 @@
       "checklist": [
         {
           "id": "CNTS-1",
-          "risk_domain": "Claims / Enforcement",
+          "risk_domain": "Dispute Resolution Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
           "question": "Does the covenant restrict claims or enforcement rights more broadly than the commercial arrangement requires?",
           "flag_if": "Yes",
           "do_not_flag_if": [],
-          "required_evidence": [            "Exact clause text supporting the finding"
+          "required_evidence": [
+            "Exact clause text supporting the finding"
           ],
           "evidence_location": "clause",
           "severity_factors": [],
@@ -2105,11 +2119,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Claims / Enforcement"
         },
         {
           "id": "CNTS-2",
-          "risk_domain": "Claims / Enforcement",
+          "risk_domain": "Dispute Resolution Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2127,11 +2142,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Claims / Enforcement"
         },
         {
           "id": "CNTS-3",
-          "risk_domain": "Claims / Enforcement",
+          "risk_domain": "Dispute Resolution Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2149,7 +2165,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Claims / Enforcement"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2164,7 +2181,7 @@
       "checklist": [
         {
           "id": "JIPO-1",
-          "risk_domain": "IP Ownership / Governance",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2182,11 +2199,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "IP Ownership / Governance"
         },
         {
           "id": "JIPO-2",
-          "risk_domain": "IP Ownership / Governance",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2204,11 +2222,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "IP Ownership / Governance"
         },
         {
           "id": "JIPO-3",
-          "risk_domain": "IP Ownership / Governance",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2226,7 +2245,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "IP Ownership / Governance"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2241,7 +2261,7 @@
       "checklist": [
         {
           "id": "NDS-1",
-          "risk_domain": "Conduct / Communications",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2259,11 +2279,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Conduct / Communications"
         },
         {
           "id": "NDS-2",
-          "risk_domain": "Conduct / Communications",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2281,11 +2302,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Conduct / Communications"
         },
         {
           "id": "NDS-3",
-          "risk_domain": "Conduct / Communications",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2303,7 +2325,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Conduct / Communications"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2318,7 +2341,7 @@
       "checklist": [
         {
           "id": "NTL-1",
-          "risk_domain": "Licensing / Transfer",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2336,11 +2359,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Licensing / Transfer"
         },
         {
           "id": "NTL-2",
-          "risk_domain": "Licensing / Transfer",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2358,11 +2382,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Licensing / Transfer"
         },
         {
           "id": "NTL-3",
-          "risk_domain": "Licensing / Transfer",
+          "risk_domain": "Intellectual Property Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2380,7 +2405,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Licensing / Transfer"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2397,7 +2423,7 @@
       "checklist": [
         {
           "id": "RPS-1",
-          "risk_domain": "Commercial Economics",
+          "risk_domain": "Financial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2415,11 +2441,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Commercial Economics"
         },
         {
           "id": "RPS-2",
-          "risk_domain": "Commercial Economics",
+          "risk_domain": "Financial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2437,11 +2464,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Commercial Economics"
         },
         {
           "id": "RPS-3",
-          "risk_domain": "Commercial Economics",
+          "risk_domain": "Financial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2459,7 +2487,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Commercial Economics"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2477,7 +2506,7 @@
       "checklist": [
         {
           "id": "ROFR-1",
-          "risk_domain": "Commercial Rights / Process",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2495,11 +2524,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Commercial Rights / Process"
         },
         {
           "id": "ROFR-2",
-          "risk_domain": "Commercial Rights / Process",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2517,11 +2547,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Commercial Rights / Process"
         },
         {
           "id": "ROFR-3",
-          "risk_domain": "Commercial Rights / Process",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2539,7 +2570,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Commercial Rights / Process"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2554,7 +2586,7 @@
       "checklist": [
         {
           "id": "TPB-1",
-          "risk_domain": "Contract Scope / Enforcement",
+          "risk_domain": "Dispute Resolution Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2572,11 +2604,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Contract Scope / Enforcement"
         },
         {
           "id": "TPB-2",
-          "risk_domain": "Contract Scope / Enforcement",
+          "risk_domain": "Dispute Resolution Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2594,11 +2627,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Contract Scope / Enforcement"
         },
         {
           "id": "TPB-3",
-          "risk_domain": "Contract Scope / Enforcement",
+          "risk_domain": "Dispute Resolution Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2616,7 +2650,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Contract Scope / Enforcement"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2632,7 +2667,7 @@
       "checklist": [
         {
           "id": "UAEL-1",
-          "risk_domain": "Licensing / Capacity / Commercial Scope",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2650,11 +2685,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Licensing / Capacity / Commercial Scope"
         },
         {
           "id": "UAEL-2",
-          "risk_domain": "Licensing / Capacity / Commercial Scope",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2672,11 +2708,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Licensing / Capacity / Commercial Scope"
         },
         {
           "id": "UAEL-3",
-          "risk_domain": "Licensing / Capacity / Commercial Scope",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2694,7 +2731,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Licensing / Capacity / Commercial Scope"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2710,7 +2748,7 @@
       "checklist": [
         {
           "id": "VOL-1",
-          "risk_domain": "Commercial Capacity / Service Levels",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2728,11 +2766,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Commercial Capacity / Service Levels"
         },
         {
           "id": "VOL-2",
-          "risk_domain": "Commercial Capacity / Service Levels",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2750,11 +2789,12 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Commercial Capacity / Service Levels"
         },
         {
           "id": "VOL-3",
-          "risk_domain": "Commercial Capacity / Service Levels",
+          "risk_domain": "Commercial Risk",
           "risk_type": "STRUCTURAL_SCREEN",
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2772,7 +2812,8 @@
           ],
           "rationale": "Added to close a CUAD category coverage gap; requires human adjudication before evaluation claims.",
           "version": "1.0",
-          "sources": []
+          "sources": [],
+          "risk_subdomain": "Commercial Capacity / Service Levels"
         }
       ],
       "coverage_status": "ADDED_CUAD_COVERAGE",
@@ -2789,12 +2830,13 @@
       "checklist": [
         {
           "id": "IND-1",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
           "question": "Is the indemnity obligation one-sided against the reviewing party?",
-          "flag_if": "Yes",          "do_not_flag_if": [],
+          "flag_if": "Yes",
+          "do_not_flag_if": [],
           "required_evidence": [
             "Relevant contract text supporting the finding"
           ],
@@ -2814,7 +2856,7 @@
         },
         {
           "id": "IND-2",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2839,7 +2881,7 @@
         },
         {
           "id": "IND-3",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2865,7 +2907,7 @@
         },
         {
           "id": "IND-4",
-          "risk_domain": null,
+          "risk_domain": "Liability Risk",
           "risk_type": null,
           "perspective": "customer_buyer",
           "applies_when": [],
@@ -2900,12 +2942,13 @@
         "Limitation of Liability",
         "Uncapped Liability"
       ],
-      "question": "Are carve-out lists for capped and uncapped heads consistent?",
-      "flag_if": "They differ or overlap is unclear",
+      "question": "Is there an inconsistency or unclear overlap between capped and uncapped liability heads?",
+      "flag_if": "Yes",
       "sources": [
         "P2",
         "P4"
-      ]
+      ],
+      "risk_domain": "Liability Risk"
     },
     {
       "id": "X-2",
@@ -2913,12 +2956,13 @@
         "Limitation of Liability",
         "Liquidated Damages"
       ],
-      "question": "Are liquidated damages inside or outside the liability cap, and is that stated?",
-      "flag_if": "Silent or conflicting",
+      "question": "Are liquidated damages silent, conflicting, or outside the liability cap?",
+      "flag_if": "Yes",
       "sources": [
         "P2",
         "P4"
-      ]
+      ],
+      "risk_domain": "Financial Risk"
     },
     {
       "id": "X-3",
@@ -2926,12 +2970,13 @@
         "Renewal Term",
         "Notice Period to Terminate Renewal"
       ],
-      "question": "Is the non-renewal notice deadline calculable and inside the current term?",
-      "flag_if": "No",
+      "question": "Is the renewal or non-renewal notice deadline not calculable or outside the current term?",
+      "flag_if": "Yes",
       "sources": [
         "P5",
         "P6"
-      ]
+      ],
+      "risk_domain": "Termination Risk"
     },
     {
       "id": "X-4",
@@ -2943,7 +2988,8 @@
       "flag_if": "Yes",
       "sources": [
         "P5"
-      ]
+      ],
+      "risk_domain": "Commercial Risk"
     },
     {
       "id": "X-5",
@@ -2951,12 +2997,13 @@
         "Anti-Assignment",
         "Change of Control"
       ],
-      "question": "Do the two clauses apply different consent standards or consequences to the same corporate event?",
+      "question": "Do anti-assignment and change-of-control clauses impose materially different consent standards or consequences for the same corporate event?",
       "flag_if": "Yes",
       "sources": [
         "P4",
         "P5"
-      ]
+      ],
+      "risk_domain": "Assignment / Control Risk"
     },
     {
       "id": "X-6",
@@ -2964,12 +3011,13 @@
         "Irrevocable or Perpetual License",
         "Termination for Convenience"
       ],
-      "question": "Can the supplier end a license described as irrevocable or perpetual?",
+      "question": "Is a perpetual or irrevocable license inconsistent with the contract's termination rights?",
       "flag_if": "Yes",
       "sources": [
         "P4",
         "P5"
-      ]
+      ],
+      "risk_domain": "Intellectual Property Risk"
     },
     {
       "id": "X-7",
@@ -2977,11 +3025,12 @@
         "IP Ownership Assignment",
         "License Grant"
       ],
-      "question": "Does IP assignment leave the other party's license without a source of rights?",
+      "question": "Does IP assignment leave the other party's license without a clear source of continuing rights?",
       "flag_if": "Yes",
       "sources": [
         "P5"
-      ]
+      ],
+      "risk_domain": "Intellectual Property Risk"
     },
     {
       "id": "X-8",
@@ -2994,7 +3043,8 @@
       "sources": [
         "P5",
         "P6"
-      ]
+      ],
+      "risk_domain": "Operational Risk"
     },
     {
       "id": "X-9",
@@ -3007,7 +3057,8 @@
       "sources": [
         "P2",
         "P6"
-      ]
+      ],
+      "risk_domain": "Insurance Risk"
     },
     {
       "id": "X-10",
@@ -3015,12 +3066,13 @@
         "Limitation of Liability",
         "Indemnification"
       ],
-      "question": "Is indemnification inside or outside the cap, and is the interaction stated?",
-      "flag_if": "Silent, conflicting, or uncapped broad indemnity against reviewing party",
+      "question": "Is indemnification outside the liability cap or otherwise left as potentially uncapped?",
+      "flag_if": "Yes",
       "sources": [
         "P2",
         "P3"
-      ]
+      ],
+      "risk_domain": "Liability Risk"
     }
   ],
   "document_level_checks": [
@@ -3031,7 +3083,8 @@
       "sources": [
         "P4",
         "P6"
-      ]
+      ],
+      "risk_domain": "Commercial Risk"
     },
     {
       "id": "DOC-2",
@@ -3040,7 +3093,8 @@
       "sources": [
         "P4",
         "P5"
-      ]
+      ],
+      "risk_domain": "Dispute Resolution Risk"
     },
     {
       "id": "DOC-3",
@@ -3049,7 +3103,8 @@
       "sources": [
         "P5",
         "P6"
-      ]
+      ],
+      "risk_domain": "Dispute Resolution Risk"
     }
   ],
   "output_template": {
@@ -3084,5 +3139,251 @@
     ],
     "note": "CUAD v1 contains 36 substantive clause categories after excluding five metadata fields. Indemnification is a supplemental risk category and is not counted as a CUAD category."
   },
-  "playbook_hash": "11c8d9b8a1ff26a7a5065c2027db0bfd414e7584debf13c29e184eb8720a5ccf"
+  "playbook_hash": "9b0a1752c7891857594eade8f10bbb5b7e317559d210a259741cf6a141dc6efb",
+  "version": "1.2",
+  "domain_mapping_note": "Version 1.1 maps every clause, cross-clause, and document-level check to one canonical domain from backend/data/legal_knowledge/risk_taxonomy.json. This is a review-routing taxonomy, not a legal conclusion or gold label. Earlier finer-grained domain labels are preserved as risk_subdomain.",
+  "deterministic_rules": [
+    {
+      "id": "PR-UNCAPPED-LIABILITY",
+      "risk_domain": "Liability Risk",
+      "risk_type": "Explicit uncapped or unlimited liability wording",
+      "question": "Does the clause expressly connect liability or damages to uncapped, unlimited, or outside-the-cap wording?",
+      "pattern": "\\b(?:liabilit(?:y|ies)|damages?)\\b.{0,100}\\b(?:uncapped|unlimited|without limitation|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap)\\b|\\b(?:uncapped|unlimited|without limitation|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap)\\b.{0,100}\\b(?:liabilit(?:y|ies)|damages?)\\b",
+      "exclude_patterns": [
+        "\\b(?:not|never|shall not|will not|is not|are not)\\s+(?:be\\s+)?(?:uncapped|unlimited)\\b",
+        "\\bneither party\\b.{0,80}\\bunlimited liability\\b",
+        "\\bno party\\b.{0,80}\\bunlimited liability\\b"
+      ],
+      "explanation": "The clause contains express uncapped/unlimited liability language. Flag for buyer-side review of the cap, carve-outs, and monetary exposure; this is not a conclusion that the term is unlawful.",
+      "sources": [
+        "P2",
+        "P4"
+      ],
+      "regression_cases": {
+        "positive": [
+          "The supplier's liability for damages is unlimited."
+        ],
+        "negative": [
+          "The supplier's liability is capped at fees paid.",
+          "Neither party shall have unlimited liability."
+        ],
+        "edge": [
+          {
+            "text": "The supplier's liability is capped except that liability for fraud is unlimited.",
+            "expected_match": true,
+            "reason": "An express uncapped carve-out still requires review."
+          },
+          {
+            "text": "The supplier's liability shall not be unlimited.",
+            "expected_match": false,
+            "reason": "Negated unlimited-liability language."
+          }
+        ]
+      }
+    },
+    {
+      "id": "PR-INDEMNITY-OUTSIDE-CAP",
+      "risk_domain": "Liability Risk",
+      "risk_type": "Indemnification stated to be uncapped or outside the liability cap",
+      "question": "Does the clause expressly state that indemnification is uncapped, unlimited, or outside the liability cap?",
+      "pattern": "\\b(?:(?:indemnif(?:y|ication|ity|ies)|indemnity)|hold harmless)\\b.{0,180}\\b(?:uncapped|unlimited|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap|excluded from (?:the )?(?:aggregate )?(?:liability )?cap)\\b|\\b(?:uncapped|unlimited|outside (?:the )?(?:aggregate )?(?:liability )?cap|not subject to (?:the )?(?:aggregate )?(?:liability )?cap|excluded from (?:the )?(?:aggregate )?(?:liability )?cap)\\b.{0,180}\\b(?:(?:indemnif(?:y|ication|ity|ies)|indemnity)|hold harmless)\\b",
+      "exclude_patterns": [
+        "\\b(?:not|never|shall not|will not|is not|are not)\\s+(?:be\\s+)?(?:uncapped|unlimited)\\b",
+        "\\bnot\\s+excluded from\\b",
+        "\\bnot\\s+outside (?:the )?(?:aggregate )?(?:liability )?cap\\b",
+        "\\b(?:all|the indemnification obligation)\\b.{0,70}\\bsubject to (?:the )?(?:aggregate )?(?:liability )?cap\\b"
+      ],
+      "explanation": "The clause expressly links an indemnity obligation with uncapped or outside-the-cap language. Review the indemnity scope and its coordination with the liability cap.",
+      "sources": [
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "regression_cases": {
+        "positive": [
+          "Supplier's indemnification obligations are excluded from the aggregate liability cap."
+        ],
+        "negative": [
+          "All indemnification obligations are subject to the aggregate liability cap.",
+          "Indemnification is not outside the liability cap."
+        ],
+        "edge": [
+          {
+            "text": "Indemnity obligations are excluded from the cap only for IP claims.",
+            "expected_match": true,
+            "reason": "A scoped indemnity carve-out remains a review trigger."
+          }
+        ]
+      }
+    },
+    {
+      "id": "PR-LIQUIDATED-DAMAGES-OUTSIDE-CAP",
+      "risk_domain": "Financial Risk",
+      "risk_type": "Liquidated damages stated to be outside the liability cap",
+      "question": "Does the clause expressly put liquidated damages outside or exclude them from the liability cap?",
+      "pattern": "\\bliquidated damages?\\b.{0,180}\\b(?:outside|excluded from|not subject to|not governed by)\\b.{0,60}\\b(?:the )?(?:aggregate )?(?:liability )?cap\\b|\\b(?:outside|excluded from|not subject to|not governed by)\\b.{0,60}\\b(?:the )?(?:aggregate )?(?:liability )?cap\\b.{0,180}\\bliquidated damages?\\b",
+      "exclude_patterns": [
+        "\\b(?:not|never|shall not|will not|is not|are not)\\s+(?:be\\s+)?(?:outside|excluded from|unlimited)\\b",
+        "\\bnot\\s+excluded from\\b",
+        "\\bnot\\s+outside (?:the )?(?:aggregate )?(?:liability )?cap\\b"
+      ],
+      "explanation": "The wording expressly separates liquidated damages from a liability cap. Review the cap interaction, calculation method, and potential cumulative exposure.",
+      "sources": [
+        "P2",
+        "P4"
+      ],
+      "regression_cases": {
+        "positive": [
+          "Liquidated damages are excluded from the liability cap."
+        ],
+        "negative": [
+          "Liquidated damages are subject to the liability cap.",
+          "Liquidated damages are not outside the liability cap."
+        ],
+        "edge": [
+          {
+            "text": "Liquidated damages are not governed by the liability cap.",
+            "expected_match": true,
+            "reason": "The clause expressly excludes the amount from cap governance."
+          }
+        ]
+      }
+    },
+    {
+      "id": "PR-IMMEDIATE-TERMINATION-NO-NOTICE",
+      "risk_domain": "Termination Risk",
+      "risk_type": "Immediate or no-notice termination right",
+      "question": "Does the clause expressly permit termination immediately or without prior notice?",
+      "pattern": "\\bterminat(?:e|es|ed|ion|ing)\\b.{0,120}\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b|\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b.{0,120}\\bterminat(?:e|es|ed|ion|ing)\\b",
+      "exclude_patterns": [
+        "\\b(?:may not|shall not|must not|cannot|can not)\\b.{0,60}\\bterminat(?:e|es|ed|ion|ing)\\b.{0,80}\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b",
+        "\\bterminat(?:e|es|ed|ion|ing)\\b.{0,100}\\bonly after\\b.{0,80}\\b(?:notice|cure period|opportunity to cure)\\b",
+        "\\b(?:neither party|no party)\\b.{0,100}\\bterminat(?:e|es|ed|ion|ing)\\b.{0,80}\\b(?:immediately|without (?:prior )?notice|with immediate effect)\\b"
+      ],
+      "explanation": "An immediate/no-notice termination right is explicitly present. Check who holds the right, the triggering event, cure protections, and transition consequences.",
+      "sources": [
+        "P5",
+        "P6"
+      ],
+      "regression_cases": {
+        "positive": [
+          "Either party may terminate immediately without prior notice."
+        ],
+        "negative": [
+          "Termination is permitted only after written notice and a cure period.",
+          "Neither party may terminate immediately without prior notice."
+        ],
+        "edge": [
+          {
+            "text": "Either party may terminate with immediate effect after a material breach.",
+            "expected_match": true,
+            "reason": "The immediate-effect right is still a review trigger; assess the trigger and cure rights."
+          }
+        ]
+      }
+    },
+    {
+      "id": "PR-BROAD-IP-LICENSE",
+      "risk_domain": "Intellectual Property Risk",
+      "risk_type": "Perpetual, irrevocable, worldwide, or sublicensable IP license wording",
+      "question": "Does the clause pair a license with perpetual, irrevocable, worldwide, or sublicensing language?",
+      "pattern": "\\blicen[cs](?:e|es|ed|ing)?\\b.{0,180}\\b(?:perpetual|irrevocable|worldwide|sublicensable|sublicense)\\b|\\b(?:perpetual|irrevocable|worldwide|sublicensable|sublicense)\\b.{0,180}\\blicen[cs](?:e|es|ed|ing)?\\b",
+      "exclude_patterns": [
+        "\\bnon[- ]sublicensable\\b",
+        "\\bno\\s+(?:perpetual|irrevocable|worldwide)\\s+licen[cs]e\\b",
+        "\\b(?:perpetual|irrevocable|worldwide)\\s+licen[cs]e\\b.{0,60}\\b(?:not granted|not provided|shall not be granted|will not be granted)\\b"
+      ],
+      "explanation": "The clause pairs license rights with one or more broad-scope terms. Review purpose, territory, duration, transfer/sublicense rights, ownership, and post-termination effects.",
+      "sources": [
+        "P4",
+        "P5"
+      ],
+      "regression_cases": {
+        "positive": [
+          "Customer grants Supplier a perpetual, irrevocable worldwide license to use the materials."
+        ],
+        "negative": [
+          "No perpetual license is granted.",
+          "The license is non-sublicensable."
+        ],
+        "edge": [
+          {
+            "text": "The license is perpetual only for the period required to exercise surviving rights.",
+            "expected_match": true,
+            "reason": "Scope and survival must be checked even when the stated purpose is narrow."
+          }
+        ]
+      }
+    },
+    {
+      "id": "PR-EARLY-EXIT-FULL-TERM-FEES",
+      "risk_domain": "Commercial Risk",
+      "risk_type": "Full remaining-term fees or minimum commitment after early exit",
+      "question": "Does the clause connect early/convenience termination with payment of the full remaining term or minimum commitment?",
+      "pattern": "\\bterminat(?:e|es|ed|ion|ing)\\b.{0,180}\\b(?:for convenience|early|without cause)\\b.{0,240}\\b(?:full remaining term|remaining term|minimum commitment|remaining fees|all fees for the remainder)\\b|\\b(?:full remaining term|remaining term|minimum commitment|remaining fees|all fees for the remainder)\\b.{0,240}\\bterminat(?:e|es|ed|ion|ing)\\b.{0,180}\\b(?:for convenience|early|without cause)\\b",
+      "exclude_patterns": [
+        "\\b(?:not|shall not|will not|does not)\\s+(?:be\\s+)?(?:liable for|pay|owe|charge)\\b.{0,100}\\b(?:remaining term|minimum commitment|remaining fees)\\b",
+        "\\b(?:waived|forgiven|credited|pro[- ]rated)\\b.{0,80}\\b(?:remaining term|minimum commitment|remaining fees)\\b"
+      ],
+      "explanation": "The clause links early termination to payment for the remaining term or the full minimum commitment. Review pro-rating, mitigation, credits, and exit exceptions.",
+      "sources": [
+        "P5"
+      ],
+      "regression_cases": {
+        "positive": [
+          "If Customer terminates early for convenience, Customer must pay all fees for the remaining term.",
+          "Early termination without cause requires payment of the minimum commitment."
+        ],
+        "negative": [
+          "Customer will not owe remaining fees after early termination.",
+          "No minimum commitment applies after early termination."
+        ],
+        "edge": [
+          {
+            "text": "Termination for convenience requires payment of all fees for the remainder of the term.",
+            "expected_match": true,
+            "reason": "Potential remaining-term exposure requires review of credits and mitigation."
+          }
+        ]
+      }
+    },
+    {
+      "id": "PR-ABSOLUTE-ASSIGNMENT-PROHIBITION",
+      "risk_domain": "Assignment / Control Risk",
+      "risk_type": "Absolute assignment prohibition wording",
+      "question": "Does the clause expressly prohibit assignment under any circumstances or without exception?",
+      "pattern": "\\b(?:absolute(?:ly)?\\s+prohibit(?:ed|s)?|may not|shall not|must not)\\s+assign\\b.{0,140}\\b(?:under any circumstances|in any circumstances|without exception)\\b|\\b(?:under any circumstances|in any circumstances)\\b.{0,140}\\b(?:may not|shall not|must not)\\s+assign\\b|\\bno assignment\\b.{0,100}\\b(?:under any circumstances|in any circumstances|without exception)\\b",
+      "exclude_patterns": [
+        "\\b(?:except|unless|subject to|with (?:prior )?written consent|without (?:prior )?written consent|with consent)\\b",
+        "\\bno assignment\\b.{0,100}\\b(?:except|unless|subject to|with (?:prior )?written consent)\\b"
+      ],
+      "explanation": "The text contains an express absolute assignment prohibition. Review affiliate, internal restructuring, financing, and change-of-control exceptions.",
+      "sources": [
+        "P4",
+        "P5"
+      ],
+      "regression_cases": {
+        "positive": [
+          "Customer shall not assign this Agreement under any circumstances.",
+          "Customer may not assign this Agreement under any circumstances."
+        ],
+        "negative": [
+          "Customer shall not assign this Agreement without prior written consent.",
+          "Assignment is permitted with prior written consent."
+        ],
+        "edge": [
+          {
+            "text": "No assignment is permitted under any circumstances.",
+            "expected_match": true,
+            "reason": "An absolute noun-form prohibition should also trigger review."
+          },
+          {
+            "text": "No assignment is permitted without exception, except for affiliates.",
+            "expected_match": false,
+            "reason": "The express exception prevents classification as absolute."
+          }
+        ]
+      }
+    }
+  ]
 }

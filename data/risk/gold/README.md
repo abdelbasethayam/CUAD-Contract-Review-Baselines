@@ -1,19 +1,16 @@
-# Risk gold annotation files
+# Risk finding adjudication dataset
 
-These files are committed so the Phase 2 risk workflow is runnable immediately.
+This folder contains a schema/template, not pre-filled ground truth. Do not populate labels by copying model outputs or synthetic scenarios.
 
-- `../commercial_clause_risk_playbook.json` is the installed 37-target playbook: all 36 substantive CUAD v1 clause categories plus the supplemental `Indemnification` category.
-- `gold_annotations.csv` is the canonical 300-task human-annotation template.
-- `annotation_queue.csv` is the runtime-compatible copy used by `scripts/risk/run_gold_evaluation.py`.
+## Workflow
+1. Freeze the playbook, model, prompt, support-score version, and contract-disjoint train/calibration/test split.
+2. Two qualified reviewers independently label each prediction against the contract and the declared review policy.
+3. An adjudicator resolves disagreements; only rows with `adjudication_status=ADJUDICATED` are used.
+4. Keep every contract entirely within one split. Do not move test contracts into calibration after inspecting test results.
+5. Populate `risk_finding_adjudication_template.csv` with adjudicated rows, preserving contract and playbook IDs.
+6. Copy the completed file to `risk_finding_adjudication.csv`, then run `python scripts/risk/fit_calibration.py`.
 
-The CSV currently contains **no completed human gold labels**. Annotators must independently fill the annotation fields and an adjudicator must populate the `adjudicated_*` fields before gold evaluation or calibration.
+## Confidence definition
+The calibrated probability estimates whether the system's predicted YES/NO decision matches the adjudicated reviewer label. It is not risk severity, probability of loss, or legal correctness in any jurisdiction.
 
-Do not treat playbook-derived findings as gold ground truth. The playbook is policy/guidance and remains separate from human adjudication.
-
-To regenerate the annotation queue after replacing the playbook:
-
-```bash
-python scripts/risk/build_gold_queue.py --n 300
-```
-
-The committed templates can be replaced later with the adjudicated dataset.
+The fitter refuses to create an artifact unless calibration and locked-test partitions meet the minimum sample, class-balance, and contract-disjoint gates and the calibrated Brier score beats a constant-prevalence baseline with ECE <= 0.15. These are conservative operational gates, not a guarantee of external validity.

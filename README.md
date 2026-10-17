@@ -1,6 +1,8 @@
-# CUAD Contract Clause Classification
+# CUAD Contract Review Baselines
 
-**Student project:** classify commercial contract clauses into CUAD categories using retrieval and large language models.
+An evidence-grounded research workspace for commercial contract clause classification and Phase 2 risk-review experiments.
+
+> **Scope and safety:** This is a research/demo system, not legal advice or an autonomous legal decision-maker. Risk findings are review triggers, not legal conclusions. The current playbook has zero production-approved rules, no project-specific adjudicated risk-gold set, and no validated risk-confidence calibration. Passing CI proves software conformance—not legal accuracy.
 
 ### GitHub links
 
@@ -11,6 +13,24 @@
 | **Clone** | `git clone https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines.git` |
 | **Fine-tune guide** | https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/FINETUNE.md |
 | **Hybrid / Qwen notes** | https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/QWEN_IMPROVEMENTS.md |
+
+## Current product demo
+
+The Phase 2 workspace includes a guided synthetic-contract walkthrough, clause and contract-level review findings, evidence quotes, audit-artifact downloads, and a contract-linked Q&A assistant. On a clean install, **Open guided demo** generates a deterministic demo result from the checked-in fixture; it does not require a prior upload or a model call to render the walkthrough. The Q&A assistant uses the configured local Ollama model when available and falls back to source excerpts only if the model is unavailable.
+
+- [Recorded-demo runbook](docs/PHASE2_DEMO_RUNBOOK.md)
+- [Phase 2 research and release protocol](docs/PHASE2_Q1_PAPER_PROTOCOL.md)
+- [Risk-gold annotation guide](docs/PHASE2_RISK_GOLD_ANNOTATION_GUIDE.md)
+
+Before recording, start the API and configured local Ollama model, then run the six-question chatbot semantic/citation smoke check:
+
+```bash
+python scripts/risk/evaluate_contract_chat_demo.py --out data/risk/results/contract_chat_demo_evaluation.json
+```
+
+The check covers party-specific liability caps and termination rights, governing-law uncertainty, insurance limits, post-termination data handling, indemnity/liability-cap interaction, and exact citation provenance. It is a demo smoke test, not a statistically valid accuracy benchmark. Fix failures before presenting the chatbot as working.
+
+The demo is synthetic and intentionally labelled. Do not present its illustrative findings as independently validated legal analysis.
 
 ---
 
@@ -133,6 +153,36 @@ Details: [docs/FINETUNE.md](https://github.com/abdelbasethayam/CUAD-Contract-Rev
 
 ---
 
+## Phase 2 — Uploadable contract risk review
+
+The repository includes an end-to-end PDF/TXT upload application with clause segmentation, a separate CUAD clause-category classifier, rule-first buyer-side contract-risk screening, exact contract-evidence validation, cross-clause/document questions, and contract-level triage. The seven deterministic risk predicates run against every clause independently of the predicted CUAD label. The risk prompt never receives retrieved CUAD training example spans, and every positive must preserve exact evidence from the uploaded agreement. Rule hits are review triggers, not legal conclusions; severity/confidence are not calibrated.
+
+**Start the UI/API:** configure Ollama and backend/.env, then run bash scripts/start_all.sh. The API health check is curl -fsS http://127.0.0.1:8000/health; the frontend is usually on port 5173.
+
+**Run the synthetic TXT smoke and audit, using the configured interactive setting:**
+    .venv/bin/python scripts/risk/smoke_upload_api.py
+    .venv/bin/python scripts/risk/audit_smoke_run.py
+
+For a PDF test fixture, run `python scripts/risk/smoke_upload_api.py --file test_contract.pdf --out data/risk/results/smoke_upload_api_pdf_result.json`, then audit it with `python scripts/risk/audit_smoke_run.py --input data/risk/results/smoke_upload_api_pdf_result.json --suffix pdf`. The checked-in run records include the earlier three-pass TXT/PDF runs plus a one-pass TXT run for a measured latency comparison.
+
+**Rebuild the no-network retrieval profile from source:** stop the backend, then run `bash scripts/risk/build_local_retrieval_profile.sh`. This rebuilds both 768-dimensional local hashing indexes, proves train/test/index isolation, checks representative legal guidance retrieval, regenerates the team export/report, and runs the release suite. Start the app afterward with `bash scripts/start_all.sh`. Do not rebuild the embedded Qdrant collections while the backend is running.
+
+**Regenerate reproducible artifacts (without rebuilding indexes):**
+    .venv/bin/python scripts/risk/validate_playbook_rules.py
+    .venv/bin/python scripts/risk/validate_evaluation_integrity.py
+    .venv/bin/python scripts/risk/normalize_playbook_domains.py
+    .venv/bin/python scripts/risk/export_team_pack.py
+    .venv/bin/python scripts/risk/report_phase2_experiment.py
+    .venv/bin/python scripts/risk/run_release_checks.py
+
+Full guides: docs/PHASE2_RISK_PIPELINE.md, docs/PHASE2_REPRODUCIBILITY.md, and docs/PHASE2_PAPER_DRAFT.md. Release validation can be recorded with python scripts/risk/run_release_checks.py.
+
+Phase 2 release checks are explicitly independent of risk-span annotation datasets. They validate playbook rule definitions, taxonomy coverage, exact-quote provenance, classifier-index isolation, synthetic playbook-question regressions, upload smoke tests, and backend behavior. These are system-conformance checks, not estimates of legal-risk accuracy, enforceability, precision, recall, or F1. See docs/PHASE2_RULE_CONFORMANCE_PROTOCOL.md.
+
+**Privacy and offline mode:** the default `EMBEDDING_BACKEND=cohere` sends clause/query text to Cohere for embeddings and requires network access. For a local-only mode, set `EMBEDDING_BACKEND=local_hashing`, `LOCAL_HASHING_DIM=768`, `QDRANT_COLLECTION=cuad_train_hashing`, and `LEGAL_KNOWLEDGE_COLLECTION=legal_knowledge_hashing` in `backend/.env`, then stop the backend and run `bash scripts/risk/build_local_retrieval_profile.sh`. Restart with `bash scripts/start_all.sh`. This local mode uses deterministic HashingVectorizer/cosine retrieval (lexical-vector baseline), not a pretrained semantic embedding model, and must be evaluated as a separate configuration. Ollama generation and Qdrant remain local; do not upload confidential documents to any network-enabled mode unless the transfer is authorized.
+
+---
+
 ## 5. Evaluation policy
 
 The repository no longer publishes guessed accuracy ranges for the final pipeline. Report:
@@ -146,63 +196,9 @@ The repository no longer publishes guessed accuracy ranges for the final pipelin
 
 Use validation for all configuration decisions. Use the untouched test split only after the configuration is frozen.
 
-## 6. Web interface and grounded chatbot
-
-The Vite interface supports PDF/TXT upload, live analysis progress, clause/risk review, downloadable audit artifacts, and a grounded assistant that answers questions about the completed analysis. The assistant is intentionally scoped to the selected `analysis_id`; it must not be treated as a general legal advisor.
-
-Set `OPENROUTER_API_KEY` in `backend/.env` before using the chat panel. The API endpoint is `POST /query` with `{ "analysis_id": "...", "question": "...", "history": [] }`. Answers are generated from the stored `result.json` context, cite clause numbers where possible, and fall back clearly when the evidence is insufficient.
-
-Run locally in two terminals:
-
-```bash
-# API
-cd backend && uvicorn app.main:app --reload --port 8000
-
-# UI
-cd frontend && npm ci && npm run dev
-```
-
-### Fast local Phase 2 demo
-
-For the quickest demonstration using your Queen's/Ollama/Qdrant resources, configure the service endpoints in the shell and run the included launcher:
-
-```bash
-cd CUAD-Contract-Review-Baselines
-python3 -m pip install -r requirements.txt
-cd frontend && npm ci && cd ..
-
-export OLLAMA_URL=http://<queens-ollama-host>:11434
-export QDRANT_URL=http://<queens-qdrant-host>:6333       # omit when using local data/qdrant_local
-export COHERE_API_KEY=<your-key>                         # needed for the current embedding path
-export OPENROUTER_API_KEY=<your-key>                     # needed only for chatbot questions
-export CORS_ORIGINS=http://localhost:5173
-
-bash scripts/run_local_demo.sh
-```
-
-Open `http://localhost:5173`, upload `examples/phase2_demo_contract.txt`, and wait for the progress stages to finish. This sample deliberately contains an indemnity, an aggressive liability cap, an asymmetric termination right, and underspecified data-security obligations. The Phase 2 result should show clause-level `POTENTIAL_RISK` or `INSUFFICIENT_EVIDENCE` findings with exact contract evidence, a contract-level summary, and `Review required`/`UNCALIBRATED` labels. It is a demonstration of the resolved evidence gate—not a claim that the sample has been lawyer-validated.
-
-Then ask the chatbot questions such as:
-
-```text
-What are the highest-priority review items?
-Which clause contains the liability cap?
-What evidence supports the termination concern?
-```
-
-The Vite launcher now proxies `/documents`, `/query`, and `/health` to the backend, so the GUI and chatbot work from the same local command. If the full pipeline is slow, the backend checkpoints `segments.json`, embeddings, classification, and risk findings under `data/runs/<analysis_id>`; restarting with the same file resumes instead of mixing a new run.
-
-For a production deployment, build the UI (`npm run build`) and copy `frontend/dist` to `backend/static`, then run the API behind HTTPS. Keep API keys server-side, persist `data/runs` on durable storage, configure a non-local Qdrant/Ollama provider, add authentication/tenant isolation, enforce reverse-proxy upload limits, and establish human-adjudicated calibration/evaluation gates before relying on risk scores.
-
-### Two-day release boundary
-
-The current release is a **review-assistance prototype**, not an autonomous legal decision system. The critical safeguards included now are: completed-run gating for chat, clause citation validation, refusal of legal-advice/jailbreak requests, lightweight request rate limiting, explicit `Review required` UI messaging, exact contract-evidence checks in the risk pipeline, configurable CORS, upload limits, and run provenance (commit/fingerprint/playbook metadata). Configure `CORS_ORIGINS` to the real HTTPS UI origin before deployment.
-
-The following are intentionally deferred to the next version because they require infrastructure, policy, or independent legal review: lawyer-adjudicated gold labels and calibration, JWT/OAuth tenant isolation, object storage and a metadata database, malware scanning, durable audit/event logs, distributed Qdrant/Ollama, metrics/tracing/alerts, and reviewer accept/reject workflows. Do not present `PLAYBOOK_DERIVED` or `UNCALIBRATED` findings as validated legal-risk probabilities.
-
 ---
 
-## 7. Project structure (main folders)
+## 6. Project structure (main folders)
 
 ```
 backend/app/core/rag/     # retrieval, prompts, classifier, rules
@@ -217,7 +213,7 @@ Browse on GitHub: https://github.com/abdelbasethayam/CUAD-Contract-Review-Baseli
 
 ---
 
-## 8. Limitations
+## 7. Limitations
 
 - Output is **decision support**, not legal advice.
 - Rare CUAD labels keep **macro-F1** lower than overall accuracy.
@@ -226,7 +222,7 @@ Browse on GitHub: https://github.com/abdelbasethayam/CUAD-Contract-Review-Baseli
 
 ---
 
-## 9. References
+## 8. References
 
 - CUAD dataset (Atticus Project) — contract understanding benchmark  
 - Qwen2.5 / Qwen3 models (Alibaba) — local LLM via Ollama  
@@ -234,7 +230,7 @@ Browse on GitHub: https://github.com/abdelbasethayam/CUAD-Contract-Review-Baseli
 
 ---
 
-## 10. Author
+## 9. Author
 
 - **GitHub:** [abdelbasethayam](https://github.com/abdelbasethayam)  
 - **Project repo:** [CUAD-Contract-Review-Baselines](https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines)
