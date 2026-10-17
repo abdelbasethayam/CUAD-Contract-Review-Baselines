@@ -138,12 +138,11 @@ def _support_score(*, answer: str, evidence_ok: bool, agreement: float, indicato
     return round(min(1.0, evidence_component + agreement_component + indicator_component), 4)
 
 
-_NEGATIVE_FLAG_PREFIX = re.compile(
-    r"^(?:no\\b|none\\b|missing\\b|absent\\b|absence\\b|lack(?:s|ing)?\\b|without\\b|"
-    r"silent\\b|unclear\\b|not\\b|future[- ]tense only\\b|looks punitive\\b|"
-    r"over[- ]broad\\b|very long\\b|limits far below\\b|"
-    r"one-sided protecting only the counterparty\\b)",
-    re.IGNORECASE,
+_NEGATIVE_FLAG_PREFIXES = (
+    "no", "none", "missing", "absent", "absence", "lack", "lacks", "lacking",
+    "without", "silent", "unclear", "not", "future-tense only", "future tense only",
+    "looks punitive", "over-broad", "overbroad", "very long", "limits far below",
+    "one-sided protecting only the counterparty",
 )
 _NEGATIVE_TRIGGER_OVERRIDES = {("Cap On Liability", "LOL-2")}
 _FOLLOW_UP_TRIGGER_RULES = {
@@ -190,8 +189,17 @@ def _expected_trigger_answer(check: dict) -> str:
     key = _check_key(check)
     if key in _NEGATIVE_TRIGGER_OVERRIDES:
         return "NO"
-    flag_if = str(check.get("flag_if") or "").strip()
-    return "NO" if _NEGATIVE_FLAG_PREFIX.search(flag_if) else "YES"
+    flag_if = str(check.get("flag_if") or "").strip().lower()
+    negative_prefix = any(
+        flag_if == prefix
+        or flag_if.startswith(prefix + " ")
+        or flag_if.startswith(prefix + "/")
+        or flag_if.startswith(prefix + ",")
+        or flag_if.startswith(prefix + "—")
+        or flag_if.startswith(prefix + "-")
+        for prefix in _NEGATIVE_FLAG_PREFIXES
+    )
+    return "NO" if negative_prefix else "YES"
 
 
 def _question_for_check(check: dict) -> str:
