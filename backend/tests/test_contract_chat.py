@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from scripts.risk.evaluate_contract_chat_demo import _fact_attributed_to_entity
+from scripts.risk.evaluate_contract_chat_demo import _evaluate_question, _fact_attributed_to_entity
 
 from app.main import app
 from app.api.routes import query
@@ -455,3 +455,37 @@ def test_contract_chat_answers_supported_explicit_clause_question(monkeypatch, t
     data = response.json()
     assert data["insufficient_evidence"] is False
     assert data["citations"][0]["clause_index"] == 3
+
+def test_chatbot_semantic_evaluator_checks_all_required_concepts_and_clause_citations():
+    spec = {
+        "id": "indemnity_cap",
+        "question": "Does indemnity fall under the aggregate liability cap?",
+        "must_cite_terms": ["indemnification obligations", "aggregate liability exceed", "Customer shall indemnify"],
+        "must_cite_clause_indices": [3, 4],
+        "must_answer_one_of": [["ambiguous", "unclear"], ["aggregate liability caps", "aggregate caps"]],
+        "must_answer_all": [["indemnification", "indemnity"]],
+        "must_answer_relations": [],
+    }
+    clauses = {
+        3: "Except for indemnification obligations, liability is limited. Customer aggregate liability shall not exceed ten times fees.",
+        4: "Customer shall indemnify Supplier for claims.",
+    }
+    good = {
+        "answer": "The interaction is ambiguous: indemnification obligations are excepted in one sentence, but the aggregate liability caps are stated separately.",
+        "insufficient_evidence": False,
+        "citations": [
+            {"clause_index": 3, "quote": "Except for indemnification obligations, liability is limited. Customer aggregate liability shall not exceed ten times fees."},
+            {"clause_index": 4, "quote": "Customer shall indemnify Supplier for claims."},
+        ],
+    }
+    assert _evaluate_question(spec, good, clauses)["passed"] is True
+
+    missing_clause = {**good, "citations": good["citations"][:1]}
+    result = _evaluate_question(spec, missing_clause, clauses)
+    assert result["checks"]["required_clause_citations_present"] is False
+    assert result["passed"] is False
+
+    incomplete_answer = {**good, "answer": "The issue is ambiguous and the aggregate liability caps are stated separately."}
+    result = _evaluate_question(spec, incomplete_answer, clauses)
+    assert result["checks"]["answer_contains_all_required_concepts"] is False
+    assert result["passed"] is False
