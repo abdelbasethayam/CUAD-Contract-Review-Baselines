@@ -21,8 +21,8 @@ def test_authority_catalog_and_map_pass_schema_and_taxonomy_validation():
     assert report["legal_approval_status"] == "NOT_APPROVED"
     assert report["taxonomy_count"] == 37
     assert report["mapped_clause_count"] == 37
-    assert report["authority_record_count"] == 32
-    assert report["authority_records_referenced_by_map"] == 32
+    assert report["authority_record_count"] == 33
+    assert report["authority_records_referenced_by_map"] == 33
 
 
 def test_authority_schemas_validate_committed_records():
@@ -135,6 +135,7 @@ def test_rule_review_queue_contains_authority_mapping_for_all_clause_rules():
         assert [source["authority_id"] for source in sources] == ids
         for source in sources:
             assert source["url"].startswith("https://")
+            assert source["source_type"] in {"FEDERAL_STATUTE", "STATE_STATUTE", "REGULATOR_STATUS_NOTICE", "PRIMARY_COURT_OPINION_REPUBLISHED"}
             assert source["pinpoint"]
             assert source["jurisdiction"]
             assert source["source_tier"] in {"A", "B"}
