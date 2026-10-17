@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -19,6 +20,39 @@ PLAYBOOK_PATH = ROOT / "data" / "risk" / "commercial_clause_risk_playbook.json"
 REGISTRY_PATH = ROOT / "data" / "risk" / "rule_registry.jsonl"
 DEFAULT_INPUT = ROOT / "data" / "risk" / "evaluation" / "risk_gold.jsonl"
 VALID_LEGAL_EFFECTIVE_STATUSES = {"VERIFIED_FOR_RELEVANT_PERIOD"}
+LEGAL_VERIFIED_SOURCE_STATUSES = {
+    "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
+    "OFFICIAL_CHAPTER_TEXT_AND_PINPOINT_RETRIEVED",
+    "OFFICIAL_PART_PAGE_AND_SECTION_PINPOINT",
+}
+
+
+def _jurisdiction_codes(value: str) -> set[str]:
+    normalized = str(value or "").strip().upper()
+    aliases = {
+        "UNITED STATES FEDERAL LAW": "US-FEDERAL",
+        "U.S. FEDERAL LAW": "US-FEDERAL",
+        "FEDERAL LAW": "US-FEDERAL",
+        "NEW YORK": "US-NY",
+        "NEW YORK LAW": "US-NY",
+        "DELAWARE": "US-DE",
+        "DELAWARE LAW": "US-DE",
+        "CALIFORNIA": "US-CA",
+        "CALIFORNIA LAW": "US-CA",
+    }
+    normalized = aliases.get(normalized, normalized)
+    return set(re.findall(r"\\bUS-[A-Z]{2,8}\\b", normalized))
+
+
+def _authority_jurisdiction_compatible(resolved_law: str, authority_jurisdiction: str) -> bool:
+    resolved_codes = _jurisdiction_codes(resolved_law)
+    authority_code = str(authority_jurisdiction or "").strip().upper()
+    if not resolved_codes:
+        return False
+    if authority_code == "US-FEDERAL":
+        # Federal authority can be relevant to a U.S. contract, subject to the statute's scope.
+        return any(code.startswith("US-") for code in resolved_codes)
+    return authority_code in resolved_codes
 
 
 def _sha256(text: str) -> str:
@@ -137,17 +171,20 @@ def validate_records(
                 problems.append(f"legal_proposition_requires_verified_law_and_date:{record_id}")
             if not referenced_ids:
                 problems.append(f"legal_proposition_requires_authority:{record_id}")
+            resolved_law = str(governing_law.get("resolved_law") or "")
             for authority_id in referenced_ids:
                 source = authority_by_id.get(authority_id)
                 if source is None:
                     continue
                 if source.get("source_tier") != "A":
                     problems.append(f"legal_proposition_requires_tier_a_authority:{record_id}:{authority_id}")
+                if not _authority_jurisdiction_compatible(resolved_law, str(source.get("jurisdiction") or "")):
+                    problems.append(f"authority_jurisdiction_mismatch:{record_id}:{authority_id}:{resolved_law}:{source.get('jurisdiction')}")
                 if source.get("effective_date_status") not in VALID_LEGAL_EFFECTIVE_STATUSES:
                     problems.append(f"authority_effective_period_not_verified:{record_id}:{authority_id}")
                 verification = str(source.get("verification_status") or "")
-                if "REVIEW_REQUIRED" in verification or "REPUBLICATION_HOST" in verification or "CURRENTNESS_REVIEW_REQUIRED" in verification:
-                    problems.append(f"authority_currentness_not_cleared:{record_id}:{authority_id}")
+                if verification not in LEGAL_VERIFIED_SOURCE_STATUSES:
+                    problems.append(f"authority_source_verification_not_cleared:{record_id}:{authority_id}")
 
     for contract_id, splits in contract_splits.items():
         if len(splits) > 1:
