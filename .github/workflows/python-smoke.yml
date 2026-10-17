@@ -29,6 +29,7 @@ jobs:
           backend/tests/test_contract_checks_batching.py
           backend/tests/test_contract_checks_evaluation.py
           backend/tests/test_contract_risk_architecture.py
+          backend/tests/test_phase2_evidence_integrity_hardening.py
           backend/tests/test_deterministic_cross_checks.py
           backend/tests/test_contract_level_assessment.py
           backend/tests/test_openrouter_pipeline.py
