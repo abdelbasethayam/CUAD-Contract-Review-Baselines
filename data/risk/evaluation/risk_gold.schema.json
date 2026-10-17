@@ -192,7 +192,8 @@
           "source_tier",
           "effective_date_status",
           "retrieval_date",
-          "verification_status"
+          "verification_status",
+          "applicability_basis"
         ],
         "properties": {
           "authority_id": {
@@ -226,6 +227,10 @@
             "format": "date"
           },
           "verification_status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "applicability_basis": {
             "type": "string",
             "minLength": 1
           }
