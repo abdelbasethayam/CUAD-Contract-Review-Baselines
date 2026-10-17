@@ -18,7 +18,7 @@ CATALOG_PATH = ROOT / "data" / "risk" / "authority_catalog.json"
 PLAYBOOK_PATH = ROOT / "data" / "risk" / "commercial_clause_risk_playbook.json"
 REGISTRY_PATH = ROOT / "data" / "risk" / "rule_registry.jsonl"
 DEFAULT_INPUT = ROOT / "data" / "risk" / "evaluation" / "risk_gold.jsonl"
-VALID_LEGAL_EFFECTIVE_STATUSES = {"VERIFIED_FOR_RELEVANT_PERIOD", "NOT_APPLICABLE"}
+VALID_LEGAL_EFFECTIVE_STATUSES = {"VERIFIED_FOR_RELEVANT_PERIOD"}
 
 
 def _sha256(text: str) -> str:
