@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import csv
 import json
+import time
 from pathlib import Path
 from threading import Lock
 import hashlib
@@ -75,7 +76,16 @@ def _emit(
 
 
 def _trace_callback(run, callback: ProgressCallback | None):
+    started = time.monotonic()
+    sequence = 0
     def emit(event: dict) -> None:
+        nonlocal sequence
+        sequence += 1
+        event = {
+            **event,
+            "sequence": sequence,
+            "elapsed_seconds": round(time.monotonic() - started, 3),
+        }
         run.append_jsonl("trace.jsonl", event)
         run.write_json(
             "status.json",
