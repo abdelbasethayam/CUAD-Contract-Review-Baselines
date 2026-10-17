@@ -54,7 +54,7 @@ QUESTIONS = [
         "question": "What insurance must the supplier maintain, and does the agreement set minimum policy limits?",
         "must_cite_terms": ["commercially reasonable", "No minimum policy limits"],
         "must_answer_one_of": [
-            ["no minimum policy limits", "minimum policy limits are not stated", "does not specify minimum policy limits", "no minimum limits are specified"],
+            ["no minimum policy limits", "minimum policy limits are not stated", "does not specify minimum policy limits", "no minimum limits are specified", "no minimum limits are stated"],
             ["commercially reasonable"],
         ],
         "must_answer_all": [],
@@ -71,8 +71,8 @@ QUESTIONS = [
             ["disable access", "disable customer access", "turn off access"],
         ],
         "must_answer_all": [
-            ["does not specify a retention period", "no retention period", "does not say how long", "retention period is not specified"],
-            ["does not specify deletion", "does not address deletion", "does not say whether data is deleted", "deletion is not specified"],
+            ["does not specify a retention period", "doesn't specify a retention period", "no retention period", "does not say how long", "does not specify how long customer data is retained", "retention period is not specified", "retention period is not stated", "retention is not addressed"],
+            ["does not specify deletion", "does not address deletion", "does not say whether data is deleted", "deletion is not specified", "doesn't specify deletion", "does not specify a deletion requirement", "no deletion requirement", "does not specify when data is deleted", "deletion is not addressed"],
         ],
     },
     {
