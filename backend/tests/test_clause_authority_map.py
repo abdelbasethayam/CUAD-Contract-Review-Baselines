@@ -148,3 +148,20 @@ def test_rule_review_queue_contains_authority_mapping_for_all_clause_rules():
         and row["authority_coverage_status"] == "RULE_FAMILY_SPECIFIC_AUTHORITY_REVIEW_REQUIRED"
         for row in non_clause_rows
     )
+
+def test_release_checks_include_authority_and_registry_gates():
+    runner = (ROOT / "scripts/risk/run_release_checks.py").read_text(encoding="utf-8")
+    for check in (
+        "rule_registry_reproducibility",
+        "rule_registry_governance",
+        "clause_authority_map",
+        "rule_review_queue_reproducibility",
+    ):
+        assert f'("{check}"' in runner
+    for path in (
+        'ROOT / "data/risk/authority_catalog.json"',
+        'ROOT / "data/risk/clause_authority_map.json"',
+        'ROOT / "data/risk/rule_registry.jsonl"',
+        'ROOT / "data/risk/rule_review_queue.csv"',
+    ):
+        assert path in runner
