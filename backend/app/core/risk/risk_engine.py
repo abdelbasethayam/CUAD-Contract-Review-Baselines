@@ -50,19 +50,57 @@ def _evidence_valid(evidence: str, clause_text: str, context: list[dict]) -> boo
 
 
 def _evidence_source(evidence: str, clause_text: str, clause_index: int, context: list[dict]) -> dict:
-    """Return the exact clause that contains the evidence quote."""
+    """Resolve an exact quote to one source clause, or mark its provenance ambiguous."""
     quote = str(evidence or "").strip()
     if quote and quote in str(clause_text or ""):
-        return {"evidence_clause_index": clause_index, "evidence_scope": "target_clause"}
+        return {
+            "evidence_clause_index": clause_index,
+            "evidence_scope": "target_clause",
+            "evidence_source_status": "VERIFIED",
+            "evidence_clause_candidates": [clause_index],
+        }
+
+    matches: list[int] = []
+    unindexed_match = False
     for item in context or []:
         text = str(item.get("clause_text") or "")
-        if quote and quote in text:
-            try:
-                source_index = int(item.get("clause_index"))
-            except (TypeError, ValueError):
-                source_index = None
-            return {"evidence_clause_index": source_index, "evidence_scope": "related_contract_clause"}
-    return {"evidence_clause_index": None, "evidence_scope": None}
+        if not quote or quote not in text:
+            continue
+        try:
+            source_index = int(item.get("clause_index"))
+        except (TypeError, ValueError):
+            unindexed_match = True
+            continue
+        matches.append(source_index)
+
+    candidates = sorted(set(matches))
+    if unindexed_match:
+        return {
+            "evidence_clause_index": None,
+            "evidence_scope": "ambiguous_related_contract_clause" if candidates else "related_contract_clause",
+            "evidence_source_status": "AMBIGUOUS" if candidates else "UNVERIFIABLE",
+            "evidence_clause_candidates": candidates,
+        }
+    if len(candidates) == 1:
+        return {
+            "evidence_clause_index": candidates[0],
+            "evidence_scope": "related_contract_clause",
+            "evidence_source_status": "VERIFIED",
+            "evidence_clause_candidates": candidates,
+        }
+    if len(candidates) > 1:
+        return {
+            "evidence_clause_index": None,
+            "evidence_scope": "ambiguous_related_contract_clause",
+            "evidence_source_status": "AMBIGUOUS",
+            "evidence_clause_candidates": candidates,
+        }
+    return {
+        "evidence_clause_index": None,
+        "evidence_scope": None,
+        "evidence_source_status": "NOT_FOUND",
+        "evidence_clause_candidates": [],
+    }
 
 
 def _factor(value: object) -> float | None:
@@ -230,21 +268,25 @@ def _parse(raw: str, valid_ids: set[str]) -> list[dict]:
     return out
 
 
-def _majority(records: list[dict]) -> tuple[str, float]:
-    """Return a conservative repeated-pass decision and agreement signal.
+def _majority(records: list[dict], expected_passes: int | None = None) -> tuple[str, float]:
+    """Return a conservative decision while counting missing passes as abstentions.
 
-    A single pass has no measurable inter-pass agreement, so its agreement
-    signal is 0 rather than 1.0. Even-number ties abstain instead of inheriting
-    Counter's insertion-order tie break.
+    Agreement uses the configured number of passes, not only successful parses.
+    A single configured pass has no measurable inter-pass agreement, so its
+    agreement signal is 0. Ties and results without a strict majority abstain.
     """
     if not records:
         return "DON'T KNOW", 0.0
+    total_passes = max(
+        len(records),
+        int(expected_passes) if expected_passes is not None else len(records),
+    )
     votes = Counter(record["answer"] for record in records)
     answer, count = votes.most_common(1)[0]
-    agreement = round(count / len(records), 4)
-    if len(records) == 1:
+    agreement = round(count / total_passes, 4)
+    if total_passes == 1:
         return answer, 0.0
-    if count * 2 <= len(records):
+    if count * 2 <= total_passes:
         return "DON'T KNOW", agreement
     return answer, agreement
 
@@ -412,10 +454,14 @@ def analyze_clause_risk(
     checks_by_id = {str(item["id"]): item for item in checks}
     findings: list[dict] = []
     for check_id, records in by_check.items():
-        answer, agreement = _majority(records)
+        answer, agreement = _majority(records, expected_passes=n_passes)
         representative = next((x for x in records if x["answer"] == answer), records[0])
         evidence = representative["evidence"]
-        evidence_ok = _evidence_valid(evidence, clause_text, context)
+        evidence_location = _evidence_source(evidence, clause_text, clause_index, context)
+        evidence_ok = (
+            _evidence_valid(evidence, clause_text, context)
+            and evidence_location.get("evidence_source_status") == "VERIFIED"
+        )
         indicator_match = bool(indicators.get("matched_indicators"))
         status = "INSUFFICIENT_EVIDENCE" if answer == "DON'T KNOW" else representative["status"]
         # Trust the model's explicit policy-aware status, but never accept a
@@ -437,10 +483,6 @@ def analyze_clause_risk(
         source_ids = checks_by_id[check_id].get("sources", [])
         supporting_sources = source_records(playbook, source_ids)
         primary_source = supporting_sources[0] if supporting_sources else {}
-        evidence_location = _evidence_source(evidence, clause_text, clause_index, context) if evidence_ok and status == "POTENTIAL_RISK" else {
-            "evidence_clause_index": None,
-            "evidence_scope": None,
-        }
         findings.append(
             {
                 "clause_index": clause_index,
@@ -479,6 +521,8 @@ def analyze_clause_risk(
                     "source_ids": source_ids,
                     "model": RISK_MODEL,
                     "passes": len(records),
+                    "expected_passes": n_passes,
+                    "missing_passes": max(0, n_passes - len(records)),
                     "agreement": agreement,
                     "deterministic_indicators": indicators.get("matched_indicators", []),
                     "score_version": score_details["score_version"] if score_details else None,
