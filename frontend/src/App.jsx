@@ -156,6 +156,16 @@ function ContractReview() {
   const [chatError, setChatError] = useState(null);
   const [phase2Metrics, setPhase2Metrics] = useState(null);
   const [demoNotice, setDemoNotice] = useState(null);
+  const [apiStatus, setApiStatus] = useState("checking");
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/health")
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("API unavailable")))
+      .then((data) => { if (!cancelled) setApiStatus(data.status === "ok" ? "online" : "degraded"); })
+      .catch(() => { if (!cancelled) setApiStatus("offline"); });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -301,29 +311,86 @@ function ContractReview() {
 
   return (
     <main className="page">
-      <header className="hero">
-        <div>
-          <div className="eyebrow">CUAD Contract Review · Phase 1 + Phase 2</div>
-          <h1>Evidence-grounded contract risk review.</h1>
-          <p>Upload a contract to segment and classify clauses, then inspect risk findings with exact evidence and reproducible provenance.</p>
+      <header className="app-bar">
+        <div className="brand-lockup">
+          <div className="brand-mark" aria-hidden="true"><span>C</span><i /></div>
+          <div><strong>Clausewise</strong><span>CONTRACT INTELLIGENCE</span></div>
         </div>
-        {result?.analysis_id && (
-          <div className="analysis-id"><span>Analysis ID</span><code>{result.analysis_id}</code></div>
-        )}
+        <div className="app-bar__right">
+          <span className={"system-status system-status--" + apiStatus}>
+            <i /> {apiStatus === "online" ? "API connected" : apiStatus === "checking" ? "Checking workspace" : apiStatus === "degraded" ? "API needs attention" : "API offline"}
+          </span>
+          <span className="workspace-tag">PHASE 2 WORKSPACE</span>
+        </div>
       </header>
 
-      <form className="upload-form" onSubmit={handleSubmit}>
-        <input type="file" accept=".pdf,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={loading} />
-        <button type="submit" disabled={!file || loading}>{loading ? "Analyzing…" : "Analyze contract"}</button>
-        <button type="button" className="button-secondary" onClick={loadSavedDemo} disabled={loading}>Load saved demo</button>
-      </form>
-      <p className="muted" role="note">
-        Privacy notice: LLM inference runs locally, but clause text is sent to the configured Cohere embedding API.
-        Do not upload confidential contracts unless that transfer is authorized. This build is not fully offline.
-      </p>
+      <header className="hero">
+        <div className="hero-copy">
+          <div className="eyebrow">AI-assisted review · evidence-first workflow</div>
+          <h1>Know what your contract says. See why it matters.</h1>
+          <p>Classify clauses, surface commercial review triggers, inspect exact wording, and ask grounded questions about the agreement—all in one auditable workspace.</p>
+          <div className="hero-points">
+            <span><i /> Exact-text evidence</span>
+            <span><i /> Cross-clause review</span>
+            <span><i /> Traceable findings</span>
+          </div>
+        </div>
+        <div className="hero-side">
+          <div className="hero-orbit" aria-hidden="true"><span>§</span><i /><b /></div>
+          <div className="hero-side__caption">REVIEW WITH CONTEXT<br /><strong>Not just a risk score.</strong></div>
+          {result?.demo_mode && <span className="demo-mode-pill">SYNTHETIC DEMO</span>}
+          {result?.analysis_id && (
+            <div className="analysis-id"><span>Analysis ID</span><code>{result.analysis_id}</code></div>
+          )}
+        </div>
+      </header>
 
-      <details className="experiment-snapshot" open>
-        <summary>Phase 2 rule-conformance snapshot</summary>
+      <section className="intake-panel" aria-label="Start contract review">
+        <div className="intake-heading">
+          <div><span className="step-tag">01 / START HERE</span><h2>Review a contract</h2></div>
+          <span className="intake-note">PDF or plain text · analysis results stay linked to this workspace</span>
+        </div>
+        <form className="upload-form" onSubmit={handleSubmit}>
+          <label className="file-picker">
+            <span className="file-picker__icon" aria-hidden="true">↑</span>
+            <span className="file-picker__copy"><strong>{file ? file.name : "Choose a contract file"}</strong><small>{file ? (file.size / 1024).toFixed(1) + " KB · ready to analyze" : "Select a PDF or TXT document from your computer"}</small></span>
+            <span className="file-picker__button">Browse files</span>
+            <input type="file" accept=".pdf,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={loading} />
+          </label>
+          <div className="upload-actions">
+            <button type="submit" disabled={!file || loading}>{loading ? "Analyzing contract…" : "Analyze contract"} <span aria-hidden="true">→</span></button>
+            <button type="button" className="button-secondary" onClick={loadSavedDemo} disabled={loading}>Open guided demo</button>
+            <a className="sample-link" href="/query/demo-contract" download>Download sample agreement ↗</a>
+          </div>
+        </form>
+        <p className="privacy-note" role="note"><span aria-hidden="true">ⓘ</span> Privacy: inference runs locally, but clause text is sent to the configured Cohere embedding API. Do not upload confidential documents unless that transfer is authorized; this build is not fully offline.</p>
+      </section>
+
+      {!result && !loading && (
+        <section className="welcome-grid" aria-label="How the workspace works">
+          <article className="welcome-card welcome-card--primary">
+            <span className="step-tag">02 / INSPECT</span><div className="welcome-icon">⌕</div>
+            <h3>Evidence before conclusions</h3>
+            <p>Every displayed risk candidate points back to contract wording. Unverified interpretations should remain unresolved—not become confident legal claims.</p>
+          </article>
+          <article className="welcome-card">
+            <span className="step-tag">03 / ASK</span><div className="welcome-icon">↗</div>
+            <h3>Ask the contract</h3>
+            <p>Explore termination, liability, payment, IP ownership, and interactions between clauses with source-backed answers and explicit uncertainty.</p>
+          </article>
+          <article className="welcome-card">
+            <span className="step-tag">BUILT FOR REVIEW</span><div className="welcome-icon">◎</div>
+            <h3>Auditable by design</h3>
+            <p>Inspect rule status, evidence provenance, and downloadable artifacts. A passed software check is never presented as proof of legal accuracy.</p>
+          </article>
+        </section>
+      )}
+
+      {demoNotice && <p className="demo-notice" role="status">{demoNotice}</p>}
+      {error && <div className="error" role="alert">{error}</div>}
+
+      <details className="experiment-snapshot">
+        <summary>Technical validation snapshot <span className="snapshot-hint">Open to inspect runtime metrics</span></summary>
         <div className="experiment-snapshot__body">
           <div className="experiment-metrics">
             <div><strong>{phase2Metrics?.playbook?.deterministic_rule_count ?? "—"}</strong><span>Executable playbook rules</span></div>
@@ -347,9 +414,6 @@ function ContractReview() {
           <p><a href="/query/phase2-metrics" target="_blank" rel="noreferrer">Open metrics JSON</a></p>
         </div>
       </details>
-
-      {demoNotice && <p className="demo-notice" role="status">{demoNotice} You can inspect the saved clauses, findings and chatbot immediately.</p>}
-      {error && <div className="error">{error}</div>}
 
       {loading && (
         <section className="trace" aria-live="polite">
@@ -506,9 +570,9 @@ function ContractReview() {
                 <div>
                   <div className="eyebrow">Contract-aware assistant</div>
                   <h2>Ask questions about {result.contract_metadata?.name || result.filename}</h2>
-                  <p className="muted">Answers use the saved review of this uploaded contract. Quotes are checked against extracted clause text; unsupported answers should abstain.</p>
+                  <p className="muted">Answers are grounded in this analysis. Each material contract claim should cite exact wording; if the source does not support an answer, the assistant should say so rather than guess.</p>
                 </div>
-                <span className="chat-model">Local model · analysis linked</span>
+                <span className="chat-model">{chatMessages.some((message) => message.model === "EXTRACTIVE_FALLBACK") ? "Source-only fallback" : "Contract-linked assistant"}</span>
               </div>
 
               <div className="suggested-questions" aria-label="Suggested questions">
