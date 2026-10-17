@@ -212,3 +212,33 @@ def test_csv_exports_nested_evidence_and_citations_as_json():
     assert row["score_component_source"] == "LLM_SELF_REPORTED_UNVALIDATED"
     assert row["score_interpretation"] == "triage only"
     assert row["score_version"] == "test-score-v1"
+
+
+
+def test_clause_risk_summary_clears_stale_positive_fields_on_no_risk():
+    from app.services.rag_service import _apply_clause_risk_summary
+
+    row = {
+        "risk": True,
+        "risk_type": "Stale liability finding",
+        "risk_level": "HIGH",
+        "risk_provenance": {"old": True},
+        "risk_supporting_sources": [{"id": "OLD"}],
+        "why_flagged": "Old explanation",
+        "evidence": "Old quote",
+    }
+
+    result = _apply_clause_risk_summary(row, [{
+        "check_id": "C-1",
+        "risk": False,
+        "risk_status": "NO_RISK",
+    }])
+
+    assert result["risk"] is False
+    assert result["risk_status"] == "NO_RISK"
+    assert result["risk_type"] is None
+    assert result["risk_level"] is None
+    assert result["risk_provenance"] == {}
+    assert result["risk_supporting_sources"] == []
+    assert result["why_flagged"] == ""
+    assert result["evidence"] == ""
