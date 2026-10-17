@@ -257,15 +257,87 @@ def load_playbook(path: Path | None = None) -> dict:
     return starter_playbook()
 
 
-def applicable_checks(playbook: dict, clause_type: str) -> list[dict]:
-    entry = playbook.get("clause_types", {}).get(clause_type)
-    if entry:
-        return list(entry.get("checklist") or [])
-    lower = str(clause_type or "").lower()
-    for name, payload in playbook.get("clause_types", {}).items():
-        if name.lower() in lower or lower in name.lower():
-            return list(payload.get("checklist") or [])
-    return []
+_STRONG_RISK_KEYWORDS = {
+    "assignment", "assign", "liability", "cap", "indemnity", "indemnify",
+    "indemnification", "insurance", "audit", "inspect", "warranty", "warranties",
+    "license", "licence", "sublicense", "perpetual", "irrevocable", "uncapped",
+    "unlimited", "termination", "terminate", "renewal", "renew", "exclusive",
+    "exclusivity", "non-compete", "noncompete", "non-solicit", "nonsolicit",
+    "non-solicitation", "solicit", "escrow", "royalty", "mfn", "rofr", "rofo",
+    "rofn", "ip", "transferable", "disparagement", "penalty", "discount",
+    "adjustment", "transition", "wind-down", "revenue sharing", "profit sharing",
+    "net sales", "net revenue", "profit share", "liquidated damages",
+    "minimum commitment", "take or pay", "change of control", "governing law",
+    "intellectual property", "source code", "work product", "deliverables",
+    "third-party beneficiary", "third party beneficiary", "covenant not to sue",
+    "joint ownership", "price restriction", "volume restriction", "usage cap",
+    "quantity limit", "right of first refusal", "right of first offer",
+    "right of first negotiation", "post-termination", "non-renewal",
+    "without limitation", "fees paid", "aggregate liability", "maximum liability",
+    "liability shall not exceed", "no assignment without consent",
+    "shall not assign", "may not assign", "field of use", "all right, title and interest",
+}
+_GENERIC_PLAYBOOK_KEYWORDS = {
+    "upon reasonable notice", "for any reason", "under any circumstances",
+    "requirements", "coverage", "customers", "employees", "territory",
+    "duration", "fees", "price", "notice", "term", "sole", "records", "report",
+    "affiliate", "customer",
+}
+
+
+def _keyword_matches_clause(clause_text: str, keyword: str) -> bool:
+    phrase = re.sub(r"\\s+", " ", str(keyword or "").strip().lower())
+    if not phrase or phrase in _GENERIC_PLAYBOOK_KEYWORDS:
+        return False
+    if len(phrase.split()) == 1 and phrase not in _STRONG_RISK_KEYWORDS:
+        return False
+    pattern = r"(?<!\\w)" + re.escape(phrase).replace(r"\\ ", r"\\s+") + r"(?!\\w)"
+    return bool(re.search(pattern, str(clause_text or ""), flags=re.IGNORECASE))
+
+
+def applicable_checks(
+    playbook: dict,
+    clause_type: str,
+    clause_text: str | None = None,
+) -> list[dict]:
+    """Select the predicted-label checklist plus other text-relevant playbook checks.
+
+    CUAD's predicted category is a useful retrieval signal, not a hard gate:
+    misclassification must not prevent an independently relevant risk check from
+    being evaluated. Only explicit, risk-specific playbook keywords add families.
+    """
+    clause_types = playbook.get("clause_types", {}) or {}
+    label = str(clause_type or "").strip()
+    matched_categories: list[str] = []
+    if label in clause_types:
+        matched_categories.append(label)
+    else:
+        lower = label.lower()
+        for name in clause_types:
+            if lower and (name.lower() in lower or lower in name.lower()):
+                matched_categories.append(name)
+                break
+
+    text = str(clause_text or "")
+    if text.strip():
+        for name, payload in clause_types.items():
+            if name in matched_categories:
+                continue
+            keywords = payload.get("keywords") or []
+            if any(_keyword_matches_clause(text, keyword) for keyword in keywords):
+                matched_categories.append(name)
+
+    checks: list[dict] = []
+    seen_ids: set[str] = set()
+    for name in matched_categories:
+        payload = clause_types.get(name) or {}
+        for check in payload.get("checklist") or []:
+            check_id = str(check.get("id") or "").strip()
+            if not check_id or check_id in seen_ids:
+                continue
+            seen_ids.add(check_id)
+            checks.append(check)
+    return checks
 
 
 def source_records(playbook: dict, ids: list[str]) -> list[dict]:
