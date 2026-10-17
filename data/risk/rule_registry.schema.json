@@ -1,0 +1,348 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/cuad-contract-review/rule_registry.schema.json",
+  "title": "Phase 2 rule registry record",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "rule_id",
+    "base_rule_key",
+    "base_rule_id",
+    "record_kind",
+    "rule_family",
+    "title",
+    "risk_domain",
+    "perspective",
+    "contract_type_profile",
+    "contract_type_scope",
+    "applicability_status",
+    "jurisdiction_scope",
+    "jurisdiction_status",
+    "jurisdiction_review_required",
+    "decision_logic",
+    "evidence_contract",
+    "source_ids",
+    "source_status",
+    "severity_rationale",
+    "confidence_policy",
+    "regression_cases",
+    "validation_status",
+    "approval_status",
+    "execution_status",
+    "execution_eligible",
+    "legal_conclusion_allowed",
+    "source_playbook_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "rule_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "base_rule_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "base_rule_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_kind": {
+      "enum": [
+        "BASE_RULE",
+        "CONTEXT_VARIANT_CANDIDATE"
+      ]
+    },
+    "rule_family": {
+      "enum": [
+        "CLAUSE_CHECK",
+        "CROSS_CLAUSE_CHECK",
+        "DOCUMENT_CHECK",
+        "DETERMINISTIC_REGEX"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clause_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "risk_domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "risk_subdomain": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "risk_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "perspective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_type_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_type_scope": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "applicability_status": {
+      "type": "string"
+    },
+    "jurisdiction_scope": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "jurisdiction_status": {
+      "enum": [
+        "UNRESOLVED",
+        "DECLARED_NOT_VERIFIED",
+        "VERIFIED"
+      ]
+    },
+    "jurisdiction_review_required": {
+      "type": "boolean"
+    },
+    "decision_logic": {
+      "type": "object",
+      "required": [
+        "question",
+        "trigger_condition",
+        "counterconditions",
+        "dependencies",
+        "applies_when",
+        "pattern",
+        "exclude_patterns"
+      ],
+      "properties": {
+        "question": {
+          "type": "string"
+        },
+        "trigger_condition": {
+          "type": "string"
+        },
+        "counterconditions": {
+          "type": "array"
+        },
+        "dependencies": {
+          "type": "array"
+        },
+        "applies_when": {
+          "type": "array"
+        },
+        "pattern": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exclude_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "applicability_hypothesis": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "evidence_contract": {
+      "type": "object",
+      "required": [
+        "required_evidence",
+        "evidence_location",
+        "exact_quote_required",
+        "must_be_from_uploaded_contract",
+        "source_citation_is_not_contract_evidence",
+        "affected_clause_ids_required"
+      ],
+      "properties": {
+        "required_evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence_location": {
+          "type": "string"
+        },
+        "exact_quote_required": {
+          "type": "boolean"
+        },
+        "must_be_from_uploaded_contract": {
+          "type": "boolean"
+        },
+        "source_citation_is_not_contract_evidence": {
+          "type": "boolean"
+        },
+        "affected_clause_ids_required": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "source_status": {
+      "type": "string"
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "severity_rationale": {
+      "type": "object",
+      "required": [
+        "status",
+        "reason"
+      ],
+      "properties": {
+        "status": {
+          "const": "NOT_USED"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "confidence_policy": {
+      "type": "object",
+      "required": [
+        "target",
+        "raw_support_score_status",
+        "probability_allowed_only_when",
+        "model_self_reported_confidence_allowed"
+      ],
+      "properties": {
+        "target": {
+          "const": "PREDICTION_CORRECTNESS"
+        },
+        "raw_support_score_status": {
+          "const": "HEURISTIC_UNCALIBRATED"
+        },
+        "probability_allowed_only_when": {
+          "type": "string"
+        },
+        "model_self_reported_confidence_allowed": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "regression_cases": {
+      "type": "object",
+      "required": [
+        "positive",
+        "negative",
+        "edge"
+      ],
+      "properties": {
+        "positive": {
+          "type": "array"
+        },
+        "negative": {
+          "type": "array"
+        },
+        "edge": {
+          "type": "array"
+        }
+      },
+      "additionalProperties": false
+    },
+    "validation_status": {
+      "enum": [
+        "DRAFT_UNVALIDATED",
+        "IN_REVIEW",
+        "ADJUDICATED",
+        "APPROVED",
+        "REJECTED"
+      ]
+    },
+    "approval_status": {
+      "type": "string"
+    },
+    "execution_status": {
+      "enum": [
+        "PILOT_REVIEW_ONLY",
+        "DISABLED_UNVALIDATED_CANDIDATE",
+        "APPROVED_FOR_EXECUTION"
+      ]
+    },
+    "execution_eligible": {
+      "type": "boolean"
+    },
+    "legal_conclusion_allowed": {
+      "const": false
+    },
+    "source_playbook_hash": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "record_kind": {
+            "const": "CONTEXT_VARIANT_CANDIDATE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution_eligible": {
+            "const": false
+          },
+          "execution_status": {
+            "const": "DISABLED_UNVALIDATED_CANDIDATE"
+          },
+          "validation_status": {
+            "const": "DRAFT_UNVALIDATED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_kind": {
+            "const": "BASE_RULE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution_status": {
+            "const": "PILOT_REVIEW_ONLY"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": true
+}
