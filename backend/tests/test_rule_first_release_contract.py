@@ -183,3 +183,21 @@ def test_contract_check_checkpoint_retries_incomplete_model_passes():
         payload, playbook, model="test-model",
         cross_clause_enabled=True, document_checks_enabled=True,
     ) is False
+
+
+
+def test_csv_exports_nested_evidence_and_citations_as_json():
+    import json
+    from app.services.rag_service import _csv_safe_rows
+
+    source_row = {
+        "evidence": [{"clause_id": 4, "quote": "Liability is capped."}],
+        "supporting_sources": [{"id": "P2", "source_title": "Practice note"}],
+        "provenance": {"score_interpretation": "triage only"},
+    }
+
+    row = _csv_safe_rows([source_row])[0]
+
+    assert json.loads(row["evidence"]) == source_row["evidence"]
+    assert json.loads(row["supporting_sources"]) == source_row["supporting_sources"]
+    assert json.loads(row["provenance"]) == source_row["provenance"]
