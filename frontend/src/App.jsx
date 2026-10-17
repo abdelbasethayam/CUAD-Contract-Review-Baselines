@@ -150,6 +150,7 @@ function ContractReview() {
   const [trace, setTrace] = useState([]);
   const [tab, setTab] = useState("overview");
   const [riskFilter, setRiskFilter] = useState("all");
+  const [clauseSearch, setClauseSearch] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
@@ -193,6 +194,7 @@ function ContractReview() {
       setDemoNotice(data.notice || "Loaded the synthetic demo.");
       setTab("overview");
       setRiskFilter("all");
+      setClauseSearch("");
     } catch (err) {
       setError(err.message || "Could not load the guided demo.");
     } finally {
@@ -242,6 +244,7 @@ function ContractReview() {
     setChatMessages([]);
     setChatError(null);
     setTab("overview");
+    setClauseSearch("");
 
     try {
       const formData = new FormData();
@@ -292,6 +295,14 @@ function ContractReview() {
 
   const assessment = result?.contract_risk_assessment || {};
   const clauses = result?.clauses || [];
+  const visibleClauses = useMemo(() => {
+    const query = clauseSearch.trim().toLowerCase();
+    if (!query) return clauses;
+    return clauses.filter((clause) =>
+      [clause.predicted_label, clause.heading, clause.section_path, clause.clause_text]
+        .some((value) => String(value || "").toLowerCase().includes(query))
+    );
+  }, [clauses, clauseSearch]);
   const risks = useMemo(
     () => clauses.flatMap((clause) =>
       (clause.risk_findings || []).map((finding) => ({
@@ -499,9 +510,12 @@ function ContractReview() {
 
           {tab === "clauses" && (
             <section className="results">
-              <div className="section-heading"><div><div className="eyebrow">Clause-by-clause</div><h2>{clauses.length} extracted segments</h2></div></div>
+              <div className="section-heading">
+                <div><div className="eyebrow">Clause-by-clause</div><h2>{clauseSearch.trim() ? visibleClauses.length + " matching segments" : clauses.length + " extracted segments"}</h2></div>
+                <label className="clause-search"><span aria-hidden="true">⌕</span><input type="search" value={clauseSearch} onChange={(event) => setClauseSearch(event.target.value)} placeholder="Search clause text or label…" aria-label="Search clauses" /></label>
+              </div>
               <div className="clause-list">
-                {clauses.map((clause) => (
+                {visibleClauses.map((clause) => (
                   <article key={clause.clause_index} className="clause-card">
                     <div className="clause-card__header">
                       <div><span className="field-label">Clause {clause.clause_index}</span><h3>{clause.predicted_label || "No applicable label"}</h3></div>
@@ -517,6 +531,7 @@ function ContractReview() {
                     ))}
                   </article>
                 ))}
+                {!visibleClauses.length && <div className="panel"><h3>No clauses match this search.</h3><p>Try a different term, section heading, or clause category.</p></div>}
               </div>
             </section>
           )}
