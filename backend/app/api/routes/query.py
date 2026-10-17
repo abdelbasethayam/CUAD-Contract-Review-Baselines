@@ -686,13 +686,49 @@ def download_demo_contract() -> FileResponse:
 
 @router.get("/demo-analysis")
 def load_demo_analysis() -> dict[str, Any]:
-    """Load or deterministically create a synthetic walkthrough; never expose a user's upload."""
+    """Load a hash-matched saved walkthrough or create a deterministic synthetic one."""
     fixture_path = Path(PROJECT_ROOT) / "data" / "risk" / "demo_contract_for_reproduction.txt"
     if not fixture_path.is_file():
         raise HTTPException(status_code=404, detail="The repository's synthetic demo fixture is missing.")
     fixture_hash = hashlib.sha256(fixture_path.read_bytes()).hexdigest()
-    analysis_id = hashlib.sha256((fixture_hash + ":synthetic-demo-v1").encode("utf-8")).hexdigest()[:16] + "-" + hashlib.sha256((fixture_hash + ":synthetic-demo-v1").encode("utf-8")).hexdigest()[16:32]
     runs_root = Path(RUNS_DIR).resolve()
+    candidates: list[tuple[float, dict[str, Any], Path]] = []
+    for saved_path in runs_root.glob("*/result.json"):
+        try:
+            saved = json.loads(saved_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        metadata = saved.get("contract_metadata") or {}
+        if (
+            saved.get("filename") == fixture_path.name
+            and isinstance(saved.get("clauses"), list)
+            and len(saved["clauses"]) >= 5
+            and metadata.get("document_hash") == fixture_hash
+        ):
+            candidates.append((saved_path.stat().st_mtime, saved, saved_path.parent))
+    if candidates:
+        _, saved_result, saved_root = max(candidates, key=lambda item: item[0])
+        saved_id = str(saved_result.get("analysis_id") or saved_root.name)
+        if not _ANALYSIS_ID.fullmatch(saved_id):
+            raise HTTPException(status_code=422, detail="Saved demo result has an invalid analysis ID.")
+        return {
+            "filename": saved_result.get("filename"),
+            "total_clauses": len(saved_result["clauses"]),
+            "analysis_id": saved_id,
+            "clauses": saved_result["clauses"],
+            "contract_risk_assessment": saved_result.get("contract_risk_assessment") or {},
+            "contract_metadata": saved_result.get("contract_metadata") or {"name": "Synthetic demo contract"},
+            "downloads": {
+                name.replace(".", "_"): f"/documents/runs/{saved_id}/artifact/{name}"
+                for name in ("result.json", "contract_risk.json", "risk_findings.jsonl", "risk_findings.csv", "clauses.csv", "classification.jsonl", "manifest.json")
+                if (saved_root / name).is_file()
+            },
+            "demo_mode": True,
+            "notice": "Loaded the saved analysis of the repository's hash-matched synthetic demo fixture. Findings remain uncalibrated and require review.",
+        }
+
+    digest = hashlib.sha256((fixture_hash + ":synthetic-demo-v1").encode("utf-8")).hexdigest()
+    analysis_id = digest[:16] + "-" + digest[16:32]
     run_root = (runs_root / analysis_id).resolve()
     if runs_root not in run_root.parents:
         raise HTTPException(status_code=500, detail="Invalid demo storage location.")
