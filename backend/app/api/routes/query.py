@@ -115,6 +115,7 @@ _CONCEPT_EXPANSIONS: dict[str, set[str]] = {
 }
 _RISK_INTENT = re.compile(r"\b(risk|risks|exposure|red flags?|concerns?|issues?|unfavo[u]?rable|one[- ]sided|imbalanc(?:e|ed)|problematic)\b", re.I)
 _OVERVIEW_INTENT = re.compile(r"\b(summar(?:y|ize|ise)|overview|key points?|main obligations|overall review|what(?:'s| is) this contract about)\b", re.I)
+_META_HELP_INTENT = re.compile(r"\s*(?:hi|hello|hey|thanks|thank you|help|what can you do(?: with (?:this )?contract)?|what questions can i ask|how do i use (?:this )?assistant)[?.! ]*\s*", re.I)
 
 
 def _question_terms(question: str) -> set[str]:
@@ -288,6 +289,28 @@ def _verified_citations(raw: Any, source_texts: dict[int, str]) -> list[dict[str
     return verified
 
 
+def _has_unverified_citation(raw: Any, source_texts: dict[int, str]) -> bool:
+    """Return True if the model supplied any malformed or unverifiable citation."""
+    if raw is None:
+        return False
+    if not isinstance(raw, list):
+        return True
+    if len(raw) > 8:
+        return True
+    for item in raw:
+        if not isinstance(item, dict):
+            return True
+        try:
+            index = int(item.get("clause_index"))
+        except (TypeError, ValueError):
+            return True
+        quote = re.sub(r"\s+", " ", str(item.get("quote") or "")).strip()
+        original = re.sub(r"\s+", " ", source_texts.get(index, "")).strip()
+        if len(quote) < 12 or quote not in original:
+            return True
+    return False
+
+
 def _call_local_chat(messages: list[dict[str, str]]) -> str:
     """Use local Ollama chat with contract text isolated in the user message."""
     timeout = min(max(int(OLLAMA_TIMEOUT_SECONDS), 45), 180)
@@ -322,6 +345,27 @@ def query_contract(request: ContractQuestion) -> dict[str, Any]:
     if not question:
         raise HTTPException(status_code=422, detail="Enter a question about the uploaded contract.")
     result = _load_result(request.analysis_id)
+    if _META_HELP_INTENT.fullmatch(question):
+        return {
+            "analysis_id": request.analysis_id,
+            "answer": (
+                "I can summarize the agreement in plain English, compare each party's obligations and rights, "
+                "locate terms on termination, renewal, payment, liability, intellectual property, data, and disputes, "
+                "and explain why a review finding was raised. I can show the exact wording behind an answer and point "
+                "out where the document is silent or ambiguous. I cannot decide whether you should sign or provide a "
+                "jurisdiction-specific legal opinion. Ask a specific question and I will cite the relevant clause; "
+                "if the text does not support an answer, I will say so."
+            ),
+            "insufficient_evidence": False,
+            "citations": [],
+            "follow_up_questions": [
+                "Summarize the main obligations in plain English.",
+                "What termination rights and notice periods does each party have?",
+            ],
+            "model": "DETERMINISTIC_HELP",
+            "evidence_policy": "Product guidance only; no contract-specific interpretation was made.",
+            "disclaimer": "AI-assisted contract review, not legal advice. Risk findings are review triggers, not calibrated probabilities.",
+        }
     history = request.history[-8:]
     retrieval_question = " ".join(
         [turn.content for turn in history if turn.role == "user"][-3:] + [question]
@@ -401,7 +445,9 @@ Use at most 4 citations and 2 follow-up questions. No markdown fences.
 
     parsed = extract_json_object(raw_text) or {}
     answer = str(parsed.get("answer") or "").strip()
-    citations = _verified_citations(parsed.get("citations"), source_texts)
+    raw_citations = parsed.get("citations")
+    citations = _verified_citations(raw_citations, source_texts)
+    citation_integrity_error = _has_unverified_citation(raw_citations, source_texts)
     raw_insufficient = parsed.get("insufficient_evidence", False)
     insufficient = (
         raw_insufficient is True
@@ -409,17 +455,14 @@ Use at most 4 citations and 2 follow-up questions. No markdown fences.
     )
     if not answer:
         raise HTTPException(status_code=502, detail="The assistant did not return a usable answer. Try a narrower question.")
-    if parsed.get("citations") and not citations:
+    if citation_integrity_error:
         insufficient = True
         answer = (
-            "I couldn't verify the assistant's proposed quotes against the uploaded contract, "
-            "so I can't present that as an evidence-grounded answer. Try a narrower question about a specific clause."
+            "I couldn't verify one or more of the assistant's proposed quotes against the analyzed contract, "
+            "so I can't present the answer as fully evidence-grounded. Verified source excerpts, if any, are shown below; "
+            "try a narrower question about a specific clause."
         )
-    elif not citations and not re.fullmatch(
-        r"\s*(hi|hello|hey|thanks|thank you|what can you do|how do i use this assistant)[?.! ]*\s*",
-        question,
-        re.I,
-    ):
+    elif not citations:
         insufficient = True
         answer = (
             "I couldn't verify a supporting quote in the analyzed contract for that answer, "
