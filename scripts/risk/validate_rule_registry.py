@@ -387,7 +387,8 @@ def main() -> int:
             "base_rules_with_authority_refs": sum(bool(item.get("authority_map", {}).get("authority_ids")) for item in base_rules),
             "base_rules_without_authority_refs": sum(not bool(item.get("authority_map", {}).get("authority_ids")) for item in base_rules),
             "base_rules_with_full_authority_metadata": sum(
-                len(item.get("authority_map", {}).get("authority_sources") or []) == len(item.get("authority_map", {}).get("authority_ids") or [])
+                bool(item.get("authority_map", {}).get("authority_ids"))
+                and len(item.get("authority_map", {}).get("authority_sources") or []) == len(item.get("authority_map", {}).get("authority_ids") or [])
                 for item in base_rules
             ),
             "categories_without_universal_primary_authority": sorted(
