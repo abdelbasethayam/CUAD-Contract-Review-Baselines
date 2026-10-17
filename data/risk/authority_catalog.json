@@ -23,7 +23,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; FACT_AND_WORK_CATEGORY_ANALYSIS_REQUIRED",
       "scope_limit": "Copyright ownership only; commissioned work qualifies as work made for hire only within statutory categories and signed-writing conditions.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "USC_17_106",
@@ -37,7 +40,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; LIMITATIONS_AND_RIGHTS_TYPE_REVIEW_REQUIRED",
       "scope_limit": "Copyright rights only; does not independently resolve patents, trademarks, trade secrets, or contractual scope.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "USC_17_201",
@@ -51,7 +57,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; AUTHORSHIP_AND_WORK_FACTS_REQUIRED",
       "scope_limit": "Copyright ownership; joint authorship and work-made-for-hire require statutory factual analysis.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "USC_17_203",
@@ -65,7 +74,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; DATES, AUTHORSHIP, NOTICE, AND EXCEPTIONS_REQUIRED",
       "scope_limit": "Applies only to qualifying grants by authors and is subject to statutory conditions and exceptions; 'perpetual' does not itself resolve termination rights.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "USC_17_204",
@@ -79,7 +91,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; SUBJECT MATTER AND TRANSFER TYPE REVIEW REQUIRED",
       "scope_limit": "Copyright transfers; not a universal assignment rule for all contract rights or all IP types.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "USC_18_1836",
@@ -93,7 +108,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; TRADE-SECRET ELEMENTS AND FACTS REQUIRED",
       "scope_limit": "Provides a federal civil cause of action for qualifying trade-secret misappropriation; does not mandate source-code escrow.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "USC_18_1839",
@@ -107,7 +125,10 @@
       "verification_status": "OFFICIAL_CHAPTER_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; FACTUAL ELEMENTS REQUIRED",
       "scope_limit": "Definitions only; does not make all confidential information a statutory trade secret.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "USC_15_1",
@@ -121,7 +142,10 @@
       "verification_status": "OFFICIAL_SOURCE_LINKED_CURRENTNESS_REVIEW_REQUIRED",
       "currentness_status": "CURRENTNESS_AND_APPLICABLE_ANTITRUST_TEST_MUST_BE_CONFIRMED_BEFORE_LEGAL_USE",
       "scope_limit": "Competition restrictions require market, parties, effects, and governing-law facts; exclusivity or MFN terms are not automatically unlawful.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "USC_15_45",
@@ -135,7 +159,10 @@
       "verification_status": "OFFICIAL_SOURCE_LINKED_CURRENTNESS_REVIEW_REQUIRED",
       "currentness_status": "CURRENTNESS_AND_APPLICABLE_ANTITRUST_TEST_MUST_BE_CONFIRMED_BEFORE_LEGAL_USE",
       "scope_limit": "General FTC authority; does not itself make a particular contract clause per se unlawful.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "USC_35_261",
@@ -149,7 +176,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; PATENT RIGHTS AND RECORDING FACTS REQUIRED",
       "scope_limit": "Patent interests only; does not independently resolve copyright, trademark, or trade-secret ownership.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_FEDERAL_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "FTC_NONCOMPETE_STATUS_2025",
@@ -163,7 +193,10 @@
       "verification_status": "OFFICIAL_STATUS_NOTICE_RETRIEVED",
       "currentness_status": "RULE_NOT_IN_EFFECT_PER_FTC_STATUS_PAGE_RETRIEVED_2026-10-17; CHECK_LATER_CASES_AND_STATE_LAW",
       "scope_limit": "Status evidence only, not a substitute for state non-compete law or a conclusion about enforceability.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "OFFICIAL_REGULATOR_STATUS_NOTICE_NOT_BINDING_STATUTE",
+      "effective_date_status": "RULE_NOT_IN_EFFECT_STATUS_RETRIEVED_2026-10-17; STATE_LAW_REVIEW_REQUIRED"
     },
     {
       "authority_id": "NY_UCC_1_301",
@@ -177,7 +210,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; TRANSACTION, CONSUMER, AND CONFLICT-OF-LAWS CONDITIONS_REQUIRED",
       "scope_limit": "UCC territorial applicability and choice-of-law rules only; not a universal conflicts rule for every contract.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_GOL_5_1401",
@@ -191,7 +227,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; VALUE THRESHOLD, EXCLUSIONS, AND TRANSACTION FACTS REQUIRED",
       "scope_limit": "Choice-of-law safe harbor subject to statutory transaction-value threshold and exclusions; not a blanket validation of all clauses.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_GOL_5_1402",
@@ -205,7 +244,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; VALUE THRESHOLD AND FORUM-CLAUSE CONDITIONS REQUIRED",
       "scope_limit": "Specific choice-of-forum statute tied to § 5-1401 and statutory transaction conditions.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_UCC_2_210",
@@ -219,7 +261,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; SALE-OF-GOODS SCOPE AND CONTRACT LANGUAGE REQUIRED",
       "scope_limit": "Article 2 goods contracts; does not establish a universal assignment rule for services, IP licences, or corporate change of control.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_UCC_2_306",
@@ -233,7 +278,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, GOOD-FAITH, QUANTITY, AND MARKET FACTS REQUIRED",
       "scope_limit": "Addresses output/requirements quantity and exclusive dealings under Article 2; not a universal MFN, price, or exclusivity rule.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_UCC_2_309",
@@ -247,7 +295,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; ARTICLE 2 SCOPE AND CONTRACT TERMS REQUIRED",
       "scope_limit": "Sale-of-goods default rules for timing and indefinite successive performance; not a universal automatic-renewal law.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_UCC_2_316",
@@ -261,7 +312,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, WARRANTY TYPE, NOTICE, AND FACTS REQUIRED",
       "scope_limit": "Article 2 warranty exclusion/modification rules; does not settle warranty duration for every services/software contract.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_UCC_2_318",
@@ -275,7 +329,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; STATUTORY BENEFICIARY AND PERSONAL-INJURY LIMITS REQUIRED",
       "scope_limit": "A narrow warranty-beneficiary provision; not the general third-party-beneficiary doctrine.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_UCC_2_718",
@@ -289,7 +346,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS AND FACT-SPECIFIC DAMAGES ANALYSIS REQUIRED",
       "scope_limit": "Article 2 liquidated-damages standard; service contracts and other contexts require separate law.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_UCC_2_719",
@@ -303,7 +363,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, REMEDY DESIGN, AND FACTS REQUIRED",
       "scope_limit": "Article 2 remedies and consequential damages; not a universal liability-cap rule for all commercial contracts.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "NY_UCC_2_725",
@@ -317,7 +380,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; ACCRUAL AND FUTURE-PERFORMANCE EXCEPTIONS REQUIRED",
       "scope_limit": "Statute of limitations for sale-of-goods actions; distinct from contractual warranty duration.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_UCC_1_301",
@@ -331,7 +397,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; UCC TRANSACTION AND CONFLICT-OF-LAWS CONDITIONS REQUIRED",
       "scope_limit": "UCC choice-of-law provision only; not a universal conflicts rule for every contract.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_UCC_2_210",
@@ -345,7 +414,10 @@
       "verification_status": "OFFICIAL_PART_PAGE_AND_SECTION_PINPOINT",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS TRANSACTION AND CONTRACT LANGUAGE REQUIRED",
       "scope_limit": "Article 2 goods contracts only; not a universal assignment or change-of-control rule.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_UCC_2_306",
@@ -359,7 +431,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, GOOD-FAITH, QUANTITY, AND MARKET FACTS REQUIRED",
       "scope_limit": "Article 2 output/requirements and exclusive-dealing terms; not a universal MFN or competition-law conclusion.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_UCC_2_309",
@@ -373,7 +448,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; ARTICLE 2 SCOPE AND CONTRACT TERMS REQUIRED",
       "scope_limit": "Goods-contract default rules; not a universal automatic-renewal or termination-for-convenience rule.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_UCC_2_316",
@@ -387,7 +465,10 @@
       "verification_status": "OFFICIAL_PART_PAGE_AND_SECTION_PINPOINT",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS AND WARRANTY FACTS REQUIRED",
       "scope_limit": "Article 2 warranty rules only.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_UCC_2_318",
@@ -401,7 +482,10 @@
       "verification_status": "OFFICIAL_PART_PAGE_AND_SECTION_PINPOINT",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; STATUTORY BENEFICIARY SCOPE REQUIRED",
       "scope_limit": "Warranty beneficiaries under Article 2 only; not the general third-party-beneficiary doctrine.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_UCC_2_718",
@@ -415,7 +499,10 @@
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS AND FACT-SPECIFIC DAMAGES ANALYSIS REQUIRED",
       "scope_limit": "Article 2 liquidated-damages standard; service contracts and other contexts require separate law.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_UCC_2_719",
@@ -429,7 +516,10 @@
       "verification_status": "OFFICIAL_PART_PAGE_AND_SECTION_PINPOINT",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, REMEDY DESIGN, AND FACTS REQUIRED",
       "scope_limit": "Article 2 remedies and consequential damages only.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_DGCL_251",
@@ -443,7 +533,10 @@
       "verification_status": "OFFICIAL_CODE_SECTION_LINKED; TRANSACTION-SPECIFIC_REVIEW_REQUIRED",
       "currentness_status": "CORPORATE_TRANSACTION_SCOPE_ONLY; DO NOT EQUATE MERGER WITH CONTRACTUAL CHANGE OF CONTROL",
       "scope_limit": "Corporate merger procedure; does not determine how a particular contract defines change of control.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_RETRIEVED; RELEVANT_CONTRACT_DATE_AND_AMENDMENT_EFFECTIVE_DATES_NOT_ANALYZED"
     },
     {
       "authority_id": "DE_SUPREME_PAYSCALE_2026",
@@ -457,7 +550,10 @@
       "verification_status": "PRIMARY_OPINION_TEXT_RETRIEVED_ON_REPUBLICATION_HOST",
       "currentness_status": "DECISION_DATED_2026-03-19; OFFICIAL_DOCKET_COPY_AND_SUBSEQUENT_HISTORY_REQUIRED_BEFORE_APPROVAL",
       "scope_limit": "The Court held only that claims were reasonably conceivable at the pleading stage and expressly did not decide ultimate enforceability; facts concerned employment-related equity covenants.",
-      "retrieval_date": "2026-10-17"
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_COURT_OPINION_REPUBLISHED_HOST_NOT_OFFICIAL",
+      "effective_date_status": "DECISION_DATE_2026-03-19; OFFICIAL_DOCKET_AND_SUBSEQUENT_HISTORY_REVIEW_REQUIRED"
     }
   ]
 }
