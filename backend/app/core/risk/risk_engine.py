@@ -138,6 +138,64 @@ def _support_score(*, answer: str, evidence_ok: bool, agreement: float, indicato
     return round(min(1.0, evidence_component + agreement_component + indicator_component), 4)
 
 
+_NEGATIVE_FLAG_PREFIXES = (
+    "no", "none", "missing", "absent", "absence", "lack", "lacks", "lacking",
+    "without", "silent", "unclear", "not", "future-tense only", "future tense only",
+    "looks punitive", "over-broad", "overbroad", "very long", "limits far below",
+    "one-sided protecting only the counterparty",
+)
+_NEGATIVE_TRIGGER_OVERRIDES = {("Cap On Liability", "LOL-2")}
+_BINARY_QUESTION_OVERRIDES = {
+    ("Anti-Assignment", "AA-2"): (
+        "Does the consent standard impose an absolute assignment ban or require consent "
+        "without a reasonableness standard?"
+    ),
+    ("Change Of Control", "COC-1"): (
+        "Does a change of control trigger automatic termination or another materially adverse effect?"
+    ),
+    ("Ip Ownership Assignment", "IP-1"): (
+        "Does the vendor retain ownership of newly created or deliverable IP paid for by the customer "
+        "without a clear license-back?"
+    ),
+}
+TRIGGER_POLARITY_POLICY_VERSION = "flag-if-answer-polarity-v1"
+
+
+def _check_key(check: dict) -> tuple[str, str]:
+    category = str(check.get("_playbook_category") or check.get("clause_type") or "").strip()
+    base_id = str(check.get("_base_check_id") or check.get("id") or "").strip()
+    if "@" in base_id:
+        base_id = base_id.split("@", 1)[0]
+    return category, base_id
+
+
+def _expected_trigger_answer(check: dict) -> str:
+    """Infer the YES/NO answer polarity implied by legacy flag_if wording."""
+    explicit = str(check.get("risk_trigger_answer") or "").strip().upper()
+    if explicit in {"YES", "NO"}:
+        return explicit
+    key = _check_key(check)
+    if key in _NEGATIVE_TRIGGER_OVERRIDES:
+        return "NO"
+    flag_if = str(check.get("flag_if") or "").strip().lower()
+    negative_prefix = any(
+        flag_if == prefix
+        or flag_if.startswith(prefix + " ")
+        or flag_if.startswith(prefix + "/")
+        or flag_if.startswith(prefix + ",")
+        or flag_if.startswith(prefix + "—")
+        or flag_if.startswith(prefix + "-")
+        for prefix in _NEGATIVE_FLAG_PREFIXES
+    )
+    return "NO" if negative_prefix else "YES"
+
+
+def _question_for_check(check: dict) -> str:
+    """Normalize legacy open-ended items to answerable binary predicates."""
+    key = _check_key(check)
+    return _BINARY_QUESTION_OVERRIDES.get(key, str(check.get("question") or "").strip())
+
+
 def _prompt(
     *,
     clause_text: str,
@@ -157,7 +215,9 @@ def _prompt(
             "risk_type": item.get("risk_type"),
             "perspective": item.get("perspective"),
             "applies_when": item.get("applies_when", []),
-            "question": item["question"],
+            "question": _question_for_check(item),
+            "source_question": item.get("question") if _question_for_check(item) != item.get("question") else None,
+            "risk_trigger_answer": _expected_trigger_answer(item),
             "flag_if": item["flag_if"],
             "do_not_flag_if": item.get("do_not_flag_if", []),
             "required_evidence": item.get("required_evidence", []),
@@ -185,11 +245,12 @@ Rules:
 9. Return JSON only. No hidden reasoning, no markdown, no extra text.
 10. Each checklist item is a RISK PREDICATE: answer the supplied question as written.
 11. Apply the supplied flag_if and do_not_flag_if rules when setting status. Do not treat every YES as a risk.
-12. If the question asks whether a risk condition exists, YES can be POTENTIAL_RISK only when flag_if is satisfied and exact evidence supports it. If flag_if is not satisfied, use NO_RISK.
-13. A mutual/reciprocal clause must not be labeled one-sided when the contract text itself applies the protection to both parties.
-14. Treat the registry status as binding pipeline governance: unapproved rules are review triggers only, not approved legal policy.
-15. If jurisdiction scope is unresolved or the source citation is incomplete, describe a commercial review concern; do not assert enforceability, illegality, or governing-law doctrine.
-16. Never emit ordinal severity, numerical severity scores, or self-reported confidence. Confidence is computed separately only after adjudicated calibration.
+12. Each check includes risk_trigger_answer, the answer polarity implied by flag_if. A supported risk trigger may be YES or NO; do not force all positive findings to answer YES.
+13. Emit POTENTIAL_RISK only when the answer matches risk_trigger_answer, the trigger condition is satisfied, and exact evidence supports it. If the answer contradicts trigger polarity, use INSUFFICIENT_EVIDENCE.
+14. A mutual/reciprocal clause must not be labeled one-sided when the contract text itself applies the protection to both parties.
+15. Treat the registry status as binding pipeline governance: unapproved rules are review triggers only, not approved legal policy.
+16. If jurisdiction scope is unresolved or the source citation is incomplete, describe a commercial review concern; do not assert enforceability, illegality, or governing-law doctrine.
+17. Never emit ordinal severity, numerical severity scores, or self-reported confidence. Confidence is computed separately only after adjudicated calibration.
 
 CURRENT CLAUSE
 ID: {clause_type}
@@ -481,10 +542,13 @@ def analyze_clause_risk(
             and evidence_location.get("evidence_source_status") == "VERIFIED"
         )
         indicator_match = bool(indicators.get("matched_indicators"))
+        check = checks_by_id[check_id]
         status = "INSUFFICIENT_EVIDENCE" if answer == "DON'T KNOW" else representative["status"]
-        # The decision and status must agree. YES may still be NO_RISK when the
-        # playbook's flag_if condition is not met, but NO must never become positive.
-        if status == "POTENTIAL_RISK" and (answer != "YES" or not evidence_ok):
+        # Trigger polarity is rule-specific: missing protections, unclear terms, and
+        # one-sided rights may correctly be answered NO. A positive finding must match
+        # the rule's expected polarity and retain verified contract evidence.
+        expected_trigger_answer = _expected_trigger_answer(check)
+        if status == "POTENTIAL_RISK" and (answer != expected_trigger_answer or not evidence_ok):
             status = "INSUFFICIENT_EVIDENCE"
         elif status not in {"POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE", "ERROR"}:
             status = "INSUFFICIENT_EVIDENCE"
@@ -512,7 +576,8 @@ def analyze_clause_risk(
                 **evidence_location,
                 "risk_domain": checks_by_id[check_id].get("risk_domain"),
                 "risk_subdomain": checks_by_id[check_id].get("risk_subdomain"),
-                "question": checks_by_id[check_id]["question"],
+                "question": _question_for_check(check),
+                "source_question": check.get("question") if _question_for_check(check) != check.get("question") else None,
                 "answer": answer,
                 "risk_status": status,
                 "risk_type": representative.get("risk_type") if status == "POTENTIAL_RISK" else None,
@@ -540,6 +605,10 @@ def analyze_clause_risk(
                     "playbook_hash": playbook.get("playbook_hash"),
                     "rule_engine_version": RULE_ENGINE_VERSION,
                     "check_id": check_id,
+                    "base_check_id": check.get("_base_check_id") or check.get("id") or check_id,
+                    "playbook_category": check.get("_playbook_category"),
+                    "risk_trigger_answer": expected_trigger_answer,
+                    "trigger_polarity_policy_version": TRIGGER_POLARITY_POLICY_VERSION,
                     "source_ids": source_ids,
                     "model": RISK_MODEL,
                     "passes": len(records),
@@ -586,7 +655,8 @@ def analyze_clause_risk(
                 "check_id": check["id"],
                 "risk_domain": check.get("risk_domain"),
                 "risk_subdomain": check.get("risk_subdomain"),
-                "question": check["question"],
+                "question": _question_for_check(check),
+                "source_question": check.get("question") if _question_for_check(check) != check.get("question") else None,
                 "answer": "DON'T KNOW",
                 "risk_status": "INSUFFICIENT_EVIDENCE",
                 "risk_type": None,
@@ -611,6 +681,10 @@ def analyze_clause_risk(
                     "playbook_hash": playbook.get("playbook_hash"),
                     "rule_engine_version": RULE_ENGINE_VERSION,
                     "check_id": check["id"],
+                    "base_check_id": check.get("_base_check_id") or check.get("id"),
+                    "playbook_category": check.get("_playbook_category"),
+                    "risk_trigger_answer": _expected_trigger_answer(check),
+                    "trigger_polarity_policy_version": TRIGGER_POLARITY_POLICY_VERSION,
                     "source_ids": check.get("sources", []),
                     "model": RISK_MODEL,
                     "passes": 0,
