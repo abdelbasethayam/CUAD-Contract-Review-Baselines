@@ -466,6 +466,51 @@ def phase2_metrics() -> dict[str, Any]:
     integrity = _load_json(integrity_path)
     release = _load_json(release_path)
     baseline = _load_json(baseline_path)
+    registry_manifest = _load_json(Path(PROJECT_ROOT) / "data" / "risk" / "rule_registry_manifest.json")
+    registry_path = Path(PROJECT_ROOT) / "data" / "risk" / "rule_registry.jsonl"
+    registry_records: list[dict[str, Any]] = []
+    if registry_path.is_file():
+        for line in registry_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(record, dict):
+                registry_records.append(record)
+    base_rules = [item for item in registry_records if item.get("record_kind") == "BASE_RULE"]
+    complete_rule_suites = sum(
+        all((item.get("regression_cases") or {}).get(key) for key in ("positive", "negative", "edge"))
+        for item in base_rules
+    )
+    adjudication_template = Path(PROJECT_ROOT) / "data" / "risk" / "gold" / "risk_finding_adjudication_template.csv"
+    project_adjudication_available = False
+    if adjudication_template.is_file():
+        try:
+            with adjudication_template.open(encoding="utf-8-sig", newline="") as handle:
+                project_adjudication_available = any(
+                    str(row.get("adjudication_status") or "").strip().upper() == "ADJUDICATED"
+                    for row in csv.DictReader(handle)
+                )
+        except OSError:
+            project_adjudication_available = False
+    calibration_available = (
+        Path(PROJECT_ROOT) / "data" / "risk" / "calibration" / "confidence_calibration.json"
+    ).is_file()
+    release_blockers = []
+    if registry_manifest.get("policy_status") != "APPROVED":
+        release_blockers.append("playbook_policy_not_approved")
+    if not registry_manifest.get("production_approved_rule_count", 0):
+        release_blockers.append("no_individually_approved_rules")
+    if not registry_manifest.get("verified_pinpoint_source_count", 0):
+        release_blockers.append("no_verified_pinpoint_citations")
+    if not project_adjudication_available:
+        release_blockers.append("no_project_specific_adjudication")
+    if not calibration_available:
+        release_blockers.append("no_validated_confidence_calibration")
+    if len(base_rules) and complete_rule_suites < len(base_rules):
+        release_blockers.append("incomplete_positive_negative_edge_rule_tests")
     clauses = playbook.get("clause_types") or {}
     clause_questions = sum(len((item or {}).get("checklist") or []) for item in clauses.values())
     rules = playbook.get("deterministic_rules") or []
@@ -501,6 +546,19 @@ def phase2_metrics() -> dict[str, Any]:
             "status": release.get("status", "NOT_RUN"),
             "checks_passed": sum(1 for check in (release.get("checks") or []) if check.get("passed")),
             "checks_total": len(release.get("checks") or []),
+        },
+        "production_release_readiness": {
+            "status": "BLOCKED" if release_blockers else "REQUIRES_FINAL_REVIEW",
+            "production_release_allowed": False,
+            "policy_status": registry_manifest.get("policy_status", "UNKNOWN"),
+            "base_rule_count": len(base_rules) or registry_manifest.get("base_rule_count", 0),
+            "production_approved_rule_count": registry_manifest.get("production_approved_rule_count", 0),
+            "complete_rule_test_suites": complete_rule_suites,
+            "incomplete_rule_test_suites": max(0, len(base_rules) - complete_rule_suites),
+            "project_specific_adjudication_available": project_adjudication_available,
+            "confidence_calibration_available": calibration_available,
+            "blockers": release_blockers,
+            "interpretation": "Software checks do not establish legal-risk accuracy or production legal approval.",
         },
         "separate_cuad_category_baseline": {
             "accuracy": baseline_metrics.get("nearest_neighbor_accuracy"),
