@@ -106,7 +106,7 @@ def evaluate_playbook_rules(
                 "risk_level": None,
                 "severity": None,
                 "confidence": None,
-                "confidence_status": "UNCALIBRATED",
+                "confidence_status": "NOT_ESTIMATED_DETERMINISTIC_TRIGGER",
                 "severity_status": "DEPRECATED_NOT_USED",
                 "ground_truth_status": "PLAYBOOK_DERIVED",
                 "evidence": evidence,
