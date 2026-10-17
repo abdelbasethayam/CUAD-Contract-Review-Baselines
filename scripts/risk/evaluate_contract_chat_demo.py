@@ -49,6 +49,43 @@ QUESTIONS = [
         ],
         "must_answer_all": [],
     },
+    {
+        "id": "insurance_limits",
+        "question": "What insurance must the supplier maintain, and does the agreement set minimum policy limits?",
+        "must_cite_terms": ["commercially reasonable", "No minimum policy limits"],
+        "must_answer_one_of": [
+            ["no minimum policy limits", "minimum policy limits are not stated", "does not specify minimum policy limits", "no minimum limits are specified"],
+            ["commercially reasonable"],
+        ],
+        "must_answer_all": [],
+        "must_answer_relations": [
+            {"entity": "supplier", "facts": ["commercially reasonable", "maintain insurance", "maintain coverage"]}
+        ],
+    },
+    {
+        "id": "customer_data_after_termination",
+        "question": "What happens to customer data after termination, and does the agreement specify retention or deletion?",
+        "must_cite_terms": ["disable Customer access immediately", "Customer must export all data before the effective termination date"],
+        "must_answer_one_of": [
+            ["export all data", "export data", "export its data"],
+            ["disable access", "disable customer access", "turn off access"],
+        ],
+        "must_answer_all": [
+            ["does not specify a retention period", "no retention period", "does not say how long", "retention period is not specified"],
+            ["does not specify deletion", "does not address deletion", "does not say whether data is deleted", "deletion is not specified"],
+        ],
+    },
+    {
+        "id": "indemnity_and_liability_cap_interaction",
+        "question": "Does the agreement clearly say whether indemnification obligations are subject to the aggregate liability caps?",
+        "must_cite_terms": ["indemnification obligations", "aggregate liability exceed", "Customer shall indemnify"],
+        "must_cite_clause_indices": [3, 4],
+        "must_answer_one_of": [
+            ["unclear", "ambiguous", "does not expressly state", "does not expressly say", "not clear"],
+            ["aggregate liability cap", "aggregate liability caps", "aggregate caps", "liability cap"],
+        ],
+        "must_answer_all": [["indemnification", "indemnity"]],
+    },
 ]
 
 
@@ -113,14 +150,25 @@ def _evaluate_question(
         cited_texts.append(quote)
 
     cited_text = " ".join(cited_texts)
+    cited_clause_indices = {
+        int(item["clause_index"])
+        for item in citations
+        if isinstance(item, dict) and str(item.get("clause_index", "")).isdigit()
+    }
+    required_clause_indices = {int(item) for item in spec.get("must_cite_clause_indices", [])}
     checks: dict[str, bool] = {
         "answer_present": bool(answer.strip()),
         "not_abstained": answer_data.get("insufficient_evidence") is False,
         "has_verified_citations": bool(cited_texts) and not citation_errors,
         "citation_terms_present": all(_normalize(term) in cited_text for term in spec["must_cite_terms"]),
+        "required_clause_citations_present": required_clause_indices.issubset(cited_clause_indices),
         "answer_contains_expected_concepts": all(
             _contains_any(normalized_answer, alternatives)
             for alternatives in spec["must_answer_one_of"]
+        ),
+        "answer_contains_all_required_concepts": all(
+            _contains_any(normalized_answer, alternatives)
+            for alternatives in spec.get("must_answer_all", [])
         ),
         "party_fact_attribution_correct": all(
             _fact_attributed_to_entity(
