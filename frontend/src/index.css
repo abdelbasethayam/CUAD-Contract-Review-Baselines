@@ -812,3 +812,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+.clause-search {
+  display: flex; align-items: center; gap: 8px; min-width: min(100%, 320px);
+  padding: 9px 12px; border: 1px solid #d6e2e8; border-radius: 10px;
+  color: #718492; background: #fff;
+}
+.clause-search:focus-within { border-color: #7dbdaf; box-shadow: 0 0 0 3px rgba(22,124,114,.08); }
+.clause-search > span { color: #168176; font-size: 1.15rem; }
+.clause-search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #243c50; font: inherit; font-size: .77rem; }
+.clause-search input::placeholder { color: #95a2ad; }
+@media (max-width: 760px) { .clause-search { width: 100%; min-width: 0; } }
