@@ -34,6 +34,7 @@ jobs:
           backend/tests/test_contract_checks_evaluation.py
           backend/tests/test_contract_risk_architecture.py
           backend/tests/test_phase2_evidence_integrity_hardening.py
+          backend/tests/test_phase2_rule_polarity_and_identity.py
           backend/tests/test_rule_registry_governance.py
           backend/tests/test_deterministic_rule_exception_cases.py
           backend/tests/test_deterministic_cross_checks.py
