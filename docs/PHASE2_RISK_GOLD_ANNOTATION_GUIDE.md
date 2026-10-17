@@ -23,7 +23,7 @@ The final decision must be one of `POTENTIAL_RISK`, `NO_RISK`, `INSUFFICIENT_EVI
 3. `NO_RISK` can be supported by a quoted protective control or by a documented full-document scan showing absence. Do not turn missing evidence into `NO_RISK`.
 4. Use `INSUFFICIENT_EVIDENCE` when text, context, governing law, relevant dates, or exceptions are unresolved.
 5. Use `NOT_APPLICABLE` only with a specific rationale.
-6. A legal-proposition record must include verified governing law, a relevant date, and authority pinpoints whose jurisdiction and effective-date status have been reviewed for that period.
+6. A legal-proposition record must include verified governing law, a relevant date, and authority pinpoints whose jurisdiction and effective-date status have been reviewed for that period. An authority marked as a URL-only lead, currentness-review-required, or republication-host-only cannot support a final legal-proposition label until those gaps are cleared.
 
 ## Independent review and adjudication
 
