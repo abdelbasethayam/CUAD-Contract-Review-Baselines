@@ -42,7 +42,7 @@ def _evidence_valid(evidence: str, clause_text: str, context: list[dict]) -> boo
     evidence = str(evidence or "").strip()
     # One-word or token-sized snippets are too weak to support a legal-risk finding,
     # even if the characters happen to occur in the contract.
-    if len(evidence) < 8 or len(re.findall(r"\\b[\\w]{2,}\\b", evidence)) < 2:
+    if len(evidence) < 8 or len(re.findall(r"\b[\w]{2,}\b", evidence)) < 2:
         return False
     if evidence in str(clause_text or ""):
         return True
