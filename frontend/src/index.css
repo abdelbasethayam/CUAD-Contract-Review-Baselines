@@ -465,6 +465,8 @@ summary { cursor: pointer; color: var(--muted); font-size: .82rem; }
 .chat-heading h2 { margin: 5px 0 7px; font-size: 1.45rem; }
 .chat-heading p { max-width: 760px; line-height: 1.5; margin: 0; }
 .chat-heading__actions { display: flex; align-items: center; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
+.citation-open-button { display: block; margin-top: 8px; border: 0; padding: 0; color: #176b62; background: transparent; font-size: .69rem; font-weight: 800; cursor: pointer; }
+.citation-open-button:hover { text-decoration: underline; }
 .chat-clear-button { border: 1px solid #d7e1e6; border-radius: 9px; padding: 8px 10px; color: #627687; background: #fff; font-size: .7rem; font-weight: 700; white-space: nowrap; }
 .chat-clear-button:hover:not(:disabled) { border-color: #a8c9c2; color: #176b62; background: #f2faf7; }
 .chat-clear-button:disabled { opacity: .45; cursor: not-allowed; }
