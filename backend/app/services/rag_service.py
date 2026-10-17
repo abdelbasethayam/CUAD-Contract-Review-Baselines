@@ -49,7 +49,7 @@ from ..core.risk.contract_coverage import build_contract_coverage
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
 from ..core.risk.risk_engine import analyze_clause_risk
 from ..core.risk.deterministic_rules import RULE_ENGINE_VERSION
-from ..core.risk.risk_playbook import load_playbook
+from ..core.risk.risk_playbook import applicable_checks, load_playbook
 from ..core.risk.run_store import AnalysisRun, create_or_resume_run, mark_run_complete, mark_run_failed
 from ..core.risk.evidence_compressor import compress_cuad_evidence
 
@@ -484,8 +484,12 @@ def _classify_contract(
                 for value in findings_for_clause
             }
             checks_expected = {
-                str(c.get("id"))
-                for c in (playbook.get("clause_types", {}).get(label, {}).get("checklist") or [])
+                str(check.get("id"))
+                for check in applicable_checks(
+                    playbook,
+                    label,
+                    clause_text=str(item.get("clause_text") or ""),
+                )
             }
             rule_engine_current = bool(findings_for_clause) and all(
                 (value.get("provenance") or {}).get("rule_engine_version") == RULE_ENGINE_VERSION
