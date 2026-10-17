@@ -2,9 +2,11 @@ import { Component, useEffect, useMemo, useState } from "react";
 
 const API_URL = "/documents/classify/stream";
 
-function RiskBadge({ status, level }) {
+function RiskBadge({ status, level, severityStatus }) {
   const label = status === "POTENTIAL_RISK"
-    ? (level || "POTENTIAL RISK")
+    ? (severityStatus === "INCOMPLETE" || !level
+      ? "UNSCORED · REVIEW"
+      : `${level} · TRIAGE`)
     : status === "NO_RISK" ? "NO RISK" : (status || "NOT ANALYZED");
   const cls = status === "POTENTIAL_RISK"
     ? "risk-badge risk-badge--risk"
@@ -24,7 +26,7 @@ function RiskCard({ finding }) {
           <div className="eyebrow">{finding.scope || "clause"} · {finding.check_id}</div>
           <h3>{finding.risk_type || finding.question || "Risk review item"}</h3>
         </div>
-        <RiskBadge status={finding.risk_status} level={finding.risk_level} />
+        <RiskBadge status={finding.risk_status} level={finding.risk_level} severityStatus={finding.severity_status} />
       </div>
 
       <div className="risk-grid">
@@ -36,6 +38,15 @@ function RiskCard({ finding }) {
             <span className="field-note">{finding.evidence_scope === "related_contract_clause" ? "Retrieved from another clause in this contract" : "Quote from this clause"}</span>
           </div>
         )}
+        {finding.evidence_source_status && (
+          <div>
+            <span className="field-label">Evidence verification</span>
+            <strong>{finding.evidence_source_status}</strong>
+            {finding.evidence_source_status !== "VERIFIED" && finding.evidence_clause_candidates?.length > 0 && (
+              <span className="field-note">Possible source clauses: {finding.evidence_clause_candidates.join(", ")}</span>
+            )}
+          </div>
+        )}
         <div>
           <span className="field-label">Confidence</span>
           <strong>{confidence}</strong>
@@ -45,6 +56,9 @@ function RiskCard({ finding }) {
           <span className="field-label">Finding provenance</span>
           <strong>{finding.provenance?.source === "DETERMINISTIC_PLAYBOOK_RULE" ? "Deterministic playbook rule" : (finding.ground_truth_status || "PLAYBOOK_DERIVED")}</strong>
           <span className="field-note">Review trigger; not a legal-correctness rating.</span>
+          {finding.provenance?.score_component_source === "LLM_SELF_REPORTED_UNVALIDATED" && (
+            <span className="field-note">Severity inputs are unvalidated triage signals, not probabilities.</span>
+          )}
         </div>
       </div>
 
@@ -77,12 +91,18 @@ function RiskCard({ finding }) {
         <details>
           <summary>Supporting sources</summary>
           <ul className="evidence-list">
-            {finding.supporting_sources.map((source, index) => (
-              <li key={String(source.id || source.url || "source") + index}>
-                <strong>{source.id || source.name || "Source"}</strong> {source.citation || source.title || ""}
-                {source.url && <> — <a href={source.url} target="_blank" rel="noreferrer">source</a></>}
-              </li>
-            ))}
+            {finding.supporting_sources.map((source, index) => {
+              const title = source.source_title || source.source_name || source.citation || source.title || "";
+              const url = source.source_url || source.url;
+              const note = source.supporting_quote_or_paraphrase;
+              return (
+                <li key={String(source.id || url || "source") + index}>
+                  <strong>{source.id || source.name || "Source"}</strong> {title}
+                  {note && note !== title && <> — {note}</>}
+                  {url && <> — <a href={url} target="_blank" rel="noreferrer">source</a></>}
+                </li>
+              );
+            })}
           </ul>
         </details>
       )}
@@ -400,7 +420,7 @@ function ContractReview() {
                   <article key={clause.clause_index} className="clause-card">
                     <div className="clause-card__header">
                       <div><span className="field-label">Clause {clause.clause_index}</span><h3>{clause.predicted_label || "No applicable label"}</h3></div>
-                      <RiskBadge status={clause.risk_status} level={clause.risk_level} />
+                      <RiskBadge status={clause.risk_status} level={clause.risk_level} severityStatus={clause.risk_severity_status} />
                     </div>
                     <p className="clause-text">{clause.clause_text}</p>
                     <div className="classification-row">
