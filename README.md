@@ -22,6 +22,14 @@ The Phase 2 workspace includes a guided synthetic-contract walkthrough, clause a
 - [Phase 2 research and release protocol](docs/PHASE2_Q1_PAPER_PROTOCOL.md)
 - [Risk-gold annotation guide](docs/PHASE2_RISK_GOLD_ANNOTATION_GUIDE.md)
 
+Before recording, start the API and configured local Ollama model, then run the six-question chatbot semantic/citation smoke check:
+
+```bash
+python scripts/risk/evaluate_contract_chat_demo.py --out data/risk/results/contract_chat_demo_evaluation.json
+```
+
+The check covers party-specific liability caps and termination rights, governing-law uncertainty, insurance limits, post-termination data handling, indemnity/liability-cap interaction, and exact citation provenance. It is a demo smoke test, not a statistically valid accuracy benchmark. Fix failures before presenting the chatbot as working.
+
 The demo is synthetic and intentionally labelled. Do not present its illustrative findings as independently validated legal analysis.
 
 ---
