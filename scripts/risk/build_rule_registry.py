@@ -17,6 +17,8 @@ PLAYBOOK_PATH = ROOT / "data" / "risk" / "commercial_clause_risk_playbook.json"
 REGISTRY_PATH = ROOT / "data" / "risk" / "rule_registry.jsonl"
 SOURCE_REGISTRY_PATH = ROOT / "data" / "risk" / "source_registry.json"
 MANIFEST_PATH = ROOT / "data" / "risk" / "rule_registry_manifest.json"
+AUTHORITY_MAP_PATH = ROOT / "data" / "risk" / "clause_authority_map.json"
+AUTHORITY_CATALOG_PATH = ROOT / "data" / "risk" / "authority_catalog.json"
 REGISTRY_VERSION = "0.3.0"
 SCHEMA_VERSION = 1
 
@@ -543,6 +545,45 @@ def _record(
         "source_playbook_hash": str(playbook.get("_source_blob_sha") or ""),
         "candidate_note": candidate_profile.get("note") if candidate else None,
     }
+    authority_map_by_clause = playbook.get("_authority_map_by_clause") or {}
+    authority_catalog_by_id = playbook.get("_authority_catalog_by_id") or {}
+    authority_entry = authority_map_by_clause.get(str(category or ""))
+    if authority_entry:
+        authority_map_clause_type = str(authority_entry["clause_type"])
+        authority_map_ids = list(authority_entry.get("authority_ids") or [])
+        authority_coverage_status = str(authority_entry["authority_coverage_status"])
+        authority_scope_note = str(authority_entry["scope_note"])
+        authority_jurisdiction_policy = str(authority_entry["jurisdiction_policy"])
+        authority_map_review_status = str(authority_entry["review_status"])
+    else:
+        authority_map_clause_type = None
+        authority_map_ids = []
+        authority_coverage_status = "RULE_FAMILY_SPECIFIC_AUTHORITY_REVIEW_REQUIRED"
+        authority_scope_note = "Cross-clause, document-level, and regex rules require authority mapping based on their actual trigger and contract facts."
+        authority_jurisdiction_policy = "GOVERNING_LAW_AND_RULE_CONTEXT_REQUIRED"
+        authority_map_review_status = "RESEARCH_SEED_NOT_LEGALLY_APPROVED"
+    authority_sources = [
+        {
+            key: authority_catalog_by_id[authority_id].get(key)
+            for key in (
+                "authority_id", "title", "citation", "source_type", "url", "pinpoint",
+                "jurisdiction", "source_tier", "authority_status", "effective_date",
+                "effective_date_status", "retrieval_date", "verification_status",
+                "currentness_status", "scope_limit",
+            )
+        }
+        for authority_id in authority_map_ids
+        if authority_id in authority_catalog_by_id
+    ]
+    record["authority_map"] = {
+        "clause_type": authority_map_clause_type,
+        "authority_ids": authority_map_ids,
+        "authority_sources": authority_sources,
+        "authority_coverage_status": authority_coverage_status,
+        "scope_note": authority_scope_note,
+        "jurisdiction_policy": authority_jurisdiction_policy,
+        "review_status": authority_map_review_status,
+    }
     if review_governance is not None:
         record["review_governance"] = review_governance
     return record
@@ -565,7 +606,7 @@ def _candidate_record(rule: dict[str, Any], playbook: dict[str, Any], profile: d
             "perspective", "jurisdiction_scope", "decision_logic", "evidence_contract",
             "source_ids", "source_status", "source_tier", "authority_jurisdictions",
             "effective_dates", "pinpoint_citations", "citation_status", "legal_authority",
-            "rationale", "confidence_policy", "regression_cases",
+            "rationale", "confidence_policy", "regression_cases", "authority_map",
         ],
         "candidate_note": profile["note"],
         "validation_status": "DRAFT_UNVALIDATED",
@@ -581,6 +622,20 @@ def build_artifacts(playbook: dict[str, Any]) -> tuple[str, str, str]:
     # any rule invalidates the generated registry even if a declared field is stale.
     playbook = dict(playbook)
     playbook["_source_blob_sha"] = _git_blob_sha(PLAYBOOK_PATH.read_bytes())
+    authority_map_doc = json.loads(AUTHORITY_MAP_PATH.read_text(encoding="utf-8"))
+    authority_catalog_doc = json.loads(AUTHORITY_CATALOG_PATH.read_text(encoding="utf-8"))
+    playbook["_authority_map_by_clause"] = {
+        str(item["clause_type"]): item
+        for item in authority_map_doc.get("clauses", [])
+        if item.get("clause_type")
+    }
+    playbook["_authority_catalog_by_id"] = {
+        str(item["authority_id"]): item
+        for item in authority_catalog_doc.get("authorities", [])
+        if item.get("authority_id")
+    }
+    authority_map_hash = _git_blob_sha(AUTHORITY_MAP_PATH.read_bytes())
+    authority_catalog_hash = _git_blob_sha(AUTHORITY_CATALOG_PATH.read_bytes())
     source_registry = _source_registry(playbook)
     source_by_id = {
         str(item["source_id"]): item
@@ -599,6 +654,11 @@ def build_artifacts(playbook: dict[str, Any]) -> tuple[str, str, str]:
         "schema_version": SCHEMA_VERSION,
         "registry_version": REGISTRY_VERSION,
         "source_playbook_hash": str(playbook.get("_source_blob_sha") or ""),
+        "authority_map_hash": authority_map_hash,
+        "authority_catalog_hash": authority_catalog_hash,
+        "authority_catalog_count": len(authority_catalog_doc.get("authorities", [])),
+        "mapped_clause_count": len(authority_map_doc.get("clauses", [])),
+        "rule_authority_map_record_count": len(base_records),
         "policy_status": str(playbook.get("approval_status") or "UNAPPROVED"),
         "execution_mode": "PILOT_REVIEW_ONLY",
         "base_rule_count": len(base_records),
