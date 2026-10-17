@@ -76,7 +76,10 @@
           "pinpoint",
           "verification_status",
           "currentness_status",
-          "scope_limit"
+          "scope_limit",
+          "authority_status",
+          "effective_date",
+          "effective_date_status"
         ],
         "properties": {
           "authority_id": {
@@ -132,6 +135,20 @@
           "retrieval_date": {
             "type": "string",
             "format": "date"
+          },
+          "authority_status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "effective_date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "effective_date_status": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "additionalProperties": false
