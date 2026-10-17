@@ -69,6 +69,8 @@ def main() -> int:
             break
     if schema_errors:
         problems.extend(f"schema_validation_error:{item}" for item in schema_errors)
+        print(json.dumps({"status": "FAIL", "problems": problems}, indent=2))
+        return 1
     ids = [item["rule_id"] for item in records]
     if len(ids) != len(set(ids)):
         problems.append("duplicate_rule_ids")
@@ -100,12 +102,17 @@ def main() -> int:
         eligible = item.get("execution_eligible") is True
         governance = item.get("review_governance") or {}
         if status in {"ADJUDICATED", "APPROVED"}:
-            reviewers = governance.get("reviewer_ids") or []
+            raw_reviewers = governance.get("reviewer_ids") or []
+            reviewers = [
+                str(reviewer).strip()
+                for reviewer in raw_reviewers
+                if isinstance(reviewer, str) and reviewer.strip()
+            ] if isinstance(raw_reviewers, list) else []
             adjudicator = str(governance.get("adjudicator_id") or "").strip()
             if (
                 governance.get("status") != status
                 or len(set(reviewers)) < 2
-                or any(not str(reviewer).strip() for reviewer in reviewers)
+                or len(reviewers) != len(raw_reviewers)
                 or not adjudicator
                 or adjudicator in set(reviewers)
                 or not str(governance.get("adjudication_reference") or "").strip()
@@ -122,6 +129,28 @@ def main() -> int:
                 or not str(governance.get("approval_basis") or "").strip()
             ):
                 problems.append(f"approved_rule_missing_approval_gate:{item.get('rule_id')}")
+            cases = item.get("regression_cases") or {}
+            if not cases.get("positive") or not cases.get("negative") or not cases.get("edge"):
+                problems.append(f"approved_rule_missing_positive_negative_edge_tests:{item.get('rule_id')}")
+            scope = [str(value).strip().upper() for value in (item.get("jurisdiction_scope") or [])]
+            if item.get("jurisdiction_status") != "VERIFIED" or not scope or any(value in {"", "UNSPECIFIED", "UNKNOWN"} for value in scope):
+                problems.append(f"approved_rule_jurisdiction_not_verified:{item.get('rule_id')}")
+            authority_sources = (item.get("legal_authority") or {}).get("sources") or []
+            if not authority_sources or any(
+                source.get("citation_status") != "VERIFIED_PINPOINT"
+                or not str(source.get("pinpoint_citation") or "").strip()
+                or not str(source.get("retrieval_date") or "").strip()
+                or str(source.get("jurisdiction") or "").strip().upper() in {
+                    "", "UNSPECIFIED", "NON_JURISDICTIONAL_PRACTICE",
+                    "NON_JURISDICTIONAL_DRAFTING_GUIDANCE",
+                    "NOT_APPLICABLE_NONLEGAL_GUIDANCE",
+                }
+                or str(source.get("effective_date_status") or "").strip().upper() not in {
+                    "VERIFIED", "VERIFIED_FOR_RELEVANT_PERIOD", "NOT_APPLICABLE",
+                }
+                for source in authority_sources
+            ):
+                problems.append(f"approved_rule_source_scope_not_verified:{item.get('rule_id')}")
         elif approval_status == "APPROVED" or execution_status == "APPROVED_FOR_EXECUTION":
             problems.append(f"rule_approval_state_inconsistent:{item.get('rule_id')}")
         if status == "REJECTED" and eligible:
@@ -193,10 +222,26 @@ def main() -> int:
     for source in sources["sources"]:
         if required_source_fields - set(source):
             problems.append(f"source_metadata_fields_missing:{source.get('source_id')}")
-        if source.get("can_support_legal_conclusion") and (
-            not source.get("pinpoint_citation") or source.get("citation_status") != "VERIFIED_PINPOINT"
-        ):
-            problems.append(f"unsupported_authority_claim:{source.get('source_id')}")
+        if source.get("citation_status") == "VERIFIED_PINPOINT" and not str(source.get("pinpoint_citation") or "").strip():
+            problems.append(f"verified_source_without_pinpoint:{source.get('source_id')}")
+        if source.get("can_support_legal_conclusion"):
+            jurisdiction = str(source.get("jurisdiction") or "").strip().upper()
+            effective_status = str(source.get("effective_date_status") or "").strip().upper()
+            if (
+                not source.get("pinpoint_citation")
+                or source.get("citation_status") != "VERIFIED_PINPOINT"
+                or source.get("source_tier") != "A"
+                or not str(source.get("retrieval_date") or "").strip()
+                or jurisdiction in {
+                    "", "UNSPECIFIED", "NON_JURISDICTIONAL_PRACTICE",
+                    "NON_JURISDICTIONAL_DRAFTING_GUIDANCE",
+                    "NOT_APPLICABLE_NONLEGAL_GUIDANCE",
+                }
+                or effective_status not in {"VERIFIED", "VERIFIED_FOR_RELEVANT_PERIOD", "NOT_APPLICABLE"}
+            ):
+                problems.append(f"unsupported_authority_claim:{source.get('source_id')}")
+    if manifest["source_count"] != len(sources.get("sources", [])):
+        problems.append("manifest_source_count_mismatch")
     expected_base_count = len(_base_inputs(playbook))
     if manifest["base_rule_count"] != expected_base_count:
         problems.append(f"base_rule_count_does_not_match_playbook:{manifest['base_rule_count']}:{expected_base_count}")
