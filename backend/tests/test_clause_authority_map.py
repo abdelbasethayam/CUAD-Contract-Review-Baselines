@@ -155,12 +155,15 @@ def test_release_checks_include_authority_and_registry_gates():
         "rule_registry_reproducibility",
         "rule_registry_governance",
         "clause_authority_map",
+        "risk_gold_schema",
         "rule_review_queue_reproducibility",
     ):
         assert f'("{check}"' in runner
     for path in (
         'ROOT / "data/risk/authority_catalog.json"',
         'ROOT / "data/risk/clause_authority_map.json"',
+        'ROOT / "data/risk/evaluation/risk_gold.schema.json"',
+        'ROOT / "scripts/risk/validate_risk_gold.py"',
         'ROOT / "data/risk/rule_registry.jsonl"',
         'ROOT / "data/risk/rule_review_queue.csv"',
     ):
