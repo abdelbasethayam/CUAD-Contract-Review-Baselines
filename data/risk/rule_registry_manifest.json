@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "registry_version": "0.1.0",
+  "source_playbook_hash": "9b0a1752c7891857594eade8f10bbb5b7e317559d210a259741cf6a141dc6efb",
+  "policy_status": "UNAPPROVED",
+  "execution_mode": "PILOT_REVIEW_ONLY",
+  "base_rule_count": 121,
+  "candidate_rule_count": 1936,
+  "total_rule_records": 2057,
+  "candidate_profile_count": 16,
+  "candidate_profiles": [
+    {
+      "id": "general_commercial",
+      "label": "General commercial",
+      "note": "General commercial agreements; applicability still requires review."
+    },
+    {
+      "id": "saas_cloud",
+      "label": "SaaS / cloud services",
+      "note": "Cloud subscriptions, hosted software, and SaaS services."
+    },
+    {
+      "id": "software_license",
+      "label": "Software licence",
+      "note": "Software licence and support agreements."
+    },
+    {
+      "id": "technology_transfer",
+      "label": "Technology transfer",
+      "note": "Technology transfer, know-how, and IP commercialization."
+    },
+    {
+      "id": "professional_services",
+      "label": "Professional services",
+      "note": "Consulting, agency, and professional services."
+    },
+    {
+      "id": "goods_supply",
+      "label": "Goods supply",
+      "note": "Purchase, sale, and supply of goods."
+    },
+    {
+      "id": "manufacturing",
+      "label": "Manufacturing",
+      "note": "Manufacturing, OEM, and production agreements."
+    },
+    {
+      "id": "distribution_reseller",
+      "label": "Distribution / reseller",
+      "note": "Distribution, reseller, and channel arrangements."
+    },
+    {
+      "id": "outsourcing_bpo",
+      "label": "Outsourcing / BPO",
+      "note": "Outsourcing and business-process services."
+    },
+    {
+      "id": "data_processing_privacy",
+      "label": "Data processing / privacy",
+      "note": "Data processing and privacy-related agreements."
+    },
+    {
+      "id": "marketing_services",
+      "label": "Marketing services",
+      "note": "Marketing, advertising, and media services."
+    },
+    {
+      "id": "construction_projects",
+      "label": "Construction / projects",
+      "note": "Construction, engineering, and project delivery."
+    },
+    {
+      "id": "nda_confidentiality",
+      "label": "NDA / confidentiality",
+      "note": "Confidentiality and non-disclosure agreements."
+    },
+    {
+      "id": "employment_services",
+      "label": "Employment / personnel",
+      "note": "Employment, contractor, and personnel arrangements."
+    },
+    {
+      "id": "ma_transaction",
+      "label": "M&A transaction",
+      "note": "Merger, acquisition, and transaction agreements."
+    },
+    {
+      "id": "franchise",
+      "label": "Franchise",
+      "note": "Franchise and branded-network arrangements."
+    }
+  ],
+  "source_count": 7,
+  "verified_pinpoint_source_count": 0,
+  "production_approved_rule_count": 0,
+  "interpretation": "The registry contains baseline rule records and disabled context-specific candidates. Candidate records are not new approved legal rules. Current baseline rules are review-only because the policy is unapproved and source citations are incomplete."
+}
