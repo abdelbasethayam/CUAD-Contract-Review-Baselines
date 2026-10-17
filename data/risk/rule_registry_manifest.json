@@ -6,7 +6,7 @@
   "authority_catalog_hash": "1315b55aa68e7c7b9c4fafa2785fc22c8700b287",
   "authority_catalog_count": 32,
   "mapped_clause_count": 37,
-  "rule_authority_map_record_count": 0,
+  "rule_authority_map_record_count": 121,
   "policy_status": "UNAPPROVED",
   "execution_mode": "PILOT_REVIEW_ONLY",
   "base_rule_count": 121,
