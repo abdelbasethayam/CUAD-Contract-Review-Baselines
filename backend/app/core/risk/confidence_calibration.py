@@ -78,19 +78,28 @@ def confidence_from_support_score(
         brier = float((metrics or {})["brier_calibrated"])
         baseline_brier = float((metrics or {})["brier_constant_prevalence_baseline"])
         ece = float((metrics or {})["ece_10_bins"])
+        improvement_ci = (metrics or {})["brier_improvement_ci_95"]
+        improvement_ci_low = float(improvement_ci[0])
+        improvement_ci_high = float(improvement_ci[1])
         dataset_sha256 = str(artifact.get("dataset_sha256") or "")
         audit_gates_ok = (
             calibration_rows >= 300
             and calibration_contracts >= 50
             and calibration_correct >= 30
             and calibration_incorrect >= 30
+            and calibration_correct + calibration_incorrect == calibration_rows
             and test_rows >= 100
             and test_contracts >= 25
             and test_correct >= 15
             and test_incorrect >= 15
+            and test_correct + test_incorrect == test_rows
             and math.isfinite(brier)
             and math.isfinite(baseline_brier)
             and math.isfinite(ece)
+            and math.isfinite(improvement_ci_low)
+            and math.isfinite(improvement_ci_high)
+            and improvement_ci_low <= improvement_ci_high
+            and improvement_ci_low > 0.0
             and brier < baseline_brier
             and 0.0 <= ece <= 0.15
             and len(dataset_sha256) == 64
