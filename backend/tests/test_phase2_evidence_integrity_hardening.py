@@ -1,7 +1,7 @@
 import json
 
-from app.core.risk import contract_checks
-from app.core.risk.risk_engine import _evidence_source, _majority
+from app.core.risk import contract_checks, risk_engine
+from app.core.risk.risk_engine import _evidence_source, _majority, _parse
 
 
 def test_missing_model_passes_count_as_abstentions():
@@ -90,6 +90,113 @@ def test_cross_clause_finding_abstains_when_evidence_clause_is_not_declared(monk
         playbook=playbook,
         passes=1,
     )
+
+    finding = next(item for item in cross if item["check_id"] == "X-1")
+    assert finding["risk_status"] == "INSUFFICIENT_EVIDENCE"
+    assert finding["evidence"] == []
+
+
+
+def test_duplicate_clause_check_ids_are_rejected_not_counted_as_votes():
+    raw = json.dumps({
+        "checks": [
+            {"check_id": "C-1", "answer": "YES", "status": "POTENTIAL_RISK", "evidence": "exact quote"},
+            {"check_id": "C-1", "answer": "NO", "status": "NO_RISK", "evidence": ""},
+        ]
+    })
+
+    assert _parse(raw, {"C-1"}) == []
+
+
+def test_duplicate_cross_clause_check_ids_are_rejected():
+    raw = json.dumps({
+        "cross_clause_findings": [
+            {"check_id": "X-1", "answer": "YES", "clause_ids": [1], "evidence": []},
+            {"check_id": "X-1", "answer": "NO", "clause_ids": [1], "evidence": []},
+        ],
+        "document_findings": [],
+    })
+
+    cross, document = contract_checks._parse(raw, {"X-1"}, set())
+
+    assert cross == []
+    assert document == []
+
+
+def test_failed_clause_model_calls_leave_explicit_unresolved_check(monkeypatch):
+    playbook = {
+        "playbook_hash": "synthetic-playbook",
+        "sources": {},
+        "clause_types": {
+            "General": {
+                "checklist": [{
+                    "id": "C-1",
+                    "question": "Does this clause create a material customer exposure?",
+                    "flag_if": "Yes, supported by exact contract wording",
+                    "sources": [],
+                    "risk_domain": "Commercial Risk",
+                }]
+            }
+        },
+        "deterministic_rules": [],
+    }
+
+    def fail_call(*args, **kwargs):
+        raise RuntimeError("synthetic provider outage")
+
+    monkeypatch.setattr(risk_engine, "call_ollama", fail_call)
+    monkeypatch.setattr(risk_engine, "retrieve_legal_guidance", lambda *args, **kwargs: [])
+
+    findings = risk_engine.analyze_clause_risk(
+        clause_index=1,
+        clause_text="The parties will cooperate on service delivery.",
+        clause_type="General",
+        query_vector=None,
+        contract_clauses=[],
+        playbook=playbook,
+        passes=2,
+    )
+
+    finding = next(item for item in findings if item["check_id"] == "C-1")
+    assert finding["risk_status"] == "INSUFFICIENT_EVIDENCE"
+    assert finding["risk"] is False
+    assert finding["provenance"]["passes"] == 0
+    assert finding["provenance"]["expected_passes"] == 2
+    assert finding["provenance"]["missing_passes"] == 2
+    assert finding["severity"] is None
+
+
+def test_cross_clause_positive_requires_evidence_for_every_declared_clause(monkeypatch):
+    playbook = {
+        "playbook_hash": "test-playbook",
+        "sources": {},
+        "cross_clause_checks": [{
+            "id": "X-1",
+            "question": "Do these clauses interact to create a risk?",
+            "sources": [],
+        }],
+        "document_level_checks": [],
+    }
+    clauses = [
+        {"clause_index": 1, "predicted_label": "Liability", "clause_text": "Liability is unlimited."},
+        {"clause_index": 2, "predicted_label": "Indemnity", "clause_text": "Supplier indemnifies Customer."},
+    ]
+    response = {
+        "cross_clause_findings": [{
+            "check_id": "X-1",
+            "answer": "YES",
+            "status": "POTENTIAL_RISK",
+            "risk_type": "Cross-clause exposure",
+            "clause_ids": [1, 2],
+            "evidence": [{"clause_id": 1, "quote": "Liability is unlimited."}],
+            "why_flagged": "Synthetic test.",
+            "score_components": {},
+        }],
+        "document_findings": [],
+    }
+    monkeypatch.setattr(contract_checks, "call_ollama", lambda *args, **kwargs: json.dumps(response))
+
+    cross, _ = contract_checks.analyze_contract_checks(clauses, playbook=playbook, passes=1)
 
     finding = next(item for item in cross if item["check_id"] == "X-1")
     assert finding["risk_status"] == "INSUFFICIENT_EVIDENCE"
