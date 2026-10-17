@@ -108,3 +108,24 @@ def test_run_resumption_expects_text_retrieved_check_families():
     source = _read("backend/app/services/rag_service.py")
     assert "for check in applicable_checks(" in source
     assert 'clause_text=str(item.get("clause_text") or "")' in source
+
+
+
+def test_clause_text_retrieves_relevant_checks_beyond_the_predicted_label():
+    from app.core.risk.risk_playbook import applicable_checks, load_playbook
+
+    playbook = load_playbook()
+    clause_text = "Supplier liability shall not exceed fees paid in the prior month."
+    checks = applicable_checks(playbook, "Insurance", clause_text=clause_text)
+    check_ids = {str(check["id"]) for check in checks}
+    cap_ids = {
+        str(check["id"])
+        for check in playbook["clause_types"]["Cap On Liability"]["checklist"]
+    }
+    audit_ids = {
+        str(check["id"])
+        for check in playbook["clause_types"]["Audit Rights"]["checklist"]
+    }
+
+    assert cap_ids.issubset(check_ids)
+    assert audit_ids.isdisjoint(check_ids)
