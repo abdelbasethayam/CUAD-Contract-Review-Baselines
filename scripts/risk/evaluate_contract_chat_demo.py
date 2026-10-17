@@ -64,31 +64,27 @@ def _fact_attributed_to_entity(
     text: str,
     expected_entity: str,
     facts: list[str],
-    *,
-    window: int = 100,
 ) -> bool:
-    """Check that a fact is mentioned nearer its expected contract party than the other party."""
+    """Check that a party and its expected fact occur in the same comparison segment."""
     entity_patterns = {
         "customer": re.compile(r"\bcustomer(?:'s)?\b"),
         "supplier": re.compile(r"\bsupplier(?:'s)?\b"),
     }
-    expected_pattern = entity_patterns.get(expected_entity)
-    if expected_pattern is None:
+    entity_pattern = entity_patterns.get(expected_entity)
+    if entity_pattern is None:
         return False
-    for fact in facts:
-        for fact_match in re.finditer(re.escape(_normalize(fact)), text):
-            fact_center = (fact_match.start() + fact_match.end()) / 2
-            start = max(0, fact_match.start() - window)
-            end = min(len(text), fact_match.end() + window)
-            mentions = []
-            for entity, pattern in entity_patterns.items():
-                for entity_match in pattern.finditer(text, start, end):
-                    entity_center = (entity_match.start() + entity_match.end()) / 2
-                    mentions.append((abs(entity_center - fact_center), entity))
-            if mentions and min(mentions, key=lambda item: item[0])[1] == expected_entity:
-                return True
-    return False
-
+    segments = re.split(
+        r"\s+(?:whereas|while|but|versus|vs\.?|compared with|compared to)\s+"
+        r"|;\s*"
+        r"|\s+and\s+(?=(?:the\s+)?(?:customer|supplier)\b)"
+        r"|,\s*(?=(?:the\s+)?(?:customer|supplier)\b)",
+        text,
+    )
+    return any(
+        entity_pattern.search(segment)
+        and any(_normalize(fact) in segment for fact in facts)
+        for segment in segments
+    )
 
 def _evaluate_question(
     spec: dict[str, Any],
