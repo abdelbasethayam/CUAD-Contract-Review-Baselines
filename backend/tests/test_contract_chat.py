@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 from fastapi.testclient import TestClient
+from scripts.risk.evaluate_contract_chat_demo import _fact_attributed_to_entity
 
 from app.main import app
 from app.api.routes import query
@@ -367,3 +368,17 @@ def test_demo_retrieval_selects_the_expected_sections_for_recording_questions():
             f"{question!r} should prioritize clause {expected_clause}, "
             f"got {[item['clause_index'] for item in selected[:4]]}"
         )
+
+def test_live_demo_evaluator_rejects_swapped_party_cap_assignments():
+    correct = (
+        "customer's cap is ten times the fees, while supplier's cap is limited "
+        "to fees paid by customer in the previous one month"
+    )
+    swapped = (
+        "supplier's cap is ten times the fees, while customer's cap is limited "
+        "to fees paid in the previous one month"
+    )
+    assert _fact_attributed_to_entity(correct, "customer", ["ten times", "10 times"])
+    assert _fact_attributed_to_entity(correct, "supplier", ["one month", "monthly"])
+    assert not _fact_attributed_to_entity(swapped, "customer", ["ten times", "10 times"])
+    assert not _fact_attributed_to_entity(swapped, "supplier", ["one month", "monthly"])
