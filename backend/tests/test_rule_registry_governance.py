@@ -201,6 +201,20 @@ def test_rule_schema_requires_independent_adjudication_before_approval():
         "review_governance": {
             "status": "APPROVED",
             "reviewer_ids": ["reviewer-a", "reviewer-b"],
+            "reviewer_decisions": [
+                {
+                    "reviewer_id": "reviewer-a",
+                    "decision": "POTENTIAL_RISK",
+                    "rationale": "The cited clause appears to satisfy the test predicate.",
+                    "reviewed_at": "2026-10-17T00:10:00Z"
+                },
+                {
+                    "reviewer_id": "reviewer-b",
+                    "decision": "INSUFFICIENT_EVIDENCE",
+                    "rationale": "The available excerpt does not resolve the exception.",
+                    "reviewed_at": "2026-10-17T00:15:00Z"
+                }
+            ],
             "adjudicator_id": "independent-adjudicator",
             "adjudication_reference": "ADJ-2026-001",
             "adjudicated_at": "2026-10-17T00:00:00Z",
