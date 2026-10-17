@@ -340,7 +340,12 @@ def parse_risk_response(raw_response: str, fallback_source: dict) -> dict:
     return {
         "risk": risk,
         "risk_status": raw_status,
-        "risk_level": risk_level if risk else None,
+        "risk_level": None,
+        "severity_status": "DEPRECATED_NOT_USED",
+        "confidence": None,
+        "confidence_status": "NOT_ESTIMATED",
+        "confidence_target": "PREDICTION_CORRECTNESS",
+        "raw_support_score": None,
         "risk_type": (
             str(parsed.get("risk_type") or "").strip() or None
             if risk
