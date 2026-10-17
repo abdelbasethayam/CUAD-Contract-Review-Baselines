@@ -14,7 +14,7 @@ from app.core.risk.risk_engine import _support_score
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "risk"))
-from build_rule_registry import PLAYBOOK_PATH, _source_registry, build_artifacts
+from build_rule_registry import AUTHORITY_CATALOG_PATH, AUTHORITY_MAP_PATH, PLAYBOOK_PATH, _git_blob_sha, _source_registry, build_artifacts
 from validate_rule_registry import _rule_lifecycle_problems
 
 
@@ -384,3 +384,47 @@ def test_global_playbook_approval_does_not_promote_unreviewed_rules():
     assert all(item["validation_status"] == "DRAFT_UNVALIDATED" for item in base)
     assert all(item["approval_status"] == "UNAPPROVED" for item in candidates)
     assert all(item["execution_eligible"] is False for item in candidates)
+
+def test_generated_registry_embeds_authority_metadata_and_hashes_for_every_base_rule():
+    manifest = json.loads((ROOT / "data/risk/rule_registry_manifest.json").read_text(encoding="utf-8"))
+    clause_map = json.loads(AUTHORITY_MAP_PATH.read_text(encoding="utf-8"))
+    catalog = json.loads(AUTHORITY_CATALOG_PATH.read_text(encoding="utf-8"))
+    records = [
+        json.loads(line)
+        for line in (ROOT / "data/risk/rule_registry.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    base = [item for item in records if item["record_kind"] == "BASE_RULE"]
+    candidates = [item for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"]
+    map_by_clause = {item["clause_type"]: item for item in clause_map["clauses"]}
+    authority_by_id = {item["authority_id"]: item for item in catalog["authorities"]}
+
+    assert manifest["authority_map_hash"] == _git_blob_sha(AUTHORITY_MAP_PATH.read_bytes())
+    assert manifest["authority_catalog_hash"] == _git_blob_sha(AUTHORITY_CATALOG_PATH.read_bytes())
+    assert manifest["authority_catalog_count"] == len(catalog["authorities"])
+    assert manifest["mapped_clause_count"] == 37
+    assert manifest["rule_authority_map_record_count"] == len(base) == 121
+    assert all("authority_map" in item for item in base)
+    assert all("authority_map" in item["inherited_fields"] for item in candidates)
+
+    for rule in base:
+        mapped = rule["authority_map"]
+        assert rule["legal_conclusion_allowed"] is False
+        assert mapped["review_status"] == "RESEARCH_SEED_NOT_LEGALLY_APPROVED"
+        if rule.get("clause_type") in map_by_clause:
+            expected = map_by_clause[rule["clause_type"]]
+            assert mapped["clause_type"] == expected["clause_type"]
+            assert mapped["authority_ids"] == expected["authority_ids"]
+            assert mapped["authority_coverage_status"] == expected["authority_coverage_status"]
+        else:
+            assert mapped["clause_type"] is None
+            assert mapped["authority_coverage_status"] == "RULE_FAMILY_SPECIFIC_AUTHORITY_REVIEW_REQUIRED"
+        assert [source["authority_id"] for source in mapped["authority_sources"]] == mapped["authority_ids"]
+        for source in mapped["authority_sources"]:
+            catalog_source = authority_by_id[source["authority_id"]]
+            assert source["url"] == catalog_source["url"]
+            assert source["pinpoint"] == catalog_source["pinpoint"]
+            assert source["jurisdiction"] == catalog_source["jurisdiction"]
+            assert source["source_tier"] == catalog_source["source_tier"]
+            assert source["effective_date_status"] == catalog_source["effective_date_status"]
+            assert source["retrieval_date"] == catalog_source["retrieval_date"]
