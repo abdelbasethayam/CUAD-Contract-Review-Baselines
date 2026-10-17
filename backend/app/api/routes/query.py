@@ -119,7 +119,7 @@ _CONCEPT_EXPANSIONS: dict[str, set[str]] = {
         "obligation", "obligations", "duty", "duties", "shall", "must", "provide", "maintain", "pay", "deliver", "notice"
     },
 }
-_RISK_INTENT = re.compile(r"\b(risk|risks|exposure|red flags?|concerns?|issues?|unfavo[u]?rable|one[- ]sided|imbalanc(?:e|ed)|problematic)\b", re.I)
+_RISK_INTENT = re.compile(r"\b(risk|risks|exposure|red flags?|concerns?|issues?|findings?|flagged|triggered|evidence|unfavo[u]?rable|one[- ]sided|imbalanc(?:e|ed)|problematic)\b", re.I)
 _OVERVIEW_INTENT = re.compile(r"\b(summar(?:y|ize|ise)|overview|key points?|main obligations|overall review|what(?:'s| is) this contract about)\b", re.I)
 _FOCUS_TERMS: list[tuple[str, set[str], int]] = [
     (r"\bdata\b|\bprivacy\b|\bpersonal information\b|\bexport\b|\bretention\b|\bsharing\b|\bdisclos(?:e|ure)\b", {
