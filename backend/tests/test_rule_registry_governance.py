@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from jsonschema import Draft202012Validator
+
 from app.core.risk.confidence_calibration import (
     SUPPORT_SCORE_VERSION,
     confidence_from_support_score,
@@ -47,11 +49,19 @@ def _valid_artifact(**overrides):
 def test_runtime_loads_governed_registry_and_explicit_source_metadata():
     playbook = load_playbook()
     registry = playbook["rule_registry"]
+    manifest = json.loads((ROOT / "data/risk/rule_registry_manifest.json").read_text(encoding="utf-8"))
+    records = [
+        json.loads(line)
+        for line in (ROOT / "data/risk/rule_registry.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    base_count = sum(item["record_kind"] == "BASE_RULE" for item in records)
+    candidate_count = sum(item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE" for item in records)
 
     assert registry["status"] == "PILOT_REVIEW_ONLY"
-    assert registry["base_rule_count"] == 121
-    assert registry["candidate_rule_count"] == 1936
-    assert registry["production_approved_rule_count"] == 0
+    assert registry["base_rule_count"] == base_count == manifest["base_rule_count"]
+    assert registry["candidate_rule_count"] == candidate_count == manifest["candidate_rule_count"]
+    assert registry["production_approved_rule_count"] == manifest["production_approved_rule_count"]
     assert registry["legal_conclusion_allowed"] is False
 
     check = playbook["clause_types"]["Cap On Liability"]["checklist"][0]
@@ -92,13 +102,17 @@ def test_registry_has_more_than_one_thousand_disabled_candidates_not_fake_approv
     base = [item for item in records if item["record_kind"] == "BASE_RULE"]
     candidates = [item for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"]
 
-    assert len(base) == 121
-    assert len(candidates) == 1936
-    assert len(records) == 2057
+    manifest = json.loads((ROOT / "data/risk/rule_registry_manifest.json").read_text(encoding="utf-8"))
+    assert len(base) == manifest["base_rule_count"]
+    assert len(candidates) == manifest["candidate_rule_count"]
+    assert len(records) == manifest["total_rule_records"]
+    assert len(candidates) == len(base) * manifest["candidate_profile_count"]
+    assert len(candidates) >= 1000
     base_keys = {item["base_rule_key"] for item in base}
     assert all(item["base_rule_key"] in base_keys for item in candidates)
     assert all(item["execution_eligible"] is False for item in candidates)
-    assert all(item["validation_status"] == "DRAFT_UNVALIDATED" for item in records)
+    assert all(item["validation_status"] == "DRAFT_UNVALIDATED" for item in candidates)
+    assert all(item["validation_status"] in {"DRAFT_UNVALIDATED", "IN_REVIEW", "ADJUDICATED", "APPROVED", "REJECTED"} for item in base)
     assert all(item["legal_conclusion_allowed"] is False for item in records)
 
 
@@ -166,3 +180,34 @@ def test_raw_support_feature_does_not_reward_yes_over_no():
     assert yes == no
     assert 0.0 <= yes <= 1.0
     assert unknown == 0.0
+
+def test_rule_schema_requires_independent_adjudication_before_approval():
+    schema = json.loads((ROOT / "data/risk/rule_registry.schema.json").read_text(encoding="utf-8"))
+    validator = Draft202012Validator(schema)
+    records = [
+        json.loads(line)
+        for line in (ROOT / "data/risk/rule_registry.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    approved = next(item.copy() for item in records if item["record_kind"] == "BASE_RULE")
+    approved.update({
+        "validation_status": "APPROVED",
+        "approval_status": "APPROVED",
+        "execution_status": "APPROVED_FOR_EXECUTION",
+        "execution_eligible": True,
+        "review_governance": {
+            "status": "APPROVED",
+            "reviewer_ids": ["reviewer-a", "reviewer-b"],
+            "adjudicator_id": "independent-adjudicator",
+            "adjudication_reference": "ADJ-2026-001",
+            "adjudicated_at": "2026-10-17T00:00:00Z",
+            "approved_by": "policy-owner",
+            "approved_at": "2026-10-17T00:30:00Z",
+            "approval_basis": "Authority, scope, evidence and exception suite independently reviewed."
+        }
+    })
+    assert validator.is_valid(approved)
+
+    invalid = approved.copy()
+    invalid.pop("review_governance")
+    assert not validator.is_valid(invalid)
