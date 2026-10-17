@@ -9,23 +9,8 @@
     "base_rule_key",
     "base_rule_id",
     "record_kind",
-    "rule_family",
-    "title",
-    "risk_domain",
-    "perspective",
     "contract_type_profile",
-    "contract_type_scope",
     "applicability_status",
-    "jurisdiction_scope",
-    "jurisdiction_status",
-    "jurisdiction_review_required",
-    "decision_logic",
-    "evidence_contract",
-    "source_ids",
-    "source_status",
-    "severity_rationale",
-    "confidence_policy",
-    "regression_cases",
     "validation_status",
     "approval_status",
     "execution_status",
@@ -302,6 +287,21 @@
     },
     "source_playbook_hash": {
       "type": "string"
+    },
+    "candidate_note": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "inherits_from_base_rule": {
+      "type": "string"
+    },
+    "inherited_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "allOf": [
@@ -309,11 +309,55 @@
       "if": {
         "properties": {
           "record_kind": {
-            "const": "CONTEXT_VARIANT_CANDIDATE"
+            "const": "BASE_RULE"
           }
-        }
+        },
+        "required": [
+          "record_kind"
+        ]
       },
       "then": {
+        "required": [
+          "rule_family",
+          "title",
+          "risk_domain",
+          "perspective",
+          "contract_type_scope",
+          "jurisdiction_scope",
+          "jurisdiction_status",
+          "jurisdiction_review_required",
+          "decision_logic",
+          "evidence_contract",
+          "source_ids",
+          "source_status",
+          "severity_rationale",
+          "confidence_policy",
+          "regression_cases"
+        ],
+        "properties": {
+          "execution_status": {
+            "const": "PILOT_REVIEW_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_kind": {
+            "const": "CONTEXT_VARIANT_CANDIDATE"
+          }
+        },
+        "required": [
+          "record_kind"
+        ]
+      },
+      "then": {
+        "required": [
+          "inherits_from_base_rule",
+          "inherited_fields",
+          "candidate_note"
+        ],
         "properties": {
           "execution_eligible": {
             "const": false
@@ -323,22 +367,6 @@
           },
           "validation_status": {
             "const": "DRAFT_UNVALIDATED"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "record_kind": {
-            "const": "BASE_RULE"
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "execution_status": {
-            "const": "PILOT_REVIEW_ONLY"
           }
         }
       }
