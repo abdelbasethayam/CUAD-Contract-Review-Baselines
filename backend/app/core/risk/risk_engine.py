@@ -24,7 +24,7 @@ from .contract_context import retrieve_related_contract_context
 from .knowledge_base import match_risk_domains, risk_guidance_for_prompt
 from ..legal_knowledge.retriever import retrieve_legal_guidance
 from .risk_detector import detect_legal_indicators
-from .risk_scoring import score_finding
+from .confidence_calibration import confidence_from_support_score, SUPPORT_SCORE_VERSION
 from .deterministic_rules import RULE_ENGINE_VERSION, evaluate_playbook_rules
 
 ProgressCallback = Callable[[dict], None]
@@ -493,9 +493,11 @@ def analyze_clause_risk(
             agreement=agreement,
             indicator_match=indicator_match,
         )
-        score_details = score_finding({"risk_type": representative.get("risk_type"), "question": checks_by_id[check_id]["question"], "check_id": check_id, "clause_type": clause_type, "evidence": evidence, "why_flagged": representative.get("why_flagged"), "scope": "clause", "score_components": representative.get("score_components") or {}}) if status == "POTENTIAL_RISK" else None
-        severity_score = float(score_details["final_score"]) if score_details and score_details.get("final_score") is not None else None
-        severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
+        confidence_details = (
+            confidence_from_support_score(raw_support, playbook_hash=playbook.get("playbook_hash"))
+            if status in {"POTENTIAL_RISK", "NO_RISK"}
+            else {"confidence": None, "confidence_status": "NOT_ESTIMATED", "confidence_target": "PREDICTION_CORRECTNESS", "confidence_calibration_version": None}
+        )
         source_ids = checks_by_id[check_id].get("sources", [])
         supporting_sources = source_records(playbook, source_ids)
         primary_source = supporting_sources[0] if supporting_sources else {}
@@ -513,21 +515,23 @@ def analyze_clause_risk(
                 "risk_status": status,
                 "risk_type": representative.get("risk_type") if status == "POTENTIAL_RISK" else None,
                 "risk": status == "POTENTIAL_RISK",
-                "risk_level": (score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None),
-                "severity": score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None,
-                "raw_support_score": raw_support,
-                "severity_score": severity_score,
-                "severity_signal": severity_signal,
-                "score_components": score_details["score_components"] if score_details else {},
-                "base_score": score_details["base_score"] if score_details else 0,
-                "score_modifiers": score_details["modifiers"] if score_details else [],
-                "final_score": score_details["final_score"] if score_details else 0,
-                "score_override_reason": score_details["override_reason"] if score_details else None,
-                "human_review_required": score_details["human_review_required"] if score_details else True,
-                "review_escalation": score_details["escalation"] if score_details else "LEGAL_REVIEW",
-                "confidence": None,
-                "confidence_status": "UNCALIBRATED",
-                "severity_status": "RULE_BASED_TRIAGE" if severity_score is not None else ("INCOMPLETE" if score_details else "UNCALIBRATED"),
+                "risk_level": None,
+                "severity": None,
+                "raw_support_score": raw_support if status in {"POTENTIAL_RISK", "NO_RISK"} else None,
+                "severity_score": None,
+                "severity_signal": None,
+                "score_components": {},
+                "base_score": None,
+                "score_modifiers": [],
+                "final_score": None,
+                "score_override_reason": None,
+                "human_review_required": status in {"POTENTIAL_RISK", "INSUFFICIENT_EVIDENCE"},
+                "review_escalation": "LEGAL_REVIEW" if status in {"POTENTIAL_RISK", "INSUFFICIENT_EVIDENCE"} else "STANDARD_REVIEW",
+                "confidence": confidence_details.get("confidence"),
+                "confidence_status": confidence_details.get("confidence_status", "UNCALIBRATED"),
+                "confidence_target": confidence_details.get("confidence_target", "PREDICTION_CORRECTNESS"),
+                "confidence_calibration_version": confidence_details.get("confidence_calibration_version"),
+                "severity_status": "DEPRECATED_NOT_USED",
                 "severity_probabilities": {},
                 "ground_truth_status": "PLAYBOOK_DERIVED",
                 "provenance": {
@@ -540,10 +544,12 @@ def analyze_clause_risk(
                     "expected_passes": n_passes,
                     "missing_passes": max(0, n_passes - len(records)),
                     "agreement": agreement,
-                    "score_component_source": "LLM_SELF_REPORTED_UNVALIDATED" if status == "POTENTIAL_RISK" else None,
-                    "score_interpretation": "Triage heuristic only; not calibrated to real-world legal outcomes.",
+                    "support_score_version": SUPPORT_SCORE_VERSION,
+                    "support_score_interpretation": "Uncalibrated diagnostic only; not a probability.",
+                    "confidence_target": confidence_details.get("confidence_target", "PREDICTION_CORRECTNESS"),
+                    "confidence_calibration_version": confidence_details.get("confidence_calibration_version"),
+                    "rule_registry_metadata": checks_by_id[check_id].get("rule_registry_metadata", {}),
                     "deterministic_indicators": indicators.get("matched_indicators", []),
-                    "score_version": score_details["score_version"] if score_details else None,
                 },
                 "why_flagged": representative.get("why_flagged") if status == "POTENTIAL_RISK" else (
                     representative.get("why_flagged") or "No evidence-supported issue identified by the check."
@@ -552,7 +558,7 @@ def analyze_clause_risk(
                 "supporting_sources": supporting_sources,
                 "legal_guidance_sources": guidance,
                 "related_contract_context": context,
-                "severity_factors": representative.get("severity_factors") or representative.get("score_components") or {},
+                "severity_factors": {},
                 "source_tier": primary_source.get("source_tier"),
                 "jurisdiction": primary_source.get("jurisdiction"),
                 "effective_date": primary_source.get("effective_date"),
