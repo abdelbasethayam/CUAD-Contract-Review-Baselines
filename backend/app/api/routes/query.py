@@ -446,6 +446,24 @@ def query_contract(request: ContractQuestion) -> dict[str, Any]:
         [turn.content for turn in history if turn.role == "user"][-3:] + [question]
     )
     context, source_texts = _context_for(result, retrieval_question)
+    if not context.get("relevant_clauses"):
+        return {
+            "analysis_id": request.analysis_id,
+            "answer": (
+                "I couldn't find a sufficiently relevant clause in this contract for that question, "
+                "so I won't guess. Try naming a topic such as termination, liability, payment, data, "
+                "insurance, intellectual property, or a specific clause number."
+            ),
+            "insufficient_evidence": True,
+            "citations": [],
+            "follow_up_questions": [
+                "Which clause or contract topic should I look at?",
+                "Would you like a plain-English summary of the agreement?",
+            ],
+            "model": "RETRIEVAL_ABSTENTION",
+            "evidence_policy": "No sufficiently relevant contract clause was retrieved; no interpretation was generated.",
+            "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
+        }
 
     system_prompt = """
 You are an evidence-grounded contract Q&A assistant inside a contract-review product.
