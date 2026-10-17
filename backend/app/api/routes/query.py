@@ -115,28 +115,28 @@ _CONCEPT_EXPANSIONS: dict[str, set[str]] = {
 }
 _RISK_INTENT = re.compile(r"\b(risk|risks|exposure|red flags?|concerns?|issues?|unfavo[u]?rable|one[- ]sided|imbalanc(?:e|ed)|problematic)\b", re.I)
 _OVERVIEW_INTENT = re.compile(r"\b(summar(?:y|ize|ise)|overview|key points?|main obligations|overall review|what(?:'s| is) this contract about)\b", re.I)
-_FOCUS_TERMS: list[tuple[str, set[str]]] = [
+_FOCUS_TERMS: list[tuple[str, set[str], int]] = [
     (r"\bdata\b|\bprivacy\b|\bpersonal information\b|\bexport\b|\bretention\b", {
         "data", "privacy", "personal", "information", "export", "retention", "retain", "delete", "deletion", "access", "backup"
-    }),
+    }, 10),
     (r"\binsurance\b|\bpolicy limits?\b|\bcoverage\b", {
         "insurance", "policy", "limits", "coverage", "certificate", "maintain"
-    }),
+    }, 8),
     (r"\bliabilit|\bdamag(?:e|es)\b|\bcap(?:ped)?\b", {
         "liability", "damages", "cap", "aggregate", "indirect", "consequential", "exception", "indemnification"
-    }),
+    }, 8),
     (r"\bterminat(?:e|ion|ing)?\b|\bnotice period\b|\bcure period\b", {
         "terminate", "termination", "notice", "cure", "breach", "convenience", "renewal", "transition", "survive", "expire"
-    }),
+    }, 3),
     (r"\bintellectual property\b|\bownership\b|\binfringement\b|\blicense\b|\blicence\b", {
         "intellectual", "property", "ownership", "assign", "assignment", "license", "licence", "pre-existing", "infringement"
-    }),
+    }, 8),
     (r"\bgoverning law\b|\bjurisdiction\b|\bforum\b|\bdispute\b", {
         "governing", "law", "jurisdiction", "forum", "dispute", "court", "venue", "arbitration", "order", "applicable"
-    }),
+    }, 8),
     (r"\bpayment\b|\bfees?\b|\brefund\b|\bsubscription\b", {
         "payment", "fees", "refund", "subscription", "minimum", "commitment", "charges", "invoice"
-    }),
+    }, 8),
 ]
 _META_HELP_INTENT = re.compile(r"\s*(?:hi|hello|hey|thanks|thank you|help|what can you do(?: with (?:this )?contract)?|what questions can i ask|how do i use (?:this )?assistant)[?.! ]*\s*", re.I)
 
@@ -202,9 +202,9 @@ def _select_clauses(
         )
         words = {term.lower() for term in _WORDS.findall(text + " " + label + " " + heading + " " + finding_text)}
         score = 5 * sum(term_weight(term) for term in direct_terms & words) + 0.25 * sum(term_weight(term) for term in expanded_terms & words)
-        for pattern, focus_terms in _FOCUS_TERMS:
+        for pattern, focus_terms, focus_weight in _FOCUS_TERMS:
             if re.search(pattern, question, re.I):
-                score += 6 * len(focus_terms & words)
+                score += focus_weight * len(focus_terms & words)
         if risk_intent:
             score += 4 * sum(1 for item in findings if item.get("risk_status") == "POTENTIAL_RISK")
             score += 2 * sum(1 for item in findings if item.get("risk_status") == "INSUFFICIENT_EVIDENCE")
