@@ -1,0 +1,749 @@
+{
+  "schema_version": 1,
+  "map_version": "1.0.0",
+  "taxonomy_source": "data/risk/commercial_clause_risk_playbook.json: clause_types",
+  "taxonomy_count": 37,
+  "authority_catalog_path": "data/risk/authority_catalog.json",
+  "default_rule": "All 37 categories are review triggers only. A linked statute is a scope-limited authority lead, not a general enforceability rule. An explicit no-universal-authority entry is not missing data; it means the legal result requires case-specific and jurisdiction-specific research.",
+  "clauses": [
+    {
+      "clause_type": "Anti-Assignment",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_210",
+        "DE_UCC_2_210"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "NY_OR_DE_UCC_ONLY_IF_VALIDLY_GOVERNED_AND_GOODS_TRANSACTION",
+      "scope_note": "Use UCC § 2-210 only for a sale-of-goods transaction governed by the named state's UCC. Services, IP licences, receivables, and change-of-control effects require separate law and contract interpretation.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Audit Rights",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [],
+      "authority_coverage_status": "NO_UNIVERSAL_PRIMARY_AUTHORITY_IDENTIFIED",
+      "jurisdiction_policy": "NO_DEFAULT_JURISDICTION; CONTRACT_AND_SECTOR_FACTS_REQUIRED",
+      "scope_note": "No universal U.S. commercial-contract statute creates a general audit right. Assess scope, frequency, confidentiality, security, cost allocation, records, and sector-specific statutes only when facts identify them.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Cap On Liability",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_719",
+        "DE_UCC_2_719"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "NY_OR_DE_UCC_ONLY_IF_VALIDLY_GOVERNED_AND_GOODS_TRANSACTION",
+      "scope_note": "UCC § 2-719 addresses contractual remedies in sale-of-goods transactions only. Liability caps in service/software and mixed contracts require governing-law-specific case law and any applicable nonwaivable rules.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Change Of Control",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "DE_DGCL_251",
+        "NY_UCC_2_210",
+        "DE_UCC_2_210"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CORPORATE_LAW_AND_CONTRACT_GOVERNING_LAW_REQUIRED",
+      "scope_note": "A corporate merger statute is not a universal change-of-control rule. Separate corporate transaction form, defined control threshold, assignment wording, consent/termination effects, and governing law.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Exclusivity",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_306",
+        "DE_UCC_2_306",
+        "USC_15_1"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "GOODS_UCC_ONLY_FOR_2_306; FEDERAL_ANTITRUST_ONLY_IF_FACTS_SUPPORT",
+      "scope_note": "UCC § 2-306 addresses output/requirements and exclusive dealings in goods; antitrust analysis requires market and competitive-effects facts. Exclusivity is not automatically unlawful.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Governing Law",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_1_301",
+        "NY_GOL_5_1401",
+        "NY_GOL_5_1402",
+        "DE_UCC_1_301"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CHOICE_OF_LAW_AND_FORUM_FACTS_REQUIRED",
+      "scope_note": "Check the clause text, transaction value, consumer status, forum clause, contacts, and conflicts rules. The cited UCC sections govern UCC transactions; New York GOL safe harbors have thresholds and exclusions.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Insurance",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [],
+      "authority_coverage_status": "NO_UNIVERSAL_PRIMARY_AUTHORITY_IDENTIFIED",
+      "jurisdiction_policy": "CONTRACT_AND_SECTOR_FACTS_REQUIRED",
+      "scope_note": "No general U.S. commercial-contract statute establishes one standard insurance requirement for all deals. Treat missing/one-sided coverage as a commercial-review issue unless a sector, licence, construction, transport, or other specific legal requirement is established.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Ip Ownership Assignment",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_17_101",
+        "USC_17_201",
+        "USC_17_204",
+        "USC_35_261"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "US_FEDERAL_COPYRIGHT_OR_PATENT_ONLY_WHERE_THAT_RIGHT_IS_AT_ISSUE",
+      "scope_note": "Separate copyright, patent, trademark, trade secret, and other rights. Copyright work-for-hire and transfer rules are not interchangeable; patent assignments have their own written-instrument rule.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Irrevocable Or Perpetual License",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_17_106",
+        "USC_17_203",
+        "USC_17_204"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "US_FEDERAL_COPYRIGHT_ONLY_WHERE_COPYRIGHT_GRANT_IS_AT_ISSUE",
+      "scope_note": "For copyright grants, distinguish contractual duration from statutory termination rights and the specific grant/author/work facts. Do not infer that 'perpetual' means immune from statutory termination.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "License Grant",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_17_106",
+        "USC_17_204",
+        "USC_35_261"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "IP_TYPE_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "Check rights, field, territory, term, sublicensing, exclusivity, and rights-owner authority. The cited provisions address copyright or patent rights only; trademarks and data rights need separate treatment.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Liquidated Damages",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_718",
+        "DE_UCC_2_718"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "NY_OR_DE_UCC_ONLY_IF_VALIDLY_GOVERNED_AND_GOODS_TRANSACTION",
+      "scope_note": "The cited UCC test is limited to sale-of-goods transactions. Do not apply it as a universal liquidated-damages test to services, employment, real estate, or other contracts without separate authority.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Minimum Commitment",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_306",
+        "DE_UCC_2_306",
+        "NY_UCC_2_309",
+        "DE_UCC_2_309"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CONTRACT_TYPE_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "UCC output/requirements rules are relevant only to their defined goods-contract setting. Flag commercial exposure and quantify term, quantity, take-or-pay, termination, and relief; do not infer enforceability.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Most Favored Nation",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_15_1",
+        "USC_15_45"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "FEDERAL_ANTITRUST_ONLY_IF_FACTS_SUPPORT; STATE_LAW_MAY_ALSO_APPLY",
+      "scope_note": "MFN terms are fact-sensitive. Antitrust review depends on market structure, parties, coverage, effects, and applicable doctrine; neither statute makes every MFN clause unlawful.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Non-Compete",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "FTC_NONCOMPETE_STATUS_2025",
+        "DE_SUPREME_PAYSCALE_2026"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "STATE_LAW_AND_PARTY_RELATIONSHIP_REQUIRED; NO_NATIONWIDE_DEFAULT_RULE",
+      "scope_note": "The FTC's 2024 nationwide rule is not in effect following vacatur and the FTC's 2025 action. State law remains essential; the Delaware opinion is a pleading-stage decision, not a holding that a clause is ultimately enforceable.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "No-Solicit Of Customers",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "DE_SUPREME_PAYSCALE_2026"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "STATE_LAW_AND_PARTY_RELATIONSHIP_REQUIRED",
+      "scope_note": "Assess whether the clause concerns customers, confidential information, employees, or competition; scope, duration, consideration, role, and state law matter. The cited Delaware case does not decide ultimate enforceability.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "No-Solicit Of Employees",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "DE_SUPREME_PAYSCALE_2026",
+        "USC_15_1"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "STATE_LAW_AND_PARTY_RELATIONSHIP_AND_MARKET_FACTS_REQUIRED",
+      "scope_note": "Employee no-poach provisions may raise employment and antitrust issues depending on parties and market effects; an ordinary customer non-solicit is not the same legal category.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Notice Period To Terminate Renewal",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_309",
+        "DE_UCC_2_309"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CONTRACT_TYPE_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "The cited default termination-notice rules apply to Article 2 goods transactions. Automatic-renewal statutes may be state-, product-, and customer-specific; verify before making a legal claim.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Post-Termination Services",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [],
+      "authority_coverage_status": "NO_UNIVERSAL_PRIMARY_AUTHORITY_IDENTIFIED",
+      "jurisdiction_policy": "CONTRACT_AND_SECTOR_FACTS_REQUIRED",
+      "scope_note": "Transition assistance, data return, migration, deletion, and continued support are generally contract-specific commercial obligations. Determine applicable privacy, security, regulated-sector, and IP rules from the actual facts.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Price Restrictions",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_306",
+        "DE_UCC_2_306",
+        "USC_15_1"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CONTRACT_TYPE_AND_COMPETITIVE_RELATIONSHIP_REQUIRED",
+      "scope_note": "UCC § 2-306 is limited to output/requirements and exclusive-dealing concepts in goods transactions. Price restraints between competitors need separate antitrust analysis; unilateral price-change terms are a different issue.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Renewal Term",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_309",
+        "DE_UCC_2_309"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CONTRACT_TYPE_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "UCC § 2-309 is a limited goods-contract default rule, not a general law governing all evergreen clauses. Flag notice mechanics, term, price change, termination windows, and state-specific automatic-renewal statutes.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Source Code Escrow",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_18_1836",
+        "USC_18_1839",
+        "USC_17_106"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CONTRACT_AND_IP_FACTS_REQUIRED",
+      "scope_note": "No universal statute requires software source-code escrow. The cited statutes concern qualifying trade secrets and copyright rights, not escrow triggers; deposit scope, verification, release events, licences, and continuity must be contractually assessed.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Termination For Convenience",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_309",
+        "DE_UCC_2_309"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CONTRACT_TYPE_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "The cited UCC provisions concern goods contracts and indefinite successive performance; they do not create a general right to terminate for convenience in every commercial agreement.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Uncapped Liability",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_719",
+        "DE_UCC_2_719"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CONTRACT_TYPE_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "The presence of uncapped exposure is a commercial allocation flag, not itself a legal violation. For goods contracts, § 2-719 is relevant to remedy limitations; other contract types require separate governing-law analysis.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Warranty Duration",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_316",
+        "NY_UCC_2_725",
+        "DE_UCC_2_316"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "GOODS_OR_SERVICE_CLASSIFICATION_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "Distinguish warranty scope, disclaimer, survival duration, and statutory limitation periods. The cited provisions concern goods and do not supply a universal warranty-duration rule for services/software.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Affiliate License-Licensee",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_17_106",
+        "USC_17_204"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "IP_TYPE_AND_CONTRACT_SCOPE_REQUIRED",
+      "scope_note": "Affiliate access, sublicensing, and user rights are contractual questions; copyright statutes define relevant exclusive rights and transfer rules but do not automatically authorize affiliate use.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Affiliate License-Licensor",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_17_201",
+        "USC_17_204",
+        "USC_35_261"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "IP_TYPE_AND_CHAIN_OF_TITLE_EVIDENCE_REQUIRED",
+      "scope_note": "Check chain of title and authority to license the actual IP type. The cited statutes address copyright ownership/transfers and patent assignment only; they do not prove ownership of a particular asset.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Competitive Restriction Exception",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_15_1",
+        "FTC_NONCOMPETE_STATUS_2025",
+        "DE_SUPREME_PAYSCALE_2026"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "RESTRICTION_TYPE_STATE_LAW_AND_MARKET_FACTS_REQUIRED",
+      "scope_note": "Separate exclusivity, employee non-compete, non-solicit, and market-allocation restrictions. Exceptions do not themselves establish enforceability; apply state law and antitrust facts.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Covenant Not To Sue",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_17_106",
+        "USC_17_204"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "SUBJECT_MATTER_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "If copyright is involved, define rights, parties, territory, duration, retained claims, and nonwaivable rights; the cited copyright provisions do not govern every covenant not to sue.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Joint Ip Ownership",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_17_201",
+        "USC_17_204",
+        "USC_35_261"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "IP_TYPE_AND_CREATION_FACTS_REQUIRED",
+      "scope_note": "Copyright joint authorship and patent co-ownership have distinct statutory consequences. A contract label alone does not establish statutory joint authorship, chain of title, or the intended exploitation rights.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Non-Disparagement",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [],
+      "authority_coverage_status": "NO_UNIVERSAL_PRIMARY_AUTHORITY_IDENTIFIED",
+      "jurisdiction_policy": "PARTY_STATUS_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "No universal U.S. commercial-contract statute determines every non-disparagement clause. Check governing state law, parties' status, labor/employment context, whistleblower rights, and other nonwaivable protections before legal assessment.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Non-Transferable License",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_17_106",
+        "USC_17_204",
+        "NY_UCC_2_210",
+        "DE_UCC_2_210"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "IP_TYPE_CONTRACT_TYPE_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "Separate assignment of contract rights, delegation of duties, sublicensing, and transfer of IP rights. UCC § 2-210 applies only to goods contracts; copyright transfer law does not settle all licences.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Revenue/Profit Sharing",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_306",
+        "DE_UCC_2_306"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CONTRACT_AND_TRANSACTION_TYPE_REQUIRED",
+      "scope_note": "UCC § 2-306 concerns output/requirements quantities, not a general accounting rule for revenue or profit sharing. Auditability, deductions, reporting, records, and dispute procedures are commercial drafting checks.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Rofr/Rofo/Rofn",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [],
+      "authority_coverage_status": "NO_UNIVERSAL_PRIMARY_AUTHORITY_IDENTIFIED",
+      "jurisdiction_policy": "ASSET_TYPE_ENTITY_LAW_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "No single general U.S. statute governs every right of first refusal, first offer, or first negotiation. The asset type, transfer trigger, notice, matching mechanics, duration, remedies, entity law, and governing law determine the analysis.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Third Party Beneficiary",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_318",
+        "DE_UCC_2_318"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "GOODS_WARRANTY_OR_STATE_COMMON_LAW_ANALYSIS_REQUIRED",
+      "scope_note": "The cited UCC sections concern beneficiaries of warranties in goods transactions only. General third-party-beneficiary doctrine is state common law and requires separate authority and intent analysis.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Unlimited/All-You-Can-Eat-License",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "USC_17_106",
+        "USC_17_204"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "IP_TYPE_AND_CONTRACT_SCOPE_REQUIRED",
+      "scope_note": "'Unlimited' is a scope/pricing descriptor, not a standalone legal violation. Identify licensed rights, users, units, usage caps, term, territory, sublicensing, and any third-party restrictions.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Volume Restriction",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [
+        "NY_UCC_2_306",
+        "DE_UCC_2_306"
+      ],
+      "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
+      "jurisdiction_policy": "CONTRACT_TYPE_AND_GOVERNING_LAW_REQUIRED",
+      "scope_note": "UCC § 2-306 applies to output/requirements quantities in goods transactions. Otherwise treat stated minimums/maximums as measurable commercial terms and seek contract-specific authority before legal conclusions.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    },
+    {
+      "clause_type": "Indemnification",
+      "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
+      "authority_ids": [],
+      "authority_coverage_status": "NO_UNIVERSAL_PRIMARY_AUTHORITY_IDENTIFIED",
+      "jurisdiction_policy": "GOVERNING_LAW_AND_INDEMNITY_CONTEXT_REQUIRED",
+      "scope_note": "There is no single universal U.S. indemnity rule for all commercial contracts. Analyze covered claims, defence/control, causation, exclusions, caps, procedures, insurance, and applicable state statutes/case law; no legal conclusion from one-sidedness alone.",
+      "legal_conclusion_allowed": false,
+      "required_context": [
+        "exact contract quote and clause location",
+        "governing-law and forum text",
+        "contract type and transaction subject matter",
+        "party relationship and relevant facts",
+        "effective date and any applicable statutory exceptions"
+      ],
+      "review_status": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+    }
+  ]
+}
