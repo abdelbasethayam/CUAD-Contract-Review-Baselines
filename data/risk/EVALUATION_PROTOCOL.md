@@ -14,7 +14,7 @@ The current target is evidence-grounded review prioritization over uploaded cont
 - question-based positives are checked against exact current-contract evidence;
 - cross-clause/document findings cite existing clause IDs and exact quotes from those clauses;
 - no ordinal severity labels or unsupported aggregate contract confidence are emitted;
-- raw support scores are labelled uncalibrated and are not presented as probabilities;
+- raw support scores are direction-neutral evidence-support features, labelled uncalibrated and never presented as probabilities;
 - numerical confidence is emitted only from a versioned calibrator that matches the current playbook and score versions and passes contract-disjoint calibration/locked-test gates;
 - CUAD classification indexes and other external benchmark data remain task-isolated and are not treated as risk ground truth;
 - synthetic regression tests, API smoke tests, backend tests, frontend build, and registry validation pass.
@@ -33,7 +33,7 @@ None is a complete gold standard for the repository's buyer-side policy. Report 
 
 ## Project-specific adjudication
 
-The project-specific risk benchmark must be frozen and contract-disjoint. Two qualified reviewers label each finding independently; an adjudicator resolves disagreement. Report finding precision/recall/F1 by rule family, evidence quote exact-match and source-clause-ID accuracy, cross-clause precision/recall, unsupported-positive rate, unresolved rate, and calibration metrics for prediction correctness. Publish the dataset version, annotation protocol, split, jurisdiction, contract type, playbook hash, model, prompt, score version, and code fingerprint.
+The project-specific risk benchmark must be frozen and contract-disjoint. Two qualified reviewers label each finding independently; an adjudicator resolves disagreement. Report finding precision/recall/F1 by rule family, evidence quote exact-match and source-clause-ID accuracy, cross-clause precision/recall, unsupported-positive rate, unresolved rate, and calibration metrics for prediction correctness. Estimate uncertainty by resampling whole contracts rather than individual findings. Fit the constant-prevalence comparator from the calibration partition only. Publish the dataset version, annotation protocol, split, jurisdiction, contract type, playbook hash, model, prompt, score version, and code fingerprint.
 
 ## Interpretation
 
