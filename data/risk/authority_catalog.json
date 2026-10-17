@@ -22,7 +22,8 @@
       "pinpoint": "17 U.S.C. § 101, definition of work made for hire",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; FACT_AND_WORK_CATEGORY_ANALYSIS_REQUIRED",
-      "scope_limit": "Copyright ownership only; commissioned work qualifies as work made for hire only within statutory categories and signed-writing conditions."
+      "scope_limit": "Copyright ownership only; commissioned work qualifies as work made for hire only within statutory categories and signed-writing conditions.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "USC_17_106",
@@ -35,7 +36,8 @@
       "pinpoint": "17 U.S.C. § 106, subject to §§ 107–122",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; LIMITATIONS_AND_RIGHTS_TYPE_REVIEW_REQUIRED",
-      "scope_limit": "Copyright rights only; does not independently resolve patents, trademarks, trade secrets, or contractual scope."
+      "scope_limit": "Copyright rights only; does not independently resolve patents, trademarks, trade secrets, or contractual scope.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "USC_17_201",
@@ -48,7 +50,8 @@
       "pinpoint": "17 U.S.C. § 201(a)–(c)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; AUTHORSHIP_AND_WORK_FACTS_REQUIRED",
-      "scope_limit": "Copyright ownership; joint authorship and work-made-for-hire require statutory factual analysis."
+      "scope_limit": "Copyright ownership; joint authorship and work-made-for-hire require statutory factual analysis.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "USC_17_203",
@@ -61,7 +64,8 @@
       "pinpoint": "17 U.S.C. § 203(a)–(b)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; DATES, AUTHORSHIP, NOTICE, AND EXCEPTIONS_REQUIRED",
-      "scope_limit": "Applies only to qualifying grants by authors and is subject to statutory conditions and exceptions; 'perpetual' does not itself resolve termination rights."
+      "scope_limit": "Applies only to qualifying grants by authors and is subject to statutory conditions and exceptions; 'perpetual' does not itself resolve termination rights.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "USC_17_204",
@@ -74,7 +78,8 @@
       "pinpoint": "17 U.S.C. § 204(a)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; SUBJECT MATTER AND TRANSFER TYPE REVIEW REQUIRED",
-      "scope_limit": "Copyright transfers; not a universal assignment rule for all contract rights or all IP types."
+      "scope_limit": "Copyright transfers; not a universal assignment rule for all contract rights or all IP types.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "USC_18_1836",
@@ -87,7 +92,8 @@
       "pinpoint": "18 U.S.C. § 1836(b)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; TRADE-SECRET ELEMENTS AND FACTS REQUIRED",
-      "scope_limit": "Provides a federal civil cause of action for qualifying trade-secret misappropriation; does not mandate source-code escrow."
+      "scope_limit": "Provides a federal civil cause of action for qualifying trade-secret misappropriation; does not mandate source-code escrow.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "USC_18_1839",
@@ -100,7 +106,8 @@
       "pinpoint": "18 U.S.C. § 1839, definitions of trade secret and misappropriation",
       "verification_status": "OFFICIAL_CHAPTER_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; FACTUAL ELEMENTS REQUIRED",
-      "scope_limit": "Definitions only; does not make all confidential information a statutory trade secret."
+      "scope_limit": "Definitions only; does not make all confidential information a statutory trade secret.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "USC_15_1",
@@ -113,7 +120,8 @@
       "pinpoint": "15 U.S.C. § 1",
       "verification_status": "OFFICIAL_SOURCE_LINKED_CURRENTNESS_REVIEW_REQUIRED",
       "currentness_status": "CURRENTNESS_AND_APPLICABLE_ANTITRUST_TEST_MUST_BE_CONFIRMED_BEFORE_LEGAL_USE",
-      "scope_limit": "Competition restrictions require market, parties, effects, and governing-law facts; exclusivity or MFN terms are not automatically unlawful."
+      "scope_limit": "Competition restrictions require market, parties, effects, and governing-law facts; exclusivity or MFN terms are not automatically unlawful.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "USC_15_45",
@@ -126,7 +134,8 @@
       "pinpoint": "15 U.S.C. § 45(a)",
       "verification_status": "OFFICIAL_SOURCE_LINKED_CURRENTNESS_REVIEW_REQUIRED",
       "currentness_status": "CURRENTNESS_AND_APPLICABLE_ANTITRUST_TEST_MUST_BE_CONFIRMED_BEFORE_LEGAL_USE",
-      "scope_limit": "General FTC authority; does not itself make a particular contract clause per se unlawful."
+      "scope_limit": "General FTC authority; does not itself make a particular contract clause per se unlawful.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "USC_35_261",
@@ -139,7 +148,8 @@
       "pinpoint": "35 U.S.C. § 261, written instrument for patent assignments",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "PRELIMINARY_US_CODE_TEXT_EFFECTIVE_2026-09; PATENT RIGHTS AND RECORDING FACTS REQUIRED",
-      "scope_limit": "Patent interests only; does not independently resolve copyright, trademark, or trade-secret ownership."
+      "scope_limit": "Patent interests only; does not independently resolve copyright, trademark, or trade-secret ownership.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "FTC_NONCOMPETE_STATUS_2025",
@@ -152,7 +162,8 @@
       "pinpoint": "Release paragraphs describing withdrawal of appeals and acceding to vacatur",
       "verification_status": "OFFICIAL_STATUS_NOTICE_RETRIEVED",
       "currentness_status": "RULE_NOT_IN_EFFECT_PER_FTC_STATUS_PAGE_RETRIEVED_2026-10-17; CHECK_LATER_CASES_AND_STATE_LAW",
-      "scope_limit": "Status evidence only, not a substitute for state non-compete law or a conclusion about enforceability."
+      "scope_limit": "Status evidence only, not a substitute for state non-compete law or a conclusion about enforceability.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_1_301",
@@ -165,7 +176,8 @@
       "pinpoint": "N.Y. U.C.C. § 1-301(a)–(c)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; TRANSACTION, CONSUMER, AND CONFLICT-OF-LAWS CONDITIONS_REQUIRED",
-      "scope_limit": "UCC territorial applicability and choice-of-law rules only; not a universal conflicts rule for every contract."
+      "scope_limit": "UCC territorial applicability and choice-of-law rules only; not a universal conflicts rule for every contract.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_GOL_5_1401",
@@ -178,7 +190,8 @@
       "pinpoint": "N.Y. Gen. Oblig. Law § 5-1401(1)–(2)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; VALUE THRESHOLD, EXCLUSIONS, AND TRANSACTION FACTS REQUIRED",
-      "scope_limit": "Choice-of-law safe harbor subject to statutory transaction-value threshold and exclusions; not a blanket validation of all clauses."
+      "scope_limit": "Choice-of-law safe harbor subject to statutory transaction-value threshold and exclusions; not a blanket validation of all clauses.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_GOL_5_1402",
@@ -191,7 +204,8 @@
       "pinpoint": "N.Y. Gen. Oblig. Law § 5-1402(1)–(2)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; VALUE THRESHOLD AND FORUM-CLAUSE CONDITIONS REQUIRED",
-      "scope_limit": "Specific choice-of-forum statute tied to § 5-1401 and statutory transaction conditions."
+      "scope_limit": "Specific choice-of-forum statute tied to § 5-1401 and statutory transaction conditions.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_2_201",
@@ -204,7 +218,8 @@
       "pinpoint": "N.Y. U.C.C. § 2-201",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_REVISION_PAGE_RETRIEVED_2026-06-05; TRANSACTION AND EXCEPTIONS REQUIRED",
-      "scope_limit": "Sale-of-goods statute of frauds; statutory threshold and exceptions apply."
+      "scope_limit": "Sale-of-goods statute of frauds; statutory threshold and exceptions apply.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_2_210",
@@ -217,7 +232,8 @@
       "pinpoint": "N.Y. U.C.C. § 2-210(1)–(5)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; SALE-OF-GOODS SCOPE AND CONTRACT LANGUAGE REQUIRED",
-      "scope_limit": "Article 2 goods contracts; does not establish a universal assignment rule for services, IP licences, or corporate change of control."
+      "scope_limit": "Article 2 goods contracts; does not establish a universal assignment rule for services, IP licences, or corporate change of control.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_2_306",
@@ -230,7 +246,8 @@
       "pinpoint": "N.Y. U.C.C. § 2-306(1)–(2)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, GOOD-FAITH, QUANTITY, AND MARKET FACTS REQUIRED",
-      "scope_limit": "Addresses output/requirements quantity and exclusive dealings under Article 2; not a universal MFN, price, or exclusivity rule."
+      "scope_limit": "Addresses output/requirements quantity and exclusive dealings under Article 2; not a universal MFN, price, or exclusivity rule.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_2_309",
@@ -243,7 +260,8 @@
       "pinpoint": "N.Y. U.C.C. § 2-309(1)–(3)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; ARTICLE 2 SCOPE AND CONTRACT TERMS REQUIRED",
-      "scope_limit": "Sale-of-goods default rules for timing and indefinite successive performance; not a universal automatic-renewal law."
+      "scope_limit": "Sale-of-goods default rules for timing and indefinite successive performance; not a universal automatic-renewal law.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_2_316",
@@ -256,7 +274,8 @@
       "pinpoint": "N.Y. U.C.C. § 2-316(1)–(4)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, WARRANTY TYPE, NOTICE, AND FACTS REQUIRED",
-      "scope_limit": "Article 2 warranty exclusion/modification rules; does not settle warranty duration for every services/software contract."
+      "scope_limit": "Article 2 warranty exclusion/modification rules; does not settle warranty duration for every services/software contract.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_2_318",
@@ -269,7 +288,8 @@
       "pinpoint": "N.Y. U.C.C. § 2-318",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; STATUTORY BENEFICIARY AND PERSONAL-INJURY LIMITS REQUIRED",
-      "scope_limit": "A narrow warranty-beneficiary provision; not the general third-party-beneficiary doctrine."
+      "scope_limit": "A narrow warranty-beneficiary provision; not the general third-party-beneficiary doctrine.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_2_718",
@@ -282,7 +302,8 @@
       "pinpoint": "N.Y. U.C.C. § 2-718(1)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS AND FACT-SPECIFIC DAMAGES ANALYSIS REQUIRED",
-      "scope_limit": "Article 2 liquidated-damages standard; service contracts and other contexts require separate law."
+      "scope_limit": "Article 2 liquidated-damages standard; service contracts and other contexts require separate law.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_2_719",
@@ -295,7 +316,8 @@
       "pinpoint": "N.Y. U.C.C. § 2-719(1)–(3)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, REMEDY DESIGN, AND FACTS REQUIRED",
-      "scope_limit": "Article 2 remedies and consequential damages; not a universal liability-cap rule for all commercial contracts."
+      "scope_limit": "Article 2 remedies and consequential damages; not a universal liability-cap rule for all commercial contracts.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "NY_UCC_2_725",
@@ -308,7 +330,8 @@
       "pinpoint": "N.Y. U.C.C. § 2-725(1)–(4)",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; ACCRUAL AND FUTURE-PERFORMANCE EXCEPTIONS REQUIRED",
-      "scope_limit": "Statute of limitations for sale-of-goods actions; distinct from contractual warranty duration."
+      "scope_limit": "Statute of limitations for sale-of-goods actions; distinct from contractual warranty duration.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_UCC_1_301",
@@ -321,7 +344,8 @@
       "pinpoint": "6 Del. C. § 1-301",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; UCC TRANSACTION AND CONFLICT-OF-LAWS CONDITIONS REQUIRED",
-      "scope_limit": "UCC choice-of-law provision only; not a universal conflicts rule for every contract."
+      "scope_limit": "UCC choice-of-law provision only; not a universal conflicts rule for every contract.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_UCC_2_210",
@@ -334,7 +358,8 @@
       "pinpoint": "6 Del. C. § 2-210, Article 2 Part 2",
       "verification_status": "OFFICIAL_PART_PAGE_AND_SECTION_PINPOINT",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS TRANSACTION AND CONTRACT LANGUAGE REQUIRED",
-      "scope_limit": "Article 2 goods contracts only; not a universal assignment or change-of-control rule."
+      "scope_limit": "Article 2 goods contracts only; not a universal assignment or change-of-control rule.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_UCC_2_306",
@@ -347,7 +372,8 @@
       "pinpoint": "6 Del. C. § 2-306(1)–(2), Article 2 Part 3",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, GOOD-FAITH, QUANTITY, AND MARKET FACTS REQUIRED",
-      "scope_limit": "Article 2 output/requirements and exclusive-dealing terms; not a universal MFN or competition-law conclusion."
+      "scope_limit": "Article 2 output/requirements and exclusive-dealing terms; not a universal MFN or competition-law conclusion.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_UCC_2_309",
@@ -360,7 +386,8 @@
       "pinpoint": "6 Del. C. § 2-309(1)–(3), Article 2 Part 3",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; ARTICLE 2 SCOPE AND CONTRACT TERMS REQUIRED",
-      "scope_limit": "Goods-contract default rules; not a universal automatic-renewal or termination-for-convenience rule."
+      "scope_limit": "Goods-contract default rules; not a universal automatic-renewal or termination-for-convenience rule.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_UCC_2_316",
@@ -373,7 +400,8 @@
       "pinpoint": "6 Del. C. § 2-316, Article 2 Part 3",
       "verification_status": "OFFICIAL_PART_PAGE_AND_SECTION_PINPOINT",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS AND WARRANTY FACTS REQUIRED",
-      "scope_limit": "Article 2 warranty rules only."
+      "scope_limit": "Article 2 warranty rules only.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_UCC_2_318",
@@ -386,7 +414,8 @@
       "pinpoint": "6 Del. C. § 2-318, Article 2 Part 3",
       "verification_status": "OFFICIAL_PART_PAGE_AND_SECTION_PINPOINT",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; STATUTORY BENEFICIARY SCOPE REQUIRED",
-      "scope_limit": "Warranty beneficiaries under Article 2 only; not the general third-party-beneficiary doctrine."
+      "scope_limit": "Warranty beneficiaries under Article 2 only; not the general third-party-beneficiary doctrine.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_UCC_2_718",
@@ -399,7 +428,8 @@
       "pinpoint": "6 Del. C. § 2-718(1), Article 2 Part 7",
       "verification_status": "OFFICIAL_TEXT_AND_PINPOINT_RETRIEVED",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS AND FACT-SPECIFIC DAMAGES ANALYSIS REQUIRED",
-      "scope_limit": "Article 2 liquidated-damages standard; service contracts and other contexts require separate law."
+      "scope_limit": "Article 2 liquidated-damages standard; service contracts and other contexts require separate law.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_UCC_2_719",
@@ -412,7 +442,8 @@
       "pinpoint": "6 Del. C. § 2-719, Article 2 Part 7",
       "verification_status": "OFFICIAL_PART_PAGE_AND_SECTION_PINPOINT",
       "currentness_status": "OFFICIAL_TEXT_RETRIEVED; GOODS, REMEDY DESIGN, AND FACTS REQUIRED",
-      "scope_limit": "Article 2 remedies and consequential damages only."
+      "scope_limit": "Article 2 remedies and consequential damages only.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_DGCL_251",
@@ -425,7 +456,8 @@
       "pinpoint": "8 Del. C. § 251",
       "verification_status": "OFFICIAL_CODE_SECTION_LINKED; TRANSACTION-SPECIFIC_REVIEW_REQUIRED",
       "currentness_status": "CORPORATE_TRANSACTION_SCOPE_ONLY; DO NOT EQUATE MERGER WITH CONTRACTUAL CHANGE OF CONTROL",
-      "scope_limit": "Corporate merger procedure; does not determine how a particular contract defines change of control."
+      "scope_limit": "Corporate merger procedure; does not determine how a particular contract defines change of control.",
+      "retrieval_date": "2026-10-17"
     },
     {
       "authority_id": "DE_SUPREME_PAYSCALE_2026",
@@ -438,7 +470,8 @@
       "pinpoint": "Part III.A and the opinion's concluding limitation: pleading-stage decision only",
       "verification_status": "PRIMARY_OPINION_TEXT_RETRIEVED_ON_REPUBLICATION_HOST",
       "currentness_status": "DECISION_DATED_2026-03-19; OFFICIAL_DOCKET_COPY_AND_SUBSEQUENT_HISTORY_REQUIRED_BEFORE_APPROVAL",
-      "scope_limit": "The Court held only that claims were reasonably conceivable at the pleading stage and expressly did not decide ultimate enforceability; facts concerned employment-related equity covenants."
+      "scope_limit": "The Court held only that claims were reasonably conceivable at the pleading stage and expressly did not decide ultimate enforceability; facts concerned employment-related equity covenants.",
+      "retrieval_date": "2026-10-17"
     }
   ]
 }
