@@ -8,7 +8,7 @@ from collections import Counter, defaultdict
 
 from ..config import RISK_MAX_TOKENS, RISK_MODEL, RISK_NUM_CTX, RISK_SELF_CONSISTENCY_PASSES, RISK_TEMPERATURE
 from ..rag.generator import call_ollama
-from .risk_engine import _evidence_valid, _majority, _severity_signal, _support_score
+from .risk_engine import _evidence_valid, _majority, _support_score
 from .risk_playbook import load_playbook, source_records
 from .confidence_calibration import confidence_from_support_score, SUPPORT_SCORE_VERSION
 
@@ -169,7 +169,6 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
                 except (TypeError, ValueError, OverflowError):
                     continue
                 evidence.append({"clause_id": evidence_clause_id, "quote": str(ev["quote"]).strip()})
-            factors = item.get("score_components") if isinstance(item.get("score_components"), dict) else (item.get("severity_factors") if isinstance(item.get("severity_factors"), dict) else {})
             out.append({
                 "check_id": check_id,
                 "answer": answer,
@@ -178,10 +177,6 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
                 "clause_ids": ids,
                 "evidence": evidence,
                 "why_flagged": str(item.get("why_flagged") or "").strip(),
-                "score_components": {
-                    key: (float(factors[key]) if str(factors.get(key)).replace(".", "", 1).isdigit() and 0 <= float(factors[key]) <= 5 else None)
-                    for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")
-                },
             })
         counts = Counter(item["check_id"] for item in out)
         return [item for item in out if counts[item["check_id"]] == 1]
