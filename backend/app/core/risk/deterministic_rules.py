@@ -9,6 +9,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from .risk_playbook import source_records
+
 RULE_ENGINE_VERSION = "playbook-rules-1.0"
 
 
@@ -81,6 +83,8 @@ def evaluate_playbook_rules(
         check_id = rule_id
         domain = str(rule.get("risk_domain") or "Commercial Risk").strip()
         risk_type = str(rule.get("risk_type") or "Contract wording requires review").strip()
+        supporting_sources = source_records(playbook or {}, rule.get("sources") or [])
+        primary_source = supporting_sources[0] if supporting_sources else {}
         question = str(rule.get("question") or "Does this wording trigger a contract-review rule?").strip()
         explanation = str(
             rule.get("explanation")
@@ -118,10 +122,18 @@ def evaluate_playbook_rules(
                 "score_override_reason": None,
                 "human_review_required": True,
                 "review_escalation": "LEGAL_REVIEW",
-                "supporting_sources": [],
+                "supporting_sources": supporting_sources,
                 "legal_guidance_sources": [],
                 "related_contract_context": [],
-                "source_tier": "D",
+                "source_tier": primary_source.get("source_tier", "D"),
+                "jurisdiction": primary_source.get("jurisdiction"),
+                "effective_date": primary_source.get("effective_date"),
+                "contract_type": primary_source.get("contract_type"),
+                "source_url": primary_source.get("source_url") or primary_source.get("url"),
+                "source_title": primary_source.get("source_title") or primary_source.get("citation"),
+                "retrieval_date": primary_source.get("retrieval_date"),
+                "supporting_quote_or_paraphrase": primary_source.get("supporting_quote_or_paraphrase") or primary_source.get("citation"),
+                "transferability": primary_source.get("transferability"),
                 "provenance": {
                     "source": "DETERMINISTIC_PLAYBOOK_RULE",
                     "rule_engine_version": RULE_ENGINE_VERSION,
