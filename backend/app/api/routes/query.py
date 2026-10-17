@@ -130,7 +130,11 @@ def _question_terms(question: str) -> set[str]:
 def _select_clauses(
     clauses: list[dict[str, Any]], question: str, limit: int = 12
 ) -> list[dict[str, Any]]:
+    # Exact query concepts must outrank broad synonym expansions. Otherwise a
+    # generic "termination" expansion can swamp a more specific data/export intent.
+    direct_terms = {term.lower() for term in _WORDS.findall(question)} - _STOP
     terms = _question_terms(question)
+    expanded_terms = terms - direct_terms
     risk_intent = bool(_RISK_INTENT.search(question))
     overview_intent = bool(_OVERVIEW_INTENT.search(question))
     scored = []
@@ -148,7 +152,7 @@ def _select_clauses(
             for item in findings
         )
         words = {term.lower() for term in _WORDS.findall(text + " " + label + " " + heading + " " + finding_text)}
-        score = len(terms & words)
+        score = 3 * len(direct_terms & words) + len(expanded_terms & words)
         if risk_intent:
             score += 4 * sum(1 for item in findings if item.get("risk_status") == "POTENTIAL_RISK")
             score += 2 * sum(1 for item in findings if item.get("risk_status") == "INSUFFICIENT_EVIDENCE")
