@@ -57,7 +57,7 @@ def test_contract_aggregation_summarizes_validated_clause_evidence():
     result = aggregate_clause_risks([_finding()], playbook=playbook)
 
     assert result["status"] == "POTENTIAL_RISK"
-    assert result["overall_risk"] == "CRITICAL"
+    assert result["overall_risk"] == "POTENTIAL_RISK"
     assert result["affected_clauses"] == [1]
     assert result["risk_domains"][0]["domain"] == "Liability Risk"
     assert result["key_risks"][0]["evidence"] == "Supplier liability is unlimited."
@@ -81,7 +81,8 @@ def test_unresolved_findings_remain_insufficient_evidence_not_no_risk():
     )
 
     assert result["status"] == "INSUFFICIENT_EVIDENCE"
-    assert result["overall_risk"] is None
+    assert result["overall_risk"] == "INSUFFICIENT_EVIDENCE"
+    assert result["overall_severity"] is None
     assert result["unresolved_check_count"] == 1
 
 
@@ -122,5 +123,6 @@ def test_no_applicable_label_does_not_create_a_contract_risk():
     )
 
     assert result["status"] == "NO_RISK"
-    assert result["overall_risk"] is None
+    assert result["overall_risk"] == "NO_RISK"
+    assert result["overall_severity"] is None
     assert result["key_risks"] == []
