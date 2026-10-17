@@ -200,7 +200,7 @@ def build_queue_text() -> tuple[str, int, int]:
                 {
                     key: authority_by_id[authority_id].get(key)
                     for key in (
-                        "authority_id", "title", "citation", "url", "pinpoint",
+                        "authority_id", "title", "citation", "source_type", "url", "pinpoint",
                         "jurisdiction", "source_tier", "authority_status",
                         "effective_date", "effective_date_status", "retrieval_date",
                         "verification_status", "currentness_status", "scope_limit",
