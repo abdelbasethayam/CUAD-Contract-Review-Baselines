@@ -422,11 +422,38 @@ def _record(rule: dict[str, Any], playbook: dict[str, Any], *, candidate_profile
         "candidate_note": candidate_profile.get("note") if candidate else None,
     }
 
+def _candidate_record(rule: dict[str, Any], playbook: dict[str, Any], profile: dict[str, str]) -> dict[str, Any]:
+    category = rule.get("clause_type")
+    family = rule["rule_family"]
+    base_key = f"{family}::{category}::{rule['base_rule_id']}" if category else f"{family}::{rule['base_rule_id']}"
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "rule_id": f"CANDIDATE::{base_key}::{profile['id']}",
+        "base_rule_key": base_key,
+        "base_rule_id": rule["base_rule_id"],
+        "record_kind": "CONTEXT_VARIANT_CANDIDATE",
+        "contract_type_profile": profile["id"],
+        "applicability_status": "NEEDS_HUMAN_REVIEW",
+        "inherits_from_base_rule": f"BASE::{base_key}",
+        "inherited_fields": [
+            "rule_family", "title", "risk_domain", "risk_subdomain", "risk_type",
+            "perspective", "jurisdiction_scope", "decision_logic", "evidence_contract",
+            "source_ids", "source_status", "rationale", "confidence_policy",
+        ],
+        "candidate_note": profile["note"],
+        "validation_status": "DRAFT_UNVALIDATED",
+        "approval_status": str(playbook.get("approval_status") or "UNAPPROVED"),
+        "execution_status": "DISABLED_UNVALIDATED_CANDIDATE",
+        "execution_eligible": False,
+        "legal_conclusion_allowed": False,
+        "source_playbook_hash": str(playbook.get("playbook_hash") or ""),
+    }
+
 def build_artifacts(playbook: dict[str, Any]) -> tuple[str, str, str]:
     base_rules = _base_inputs(playbook)
     base_records = [_record(rule, playbook) for rule in base_rules]
     candidate_records = [
-        _record(rule, playbook, candidate_profile=profile)
+        _candidate_record(rule, playbook, profile)
         for rule in base_rules
         for profile in CONTRACT_PROFILES
     ]
