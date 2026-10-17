@@ -17,7 +17,10 @@ from build_rule_registry import (
     SOURCE_REGISTRY_PATH,
     PLAYBOOK_PATH,
     CONTRACT_PROFILES,
+    AUTHORITY_MAP_PATH,
+    AUTHORITY_CATALOG_PATH,
     _base_inputs,
+    _git_blob_sha,
     build_artifacts,
 )
 
@@ -124,6 +127,18 @@ def main() -> int:
     records = [json.loads(line) for line in REGISTRY_PATH.read_text(encoding="utf-8").splitlines() if line.strip()]
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     sources = json.loads(SOURCE_REGISTRY_PATH.read_text(encoding="utf-8"))
+    authority_map_doc = json.loads(AUTHORITY_MAP_PATH.read_text(encoding="utf-8"))
+    authority_catalog_doc = json.loads(AUTHORITY_CATALOG_PATH.read_text(encoding="utf-8"))
+    authority_by_clause = {
+        str(entry["clause_type"]): entry
+        for entry in authority_map_doc.get("clauses", [])
+        if entry.get("clause_type")
+    }
+    authority_catalog_by_id = {
+        str(entry["authority_id"]): entry
+        for entry in authority_catalog_doc.get("authorities", [])
+        if entry.get("authority_id")
+    }
     rule_schema = json.loads(RULE_SCHEMA_PATH.read_text(encoding="utf-8"))
     source_schema = json.loads(SOURCE_SCHEMA_PATH.read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(rule_schema)
@@ -197,7 +212,7 @@ def main() -> int:
         "effective_dates", "pinpoint_citations", "citation_status", "legal_authority",
         "severity_rationale", "confidence_policy", "regression_cases", "validation_status",
         "approval_status", "execution_status", "execution_eligible",
-        "legal_conclusion_allowed", "source_playbook_hash",
+        "legal_conclusion_allowed", "source_playbook_hash", "authority_map",
     }
     if any(required_rule_fields - set(item) for item in records if item["record_kind"] == "BASE_RULE"):
         problems.append("base_rule_missing_required_structured_fields")
@@ -229,7 +244,7 @@ def main() -> int:
         problems.append("candidate_inheritance_contract_missing")
     required_inherited_fields = {
         "source_tier", "authority_jurisdictions", "effective_dates",
-        "pinpoint_citations", "citation_status", "legal_authority",
+        "pinpoint_citations", "citation_status", "legal_authority", "authority_map",
     }
     if any(required_inherited_fields - set(item.get("inherited_fields") or []) for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"):
         problems.append("candidate_missing_source_authority_inheritance")
@@ -262,6 +277,14 @@ def main() -> int:
                 problems.append(f"unsupported_authority_claim:{source.get('source_id')}")
     if manifest["source_count"] != len(sources.get("sources", [])):
         problems.append("manifest_source_count_mismatch")
+    if manifest.get("authority_map_hash") != _git_blob_sha(AUTHORITY_MAP_PATH.read_bytes()):
+        problems.append("manifest_authority_map_hash_mismatch")
+    if manifest.get("authority_catalog_hash") != _git_blob_sha(AUTHORITY_CATALOG_PATH.read_bytes()):
+        problems.append("manifest_authority_catalog_hash_mismatch")
+    if manifest.get("authority_catalog_count") != len(authority_catalog_doc.get("authorities", [])):
+        problems.append("manifest_authority_catalog_count_mismatch")
+    if manifest.get("mapped_clause_count") != len(authority_map_doc.get("clauses", [])):
+        problems.append("manifest_mapped_clause_count_mismatch")
     if sources.get("source_count") != len(sources.get("sources", [])):
         problems.append("source_registry_source_count_mismatch")
     expected_base_count = len(_base_inputs(playbook))
@@ -304,6 +327,36 @@ def main() -> int:
         problems.append("source_registry_status_mismatch")
 
     base_rules = [item for item in records if item.get("record_kind") == "BASE_RULE"]
+    if manifest.get("rule_authority_map_record_count") != len(base_rules):
+        problems.append("manifest_rule_authority_map_record_count_mismatch")
+    authority_fields = (
+        "authority_id", "title", "citation", "source_type", "url", "pinpoint",
+        "jurisdiction", "source_tier", "authority_status", "effective_date",
+        "effective_date_status", "retrieval_date", "verification_status",
+        "currentness_status", "scope_limit",
+    )
+    for item in base_rules:
+        category = item.get("clause_type")
+        expected_entry = authority_by_clause.get(str(category or ""))
+        expected_ids = list(expected_entry.get("authority_ids") or []) if expected_entry else []
+        expected_sources = [
+            {key: authority_catalog_by_id[authority_id].get(key) for key in authority_fields}
+            for authority_id in expected_ids
+            if authority_id in authority_catalog_by_id
+        ]
+        expected_map = {
+            "clause_type": expected_entry.get("clause_type") if expected_entry else None,
+            "authority_ids": expected_ids,
+            "authority_sources": expected_sources,
+            "authority_coverage_status": expected_entry.get("authority_coverage_status") if expected_entry else "RULE_FAMILY_SPECIFIC_AUTHORITY_REVIEW_REQUIRED",
+            "scope_note": expected_entry.get("scope_note") if expected_entry else "Cross-clause, document-level, and regex rules require authority mapping based on their actual trigger and contract facts.",
+            "jurisdiction_policy": expected_entry.get("jurisdiction_policy") if expected_entry else "GOVERNING_LAW_AND_RULE_CONTEXT_REQUIRED",
+            "review_status": expected_entry.get("review_status") if expected_entry else "RESEARCH_SEED_NOT_LEGALLY_APPROVED",
+        }
+        if item.get("authority_map") != expected_map:
+            problems.append(f"rule_authority_map_mismatch:{item.get('rule_id')}")
+        if item.get("legal_conclusion_allowed") is not False:
+            problems.append(f"rule_legal_conclusion_not_disabled:{item.get('rule_id')}")
     by_family: dict[str, dict[str, int]] = {}
     complete_exception_suite_count = 0
     for item in base_rules:
@@ -328,6 +381,19 @@ def main() -> int:
     report = {
         "status": "PASS" if not problems else "FAIL",
         "base_rule_count": manifest["base_rule_count"],
+        "authority_mapping_coverage": {
+            "taxonomy_clause_count": len(authority_map_doc.get("clauses", [])),
+            "authority_catalog_count": len(authority_catalog_doc.get("authorities", [])),
+            "base_rules_with_authority_refs": sum(bool(item.get("authority_map", {}).get("authority_ids")) for item in base_rules),
+            "base_rules_without_authority_refs": sum(not bool(item.get("authority_map", {}).get("authority_ids")) for item in base_rules),
+            "base_rules_with_full_authority_metadata": sum(
+                len(item.get("authority_map", {}).get("authority_sources") or []) == len(item.get("authority_map", {}).get("authority_ids") or [])
+                for item in base_rules
+            ),
+            "categories_without_universal_primary_authority": sorted(
+                entry["clause_type"] for entry in authority_map_doc.get("clauses", []) if not entry.get("authority_ids")
+            ),
+        },
         "source_and_jurisdiction_coverage": source_and_jurisdiction_coverage,
         "rule_test_coverage": {
             "base_rules": len(base_rules),
