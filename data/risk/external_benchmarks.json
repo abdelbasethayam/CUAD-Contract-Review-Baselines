@@ -20,15 +20,16 @@
         "risk severity",
         "confidence calibration"
       ],
-      "license_status": "Verify the exact dataset distribution terms before redistribution.",
-      "do_not_bundle_data": true
+      "license_status": "Official Atticus dataset page lists CC BY 4.0; verify the exact file distribution and attribution obligations before redistribution.",
+      "do_not_bundle_data": true,
+      "repository_url": "https://github.com/The-Atticus-Project/cuad"
     },
     {
       "id": "contractnli",
       "dataset": "ContractNLI",
-      "url": "https://github.com/ShubhamKathiriya/Contract_NLI",
+      "url": "https://stanfordnlp.github.io/contract-nli/",
       "paper_url": "https://aclanthology.org/2021.findings-emnlp.164/",
-      "task": "Document-level entailment, contradiction, or not-mentioned judgments with evidence spans over NDA contracts.",
+      "task": "Document-level three-way NLI (entailment, contradiction, not mentioned) and evidence-span identification over 607 NDAs and 17 fixed hypotheses.",
       "use": "Long-context evidence retrieval, negation, exception handling, and entailment/contradiction tests.",
       "metrics": [
         "entailment/contradiction/not-mentioned accuracy",
@@ -40,15 +41,16 @@
         "commercial loss severity",
         "jurisdiction-specific enforceability"
       ],
-      "license_status": "Verify upstream license and redistribution rights before use.",
-      "do_not_bundle_data": true
+      "license_status": "Verify the current upstream dataset license and any source-document restrictions before redistribution.",
+      "do_not_bundle_data": true,
+      "repository_url": "https://github.com/ShubhamKathiriya/Contract_NLI"
     },
     {
       "id": "acord",
       "dataset": "Attorney-annotated Contract Retrieval (ACORD)",
-      "url": "https://huggingface.co/datasets/theatticusproject/acord",
+      "url": "https://www.atticusprojectai.org/acord/",
       "paper_url": "https://arxiv.org/abs/2411.01120",
-      "task": "Attorney-rated query-to-clause relevance and retrieval ranking.",
+      "task": "Attorney-rated relevance for 126,000+ query-clause pairs across 114 contract-review queries, with graded relevance.",
       "use": "Evaluate retrieval of clauses relevant to a natural-language risk question.",
       "metrics": [
         "Recall@k",
@@ -61,8 +63,9 @@
         "legal enforceability",
         "risk severity"
       ],
-      "license_status": "Check current dataset card and license before use.",
-      "do_not_bundle_data": true
+      "license_status": "Official Atticus dataset page lists CC BY 4.0; verify the dataset card and attribution obligations before redistribution.",
+      "do_not_bundle_data": true,
+      "dataset_url": "https://huggingface.co/datasets/theatticusproject/acord"
     },
     {
       "id": "maud",
@@ -82,7 +85,8 @@
         "jurisdiction-independent legal conclusions"
       ],
       "license_status": "Verify upstream license and redistribution rights before use.",
-      "do_not_bundle_data": true
+      "do_not_bundle_data": true,
+      "paper_url": "https://arxiv.org/abs/2301.00876"
     },
     {
       "id": "contracteval",
@@ -100,7 +104,9 @@
         "calibrated probability of loss"
       ],
       "license_status": "Paper is citable; dataset reuse and redistribution rights must be checked separately.",
-      "do_not_bundle_data": true
+      "do_not_bundle_data": true,
+      "paper_citation": "Liu, Shuang; Li, Zelong; Ma, Ruoyun; Zhao, Haiyan; Du, Mengnan. ContractEval: Benchmarking LLMs for Clause-Level Legal Risk Identification in Commercial Contracts. NLLP 2025. DOI: 10.18653/v1/2025.nllp-1.19.",
+      "dataset_status": "PUBLISHED_BENCHMARK_PAPER; verify the paper's exact data/artifact availability and terms before treating it as a directly runnable external test set."
     },
     {
       "id": "legalbench",
@@ -183,6 +189,8 @@
     "split_requirement": "No contract may appear in more than one of calibration or locked-test partitions.",
     "calibration_target": "PREDICTION_CORRECTNESS",
     "confidence_is_not": "risk severity, probability of loss, or enforceability",
-    "accuracy_claim_gate": "Requires a frozen, contract-disjoint, independently adjudicated risk set and published per-domain metrics."
+    "accuracy_claim_gate": "Requires a frozen, contract-disjoint, independently adjudicated risk set and published per-domain metrics.",
+    "source_verification_date": "2026-10-17",
+    "source_note": "External benchmark descriptions checked against official Atticus, Stanford NLP, and ACL Anthology pages; licenses and redistribution rights must be checked at the exact artifact level."
   }
 }
