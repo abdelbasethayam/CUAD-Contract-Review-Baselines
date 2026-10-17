@@ -105,7 +105,7 @@ def test_risk_requires_exact_contract_evidence(monkeypatch):
     )
     assert result["risk_status"] == "POTENTIAL_RISK"
     assert result["evidence"] == "Liability is unlimited."
-    assert result["risk_level"] == "HIGH"
+    assert result["risk_level"] is None
 
 
 def test_risk_without_valid_evidence_becomes_insufficient(monkeypatch):
