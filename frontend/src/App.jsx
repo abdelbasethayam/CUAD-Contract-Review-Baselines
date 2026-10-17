@@ -162,11 +162,22 @@ function ContractReview() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/health")
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error("API unavailable")))
-      .then((data) => { if (!cancelled) setApiStatus(data.status === "ok" ? "online" : "degraded"); })
-      .catch(() => { if (!cancelled) setApiStatus("offline"); });
-    return () => { cancelled = true; };
+    const checkApi = async () => {
+      try {
+        const response = await fetch("/health", { cache: "no-store" });
+        if (!response.ok) throw new Error("API unavailable");
+        const data = await response.json();
+        if (!cancelled) setApiStatus(data.status === "ok" ? "online" : "degraded");
+      } catch {
+        if (!cancelled) setApiStatus("offline");
+      }
+    };
+    checkApi();
+    const intervalId = window.setInterval(checkApi, 15000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   useEffect(() => {
