@@ -335,6 +335,14 @@ function ContractReview() {
   const visibleRisks = riskFilter === "potential"
     ? potential
     : riskFilter === "uncertain" ? uncertain : allRisks;
+  const latestAssistantMessage = [...chatMessages].reverse().find((message) => message.role === "assistant");
+  const chatModeLabel = latestAssistantMessage?.model === "EXTRACTIVE_FALLBACK"
+    ? "Source-only fallback"
+    : latestAssistantMessage?.model === "DETERMINISTIC_HELP"
+      ? "Product help"
+      : latestAssistantMessage?.model === "RETRIEVAL_ABSTENTION"
+        ? "Evidence-first abstention"
+        : "Contract-linked assistant";
 
   return (
     <main className="page">
@@ -621,7 +629,7 @@ function ContractReview() {
                   <p className="muted">Answers are grounded in this analysis. Each material contract claim should cite exact wording; if the source does not support an answer, the assistant should say so rather than guess.</p>
                 </div>
                 <div className="chat-heading__actions">
-                  <span className="chat-model">{chatMessages.some((message) => message.model === "EXTRACTIVE_FALLBACK") ? "Source-only fallback" : chatMessages.some((message) => message.model === "DETERMINISTIC_HELP") ? "Product help" : chatMessages.some((message) => message.model === "RETRIEVAL_ABSTENTION") ? "Evidence-first abstention" : "Contract-linked assistant"}</span>
+                  <span className="chat-model">{chatModeLabel}</span>
                   <button
                     type="button"
                     className="chat-clear-button"
