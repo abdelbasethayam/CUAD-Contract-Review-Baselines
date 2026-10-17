@@ -1,4 +1,4 @@
-import { Component, useEffect, useMemo, useState } from "react";
+import { Component, useEffect, useMemo, useRef, useState } from "react";
 
 const API_URL = "/documents/classify/stream";
 
@@ -159,6 +159,35 @@ function ContractReview() {
   const [demoNotice, setDemoNotice] = useState(null);
   const [demoLoading, setDemoLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState("checking");
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [restoring, setRestoring] = useState(false);
+  const abortRef = useRef(null);
+
+  useEffect(() => {
+    const savedId = window.sessionStorage.getItem("clausewise.analysis_id");
+    if (!savedId) return undefined;
+    let cancelled = false;
+    setRestoring(true);
+    fetch("/documents/runs/" + encodeURIComponent(savedId), { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.detail || "Saved analysis unavailable.");
+        if (!cancelled && data.result_available && data.result) {
+          setResult(data.result);
+          setDemoNotice("Restored the completed analysis from this workspace.");
+        }
+      })
+      .catch(() => window.sessionStorage.removeItem("clausewise.analysis_id"))
+      .finally(() => { if (!cancelled) setRestoring(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!loading) return undefined;
+    const started = Date.now();
+    const timer = window.setInterval(() => setElapsedSeconds(Math.floor((Date.now() - started) / 1000)), 1000);
+    return () => window.clearInterval(timer);
+  }, [loading]);
 
   useEffect(() => {
     let cancelled = false;
@@ -232,10 +261,13 @@ function ContractReview() {
     setChatInput("");
     setChatError(null);
     setChatLoading(true);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 90000);
     try {
       const response = await fetch("/query/contract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           analysis_id: result.analysis_id,
           question,
@@ -249,8 +281,9 @@ function ContractReview() {
       if (!response.ok) throw new Error(data.detail || ("Assistant request failed (" + response.status + ")"));
       setChatMessages((messages) => [...messages, { role: "assistant", ...data }]);
     } catch (err) {
-      setChatError(err.message || "The contract assistant could not answer this question.");
+      setChatError(err.name === "AbortError" ? "The assistant timed out. Check the API/model and try again." : (err.message || "The contract assistant could not answer this question."));
     } finally {
+      window.clearTimeout(timeout);
       setChatLoading(false);
     }
   }
@@ -268,11 +301,14 @@ function ContractReview() {
     setChatError(null);
     setTab("overview");
     setClauseSearch("");
+    setElapsedSeconds(0);
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(API_URL, { method: "POST", body: formData });
+      const response = await fetch(API_URL, { method: "POST", body: formData, signal: controller.signal });
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -291,8 +327,11 @@ function ContractReview() {
         const event = JSON.parse(line.slice(5).trim());
         if (event.type === "progress") {
           setTrace((items) => [...items, event]);
+        } else if (event.type === "heartbeat") {
+          setTrace((items) => [...items, event]);
         } else if (event.type === "result") {
           setResult(event.data);
+          if (event.data?.analysis_id) window.sessionStorage.setItem("clausewise.analysis_id", event.data.analysis_id);
           receivedResult = true;
         } else if (event.type === "error") {
           throw new Error(event.message || "Analysis failed.");
@@ -310,8 +349,9 @@ function ContractReview() {
       if (buffer.trim()) handleEvent(buffer);
       if (!receivedResult) throw new Error("The analysis stream ended without a result.");
     } catch (err) {
-      setError(err.message);
+      setError(err.name === "AbortError" ? "Analysis cancelled. You can retry safely; completed stages remain resumable on the server." : (err.message || "Analysis failed."));
     } finally {
+      abortRef.current = null;
       setLoading(false);
     }
   }
@@ -487,7 +527,8 @@ function ContractReview() {
 
       {loading && (
         <section className="trace" aria-live="polite">
-          <div className="trace-header"><h2>Live analysis trace</h2><span>Running</span></div>
+          <div className="trace-header"><h2>Live analysis trace</h2><span>{elapsedSeconds}s · {trace.at(-1)?.stage || "starting"}</span></div>
+          <div className="analysis-progress"><strong>{trace.at(-1)?.message || "Starting analysis…"}</strong><button type="button" onClick={() => abortRef.current?.abort()}>Cancel analysis</button></div>
           <ol className="trace-list">
             {trace.map((event, index) => (
               <li key={String(event.stage) + index} className="trace-item">
