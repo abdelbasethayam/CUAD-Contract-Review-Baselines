@@ -1,6 +1,8 @@
-# CUAD Contract Clause Classification
+# CUAD Contract Review Baselines
 
-**Student project:** classify commercial contract clauses into CUAD categories using retrieval and large language models.
+An evidence-grounded research workspace for commercial contract clause classification and Phase 2 risk-review experiments.
+
+> **Scope and safety:** This is a research/demo system, not legal advice or an autonomous legal decision-maker. Risk findings are review triggers, not legal conclusions. The current playbook has zero production-approved rules, no project-specific adjudicated risk-gold set, and no validated risk-confidence calibration. Passing CI proves software conformance—not legal accuracy.
 
 ### GitHub links
 
@@ -11,6 +13,16 @@
 | **Clone** | `git clone https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines.git` |
 | **Fine-tune guide** | https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/FINETUNE.md |
 | **Hybrid / Qwen notes** | https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/QWEN_IMPROVEMENTS.md |
+
+## Current product demo
+
+The Phase 2 workspace includes a guided synthetic-contract walkthrough, clause and contract-level review findings, evidence quotes, audit-artifact downloads, and a contract-linked Q&A assistant. On a clean install, **Open guided demo** generates a deterministic demo result from the checked-in fixture; it does not require a prior upload or a model call to render the walkthrough. The Q&A assistant uses the configured local Ollama model when available and falls back to source excerpts only if the model is unavailable.
+
+- [Recorded-demo runbook](docs/PHASE2_DEMO_RUNBOOK.md)
+- [Phase 2 research and release protocol](docs/PHASE2_Q1_PAPER_PROTOCOL.md)
+- [Risk-gold annotation guide](docs/PHASE2_RISK_GOLD_ANNOTATION_GUIDE.md)
+
+The demo is synthetic and intentionally labelled. Do not present its illustrative findings as independently validated legal analysis.
 
 ---
 
