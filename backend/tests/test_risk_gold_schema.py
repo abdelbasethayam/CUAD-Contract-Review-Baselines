@@ -158,3 +158,8 @@ def test_legal_proposition_requires_verified_effective_period_not_just_a_source_
     }]
     problems = _validate(record, {record["contract_id"]: text})
     assert any("authority_effective_period_not_verified" in item for item in problems)
+
+def test_gold_validator_fails_closed_when_normalized_contract_text_is_missing():
+    _, _, _, _, _, record = _fixtures()
+    problems = _validate(record, {})
+    assert any("normalized_text_missing_for_contract" in item for item in problems)
