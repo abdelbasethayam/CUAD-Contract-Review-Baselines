@@ -127,6 +127,19 @@ def main() -> int:
         calibration_violations,
     )
 
+    support_score_violations = []
+    if 'support-score-v2-evidence-agreement-indicator' not in calibrator:
+        support_score_violations.append("support_score_version_not_bumped")
+    if 'if answer not in {"YES", "NO"}' not in active_engine:
+        support_score_violations.append("support_score_accepts_non_decisions")
+    if 'base = 1.0 if answer == "YES"' in active_engine:
+        support_score_violations.append("support_score_rewards_yes_direction")
+    check(
+        "raw_support_score_is_direction_neutral",
+        not support_score_violations,
+        support_score_violations,
+    )
+
     severity_sources = (
         active_engine,
         cross_checks,
