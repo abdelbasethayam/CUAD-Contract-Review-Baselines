@@ -156,6 +156,7 @@ function ContractReview() {
   const [chatError, setChatError] = useState(null);
   const [phase2Metrics, setPhase2Metrics] = useState(null);
   const [demoNotice, setDemoNotice] = useState(null);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState("checking");
 
   useEffect(() => {
@@ -177,6 +178,8 @@ function ContractReview() {
   }, []);
 
   async function loadSavedDemo() {
+    if (demoLoading || loading) return;
+    setDemoLoading(true);
     setError(null);
     setChatError(null);
     setDemoNotice(null);
@@ -185,13 +188,15 @@ function ContractReview() {
     try {
       const response = await fetch("/query/demo-analysis");
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.detail || "The saved demo analysis is unavailable.");
+      if (!response.ok) throw new Error(data.detail || "The guided demo is unavailable.");
       setResult(data);
-      setDemoNotice(data.notice || "Loaded a saved synthetic demo.");
+      setDemoNotice(data.notice || "Loaded the synthetic demo.");
       setTab("overview");
       setRiskFilter("all");
     } catch (err) {
-      setError(err.message || "Could not load the saved demo.");
+      setError(err.message || "Could not load the guided demo.");
+    } finally {
+      setDemoLoading(false);
     }
   }
 
@@ -359,7 +364,7 @@ function ContractReview() {
           </label>
           <div className="upload-actions">
             <button type="submit" disabled={!file || loading}>{loading ? "Analyzing contract…" : "Analyze contract"} <span aria-hidden="true">→</span></button>
-            <button type="button" className="button-secondary" onClick={loadSavedDemo} disabled={loading}>Open guided demo</button>
+            <button type="button" className="button-secondary" onClick={loadSavedDemo} disabled={loading || demoLoading}>{demoLoading ? "Preparing demo…" : "Open guided demo"}</button>
             <a className="sample-link" href="/query/demo-contract" download>Download sample agreement ↗</a>
           </div>
         </form>
