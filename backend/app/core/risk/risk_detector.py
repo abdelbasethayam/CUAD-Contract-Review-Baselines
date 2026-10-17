@@ -123,7 +123,7 @@ def _risk_result(
         "risk_level": None,
         "severity_status": "DEPRECATED_NOT_USED",
         "confidence": None,
-        "confidence_status": "UNCALIBRATED",
+        "confidence_status": "NOT_ESTIMATED",
         "confidence_target": "PREDICTION_CORRECTNESS",
         "risk_type": risk_type if safe_positive else None,
         "rule_id": rule_id if safe_positive else None,
