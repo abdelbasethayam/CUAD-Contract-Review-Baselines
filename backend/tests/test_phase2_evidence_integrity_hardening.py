@@ -201,3 +201,36 @@ def test_cross_clause_positive_requires_evidence_for_every_declared_clause(monke
     finding = next(item for item in cross if item["check_id"] == "X-1")
     assert finding["risk_status"] == "INSUFFICIENT_EVIDENCE"
     assert finding["evidence"] == []
+
+
+
+def test_contract_severity_is_not_reported_when_any_positive_finding_is_unscored():
+    from app.core.risk.risk_scoring import aggregate_contract_triage
+
+    triage = aggregate_contract_triage([
+        {
+            "risk_status": "POTENTIAL_RISK",
+            "risk": True,
+            "final_score": 16,
+            "severity": "CRITICAL",
+            "risk_domains": ["Liability Risk"],
+            "score_components": {
+                "exposure_magnitude": 4,
+                "likelihood_uncertainty": 4,
+                "scope_duration": 4,
+                "control_weakness": 4,
+            },
+        },
+        {
+            "risk_status": "POTENTIAL_RISK",
+            "risk": True,
+            "final_score": None,
+            "severity": None,
+            "risk_domains": ["Commercial Risk"],
+            "score_components": {},
+        },
+    ])
+
+    assert triage["overall_score"] is None
+    assert triage["overall_severity"] is None
+    assert triage["human_review_required"] is True
