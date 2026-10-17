@@ -51,8 +51,23 @@ def main() -> int:
     if any(item["validation_status"] != "DRAFT_UNVALIDATED" for item in records):
         problems.append("unreviewed_rule_misrepresented_as_validated")
     source_ids = {item["source_id"] for item in sources["sources"]}
-    if any(set(item["source_ids"]) - source_ids for item in records):
+    if any(set(item.get("source_ids") or []) - source_ids for item in records):
         problems.append("dangling_source_reference")
+    base_keys = {item["base_rule_key"] for item in records if item["record_kind"] == "BASE_RULE"}
+    if any(item.get("base_rule_key") not in base_keys for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"):
+        problems.append("candidate_without_base_rule")
+    required_rule_fields = {
+        "rule_id", "base_rule_key", "base_rule_id", "record_kind", "rule_family",
+        "title", "risk_domain", "perspective", "contract_type_profile", "contract_type_scope",
+        "jurisdiction_scope", "jurisdiction_status", "decision_logic", "evidence_contract",
+        "source_ids", "source_status", "severity_rationale", "confidence_policy",
+        "regression_cases", "validation_status", "approval_status", "execution_status",
+        "execution_eligible", "legal_conclusion_allowed", "source_playbook_hash",
+    }
+    if any(required_rule_fields - set(item) for item in records if item["record_kind"] == "BASE_RULE"):
+        problems.append("base_rule_missing_required_structured_fields")
+    if any(not item.get("inherits_from_base_rule") or not item.get("inherited_fields") for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"):
+        problems.append("candidate_inheritance_contract_missing")
     required_source_fields = {
         "source_id", "source_title", "source_url", "source_tier", "authority_status",
         "jurisdiction", "contract_type", "effective_date", "effective_date_status",
