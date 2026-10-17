@@ -2,12 +2,12 @@ import { Component, useEffect, useMemo, useState } from "react";
 
 const API_URL = "/documents/classify/stream";
 
-function RiskBadge({ status, level, severityStatus }) {
+function RiskBadge({ status }) {
   const label = status === "POTENTIAL_RISK"
-    ? (severityStatus === "INCOMPLETE" || !level
-      ? "UNSCORED · REVIEW"
-      : `${level} · TRIAGE`)
-    : status === "NO_RISK" ? "NO RISK" : (status || "NOT ANALYZED");
+    ? "POTENTIAL RISK · REVIEW"
+    : status === "NO_RISK" ? "NO RISK FOUND"
+      : status === "INSUFFICIENT_EVIDENCE" ? "UNRESOLVED"
+        : (status || "NOT ANALYZED");
   const cls = status === "POTENTIAL_RISK"
     ? "risk-badge risk-badge--risk"
     : status === "NO_RISK" ? "risk-badge risk-badge--clear" : "risk-badge risk-badge--unsupported";
@@ -16,8 +16,12 @@ function RiskBadge({ status, level, severityStatus }) {
 
 function RiskCard({ finding }) {
   const confidence = finding.confidence == null
-    ? "Uncalibrated"
+    ? "Not calibrated"
     : Math.round(finding.confidence * 100) + "%";
+  const supportScore = finding.raw_support_score == null
+    ? "Not available"
+    : Number(finding.raw_support_score).toFixed(2);
+  const ruleMetadata = finding.provenance?.rule_registry_metadata || {};
 
   return (
     <article className="risk-card">
@@ -26,7 +30,7 @@ function RiskCard({ finding }) {
           <div className="eyebrow">{finding.scope || "clause"} · {finding.check_id}</div>
           <h3>{finding.risk_type || finding.question || "Risk review item"}</h3>
         </div>
-        <RiskBadge status={finding.risk_status} level={finding.risk_level} severityStatus={finding.severity_status} />
+        <RiskBadge status={finding.risk_status} />
       </div>
 
       <div className="risk-grid">
@@ -48,16 +52,21 @@ function RiskCard({ finding }) {
           </div>
         )}
         <div>
-          <span className="field-label">Confidence</span>
+          <span className="field-label">Confidence in prediction correctness</span>
           <strong>{confidence}</strong>
           <span className="field-note">{finding.confidence_status || "UNCALIBRATED"}</span>
         </div>
         <div>
-          <span className="field-label">Finding provenance</span>
-          <strong>{finding.provenance?.source === "DETERMINISTIC_PLAYBOOK_RULE" ? "Deterministic playbook rule" : (finding.ground_truth_status || "PLAYBOOK_DERIVED")}</strong>
-          <span className="field-note">Review trigger; not a legal-correctness rating.</span>
-          {finding.provenance?.score_component_source === "LLM_SELF_REPORTED_UNVALIDATED" && (
-            <span className="field-note">Severity inputs are unvalidated triage signals, not probabilities.</span>
+          <span className="field-label">Support signal (not a probability)</span>
+          <strong>{supportScore}</strong>
+          <span className="field-note">Uncalibrated diagnostic from answer support, evidence, and model agreement.</span>
+        </div>
+        <div>
+          <span className="field-label">Rule governance</span>
+          <strong>{ruleMetadata.validation_status || finding.ground_truth_status || "PLAYBOOK_DERIVED"}</strong>
+          <span className="field-note">{ruleMetadata.execution_status || "Review trigger only; not a legal conclusion."}</span>
+          {ruleMetadata.jurisdiction_review_required && (
+            <span className="field-note">Jurisdiction/applicability requires reviewer verification.</span>
           )}
         </div>
       </div>
@@ -100,6 +109,12 @@ function RiskCard({ finding }) {
                   <strong>{source.id || source.name || "Source"}</strong> {title}
                   {note && note !== title && <> — {note}</>}
                   {url && <> — <a href={url} target="_blank" rel="noreferrer">source</a></>}
+                  <div className="field-note">
+                    Tier {source.source_tier || "unknown"} · {source.authority_status || "authority status unknown"} · Jurisdiction: {source.jurisdiction || "unspecified"}
+                  </div>
+                  <div className="field-note">
+                    Citation: {source.pinpoint_citation || source.citation_status || "pinpoint not recorded"} · Effective date: {source.effective_date || source.effective_date_status || "not recorded"} · Licence: {source.license_status || "not checked"}
+                  </div>
                 </li>
               );
             })}
@@ -388,10 +403,11 @@ function ContractReview() {
                 <h2>{assessment.status === "POTENTIAL_RISK" ? "Potential risk identified" : (assessment.status || "Assessment unavailable")}</h2>
                 <p>{assessment.reason}</p>
                 <div className="status-line">
-                  <span>Overall severity: {assessment.overall_risk || "Not calibrated"}</span>
-                  <span>Confidence: {assessment.overall_confidence == null ? "Not calibrated" : Math.round(assessment.overall_confidence * 100) + "%"}</span>
+                  <span>Review status: {assessment.status || "Not available"}</span>
+                  <span>Contract-level confidence: not estimated</span>
                 </div>
-                <p className="muted">This uploaded contract has no independent gold label. Findings are tagged {assessment.gold_status || "PLAYBOOK_DERIVED"}.</p>
+                <p className="muted">Clause-level confidence is shown only after adjudicated calibration. No ordinal severity labels or aggregate contract probability are used.</p>
+                <p className="muted">Policy: {assessment.rule_registry?.status || "PILOT_REVIEW_ONLY"} · Source citations: {assessment.rule_registry?.source_citation_status || "incomplete"} · Findings: {assessment.gold_status || "PLAYBOOK_DERIVED"}.</p>
               </article>
 
               <article className="panel">
@@ -420,7 +436,7 @@ function ContractReview() {
                   <article key={clause.clause_index} className="clause-card">
                     <div className="clause-card__header">
                       <div><span className="field-label">Clause {clause.clause_index}</span><h3>{clause.predicted_label || "No applicable label"}</h3></div>
-                      <RiskBadge status={clause.risk_status} level={clause.risk_level} severityStatus={clause.risk_severity_status} />
+                      <RiskBadge status={clause.risk_status} />
                     </div>
                     <p className="clause-text">{clause.clause_text}</p>
                     <div className="classification-row">
