@@ -360,10 +360,10 @@ function ContractReview() {
             <span className="file-picker__icon" aria-hidden="true">↑</span>
             <span className="file-picker__copy"><strong>{file ? file.name : "Choose a contract file"}</strong><small>{file ? (file.size / 1024).toFixed(1) + " KB · ready to analyze" : "Select a PDF or TXT document from your computer"}</small></span>
             <span className="file-picker__button">Browse files</span>
-            <input type="file" accept=".pdf,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={loading} />
+            <input type="file" accept=".pdf,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={loading || demoLoading} />
           </label>
           <div className="upload-actions">
-            <button type="submit" disabled={!file || loading}>{loading ? "Analyzing contract…" : "Analyze contract"} <span aria-hidden="true">→</span></button>
+            <button type="submit" disabled={!file || loading || demoLoading}>{loading ? "Analyzing contract…" : "Analyze contract"} <span aria-hidden="true">→</span></button>
             <button type="button" className="button-secondary" onClick={loadSavedDemo} disabled={loading || demoLoading}>{demoLoading ? "Preparing demo…" : "Open guided demo"}</button>
             <a className="sample-link" href="/query/demo-contract" download>Download sample agreement ↗</a>
           </div>
