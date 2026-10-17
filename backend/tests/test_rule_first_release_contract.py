@@ -101,3 +101,10 @@ def test_run_fingerprint_captures_risk_generation_settings(monkeypatch):
     assert config["risk_max_tokens"] == 2345
     assert config["risk_num_ctx"] == 12288
     assert config["legal_knowledge_top_k"] == 6
+
+
+
+def test_run_resumption_expects_text_retrieved_check_families():
+    source = _read("backend/app/services/rag_service.py")
+    assert "for check in applicable_checks(" in source
+    assert 'clause_text=str(item.get("clause_text") or "")' in source
