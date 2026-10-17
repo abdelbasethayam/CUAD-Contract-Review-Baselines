@@ -24,7 +24,6 @@ VALID_RISK_STATUSES = {
     "INSUFFICIENT_EVIDENCE",
     "ERROR",
 }
-VALID_RISK_LEVELS = {"HIGH", "MEDIUM", "LOW", "NONE"}
 VALID_CLASSIFICATION_STATUS = "VALID_CANDIDATE"
 
 RISK_INDICATOR_PATTERNS: dict[str, list[tuple[str, str]]] = {
@@ -121,7 +120,11 @@ def _risk_result(
     return {
         "risk": safe_positive,
         "risk_status": status,
-        "risk_level": risk_level if safe_positive else None,
+        "risk_level": None,
+        "severity_status": "DEPRECATED_NOT_USED",
+        "confidence": None,
+        "confidence_status": "UNCALIBRATED",
+        "confidence_target": "PREDICTION_CORRECTNESS",
         "risk_type": risk_type if safe_positive else None,
         "rule_id": rule_id if safe_positive else None,
         "rule": rule if safe_positive else None,
@@ -258,7 +261,8 @@ Rules:
 - Use the playbook/taxonomy and deterministic indicators to identify review questions; only the uploaded contract can establish supporting evidence.
 - A positive finding requires an exact contiguous evidence string copied from the current clause or a related clause in this same uploaded contract.
 - If evidence is missing or insufficient, return INSUFFICIENT_EVIDENCE with risk_level null.
-- Use HIGH, MEDIUM, or LOW only for a validated POTENTIAL_RISK finding; otherwise risk_level must be null.
+- Do not assign ordinal severity labels or numeric risk scores. risk_level is a deprecated compatibility field and must be null.
+- Confidence is not to be self-reported by the model; it is calibrated separately against adjudicated reviewer labels.
 - Never include hidden reasoning or reasoning_details in the response.
 
 Current contract clause:
@@ -282,7 +286,7 @@ Return exactly this shape:
 {{
   "risk_status": "POTENTIAL_RISK | NO_RISK | INSUFFICIENT_EVIDENCE",
   "risk_type": "specific risk type or null",
-  "risk_level": "HIGH | MEDIUM | LOW | null",
+  "risk_level": null,
   "reason": "concise explanation grounded in contract evidence",
   "evidence": "exact contiguous contract text or empty string",
   "source": {{"name": null, "url": null, "title": null}}
@@ -330,10 +334,8 @@ def parse_risk_response(raw_response: str, fallback_source: dict) -> dict:
     if risk and raw_status != "POTENTIAL_RISK":
         raw_status = "POTENTIAL_RISK"
 
-    raw_level = parsed.get("risk_level")
-    risk_level = str(raw_level).strip().upper() if raw_level else None
-    if risk_level not in VALID_RISK_LEVELS:
-        risk_level = None
+    # Never trust model-generated severity labels; the field is deprecated.
+    risk_level = None
     source = parsed.get("source") if isinstance(parsed.get("source"), dict) else {}
     return {
         "risk": risk,
