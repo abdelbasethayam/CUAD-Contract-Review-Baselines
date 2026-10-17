@@ -22,13 +22,13 @@ Produce a clean 2–3 minute walkthrough of the CUAD Contract Review workspace. 
    ollama run qwen3:8b
    ```
 
-   Exit the interactive model session after it has loaded if needed; keep the Ollama service running. Before recording, run the three-question semantic/citation smoke check:
+   Exit the interactive model session after it has loaded if needed; keep the Ollama service running. Before recording, run the six-question semantic/citation smoke check:
 
    ```bash
    python scripts/risk/evaluate_contract_chat_demo.py --out data/risk/results/contract_chat_demo_evaluation.json
    ```
 
-   The script checks liability-cap comparison, termination rights, governing-law uncertainty, and citation provenance. Fix any failure before presenting the chatbot as working. If Ollama is unavailable, the chatbot intentionally falls back to verified source excerpts and labels that response as a source-only fallback—it does not pretend to have interpreted the contract.
+   The script checks liability-cap comparison and party attribution, termination rights, governing-law uncertainty, insurance limits, post-termination data handling, indemnity/liability-cap ambiguity, and citation provenance. This is a small deterministic smoke suite, not a statistically valid accuracy benchmark. Fix any failure before presenting the chatbot as working. If Ollama is unavailable, the chatbot intentionally falls back to verified source excerpts and labels that response as a source-only fallback—it does not pretend to have interpreted the contract.
 6. Close unrelated tabs, browser developer tools, and desktop notifications. Use a 1920×1080 capture, browser zoom around 90–100%, and wait for the API status to show **API connected**.
 
 ## Demo flow (about 2 minutes)
