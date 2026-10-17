@@ -41,10 +41,14 @@ def test_release_gate_includes_playbook_rule_validator():
     assert '"risk_text_span_dataset_used_for_flagging": False' in report
 
 
-def test_rule_resume_freshness_uses_playbook_hash_and_engine_version():
+def test_rule_resume_freshness_uses_playbook_hash_engine_version_and_pass_completeness():
     source = _read("backend/app/services/rag_service.py")
-    assert 'get("rule_engine_version") == RULE_ENGINE_VERSION' in source
-    assert 'get("playbook_hash") == playbook.get("playbook_hash")' in source
+    assert "def _clause_risk_checkpoint_is_complete(" in source
+    assert "provenance.get(\"rule_engine_version\") != RULE_ENGINE_VERSION" in source
+    assert "provenance.get(\"playbook_hash\") != playbook_hash" in source
+    assert 'provenance.get("missing_passes", 0)' in source
+    assert "def _contract_checks_checkpoint_is_complete(" in source
+    assert 'payload.get("playbook_hash") != playbook.get("playbook_hash")' in source
 
 
 def test_active_risk_engine_does_not_load_calibration_artifacts():
