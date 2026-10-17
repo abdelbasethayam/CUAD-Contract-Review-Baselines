@@ -92,7 +92,7 @@
             }
           },
           "review_status": {
-            "const": "RESEARCH_SEED_NOT_LEGALALLY_APPROVED"
+            "const": "RESEARCH_SEED_NOT_LEGALLY_APPROVED"
           }
         },
         "additionalProperties": false
