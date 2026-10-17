@@ -79,7 +79,7 @@ def test_contract_chat_rejects_unverifiable_quote(monkeypatch, tmp_path):
         "analysis_id": analysis_id,
         "clauses": [{
             "clause_index": 4,
-            "clause_text": "A long clause with actual source evidence.",
+            "clause_text": "The Supplier aggregate liability is capped at the fees paid during the Term.",
         }],
         "contract_risk_assessment": {},
     }), encoding="utf-8")
