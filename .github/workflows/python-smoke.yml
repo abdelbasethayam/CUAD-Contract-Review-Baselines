@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install runtime dependencies
-        run: python -m pip install -q pytest httpx python-multipart fastapi pydantic requests numpy pandas scikit-learn scipy qdrant-client cohere python-dotenv 'jsonschema>=4.22,<5'
+        run: python -m pip install -q pytest httpx python-multipart fastapi pydantic requests numpy pandas scikit-learn scipy qdrant-client cohere python-dotenv pdfplumber 'jsonschema>=4.22,<5'
       - name: Compile Python sources
         run: python -m compileall -q backend scripts data/scripts
       - name: Validate playbook rule and taxonomy contract
