@@ -285,6 +285,11 @@ def test_review_queue_covers_every_base_rule_and_surfaces_missing_case_suites():
     assert all(row["source_playbook_hash"] == manifest["source_playbook_hash"] for row in queue)
     incomplete = [row for row in queue if row["case_suite_status"] == "INCOMPLETE"]
     complete = [row for row in queue if row["case_suite_status"] == "COMPLETE"]
-    assert len(complete) == 7
+    expected_complete = sum(
+        all((item.get("regression_cases") or {}).get(key) for key in ("positive", "negative", "edge"))
+        for item in records
+        if item["record_kind"] == "BASE_RULE"
+    )
+    assert len(complete) == expected_complete
     assert len(incomplete) == len(queue) - len(complete)
     assert all("AUTHOR_POSITIVE_NEGATIVE_EDGE_CASES" in row["next_action"] for row in incomplete)
