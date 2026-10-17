@@ -18,7 +18,7 @@ Can a rule-first contract-review system produce more evidence-grounded, scope-aw
 
 ## Scope and taxonomy
 
-The existing 37 clause categories are the target taxonomy. The initial legal research scope is U.S. commercial contracts, with federal authority where applicable and narrow New York/Delaware UCC modules for transactions actually within those states' Article 2 sales-of-goods law. These jurisdictions are not default governing law. The system must abstain from legal conclusions when the governing law, transaction type, relevant date, or necessary facts are unresolved.
+The existing 37 clause categories are the target taxonomy. The initial legal research scope is U.S. commercial contracts, with federal authority where applicable and narrow New York/Delaware UCC modules for transactions actually within those states' Article 2 sales-of-goods law. California Business and Professions Code § 16600 is included only as a non-compete research lead: its official page returned HTTP 403, so its current text and effective dates are not verified. None of these jurisdictions is assumed to govern by default. The system must abstain from legal conclusions when the governing law, transaction type, relevant date, or necessary facts are unresolved.
 
 ## Data and benchmark roles
 
