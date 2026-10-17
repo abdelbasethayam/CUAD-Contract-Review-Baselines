@@ -14,7 +14,7 @@ from app.core.risk.risk_engine import _support_score
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "risk"))
-from build_rule_registry import _source_registry
+from build_rule_registry import PLAYBOOK_PATH, _source_registry, build_artifacts
 from validate_rule_registry import _rule_lifecycle_problems
 
 
@@ -368,3 +368,19 @@ def test_approval_lifecycle_rejects_rules_without_verified_scope_and_exception_c
 
 def test_approval_lifecycle_accepts_a_fully_adjudicated_test_fixture():
     assert _rule_lifecycle_problems(_approved_rule_fixture()) == []
+
+def test_global_playbook_approval_does_not_promote_unreviewed_rules():
+    playbook = json.loads(PLAYBOOK_PATH.read_text(encoding="utf-8"))
+    playbook["approval_status"] = "APPROVED"
+    registry_text, _, manifest_text = build_artifacts(playbook)
+    records = [json.loads(line) for line in registry_text.splitlines() if line.strip()]
+    manifest = json.loads(manifest_text)
+    base = [item for item in records if item["record_kind"] == "BASE_RULE"]
+    candidates = [item for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"]
+
+    assert manifest["policy_status"] == "APPROVED"
+    assert manifest["production_approved_rule_count"] == 0
+    assert all(item["approval_status"] == "UNAPPROVED" for item in base)
+    assert all(item["validation_status"] == "DRAFT_UNVALIDATED" for item in base)
+    assert all(item["approval_status"] == "UNAPPROVED" for item in candidates)
+    assert all(item["execution_eligible"] is False for item in candidates)
