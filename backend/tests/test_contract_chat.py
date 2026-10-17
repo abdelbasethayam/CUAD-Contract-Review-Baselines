@@ -382,3 +382,76 @@ def test_live_demo_evaluator_rejects_swapped_party_cap_assignments():
     assert _fact_attributed_to_entity(correct, "supplier", ["one month", "monthly"])
     assert not _fact_attributed_to_entity(swapped, "customer", ["ten times", "10 times"])
     assert not _fact_attributed_to_entity(swapped, "supplier", ["one month", "monthly"])
+
+def test_clause_number_references_retrieve_the_named_provisions():
+    clauses = [
+        {"clause_index": 1, "heading": "Term", "clause_text": "The initial term is one year."},
+        {"clause_index": 3, "heading": "Limitation of Liability", "clause_text": "Supplier liability is capped at one month of fees."},
+        {"clause_index": 4, "heading": "Indemnification", "clause_text": "Customer shall indemnify Supplier for claims."},
+        {"clause_index": 10, "heading": "Governing Law", "clause_text": "The applicable Order Form specifies governing law."},
+    ]
+    selected = query._select_clauses(clauses, "Explain clause 3.")
+    assert selected[0]["clause_index"] == 3
+
+    selected = query._select_clauses(clauses, "Compare clauses 3 and 4.")
+    assert [item["clause_index"] for item in selected[:2]] == [3, 4]
+
+
+def test_contract_chat_does_not_send_unrelated_questions_to_the_model(monkeypatch, tmp_path):
+    analysis_id = "0123456789abcdef-0123456789abcdef"
+    run_root = tmp_path / analysis_id
+    run_root.mkdir()
+    (run_root / "result.json").write_text(json.dumps({
+        "analysis_id": analysis_id,
+        "clauses": [
+            {"clause_index": 1, "heading": "Term", "clause_text": "The initial term is one year."},
+            {"clause_index": 3, "heading": "Liability", "clause_text": "Supplier liability is capped at one month of fees."},
+        ],
+        "contract_risk_assessment": {},
+    }), encoding="utf-8")
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+
+    def model_must_not_be_called(*args, **kwargs):
+        raise AssertionError("Irrelevant queries must abstain before calling the model.")
+
+    monkeypatch.setattr(query, "_call_local_chat", model_must_not_be_called)
+    response = TestClient(app).post("/query/contract", json={
+        "analysis_id": analysis_id,
+        "question": "Who won the football world cup in 1998?",
+    })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["model"] == "RETRIEVAL_ABSTENTION"
+    assert data["insufficient_evidence"] is True
+    assert data["citations"] == []
+    assert "won't guess" in data["answer"]
+
+
+def test_contract_chat_answers_supported_explicit_clause_question(monkeypatch, tmp_path):
+    analysis_id = "0123456789abcdef-0123456789abcdef"
+    run_root = tmp_path / analysis_id
+    run_root.mkdir()
+    source = "Supplier's aggregate liability shall not exceed the fees paid by Customer in the previous one month."
+    (run_root / "result.json").write_text(json.dumps({
+        "analysis_id": analysis_id,
+        "clauses": [
+            {"clause_index": 3, "heading": "Limitation of Liability", "clause_text": source},
+            {"clause_index": 5, "heading": "Termination", "clause_text": "Supplier may terminate immediately for any breach."},
+        ],
+        "contract_risk_assessment": {},
+    }), encoding="utf-8")
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(query, "_call_local_chat", lambda *args, **kwargs: json.dumps({
+        "answer": "Clause 3 caps the supplier's aggregate liability at fees paid in the previous one month.",
+        "insufficient_evidence": False,
+        "citations": [{"clause_index": 3, "quote": source, "reason": "Exact liability cap."}],
+        "follow_up_questions": [],
+    }))
+    response = TestClient(app).post("/query/contract", json={
+        "analysis_id": analysis_id,
+        "question": "Explain clause 3.",
+    })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["insufficient_evidence"] is False
+    assert data["citations"][0]["clause_index"] == 3
