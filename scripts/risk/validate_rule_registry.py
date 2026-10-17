@@ -378,8 +378,34 @@ def main() -> int:
         "rules_with_unresolved_jurisdiction": sum(item.get("jurisdiction_status") == "UNRESOLVED" for item in base_rules),
     }
 
+    release_blockers: list[str] = []
+    if manifest.get("policy_status") != "APPROVED":
+        release_blockers.append("playbook_policy_not_approved")
+    if manifest.get("production_approved_rule_count", 0) == 0:
+        release_blockers.append("no_individually_approved_rules")
+    if manifest.get("verified_pinpoint_source_count", 0) == 0:
+        release_blockers.append("no_verified_pinpoint_citations")
+    adjudication_template = ROOT / "data" / "risk" / "gold" / "risk_finding_adjudication_template.csv"
+    has_adjudicated_rows = False
+    if adjudication_template.exists():
+        import csv
+        with adjudication_template.open(encoding="utf-8-sig", newline="") as handle:
+            has_adjudicated_rows = any(
+                str(row.get("adjudication_status") or "").strip().upper() == "ADJUDICATED"
+                for row in csv.DictReader(handle)
+            )
+    if not has_adjudicated_rows:
+        release_blockers.append("no_project_specific_adjudicated_risk_gold_set")
+    calibration_artifact = ROOT / "data" / "risk" / "calibration" / "confidence_calibration.json"
+    if not calibration_artifact.exists():
+        release_blockers.append("no_validated_confidence_calibration_artifact")
+
     report = {
         "status": "PASS" if not problems else "FAIL",
+        "registry_integrity_status": "PASS" if not problems else "FAIL",
+        "release_readiness": "BLOCKED" if release_blockers else "REQUIRES_FINAL_LEGAL_RELEASE_REVIEW",
+        "production_release_allowed": False if release_blockers else manifest.get("policy_status") == "APPROVED",
+        "release_blockers": release_blockers,
         "base_rule_count": manifest["base_rule_count"],
         "authority_mapping_coverage": {
             "taxonomy_clause_count": len(authority_map_doc.get("clauses", [])),
