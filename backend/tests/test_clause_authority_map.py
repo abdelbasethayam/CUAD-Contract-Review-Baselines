@@ -91,7 +91,7 @@ def test_noncompete_mapping_does_not_repeat_the_vacated_ftc_rule_as_current_law(
 
     ftc = authority["FTC_NONCOMPETE_STATUS_2025"]
     assert ftc["source_type"] == "REGULATOR_STATUS_NOTICE"
-    assert "NOT_IN_EFFECT" in ftc["currentness_status"]
+    assert "not in effect" in ftc["currentness_status"].lower()
     assert "STATE_LAW" in noncompete["jurisdiction_policy"]
     assert noncompete["legal_conclusion_allowed"] is False
 
