@@ -40,7 +40,9 @@ def _emit(callback: ProgressCallback | None, stage: str, message: str, **details
 
 def _evidence_valid(evidence: str, clause_text: str, context: list[dict]) -> bool:
     evidence = str(evidence or "").strip()
-    if not evidence:
+    # One-word or token-sized snippets are too weak to support a legal-risk finding,
+    # even if the characters happen to occur in the contract.
+    if len(evidence) < 8 or len(re.findall(r"\\b[\\w]{2,}\\b", evidence)) < 2:
         return False
     if evidence in str(clause_text or ""):
         return True
@@ -478,9 +480,9 @@ def analyze_clause_risk(
         )
         indicator_match = bool(indicators.get("matched_indicators"))
         status = "INSUFFICIENT_EVIDENCE" if answer == "DON'T KNOW" else representative["status"]
-        # Trust the model's explicit policy-aware status, but never accept a
-        # positive risk conclusion without exact contract evidence.
-        if status == "POTENTIAL_RISK" and not evidence_ok:
+        # The decision and status must agree. YES may still be NO_RISK when the
+        # playbook's flag_if condition is not met, but NO must never become positive.
+        if status == "POTENTIAL_RISK" and (answer != "YES" or not evidence_ok):
             status = "INSUFFICIENT_EVIDENCE"
         elif status not in {"POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE", "ERROR"}:
             status = "INSUFFICIENT_EVIDENCE"
