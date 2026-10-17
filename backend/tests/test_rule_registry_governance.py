@@ -59,6 +59,18 @@ def test_runtime_loads_governed_registry_and_explicit_source_metadata():
     assert metadata["legal_conclusion_allowed"] is False
     assert "jurisdiction_scope" in metadata
     assert "source_status" in metadata
+    assert metadata["citation_status"] == "INCOMPLETE_SOURCE_CITATION"
+    assert metadata["legal_authority"]["can_support_legal_conclusion"] is False
+    assert metadata["legal_authority"]["sources"]
+    assert metadata["source_tier"]
+    assert metadata["effective_dates"]
+    assert metadata["pinpoint_citations"]
+    for authority in metadata["legal_authority"]["sources"]:
+        assert "jurisdiction" in authority
+        assert "effective_date" in authority
+        assert "source_tier" in authority
+        assert "pinpoint_citation" in authority
+        assert authority["can_support_legal_conclusion"] is False
 
     source = playbook["sources"]["P1"]
     assert "jurisdiction" in source
