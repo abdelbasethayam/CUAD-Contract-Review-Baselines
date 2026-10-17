@@ -169,23 +169,23 @@ def _source_registry(playbook: dict[str, Any]) -> dict[str, Any]:
         result.append({
             "schema_version": SCHEMA_VERSION,
             "source_id": str(source_id),
-            "source_title": citation,
+            "source_title": str(raw.get("source_title") or citation),
             "citation": citation,
-            "source_url": raw.get("url"),
-            "source_tier": override.get("source_tier", "D"),
-            "authority_status": override.get("authority_status", "UNVERIFIED_LEGACY_SOURCE"),
-            "jurisdiction": override.get("jurisdiction", "UNSPECIFIED"),
-            "contract_type": override.get("contract_type", "unspecified"),
-            "effective_date": override.get("effective_date"),
-            "effective_date_status": override.get("effective_date_status", "NOT_PROVIDED"),
-            "pinpoint_citation": override.get("pinpoint_citation"),
-            "retrieval_date": None,
-            "citation_status": override.get("citation_status", "UNVERIFIED"),
-            "license_status": override.get("license_status", "VERIFY_SOURCE"),
-            "transferability": override.get("transferability", "limited_by_analogy"),
-            "can_support_legal_conclusion": bool(override.get("can_support_legal_conclusion", False)),
-            "missing_metadata": override.get("missing_metadata", ["source_authority_review"]),
-            "metadata_note": override.get("metadata_note", "Legacy source metadata requires review."),
+            "source_url": raw.get("source_url", raw.get("url")),
+            "source_tier": raw.get("source_tier", override.get("source_tier", "D")),
+            "authority_status": raw.get("authority_status", override.get("authority_status", "UNVERIFIED_LEGACY_SOURCE")),
+            "jurisdiction": raw.get("jurisdiction", override.get("jurisdiction", "UNSPECIFIED")),
+            "contract_type": raw.get("contract_type", override.get("contract_type", "unspecified")),
+            "effective_date": raw.get("effective_date", override.get("effective_date")),
+            "effective_date_status": raw.get("effective_date_status", override.get("effective_date_status", "NOT_PROVIDED")),
+            "pinpoint_citation": raw.get("pinpoint_citation", override.get("pinpoint_citation")),
+            "retrieval_date": raw.get("retrieval_date", override.get("retrieval_date")),
+            "citation_status": raw.get("citation_status", override.get("citation_status", "UNVERIFIED")),
+            "license_status": raw.get("license_status", override.get("license_status", "VERIFY_SOURCE")),
+            "transferability": raw.get("transferability", override.get("transferability", "limited_by_analogy")),
+            "can_support_legal_conclusion": bool(raw.get("can_support_legal_conclusion", override.get("can_support_legal_conclusion", False))),
+            "missing_metadata": raw.get("missing_metadata", override.get("missing_metadata", ["source_authority_review"])),
+            "metadata_note": raw.get("metadata_note", override.get("metadata_note", "Legacy source metadata requires review.")),
         })
     verified_pinpoint_count = sum(
         1 for item in result
@@ -249,6 +249,7 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
                 "execution_status": item.get("execution_status"),
                 "execution_eligible": item.get("execution_eligible"),
                 "review_governance": item.get("review_governance"),
+                "jurisdiction_status": item.get("jurisdiction_status"),
                 "rationale": item.get("rationale") or "Review trigger inherited from the unapproved baseline playbook; not a legal conclusion.",
                 "positive_examples": item.get("positive_examples") or [],
                 "negative_examples": item.get("negative_examples") or [],
@@ -292,6 +293,7 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
                 "execution_status": item.get("execution_status"),
                 "execution_eligible": item.get("execution_eligible"),
                 "review_governance": item.get("review_governance"),
+                "jurisdiction_status": item.get("jurisdiction_status"),
             "rationale": "Cross-clause candidate check; semantic conflict must be independently established.",
             "positive_examples": [],
             "negative_examples": [],
@@ -335,6 +337,7 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
                 "execution_status": item.get("execution_status"),
                 "execution_eligible": item.get("execution_eligible"),
                 "review_governance": item.get("review_governance"),
+                "jurisdiction_status": item.get("jurisdiction_status"),
             "rationale": "Document-package review trigger; absence from an incomplete upload is not proof of absence from the signed agreement.",
             "positive_examples": [],
             "negative_examples": [],
@@ -378,6 +381,7 @@ def _base_inputs(playbook: dict[str, Any]) -> list[dict[str, Any]]:
                 "execution_status": item.get("execution_status"),
                 "execution_eligible": item.get("execution_eligible"),
                 "review_governance": item.get("review_governance"),
+                "jurisdiction_status": item.get("jurisdiction_status"),
             "rationale": str(item.get("explanation") or "Textual trigger only; requires reviewer interpretation."),
             "positive_examples": item.get("positive_examples") or [],
             "negative_examples": item.get("negative_examples") or [],
@@ -469,7 +473,10 @@ def _record(
         ) and all_pinpoints_verified,
     }
     jurisdiction_scope = list(rule.get("jurisdiction_scope") or ["UNSPECIFIED"])
-    jurisdiction_status = "UNRESOLVED" if any(str(x).upper() == "UNSPECIFIED" for x in jurisdiction_scope) else "DECLARED_NOT_VERIFIED"
+    jurisdiction_status = str(
+        rule.get("jurisdiction_status")
+        or ("UNRESOLVED" if any(str(x).upper() == "UNSPECIFIED" for x in jurisdiction_scope) else "DECLARED_NOT_VERIFIED")
+    )
     validation_status = str(rule.get("validation_status") or "DRAFT_UNVALIDATED") if not candidate else "DRAFT_UNVALIDATED"
     approval_status = str(rule.get("approval_status") or playbook.get("approval_status") or "UNAPPROVED")
     default_execution_status = "APPROVED_FOR_EXECUTION" if validation_status == "APPROVED" else "PILOT_REVIEW_ONLY"
