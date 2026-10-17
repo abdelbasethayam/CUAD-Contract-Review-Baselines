@@ -527,7 +527,7 @@ def _build_synthetic_demo_result(fixture_path: Path, fixture_hash: str, analysis
         6: "License Grant",
         7: "Insurance",
         8: "Change Of Control",
-        9: "Governing Law",
+        9: "Contractual Precedence",
         10: "Governing Law",
         11: "Post-Termination Services",
     }
