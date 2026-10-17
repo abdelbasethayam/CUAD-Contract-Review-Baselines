@@ -159,7 +159,7 @@ def _canonical(value: Any) -> str:
 
 def _git_blob_sha(data: bytes) -> str:
     import hashlib
-    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\\0" + data).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
 
 def _source_registry(playbook: dict[str, Any]) -> dict[str, Any]:
     result = []
