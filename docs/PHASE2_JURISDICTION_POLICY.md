@@ -15,7 +15,7 @@ The first research scope is **U.S. commercial contracts**, because the current 3
 
 ## Authority sources
 
-`data/risk/authority_catalog.json` contains 33 traceable federal, state, and regulator/court-source records. It identifies exact statutory/case pinpoints, retrieval dates, source tier, currentness caveats, and applicability limits. Government statutes link to official U.S. Code, New York Senate, Delaware Code, or FTC pages. One Delaware Supreme Court opinion is linked through a legal-opinion republication host and is explicitly marked for official-docket and subsequent-history verification before approval.
+`data/risk/authority_catalog.json` contains 33 traceable federal, state, and regulator/court-source records. It identifies exact statutory/case pinpoints, retrieval dates, source tier, currentness caveats, and applicability limits. Government statutes link to official U.S. Code, New York Senate, Delaware Code, FTC, and California code pages. The California § 16600 page returned HTTP 403 during this audit, so its content and effective dates remain unverified. One Delaware Supreme Court opinion is linked through a legal-opinion republication host and is explicitly marked for official-docket and subsequent-history verification before approval.
 
 `data/risk/clause_authority_map.json` maps all 37 taxonomy categories to applicable authority leads or explicitly states that no universal primary statute has been identified. This distinction is deliberate: audit rights, insurance requirements, transition services, non-disparagement, rights of first refusal/offer/negotiation, and indemnification are not governed by one universal rule that can be applied without context.
 
