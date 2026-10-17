@@ -17,7 +17,7 @@ PLAYBOOK_PATH = ROOT / "data" / "risk" / "commercial_clause_risk_playbook.json"
 REGISTRY_PATH = ROOT / "data" / "risk" / "rule_registry.jsonl"
 SOURCE_REGISTRY_PATH = ROOT / "data" / "risk" / "source_registry.json"
 MANIFEST_PATH = ROOT / "data" / "risk" / "rule_registry_manifest.json"
-REGISTRY_VERSION = "0.1.0"
+REGISTRY_VERSION = "0.2.0"
 SCHEMA_VERSION = 1
 
 CONTRACT_PROFILES = [
@@ -442,7 +442,7 @@ def _candidate_record(rule: dict[str, Any], playbook: dict[str, Any], profile: d
         "inherited_fields": [
             "rule_family", "title", "risk_domain", "risk_subdomain", "risk_type",
             "perspective", "jurisdiction_scope", "decision_logic", "evidence_contract",
-            "source_ids", "source_status", "rationale", "confidence_policy",
+            "source_ids", "source_status", "rationale", "confidence_policy", "regression_cases",
         ],
         "candidate_note": profile["note"],
         "validation_status": "DRAFT_UNVALIDATED",
