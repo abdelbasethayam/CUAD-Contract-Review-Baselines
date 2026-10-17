@@ -27,6 +27,7 @@ from build_rule_registry import (  # noqa: E402
 )
 
 OUTPUT_PATH = ROOT / "data" / "risk" / "rule_review_queue.csv"
+AUTHORITY_MAP_PATH = ROOT / "data" / "risk" / "clause_authority_map.json"
 FIELDNAMES = [
     "queue_schema_version",
     "source_playbook_hash",
@@ -46,6 +47,12 @@ FIELDNAMES = [
     "evidence_contract_json",
     "source_ids_json",
     "source_citation_status",
+    "authority_map_clause_type",
+    "authority_map_ids_json",
+    "authority_coverage_status",
+    "authority_scope_note",
+    "authority_jurisdiction_policy",
+    "authority_map_review_status",
     "source_metadata_json",
     "validation_status",
     "approval_status",
@@ -104,6 +111,12 @@ def _reviewer_decision(governance: dict[str, Any], position: int) -> dict[str, A
 
 def build_queue_text() -> tuple[str, int, int]:
     playbook = json.loads(PLAYBOOK_PATH.read_text(encoding="utf-8"))
+    authority_map = json.loads(AUTHORITY_MAP_PATH.read_text(encoding="utf-8"))
+    authority_by_clause = {
+        str(item["clause_type"]): item
+        for item in authority_map.get("clauses", [])
+        if item.get("clause_type")
+    }
     playbook_hash = _git_blob_sha(PLAYBOOK_PATH.read_bytes())
     playbook["_source_blob_sha"] = playbook_hash
     source_registry = _source_registry(playbook)
@@ -171,6 +184,22 @@ def build_queue_text() -> tuple[str, int, int]:
         if validation_status == "APPROVED" and approval_status != "APPROVED":
             next_actions.append("RECONCILE_RULE_APPROVAL_STATUS")
 
+        authority_entry = authority_by_clause.get(str(category or ""))
+        if authority_entry:
+            authority_map_clause_type = str(authority_entry["clause_type"])
+            authority_map_ids = list(authority_entry.get("authority_ids") or [])
+            authority_coverage_status = str(authority_entry["authority_coverage_status"])
+            authority_scope_note = str(authority_entry["scope_note"])
+            authority_jurisdiction_policy = str(authority_entry["jurisdiction_policy"])
+            authority_map_review_status = str(authority_entry["review_status"])
+        else:
+            authority_map_clause_type = ""
+            authority_map_ids = []
+            authority_coverage_status = "RULE_FAMILY_SPECIFIC_AUTHORITY_REVIEW_REQUIRED"
+            authority_scope_note = "Cross-clause, document-level, and regex rules require authority mapping based on their actual trigger and contract facts."
+            authority_jurisdiction_policy = "GOVERNING_LAW_AND_RULE_CONTEXT_REQUIRED"
+            authority_map_review_status = "RESEARCH_SEED_NOT_LEGALLY_APPROVED"
+
         rows.append({
             "queue_schema_version": "1",
             "source_playbook_hash": playbook_hash,
@@ -190,6 +219,12 @@ def build_queue_text() -> tuple[str, int, int]:
             "evidence_contract_json": _json(rule.get("evidence_contract") or {}),
             "source_ids_json": _json(source_ids),
             "source_citation_status": citation_status,
+            "authority_map_clause_type": authority_map_clause_type,
+            "authority_map_ids_json": _json(authority_map_ids),
+            "authority_coverage_status": authority_coverage_status,
+            "authority_scope_note": authority_scope_note,
+            "authority_jurisdiction_policy": authority_jurisdiction_policy,
+            "authority_map_review_status": authority_map_review_status,
             "source_metadata_json": _json(source_metadata),
             "validation_status": validation_status,
             "approval_status": approval_status,
