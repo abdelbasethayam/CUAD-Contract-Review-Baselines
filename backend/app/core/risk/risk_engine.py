@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from collections import Counter, defaultdict
 from typing import Callable
@@ -237,6 +238,12 @@ def _parse(raw: str, valid_ids: set[str]) -> list[dict]:
             return []
     if not isinstance(parsed, dict) or not isinstance(parsed.get("checks"), list):
         return []
+    raw_id_counts = Counter(
+        str(item.get("check_id") or "").strip()
+        for item in parsed["checks"]
+        if isinstance(item, dict)
+        and str(item.get("check_id") or "").strip() in valid_ids
+    )
     out = []
     for item in parsed["checks"]:
         if not isinstance(item, dict):
@@ -244,7 +251,8 @@ def _parse(raw: str, valid_ids: set[str]) -> list[dict]:
         check_id = str(item.get("check_id") or "").strip()
         answer = str(item.get("answer") or "").strip().upper()
         status = str(item.get("status") or "").strip().upper()
-        if check_id not in valid_ids or answer not in VALID_ANSWER:
+        # A duplicated checklist ID in one response is ambiguous, not multiple votes.
+        if check_id not in valid_ids or answer not in VALID_ANSWER or raw_id_counts[check_id] != 1:
             continue
         if answer == "UNKNOWN":
             answer = "DON'T KNOW"
@@ -435,6 +443,12 @@ def analyze_clause_risk(
             )
             parsed = _parse(raw, valid_ids)
         except Exception:
+            logging.getLogger(__name__).exception(
+                "Clause risk model pass failed (clause_index=%s, pass=%d/%d)",
+                clause_index,
+                pass_index + 1,
+                n_passes,
+            )
             parsed = []
         outputs.append(parsed)
         _emit(
@@ -524,6 +538,8 @@ def analyze_clause_risk(
                     "expected_passes": n_passes,
                     "missing_passes": max(0, n_passes - len(records)),
                     "agreement": agreement,
+                    "score_component_source": "LLM_SELF_REPORTED_UNVALIDATED" if status == "POTENTIAL_RISK" else None,
+                    "score_interpretation": "Triage heuristic only; not calibrated to real-world legal outcomes.",
                     "deterministic_indicators": indicators.get("matched_indicators", []),
                     "score_version": score_details["score_version"] if score_details else None,
                 },
@@ -578,8 +594,12 @@ def analyze_clause_risk(
                     "check_id": check["id"],
                     "source_ids": check.get("sources", []),
                     "model": RISK_MODEL,
-                    "passes": n_passes,
+                    "passes": 0,
+                    "expected_passes": n_passes,
+                    "missing_passes": n_passes,
                     "agreement": 0.0,
+                    "score_component_source": "NONE",
+                    "score_interpretation": "Triage heuristic only; not calibrated to real-world legal outcomes.",
                     "deterministic_indicators": indicators.get("matched_indicators", []),
                 },
                 "why_flagged": "The model did not return a usable evidence-grounded answer for this check.",
