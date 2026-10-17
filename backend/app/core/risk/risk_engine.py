@@ -154,7 +154,8 @@ def _prompt(
             "required_evidence": item.get("required_evidence", []),
             "evidence_location": item.get("evidence_location", "clause"),
             "dependencies": item.get("dependencies", []),
-            "jurisdiction_scope": item.get("jurisdiction_scope", ["unspecified"]),
+            "jurisdiction_scope": item.get("jurisdiction_scope", ["UNSPECIFIED"]),
+            "rule_registry_metadata": item.get("rule_registry_metadata", {}),
             "sources": item.get("sources", []),
         }
         for item in checks
@@ -177,6 +178,9 @@ Rules:
 11. Apply the supplied flag_if and do_not_flag_if rules when setting status. Do not treat every YES as a risk.
 12. If the question asks whether a risk condition exists, YES can be POTENTIAL_RISK only when flag_if is satisfied and exact evidence supports it. If flag_if is not satisfied, use NO_RISK.
 13. A mutual/reciprocal clause must not be labeled one-sided when the contract text itself applies the protection to both parties.
+14. Treat the registry status as binding pipeline governance: unapproved rules are review triggers only, not approved legal policy.
+15. If jurisdiction scope is unresolved or the source citation is incomplete, describe a commercial review concern; do not assert enforceability, illegality, or governing-law doctrine.
+16. Never emit ordinal severity, numerical severity scores, or self-reported confidence. Confidence is computed separately only after adjudicated calibration.
 
 CURRENT CLAUSE
 ID: {clause_type}
@@ -188,6 +192,9 @@ DETERMINISTIC INDICATORS
 
 RELATED SAME-CONTRACT CLAUSES
 {json.dumps(context, indent=2, ensure_ascii=False)}
+
+PLAYBOOK GOVERNANCE
+{json.dumps(playbook.get("rule_registry", {"status": "UNAPPROVED"}), indent=2, ensure_ascii=False)}
 
 PLAYBOOK CHECKS
 {json.dumps(checklist, indent=2, ensure_ascii=False)}
@@ -209,19 +216,12 @@ Return:
       "status": "POTENTIAL_RISK | NO_RISK | INSUFFICIENT_EVIDENCE",
       "risk_type": "specific risk type or null",
       "evidence": "exact contiguous quote or empty string",
-      "why_flagged": "concise explanation or empty string",
-      "score_components": {{
-        "exposure_magnitude": 0,
-        "likelihood_uncertainty": 0,
-        "scope_duration": 0,
-        "control_weakness": 0
-      }}
+      "why_flagged": "concise explanation or empty string"
     }}
   ]
 }}
 
-Factor scale: 0=none/minor, 1=low, 2=bounded, 3=material, 4=very material, 5=extreme/unbounded.
-Use the factors only as raw signals. Do not turn them into a calibrated probability.
+Do not emit a severity scale or probability. If the policy scope or evidence is unresolved, return INSUFFICIENT_EVIDENCE and identify the missing dependency.
 """
     
 
