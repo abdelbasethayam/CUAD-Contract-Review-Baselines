@@ -1,7 +1,7 @@
 import json
 
 from app.core.risk import contract_checks, risk_engine
-from app.core.risk.risk_engine import _evidence_source, _majority, _parse
+from app.core.risk.risk_engine import _evidence_source, _evidence_valid, _majority, _parse
 
 
 def test_missing_model_passes_count_as_abstentions():
@@ -234,3 +234,60 @@ def test_contract_severity_is_not_reported_when_any_positive_finding_is_unscored
     assert triage["overall_score"] is None
     assert triage["overall_severity"] is None
     assert triage["human_review_required"] is True
+
+
+
+def test_single_token_quote_is_not_sufficient_contract_evidence():
+    assert _evidence_valid("liability", "Liability is unlimited.", []) is False
+    assert _evidence_valid("Liability is unlimited.", "Liability is unlimited.", []) is True
+
+
+def test_contradictory_no_answer_cannot_become_a_positive_clause_finding(monkeypatch):
+    playbook = {
+        "playbook_hash": "contradiction-test",
+        "sources": {},
+        "clause_types": {
+            "General": {
+                "checklist": [{
+                    "id": "C-1",
+                    "question": "Does the clause create uncapped liability?",
+                    "flag_if": "Yes, with exact evidence",
+                    "sources": [],
+                    "risk_domain": "Liability Risk",
+                }]
+            }
+        },
+        "deterministic_rules": [],
+    }
+    response = json.dumps({
+        "checks": [{
+            "check_id": "C-1",
+            "answer": "NO",
+            "status": "POTENTIAL_RISK",
+            "risk_type": "Contradictory answer",
+            "evidence": "Liability is capped.",
+            "why_flagged": "Synthetic contradictory output.",
+            "score_components": {
+                "exposure_magnitude": 3,
+                "likelihood_uncertainty": 3,
+                "scope_duration": 3,
+                "control_weakness": 3,
+            },
+        }]
+    })
+    monkeypatch.setattr(risk_engine, "call_ollama", lambda *args, **kwargs: response)
+    monkeypatch.setattr(risk_engine, "retrieve_legal_guidance", lambda *args, **kwargs: [])
+
+    findings = risk_engine.analyze_clause_risk(
+        clause_index=1,
+        clause_text="Liability is capped.",
+        clause_type="General",
+        query_vector=None,
+        contract_clauses=[],
+        playbook=playbook,
+        passes=1,
+    )
+
+    finding = next(item for item in findings if item["check_id"] == "C-1")
+    assert finding["risk_status"] == "INSUFFICIENT_EVIDENCE"
+    assert finding["risk"] is False
