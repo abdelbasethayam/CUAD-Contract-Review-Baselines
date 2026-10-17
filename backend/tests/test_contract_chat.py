@@ -113,6 +113,8 @@ def test_metrics_endpoint_never_returns_annotation_queue_metrics(monkeypatch, tm
     assert data["evaluation_mode"] == "PLAYBOOK_RULE_CONFORMANCE"
     assert data["rule_validation"]["status"] == "NOT_RUN"
     assert data["classification_index_isolation"]["status"] == "NOT_RUN"
+    assert data["production_release_readiness"]["status"] == "BLOCKED"
+    assert data["production_release_readiness"]["production_release_allowed"] is False
     assert "gold" not in json.dumps(data).lower()
     assert "silver" not in json.dumps(data).lower()
     assert "legal-risk accuracy" in data["warning"]
