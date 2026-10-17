@@ -6,7 +6,9 @@ not a source of risk evidence.
 """
 from __future__ import annotations
 
+import csv
 import hashlib
+import io
 import json
 import re
 from pathlib import Path
@@ -14,6 +16,7 @@ from typing import Any, Literal
 
 import requests
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from ...core.config import (
@@ -37,6 +40,8 @@ _STOP = {
     "about", "into", "have", "has", "are", "was", "were", "will", "contract",
     "clause", "please", "tell", "show", "explain", "summarize", "summary",
     "does", "are", "is", "was", "were", "under", "between", "according",
+    "main", "mainly", "please", "could", "would", "should", "summarize", "summary",
+    "overall", "plain", "english", "tell", "show", "explain", "review", "find", "list",
 }
 
 
@@ -70,10 +75,63 @@ def _load_result(analysis_id: str) -> dict[str, Any]:
     return result
 
 
+_CONCEPT_EXPANSIONS: dict[str, set[str]] = {
+    r"\bterminat(?:e|ion|ing)?\b|\bend(?:ing)?\s+(?:the\s+)?agreement\b": {
+        "terminate", "termination", "notice", "cure", "breach", "convenience", "renewal", "expire", "expiration", "transition", "survive"
+    },
+    r"\bliabilit|\bdamag(?:e|es)\b|\bloss(?:es)?\b|\bindirect\b|\bcap(?:ped)?\b": {
+        "liability", "damages", "losses", "cap", "capped", "uncapped", "aggregate", "indirect", "consequential", "limit", "limitation", "exception", "indemnification"
+    },
+    r"\bindemnif|\bhold harmless\b|\bdefend\b": {
+        "indemnify", "indemnification", "indemnity", "defend", "claims", "losses", "third", "party", "liability", "cap"
+    },
+    r"\bpay(?:ment|ments)?\b|\bfees?\b|\bprice\b|\brefund": {
+        "pay", "payment", "fees", "fee", "price", "refund", "refundable", "subscription", "invoice", "minimum", "commitment", "charges", "transactions"
+    },
+    r"\bintellectual property\b|\b\bip\b|\bown(?:ership|s|ed)?\b|\blicense\b|\blicence\b|\bassign(?:ment)?\b": {
+        "intellectual", "property", "ownership", "owns", "owned", "assign", "assignment", "license", "licence", "grant", "perpetual", "irrevocable", "sublicensable", "pre-existing", "materials", "infringement"
+    },
+    r"\bconfidential(?:ity)?\b|\btrade secret": {
+        "confidential", "confidentiality", "disclosure", "secret", "security", "return", "destroy"
+    },
+    r"\brenew(?:al|s)?\b|\bterm\b|\bexpiry\b|\bexpiration\b": {
+        "term", "renewal", "renew", "expire", "expiration", "notice", "automatic", "successive", "initial"
+    },
+    r"\bgoverning law\b|\bjurisdiction\b|\bforum\b|\bdispute": {
+        "governing", "law", "jurisdiction", "forum", "dispute", "court", "venue", "arbitration", "order", "applicable"
+    },
+    r"\bassign(?:ment)?\b|\btransfer\b|\bchange of control\b": {
+        "assign", "assignment", "transfer", "consent", "affiliate", "control", "change", "successor"
+    },
+    r"\binsurance\b|\binsured\b|\bpolicy limits?\b": {
+        "insurance", "insured", "coverage", "policy", "limits", "certificate", "maintain"
+    },
+    r"\bdata\b|\bprivacy\b|\bsecurity\b|\bpersonal information\b": {
+        "data", "privacy", "security", "personal", "information", "export", "access", "confidential"
+    },
+    r"\bobligation|\bdut(?:y|ies)\b|\bmust\b|\bshall\b": {
+        "obligation", "obligations", "duty", "duties", "shall", "must", "provide", "maintain", "pay", "deliver", "notice"
+    },
+}
+_RISK_INTENT = re.compile(r"\b(risk|risks|exposure|red flags?|concerns?|issues?|unfavo[u]?rable|one[- ]sided|imbalanc(?:e|ed)|problematic)\b", re.I)
+_OVERVIEW_INTENT = re.compile(r"\b(summar(?:y|ize|ise)|overview|key points?|main obligations|overall review|what(?:'s| is) this contract about)\b", re.I)
+
+
+def _question_terms(question: str) -> set[str]:
+    lowered = question.lower()
+    terms = {term.lower() for term in _WORDS.findall(question)} - _STOP
+    for pattern, expansion in _CONCEPT_EXPANSIONS.items():
+        if re.search(pattern, lowered, re.I):
+            terms.update(expansion)
+    return terms
+
+
 def _select_clauses(
     clauses: list[dict[str, Any]], question: str, limit: int = 12
 ) -> list[dict[str, Any]]:
-    terms = {term.lower() for term in _WORDS.findall(question)} - _STOP
+    terms = _question_terms(question)
+    risk_intent = bool(_RISK_INTENT.search(question))
+    overview_intent = bool(_OVERVIEW_INTENT.search(question))
     scored = []
     for order, clause in enumerate(clauses):
         if not isinstance(clause, dict):
@@ -81,15 +139,40 @@ def _select_clauses(
         text = str(clause.get("clause_text") or "")
         label = str(clause.get("predicted_label") or clause.get("clause_type") or "")
         heading = str(clause.get("heading") or clause.get("section_path") or "")
-        words = {term.lower() for term in _WORDS.findall(text + " " + label + " " + heading)}
+        findings = [item for item in clause.get("risk_findings") or [] if isinstance(item, dict)]
+        finding_text = " ".join(
+            str(item.get("risk_type") or item.get("question") or "") + " " +
+            str(item.get("why_flagged") or "") + " " +
+            str(item.get("risk_status") or "")
+            for item in findings
+        )
+        words = {term.lower() for term in _WORDS.findall(text + " " + label + " " + heading + " " + finding_text)}
         score = len(terms & words)
+        if risk_intent:
+            score += 4 * sum(1 for item in findings if item.get("risk_status") == "POTENTIAL_RISK")
+            score += 2 * sum(1 for item in findings if item.get("risk_status") == "INSUFFICIENT_EVIDENCE")
+        if overview_intent:
+            score += min(len(findings), 3)
         scored.append((score, -order, clause))
     if not scored:
         return []
-    if any(item[0] > 0 for item in scored):
-        scored.sort(reverse=True, key=lambda item: (item[0], item[1]))
-    else:
-        scored.sort(key=lambda item: -item[1])
+    scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    if overview_intent and len(scored) > limit:
+        # Preserve topic coverage in broad questions rather than returning only the first N clauses.
+        selected: list[dict[str, Any]] = []
+        seen_labels: set[str] = set()
+        for _, _, clause in scored:
+            label = str(clause.get("predicted_label") or clause.get("clause_type") or "UNLABELLED")
+            if label not in seen_labels:
+                selected.append(clause)
+                seen_labels.add(label)
+            if len(selected) >= limit:
+                break
+        if len(selected) < limit:
+            selected_ids = {id(item) for item in selected}
+            selected.extend(clause for _, _, clause in scored if id(clause) not in selected_ids) 
+            selected = selected[:limit]
+        return selected
     return [item[2] for item in scored[:limit]]
 
 
@@ -281,11 +364,40 @@ Use at most 4 citations and 2 follow-up questions. No markdown fences.
 
     try:
         raw_text = _call_local_chat(messages)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=503,
-            detail="The local contract assistant is unavailable. Check that Ollama and the configured model are running.",
-        ) from exc
+    except Exception:
+        # Keep the assistant useful when the local model is unavailable, but never
+        # disguise an extractive fallback as an LLM interpretation.
+        fallback_citations = []
+        for clause in context.get("relevant_clauses", [])[:3]:
+            try:
+                index = int(clause.get("clause_index"))
+            except (TypeError, ValueError):
+                continue
+            source = source_texts.get(index, "")
+            quote = source.strip()[:420].strip()
+            if len(quote) >= 12:
+                fallback_citations.append({
+                    "clause_index": index,
+                    "quote": quote,
+                    "reason": "Relevant source text shown without an AI interpretation.",
+                })
+        return {
+            "analysis_id": request.analysis_id,
+            "answer": (
+                "The local language model is unavailable, so I have not generated an interpretation. "
+                "I retrieved the most relevant clause text below; use these exact provisions as the starting point "
+                "and retry when the configured local model is running."
+                if fallback_citations else
+                "The local language model is unavailable, and I could not retrieve a sufficiently relevant clause. "
+                "Please retry when the model is running or ask about a specific section."
+            ),
+            "insufficient_evidence": True,
+            "citations": fallback_citations,
+            "follow_up_questions": ["Which specific clause should I explain?", "Would you like a clause-by-clause summary?"],
+            "model": "EXTRACTIVE_FALLBACK",
+            "evidence_policy": "Fallback displays verified source excerpts only; it does not interpret the contract.",
+            "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
+        }
 
     parsed = extract_json_object(raw_text) or {}
     answer = str(parsed.get("answer") or "").strip()
@@ -299,11 +411,17 @@ Use at most 4 citations and 2 follow-up questions. No markdown fences.
             "I couldn't verify the assistant's proposed quotes against the uploaded contract, "
             "so I can't present that as an evidence-grounded answer. Try a narrower question about a specific clause."
         )
-    elif not citations and any(
-        word in question.lower()
-        for word in ("clause", "contract", "termination", "liability", "indemn", "payment", "ownership", "obligation", "risk", "party", "date", "law", "ip ")
+    elif not citations and not re.fullmatch(
+        r"\s*(hi|hello|hey|thanks|thank you|what can you do|how do i use this assistant)[?.! ]*\s*",
+        question,
+        re.I,
     ):
         insufficient = True
+        answer = (
+            "I couldn't verify a supporting quote in the analyzed contract for that answer, "
+            "so I won't present it as a supported interpretation. Try asking about a specific clause, "
+            "such as termination, liability, payment, intellectual property, or governing law."
+        )
 
     followups = parsed.get("follow_up_questions")
     if not isinstance(followups, list):
@@ -395,59 +513,231 @@ def phase2_metrics() -> dict[str, Any]:
     }
 
 
+def _build_synthetic_demo_result(fixture_path: Path, fixture_hash: str, analysis_id: str) -> dict[str, Any]:
+    """Create a deterministic, clearly labelled walkthrough without model or external API calls."""
+    text = fixture_path.read_text(encoding="utf-8")
+    headings = list(re.finditer(r"(?m)^(\d+)\.\s+([^\n]+)$", text))
+    clauses: list[dict[str, Any]] = []
+    labels = {
+        1: "Contract Term",
+        2: "Minimum Commitment",
+        3: "Cap On Liability",
+        4: "Indemnification",
+        5: "Termination For Convenience",
+        6: "License Grant",
+        7: "Insurance",
+        8: "Change Of Control",
+        9: "Governing Law",
+        10: "Governing Law",
+        11: "Post-Termination Services",
+    }
+    for position, match in enumerate(headings):
+        index = int(match.group(1))
+        end = headings[position + 1].start() if position + 1 < len(headings) else len(text)
+        clause_text = text[match.start():end].strip()
+        clauses.append({
+            "clause_index": index,
+            "heading": match.group(2).strip(),
+            "section_path": f"{index}. {match.group(2).strip()}",
+            "clause_text": clause_text,
+            "predicted_label": labels.get(index, "UNCLASSIFIED"),
+            "clause_type": labels.get(index, "UNCLASSIFIED"),
+            "classification_status": "SYNTHETIC_DEMO",
+            "classification_confidence": None,
+            "risk_status": "POTENTIAL_RISK" if index in {2, 3, 4, 5, 6, 8, 9, 10, 11} else "INSUFFICIENT_EVIDENCE",
+            "risk_findings": [],
+        })
+
+    clause_by_id = {int(item["clause_index"]): item for item in clauses}
+    def add_finding(clause_index: int, check_id: str, risk_type: str, quote: str, why: str) -> dict[str, Any]:
+        if quote not in clause_by_id[clause_index]["clause_text"] or len(quote) < 12:
+            raise ValueError(f"Synthetic demo evidence is not an exact source span: {check_id}")
+        finding = {
+            "check_id": check_id,
+            "scope": "clause",
+            "risk_type": risk_type,
+            "question": risk_type,
+            "risk_status": "POTENTIAL_RISK",
+            "confidence": None,
+            "confidence_status": "UNCALIBRATED",
+            "raw_support_score": None,
+            "why_flagged": why,
+            "evidence": [{"clause_id": clause_index, "quote": quote}],
+            "evidence_source_status": "VERIFIED",
+            "ground_truth_status": "SYNTHETIC_DEMO_ONLY",
+            "provenance": {
+                "model": "deterministic synthetic demo fixture",
+                "playbook_hash": fixture_hash,
+                "rule_registry_metadata": {
+                    "validation_status": "SYNTHETIC_DEMO_ONLY",
+                    "execution_status": "Illustrative review candidate; not a production-approved rule.",
+                    "jurisdiction_review_required": True,
+                },
+            },
+            "supporting_sources": [],
+        }
+        clause_by_id[clause_index]["risk_findings"].append(finding)
+        return finding
+
+    add_finding(2, "DEMO-FEE-001", "Non-refundable fees and minimum commitment",
+        "Fees paid or payable are non-refundable, including where the service is unavailable for an extended period.",
+        "The non-refundable fee language may leave the customer paying despite prolonged service unavailability.")
+    add_finding(3, "DEMO-LIABILITY-001", "Asymmetric liability caps",
+        "Supplier's aggregate liability shall not exceed the fees paid by Customer in the previous one month.",
+        "The supplier cap is tied to one month of fees, while the customer's stated cap is ten times fees during the Term.")
+    add_finding(4, "DEMO-INDEMNITY-001", "One-way indemnification and IP claim gap",
+        "Customer shall indemnify, defend, and hold harmless Supplier and its affiliates from any and all claims, losses, damages, liabilities, and expenses arising out of Customer's use of the Services.",
+        "The customer gives a broad indemnity while the supplier disclaims an IP infringement indemnity for the customer.")
+    add_finding(5, "DEMO-TERM-001", "Unequal termination rights",
+        "Supplier may terminate this Agreement immediately for any breach.",
+        "The supplier's immediate termination right contrasts with the customer's material-breach and 90-day cure requirement.")
+    add_finding(6, "DEMO-IP-001", "Broad IP assignment",
+        "Customer hereby assigns to Supplier all intellectual property developed in connection with the Services, including Customer materials and pre-existing tools, without a separate license-back.",
+        "The assignment language is broad and expressly includes pre-existing tools without a stated license-back.")
+    add_finding(8, "DEMO-ASSIGN-001", "Asymmetric assignment restrictions",
+        "Supplier may assign this Agreement to any affiliate without consent.",
+        "The customer needs consent that may be withheld at the supplier's discretion, while the supplier has an affiliate-assignment exception.")
+    add_finding(9, "DEMO-ONLINE-001", "Changeable online terms and precedence",
+        "The Services are also subject to Supplier's online terms and the policies referenced on Supplier's website, each of which may be updated from time to time.",
+        "The referenced online terms may change and are not attached as a fixed version in the fixture.")
+    add_finding(10, "DEMO-LAW-001", "Governing law and forum unresolved",
+        "This Agreement is governed by the laws specified in the applicable Order Form.",
+        "The governing law is deferred to an Order Form, so the applicable law cannot be resolved from this document alone.")
+    add_finding(11, "DEMO-EXIT-001", "Discretionary transition assistance",
+        "Supplier will provide transition assistance only at its then-current rates and only if it chooses to do so.",
+        "Transition support is discretionary and priced at future rates, which may complicate an orderly exit.")
+
+    cross_clause_findings = [{
+        "check_id": "DEMO-X-001",
+        "scope": "cross_clause",
+        "risk_type": "Liability cap and indemnity interaction",
+        "risk_status": "POTENTIAL_RISK",
+        "clause_ids": [3, 4],
+        "why_flagged": "Review how the broad customer indemnity and the different liability caps interact; the fixture does not establish a legal conclusion.",
+        "evidence": [
+            {"clause_id": 3, "quote": "Supplier's aggregate liability shall not exceed the fees paid by Customer in the previous one month."},
+            {"clause_id": 4, "quote": "Customer shall indemnify, defend, and hold harmless Supplier and its affiliates from any and all claims, losses, damages, liabilities, and expenses arising out of Customer's use of the Services."},
+        ],
+        "confidence": None,
+        "confidence_status": "UNCALIBRATED",
+        "ground_truth_status": "SYNTHETIC_DEMO_ONLY",
+    }]
+    document_findings = [{
+        "check_id": "DEMO-DOC-001",
+        "scope": "document",
+        "risk_type": "Incorporated online terms may override the signed agreement",
+        "risk_status": "POTENTIAL_RISK",
+        "clause_ids": [9],
+        "why_flagged": "The online terms may be updated and expressly prevail over the Agreement in a conflict.",
+        "evidence": [{"clause_id": 9, "quote": "If an Order Form conflicts with this Agreement or online terms, Supplier's online terms prevail."}],
+        "confidence": None,
+        "confidence_status": "UNCALIBRATED",
+        "ground_truth_status": "SYNTHETIC_DEMO_ONLY",
+    }]
+    assessment = {
+        "status": "POTENTIAL_RISK",
+        "reason": "This synthetic walkthrough contains illustrative commercial review candidates. Verify the wording and applicable law before relying on any finding.",
+        "confidence_status": "UNCALIBRATED",
+        "gold_status": "SYNTHETIC_DEMO_ONLY",
+        "rule_registry": {"status": "DEMO_ONLY", "source_citation_status": "NOT_APPLICABLE_TO_SYNTHETIC_DEMO"},
+        "cross_clause_findings": cross_clause_findings,
+        "document_findings": document_findings,
+        "deterministic_cross_checks": [{
+            "id": "DEMO-X-001",
+            "name": "liability_indemnity_interaction",
+            "reason": cross_clause_findings[0]["why_flagged"],
+            "evidence": cross_clause_findings[0]["evidence"],
+        }],
+    }
+    metadata = {
+        "name": "Northstar Analytics / VendorCo — Synthetic Software Services Agreement",
+        "source_filename": fixture_path.name,
+        "document_hash": fixture_hash,
+        "document_version": "synthetic-demo-v1",
+        "contract_type": "Synthetic commercial software services agreement",
+        "jurisdiction_candidates": [],
+        "parties": ["Northstar Analytics Ltd. (Customer)", "VendorCo Ltd. (Supplier)"],
+        "agreement_date": None,
+        "effective_date": None,
+        "expiration_date": None,
+        "governing_law": "Deferred to the applicable Order Form; unresolved in this fixture",
+    }
+    return {
+        "filename": fixture_path.name,
+        "analysis_id": analysis_id,
+        "pipeline_status": "SYNTHETIC_DEMO",
+        "total_clauses": len(clauses),
+        "clauses": clauses,
+        "contract_metadata": metadata,
+        "contract_risk_assessment": assessment,
+        "demo_mode": True,
+        "notice": "Synthetic walkthrough generated from the repository fixture. Findings are illustrative, uncalibrated, and not legal conclusions.",
+    }
+
+
+@router.get("/demo-contract")
+def download_demo_contract() -> FileResponse:
+    """Download the public synthetic fixture used by the walkthrough."""
+    fixture_path = Path(PROJECT_ROOT) / "data" / "risk" / "demo_contract_for_reproduction.txt"
+    if not fixture_path.is_file():
+        raise HTTPException(status_code=404, detail="The repository's synthetic demo fixture is missing.")
+    return FileResponse(path=fixture_path, filename=fixture_path.name, media_type="text/plain")
+
+
 @router.get("/demo-analysis")
 def load_demo_analysis() -> dict[str, Any]:
-    """Load a saved synthetic walkthrough result, never an arbitrary analysis ID."""
-    runs_root = Path(RUNS_DIR).resolve()
+    """Load or deterministically create a synthetic walkthrough; never expose a user's upload."""
     fixture_path = Path(PROJECT_ROOT) / "data" / "risk" / "demo_contract_for_reproduction.txt"
     if not fixture_path.is_file():
         raise HTTPException(status_code=404, detail="The repository's synthetic demo fixture is missing.")
     fixture_hash = hashlib.sha256(fixture_path.read_bytes()).hexdigest()
-    candidates: list[tuple[float, dict[str, Any], Path]] = []
-    for result_path in runs_root.glob("*/result.json"):
-        try:
-            data = json.loads(result_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        if data.get("filename") != fixture_path.name:
-            continue
-        if not isinstance(data.get("clauses"), list) or len(data["clauses"]) < 5:
-            continue
-        metadata = data.get("contract_metadata") or {}
-        # Filename alone is not sufficient: never expose a different user's upload
-        # merely because it was named like the demo fixture.
-        if metadata.get("document_hash") != fixture_hash:
-            continue
-        candidates.append((result_path.stat().st_mtime, data, result_path.parent))
-
-    if not candidates:
-        raise HTTPException(
-            status_code=404,
-            detail="No saved synthetic demo analysis is available yet. Upload the repository demo TXT once, then retry.",
+    analysis_id = hashlib.sha256((fixture_hash + ":synthetic-demo-v1").encode("utf-8")).hexdigest()[:16] + "-" + hashlib.sha256((fixture_hash + ":synthetic-demo-v1").encode("utf-8")).hexdigest()[16:32]
+    runs_root = Path(RUNS_DIR).resolve()
+    run_root = (runs_root / analysis_id).resolve()
+    if runs_root not in run_root.parents:
+        raise HTTPException(status_code=500, detail="Invalid demo storage location.")
+    run_root.mkdir(parents=True, exist_ok=True)
+    result_path = run_root / "result.json"
+    try:
+        result = json.loads(result_path.read_text(encoding="utf-8")) if result_path.is_file() else {}
+    except (OSError, json.JSONDecodeError):
+        result = {}
+    if not result.get("demo_mode") or result.get("contract_metadata", {}).get("document_hash") != fixture_hash:
+        result = _build_synthetic_demo_result(fixture_path, fixture_hash, analysis_id)
+        result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        assessment = result["contract_risk_assessment"]
+        (run_root / "contract_risk.json").write_text(json.dumps(assessment, ensure_ascii=False, indent=2), encoding="utf-8")
+        findings = [
+            {"clause_index": clause["clause_index"], **finding}
+            for clause in result["clauses"] for finding in clause["risk_findings"]
+        ]
+        (run_root / "risk_findings.jsonl").write_text(
+            "".join(json.dumps(item, ensure_ascii=False) + "\n" for item in findings), encoding="utf-8"
         )
-    _, result, run_root = max(candidates, key=lambda item: item[0])
-    analysis_id = str(result.get("analysis_id") or run_root.name)
-    if not _ANALYSIS_ID.fullmatch(analysis_id):
-        raise HTTPException(status_code=422, detail="Saved demo result has an invalid analysis ID.")
-
+        with (run_root / "clauses.csv").open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=["clause_index", "heading", "predicted_label", "risk_status", "clause_text"])
+            writer.writeheader()
+            for clause in result["clauses"]:
+                writer.writerow({key: clause.get(key) for key in writer.fieldnames})
+        (run_root / "manifest.json").write_text(json.dumps({
+            "analysis_id": analysis_id,
+            "demo_mode": True,
+            "document_sha256": fixture_hash,
+            "result_sha256": hashlib.sha256(result_path.read_bytes()).hexdigest(),
+            "provenance": "Deterministic synthetic demo; not an AI-generated contract analysis.",
+        }, indent=2), encoding="utf-8")
     return {
         "filename": result.get("filename"),
         "total_clauses": len(result["clauses"]),
         "analysis_id": analysis_id,
         "clauses": result["clauses"],
         "contract_risk_assessment": result.get("contract_risk_assessment") or {},
-        "contract_metadata": result.get("contract_metadata") or {
-            "name": "Synthetic demo contract",
-            "source_filename": result.get("filename"),
-        },
+        "contract_metadata": result.get("contract_metadata") or {"name": "Synthetic demo contract"},
         "downloads": {
             name.replace(".", "_"): f"/documents/runs/{analysis_id}/artifact/{name}"
-            for name in (
-                "result.json", "contract_risk.json", "risk_findings.jsonl",
-                "risk_findings.csv", "clauses.csv", "classification.jsonl", "manifest.json"
-            )
+            for name in ("result.json", "contract_risk.json", "risk_findings.jsonl", "clauses.csv", "manifest.json")
             if (run_root / name).is_file()
         },
         "demo_mode": True,
-        "notice": "Loaded the saved synthetic demo analysis. This is not a newly analyzed upload.",
+        "notice": result.get("notice") or "Synthetic walkthrough; illustrative findings only.",
     }
