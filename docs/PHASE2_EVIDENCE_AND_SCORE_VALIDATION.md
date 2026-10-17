@@ -25,6 +25,12 @@ The current 0–20 score is a **heuristic review-triage score**, based on four m
 - If any positive finding lacks a complete scoring basis, the contract-level severity and aggregate score must be withheld; use `overall_risk=UNSCORED` and `severity_status=INCOMPLETE`, while retaining the individual evidence-supported findings.
 - Deterministic playbook matches without an adjudicated severity weight are review triggers. They must not be assigned a fabricated numeric severity.
 
+## Risk-check retrieval and resumability
+
+The predicted CUAD label remains a retrieval signal, not a hard gate. Phase 2 also selects additional checklist families when explicit, risk-specific playbook keywords occur in the clause text. This reduces dependence on one possibly incorrect classifier label; it is still a heuristic retrieval method, not proof of complete risk coverage. Contract-wide candidate checks likewise combine predicted labels with direct clause wording.
+
+A saved checkpoint is reusable only when its playbook hash, rule-engine version, expected check IDs, and model-pass completeness are current. Missing or invalid model passes are recorded as incomplete and retried on resume. They are not treated as negative answers. Run identity also includes the code fingerprint and material generation/retrieval settings.
+
 ## Scientific evaluation required before accuracy claims
 
 Build a frozen, contract-disjoint evaluation set. Each case should be independently reviewed by qualified contract reviewers against a versioned review policy, with disagreements adjudicated. Keep the held-out test contracts separate from prompt/rule tuning.
