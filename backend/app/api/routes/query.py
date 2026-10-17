@@ -76,8 +76,8 @@ def _load_result(analysis_id: str) -> dict[str, Any]:
 
 
 _CONCEPT_EXPANSIONS: dict[str, set[str]] = {
-    r"\bterminat(?:e|ion|ing)?\b|\bend(?:ing)?\s+(?:the\s+)?agreement\b": {
-        "terminate", "termination", "notice", "cure", "breach", "convenience", "renewal", "expire", "expiration", "transition", "survive"
+    r"\bterminat(?:e|ion|ing)?\b|\bcancel(?:lation|led|ing)?\b|\bwalk away\b|\bexit\b|\bend(?:ing)?\s+(?:the\s+)?agreement\b": {
+        "terminate", "termination", "cancel", "cancellation", "notice", "cure", "breach", "convenience", "renewal", "expire", "expiration", "transition", "survive", "exit", "early"
     },
     r"\bliabilit|\bdamag(?:e|es)\b|\bloss(?:es)?\b|\bindirect\b|\bcap(?:ped)?\b": {
         "liability", "damages", "losses", "cap", "capped", "uncapped", "aggregate", "indirect", "consequential", "limit", "limitation", "exception", "indemnification"
@@ -107,7 +107,7 @@ _CONCEPT_EXPANSIONS: dict[str, set[str]] = {
         "insurance", "insured", "coverage", "policy", "limits", "certificate", "maintain"
     },
     r"\bdata\b|\bprivacy\b|\bsecurity\b|\bpersonal information\b": {
-        "data", "privacy", "security", "personal", "information", "export", "access", "confidential"
+        "data", "privacy", "security", "personal", "information", "export", "access", "confidential", "share", "sharing", "disclose", "disclosure", "retain", "retention", "delete", "deletion"
     },
     r"\bobligation|\bdut(?:y|ies)\b|\bmust\b|\bshall\b": {
         "obligation", "obligations", "duty", "duties", "shall", "must", "provide", "maintain", "pay", "deliver", "notice"
@@ -116,8 +116,8 @@ _CONCEPT_EXPANSIONS: dict[str, set[str]] = {
 _RISK_INTENT = re.compile(r"\b(risk|risks|exposure|red flags?|concerns?|issues?|unfavo[u]?rable|one[- ]sided|imbalanc(?:e|ed)|problematic)\b", re.I)
 _OVERVIEW_INTENT = re.compile(r"\b(summar(?:y|ize|ise)|overview|key points?|main obligations|overall review|what(?:'s| is) this contract about)\b", re.I)
 _FOCUS_TERMS: list[tuple[str, set[str], int]] = [
-    (r"\bdata\b|\bprivacy\b|\bpersonal information\b|\bexport\b|\bretention\b", {
-        "data", "privacy", "personal", "information", "export", "retention", "retain", "delete", "deletion", "access", "backup"
+    (r"\bdata\b|\bprivacy\b|\bpersonal information\b|\bexport\b|\bretention\b|\bsharing\b|\bdisclos(?:e|ure)\b", {
+        "data", "privacy", "personal", "information", "export", "retention", "retain", "delete", "deletion", "access", "backup", "share", "sharing", "disclose", "disclosure"
     }, 10),
     (r"\binsurance\b|\bpolicy limits?\b|\bcoverage\b", {
         "insurance", "policy", "limits", "coverage", "certificate", "maintain"
@@ -186,6 +186,10 @@ def _select_clauses(
 
     risk_intent = bool(_RISK_INTENT.search(question))
     overview_intent = bool(_OVERVIEW_INTENT.search(question))
+    explicit_clause_indices = {
+        int(match.group(1))
+        for match in re.finditer(r"\b(?:clause|section|paragraph|provision)\s+(\d{1,4})\b", question, re.I)
+    }
     scored = []
     for order, clause in enumerate(clauses):
         if not isinstance(clause, dict):
@@ -202,6 +206,12 @@ def _select_clauses(
         )
         words = {term.lower() for term in _WORDS.findall(text + " " + label + " " + heading + " " + finding_text)}
         score = 5 * sum(term_weight(term) for term in direct_terms & words) + 0.25 * sum(term_weight(term) for term in expanded_terms & words)
+        try:
+            clause_index = int(clause.get("clause_index"))
+        except (TypeError, ValueError):
+            clause_index = -1
+        if clause_index in explicit_clause_indices:
+            score += 1000
         for pattern, focus_terms, focus_weight in _FOCUS_TERMS:
             if re.search(pattern, question, re.I):
                 score += focus_weight * len(focus_terms & words)
@@ -214,6 +224,15 @@ def _select_clauses(
     if not scored:
         return []
     scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    # Never fill a failed retrieval with arbitrary clauses. Broad summaries are
+    # the only intentional exception because they need topic coverage by design.
+    # A user can still retrieve a provision explicitly by saying "clause 3".
+    if (
+        not overview_intent
+        and not explicit_clause_indices
+        and not any(score > 0 for score, _, _ in scored)
+    ):
+        return []
     if overview_intent and len(scored) > limit:
         # Preserve topic coverage in broad questions rather than returning only the first N clauses.
         selected: list[dict[str, Any]] = []
