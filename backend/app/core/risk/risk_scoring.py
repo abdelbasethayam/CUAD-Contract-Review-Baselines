@@ -401,7 +401,10 @@ def aggregate_contract_triage(
         })
 
     incomplete_scores = len(scored) < len(positive)
-    if not scored:
+    # Never present a partial contract score as the overall score. A single
+    # unscored positive finding (for example, a deterministic trigger with no
+    # empirically validated weight) makes the whole-contract severity incomplete.
+    if not scored or incomplete_scores:
         overall, severity = None, None
     else:
         overall = min(20, max(0, scored[0][0] + sum(int(x["delta"]) for x in adjustments)))
