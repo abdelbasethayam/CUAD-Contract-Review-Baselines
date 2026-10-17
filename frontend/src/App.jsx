@@ -609,7 +609,7 @@ function ContractReview() {
                   <h2>Ask questions about {result.contract_metadata?.name || result.filename}</h2>
                   <p className="muted">Answers are grounded in this analysis. Each material contract claim should cite exact wording; if the source does not support an answer, the assistant should say so rather than guess.</p>
                 </div>
-                <span className="chat-model">{chatMessages.some((message) => message.model === "EXTRACTIVE_FALLBACK") ? "Source-only fallback" : "Contract-linked assistant"}</span>
+                <span className="chat-model">{chatMessages.some((message) => message.model === "EXTRACTIVE_FALLBACK") ? "Source-only fallback" : chatMessages.some((message) => message.model === "DETERMINISTIC_HELP") ? "Product help" : "Contract-linked assistant"}</span>
               </div>
 
               <div className="suggested-questions" aria-label="Suggested questions">
