@@ -484,6 +484,11 @@ def phase2_metrics() -> dict[str, Any]:
         all((item.get("regression_cases") or {}).get(key) for key in ("positive", "negative", "edge"))
         for item in base_rules
     )
+    rules_with_authority_refs = sum(
+        bool((item.get("authority_map") or {}).get("authority_ids"))
+        for item in base_rules
+    )
+    rules_without_authority_refs = max(0, len(base_rules) - rules_with_authority_refs)
     adjudication_template = Path(PROJECT_ROOT) / "data" / "risk" / "gold" / "risk_finding_adjudication_template.csv"
     project_adjudication_available = False
     if adjudication_template.is_file():
@@ -511,6 +516,8 @@ def phase2_metrics() -> dict[str, Any]:
         release_blockers.append("no_validated_confidence_calibration")
     if len(base_rules) and complete_rule_suites < len(base_rules):
         release_blockers.append("incomplete_positive_negative_edge_rule_tests")
+    if rules_without_authority_refs:
+        release_blockers.append("rules_without_context_specific_authority_mapping")
     clauses = playbook.get("clause_types") or {}
     clause_questions = sum(len((item or {}).get("checklist") or []) for item in clauses.values())
     rules = playbook.get("deterministic_rules") or []
@@ -555,6 +562,8 @@ def phase2_metrics() -> dict[str, Any]:
             "production_approved_rule_count": registry_manifest.get("production_approved_rule_count", 0),
             "complete_rule_test_suites": complete_rule_suites,
             "incomplete_rule_test_suites": max(0, len(base_rules) - complete_rule_suites),
+            "rules_with_authority_refs": rules_with_authority_refs,
+            "rules_without_authority_refs": rules_without_authority_refs,
             "project_specific_adjudication_available": project_adjudication_available,
             "confidence_calibration_available": calibration_available,
             "blockers": release_blockers,
