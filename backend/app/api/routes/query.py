@@ -120,6 +120,7 @@ _CONCEPT_EXPANSIONS: dict[str, set[str]] = {
     },
 }
 _RISK_INTENT = re.compile(r"\b(risk|risks|exposure|red flags?|concerns?|issues?|findings?|flagged|triggered|evidence|unfavo[u]?rable|one[- ]sided|imbalanc(?:e|ed)|problematic)\b", re.I)
+_EVIDENCE_GAP_INTENT = re.compile(r"\b(insufficient evidence|more evidence|need(?:s)? more evidence|evidence gap|unresolved|uncertain|uncertainty)\b", re.I)
 _OVERVIEW_INTENT = re.compile(r"\b(summar(?:y|ize|ise)|overview|key points?|main obligations|overall review|what(?:'s| is) this contract about)\b", re.I)
 _FOCUS_TERMS: list[tuple[str, set[str], int]] = [
     (r"\bdata\b|\bprivacy\b|\bpersonal information\b|\bexport\b|\bretention\b|\bsharing\b|\bdisclos(?:e|ure)\b", {
@@ -191,6 +192,7 @@ def _select_clauses(
         return (document_count + 1) / (document_frequency.get(term, 0) + 1)
 
     risk_intent = bool(_RISK_INTENT.search(question))
+    evidence_gap_intent = bool(_EVIDENCE_GAP_INTENT.search(question))
     overview_intent = bool(_OVERVIEW_INTENT.search(question))
     explicit_clause_indices: set[int] = set()
     for match in re.finditer(
@@ -227,6 +229,8 @@ def _select_clauses(
         if risk_intent:
             score += 4 * sum(1 for item in findings if item.get("risk_status") == "POTENTIAL_RISK")
             score += 2 * sum(1 for item in findings if item.get("risk_status") == "INSUFFICIENT_EVIDENCE")
+        if evidence_gap_intent:
+            score += 8 * sum(1 for item in findings if item.get("risk_status") == "INSUFFICIENT_EVIDENCE")
         if overview_intent:
             score += min(len(findings), 3)
         scored.append((score, -order, clause))
