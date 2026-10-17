@@ -107,6 +107,7 @@ def test_rule_review_queue_contains_authority_mapping_for_all_clause_rules():
     required = {
         "authority_map_clause_type",
         "authority_map_ids_json",
+        "authority_sources_json",
         "authority_coverage_status",
         "authority_scope_note",
         "authority_jurisdiction_policy",
@@ -121,8 +122,23 @@ def test_rule_review_queue_contains_authority_mapping_for_all_clause_rules():
     assert all(row["authority_map_clause_type"] == row["clause_type"] for row in clause_rows)
     assert all(row["authority_map_review_status"] == "RESEARCH_SEED_NOT_LEGALLY_APPROVED" for row in queue)
     assert all(row["authority_coverage_status"] != "" for row in queue)
+    catalog = _json("data/risk/authority_catalog.json")
+    catalog_by_id = {item["authority_id"]: item for item in catalog["authorities"]}
+    for row in clause_rows:
+        ids = json.loads(row["authority_map_ids_json"])
+        sources = json.loads(row["authority_sources_json"])
+        assert len(sources) == len(ids)
+        assert [source["authority_id"] for source in sources] == ids
+        for source in sources:
+            assert source["url"].startswith("https://")
+            assert source["pinpoint"]
+            assert source["jurisdiction"]
+            assert source["source_tier"] in {"A", "B"}
+            assert source["retrieval_date"] == catalog["retrieval_date"]
+            assert source["effective_date_status"]
     assert all(json.loads(row["authority_map_ids_json"]) is not None for row in queue)
     assert all(
-        row["authority_coverage_status"] == "RULE_FAMILY_SPECIFIC_AUTHORITY_REVIEW_REQUIRED"
+        json.loads(row["authority_sources_json"]) == []
+        and row["authority_coverage_status"] == "RULE_FAMILY_SPECIFIC_AUTHORITY_REVIEW_REQUIRED"
         for row in non_clause_rows
     )
