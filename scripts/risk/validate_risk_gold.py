@@ -90,6 +90,8 @@ def validate_records(
         adjudicator_id = str(adjudication.get("adjudicator_id") or "").strip()
         if not adjudicator_id or adjudicator_id in reviewer_ids:
             problems.append(f"adjudicator_must_be_independent:{record_id}")
+        if record.get("decision") != adjudication.get("final_decision"):
+            problems.append(f"record_decision_must_match_adjudication:{record_id}")
 
         evidence = record.get("evidence") or []
         for evidence_index, item in enumerate(evidence, start=1):
