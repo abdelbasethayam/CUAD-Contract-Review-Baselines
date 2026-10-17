@@ -89,7 +89,7 @@ The only safe immediate status is **PILOT_REVIEW_ONLY / UNAPPROVED**. The regist
 
 The supplemental authority layer is intentionally separate from a rule's approval state:
 
-- `data/risk/authority_catalog.json`: 32 traceable authority records with per-record retrieval dates, pinpoint citations, source tiers, currentness notes, and scope limits.
+- `data/risk/authority_catalog.json`: 33 traceable authority records with per-record retrieval dates, pinpoint citations, source tiers, currentness notes, and scope limits.
 - `data/risk/clause_authority_map.json`: one entry for every one of the 37 taxonomy categories. Six entries explicitly state that no universal primary statute has been identified; their triggers remain commercial/contract-text checks pending applicable law.
 - `data/risk/rule_review_queue.csv`: each clause-check work item carries the relevant authority IDs and scope notes. The 20 cross-clause/document/regex work items are marked for context-specific authority review.
 - `scripts/risk/validate_clause_authority_map.py`: CI validates schema, exact taxonomy coverage, source provenance, references, and explicit no-universal-authority notes.
