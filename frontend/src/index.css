@@ -713,7 +713,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .file-picker__copy strong { overflow: hidden; color: #233b4f; font-size: .84rem; text-overflow: ellipsis; white-space: nowrap; }
 .file-picker__copy small { color: #7d8c99; font-size: .71rem; }
 .file-picker__button { margin-left: auto; padding: 8px 11px; border: 1px solid #d5e0e7; border-radius: 8px; color: #4f6677; background: #fff; font-size: .7rem; font-weight: 750; white-space: nowrap; }
-.file-picker input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; pointer-events: auto; }\n.file-picker:focus-within { outline: 3px solid rgba(22,124,114,.22); outline-offset: 3px; }
+.file-picker input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; pointer-events: auto; }
+.file-picker:focus-within { outline: 3px solid rgba(22,124,114,.22); outline-offset: 3px; }
 .upload-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 9px; }
 .upload-actions > button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 43px; padding: 11px 15px; border-radius: 10px; background: #147c71; box-shadow: 0 6px 14px rgba(20,124,113,.15); font-size: .79rem; white-space: nowrap; }
 .upload-actions > button:hover:not(:disabled) { transform: translateY(-1px); background: #116b62; box-shadow: 0 8px 18px rgba(20,124,113,.22); }
