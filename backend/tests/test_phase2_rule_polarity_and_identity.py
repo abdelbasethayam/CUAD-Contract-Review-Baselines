@@ -43,7 +43,7 @@ def test_duplicate_non_solicit_ids_are_stable_and_distinct():
         "No-Solicit Of Customers",
         "No-Solicit Of Employees",
     }
-    assert all(item.get("rule_registry_metadata", {}).get("rule_id") for item in duplicates)
+    assert all(item.get("rule_registry_metadata", {}).get("registry_rule_id") for item in duplicates)
 
 
 def test_negative_trigger_can_return_supported_positive_finding(monkeypatch):
