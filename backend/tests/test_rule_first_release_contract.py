@@ -129,3 +129,57 @@ def test_clause_text_retrieves_relevant_checks_beyond_the_predicted_label():
 
     assert cap_ids.issubset(check_ids)
     assert audit_ids.isdisjoint(check_ids)
+
+
+def test_clause_checkpoint_retries_missing_model_passes():
+    from app.services.rag_service import _clause_risk_checkpoint_is_complete
+
+    expected = {"C-1"}
+    complete = [{
+        "check_id": "C-1",
+        "provenance": {
+            "rule_engine_version": "playbook-rules-1.0",
+            "playbook_hash": "p1",
+            "missing_passes": 0,
+        },
+    }]
+    incomplete = [{
+        "check_id": "C-1",
+        "provenance": {
+            "rule_engine_version": "playbook-rules-1.0",
+            "playbook_hash": "p1",
+            "missing_passes": 1,
+        },
+    }]
+
+    assert _clause_risk_checkpoint_is_complete(complete, expected, "p1") is True
+    assert _clause_risk_checkpoint_is_complete(incomplete, expected, "p1") is False
+
+
+def test_contract_check_checkpoint_retries_incomplete_model_passes():
+    from app.services.rag_service import _contract_checks_checkpoint_is_complete
+
+    playbook = {
+        "playbook_hash": "p1",
+        "cross_clause_checks": [{"id": "X-1"}],
+        "document_level_checks": [{"id": "DOC-1"}],
+    }
+    payload = {
+        "playbook_hash": "p1",
+        "model": "test-model",
+        "cross_clause_enabled": True,
+        "document_checks_enabled": True,
+        "cross_clause_findings": [{"check_id": "X-1", "provenance": {"missing_passes": 0}}],
+        "document_findings": [{"check_id": "DOC-1", "provenance": {"missing_passes": 0}}],
+    }
+
+    assert _contract_checks_checkpoint_is_complete(
+        payload, playbook, model="test-model",
+        cross_clause_enabled=True, document_checks_enabled=True,
+    ) is True
+
+    payload["cross_clause_findings"][0]["provenance"]["missing_passes"] = 1
+    assert _contract_checks_checkpoint_is_complete(
+        payload, playbook, model="test-model",
+        cross_clause_enabled=True, document_checks_enabled=True,
+    ) is False
