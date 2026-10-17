@@ -357,6 +357,7 @@ def test_demo_retrieval_selects_the_expected_sections_for_recording_questions():
     cases = [
         ("How does the supplier liability cap compare with the customer's cap?", 3),
         ("What termination rights does each party have?", 5),
+        ("Can the vendor cancel the agreement?", 5),
         ("Can we determine the governing law from this agreement alone?", 10),
         ("What insurance limits are required?", 7),
         ("What happens to customer data after termination?", 11),
