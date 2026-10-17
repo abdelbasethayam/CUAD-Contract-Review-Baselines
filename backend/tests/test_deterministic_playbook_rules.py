@@ -162,6 +162,12 @@ def test_direct_rule_finding_survives_contract_level_aggregation():
         item["check_id"] for item in assessment["key_risks"]
     }
     assert assessment["confidence_status"] == "UNCALIBRATED"
+    # A deterministic rule trigger has no empirically validated severity weight.
+    # It must remain a review finding without inventing a contract-level severity.
+    assert assessment["overall_risk"] == "UNSCORED"
+    assert assessment["severity_status"] == "INCOMPLETE"
+    assert assessment["overall_score"] is None
+    assert assessment["human_review_required"] is True
 
 
 
