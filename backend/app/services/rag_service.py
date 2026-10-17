@@ -173,6 +173,80 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
     }
 
 
+def _clause_risk_checkpoint_is_complete(
+    findings: list[dict],
+    expected_check_ids: set[str],
+    playbook_hash: str | None,
+) -> bool:
+    """A checkpoint is reusable only if all expected checks and model passes completed."""
+    if not findings or not expected_check_ids:
+        return False
+    found_ids = {str(item.get("check_id") or "") for item in findings}
+    if not expected_check_ids.issubset(found_ids):
+        return False
+    for finding in findings:
+        provenance = finding.get("provenance") or {}
+        if provenance.get("rule_engine_version") != RULE_ENGINE_VERSION:
+            return False
+        if provenance.get("playbook_hash") != playbook_hash:
+            return False
+        if str(finding.get("check_id") or "") in expected_check_ids:
+            try:
+                missing_passes = int(provenance.get("missing_passes", 0) or 0)
+            except (TypeError, ValueError, OverflowError):
+                return False
+            if missing_passes > 0:
+                return False
+    return True
+
+
+def _contract_checks_checkpoint_is_complete(
+    payload: dict,
+    playbook: dict,
+    *,
+    model: str,
+    cross_clause_enabled: bool,
+    document_checks_enabled: bool,
+) -> bool:
+    """Do not freeze contract checks whose model calls failed or omitted answers."""
+    if not isinstance(payload, dict):
+        return False
+    if payload.get("playbook_hash") != playbook.get("playbook_hash"):
+        return False
+    if payload.get("model") != model:
+        return False
+    if bool(payload.get("cross_clause_enabled")) != bool(cross_clause_enabled):
+        return False
+    if bool(payload.get("document_checks_enabled")) != bool(document_checks_enabled):
+        return False
+
+    groups = (
+        (
+            {str(item.get("id")) for item in (playbook.get("cross_clause_checks") or [])},
+            payload.get("cross_clause_findings") or [],
+        ),
+        (
+            {str(item.get("id")) for item in (playbook.get("document_level_checks") or [])},
+            payload.get("document_findings") or [],
+        ),
+    )
+    for expected_ids, findings in groups:
+        found = {str(item.get("check_id") or "") for item in findings}
+        if not expected_ids.issubset(found):
+            return False
+        for finding in findings:
+            if str(finding.get("check_id") or "") not in expected_ids:
+                continue
+            provenance = finding.get("provenance") or {}
+            try:
+                missing_passes = int(provenance.get("missing_passes", 0) or 0)
+            except (TypeError, ValueError, OverflowError):
+                return False
+            if missing_passes > 0:
+                return False
+    return True
+
+
 def _load_segments(run):
     data = run.read_json("segments.json")
     if not data:
@@ -471,6 +545,7 @@ def _classify_contract(
             run.write_json("contract_coverage.json", contract_coverage)
 
         # Phase 2 clause risk: each clause is checkpointed separately.
+        clause_risks_refreshed = False
         risk_index = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
         for pos, item in enumerate(valid_items):
             idx = int(item["clause_index"])
@@ -491,14 +566,14 @@ def _classify_contract(
                     clause_text=str(item.get("clause_text") or ""),
                 )
             }
-            rule_engine_current = bool(findings_for_clause) and all(
-                (value.get("provenance") or {}).get("rule_engine_version") == RULE_ENGINE_VERSION
-                and (value.get("provenance") or {}).get("playbook_hash") == playbook.get("playbook_hash")
-                for value in findings_for_clause
-            )
-            # Do not let extra PR-* rule findings make a resumed run look complete.
-            # Require every expected question ID and the current deterministic-rule version.
-            if checks_expected and checks_expected.issubset(finding_ids) and rule_engine_current:
+            if not checks_expected:
+                checks_expected = {"OPEN-RISK-1"}
+            # Missing model passes are retryable failures, not completed checkpoints.
+            if _clause_risk_checkpoint_is_complete(
+                findings_for_clause,
+                checks_expected,
+                playbook.get("playbook_hash"),
+            ):
                 continue
 
             findings = analyze_clause_risk(
@@ -512,6 +587,7 @@ def _classify_contract(
                 playbook=playbook,
                 qdrant_client=qdrant_client,
             )
+            clause_risks_refreshed = True
             # Idempotent checkpoint: replace only the clause's prior rows.
             existing_lines = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
             existing_for_clause = [
@@ -581,22 +657,38 @@ def _classify_contract(
             run.write_json("deterministic_cross_checks.json", deterministic_signals)
 
         contract_checks_path = run.root / "contract_checks.json"
-        if contract_checks_path.exists():
-            contract_checks = run.read_json("contract_checks.json", {}) or {}
-            cross_findings = contract_checks.get("cross_clause_findings", [])
-            document_findings = contract_checks.get("document_findings", [])
+        effective_playbook = dict(playbook)
+        if not RISK_ENABLE_CROSS_CLAUSE:
+            effective_playbook["cross_clause_checks"] = []
+        if not RISK_ENABLE_DOCUMENT_CHECKS:
+            effective_playbook["document_level_checks"] = []
+
+        cached_contract_checks = (
+            run.read_json("contract_checks.json", {}) or {}
+            if contract_checks_path.exists()
+            else {}
+        )
+        contract_checks_refreshed = False
+        if contract_checks_path.exists() and _contract_checks_checkpoint_is_complete(
+            cached_contract_checks,
+            effective_playbook,
+            model=RISK_MODEL,
+            cross_clause_enabled=RISK_ENABLE_CROSS_CLAUSE,
+            document_checks_enabled=RISK_ENABLE_DOCUMENT_CHECKS,
+        ):
+            cross_findings = cached_contract_checks.get("cross_clause_findings", [])
+            document_findings = cached_contract_checks.get("document_findings", [])
         else:
             trace({
                 "type": "progress",
                 "stage": "cross_clause",
-                "message": "Running configured cross-clause/document checks",
+                "message": (
+                    "Retrying incomplete cross-clause/document checks"
+                    if contract_checks_path.exists()
+                    else "Running configured cross-clause/document checks"
+                ),
                 "total": 1,
             })
-            effective_playbook = dict(playbook)
-            if not RISK_ENABLE_CROSS_CLAUSE:
-                effective_playbook["cross_clause_checks"] = []
-            if not RISK_ENABLE_DOCUMENT_CHECKS:
-                effective_playbook["document_level_checks"] = []
             cross_findings, document_findings = analyze_contract_checks(
                 clause_rows,
                 playbook=effective_playbook,
@@ -615,9 +707,10 @@ def _classify_contract(
                     "document_checks_enabled": RISK_ENABLE_DOCUMENT_CHECKS,
                 },
             )
+            contract_checks_refreshed = True
 
         aggregate_path = run.root / "contract_risk.json"
-        if aggregate_path.exists():
+        if aggregate_path.exists() and not clause_risks_refreshed and not contract_checks_refreshed:
             assessment = run.read_json("contract_risk.json", {}) or {}
         else:
             assessment = aggregate_clause_risks(
