@@ -625,11 +625,11 @@ function ContractReview() {
 
               <div className="suggested-questions" aria-label="Suggested questions">
                 {[
-                  "Summarize the main obligations in plain English.",
-                  "What are the termination rights and notice periods?",
-                  "What liability limits or exceptions should I review?",
-                  "Who owns the intellectual property created under this agreement?",
-                  "Which findings still need more evidence?",
+                  "How does the supplier liability cap compare with the customer's cap?",
+                  "What termination rights does each party have?",
+                  "Can we determine the governing law from this agreement alone?",
+                  "What insurance must the supplier maintain, and are minimum policy limits stated?",
+                  "What happens to customer data after termination, and does the agreement specify retention or deletion?",
                 ].map((question) => (
                   <button key={question} type="button" onClick={() => askContract(question)} disabled={chatLoading}>{question}</button>
                 ))}
