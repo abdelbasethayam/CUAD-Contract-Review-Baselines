@@ -481,7 +481,7 @@ def _record(
         or ("UNRESOLVED" if any(str(x).upper() == "UNSPECIFIED" for x in jurisdiction_scope) else "DECLARED_NOT_VERIFIED")
     )
     validation_status = str(rule.get("validation_status") or "DRAFT_UNVALIDATED") if not candidate else "DRAFT_UNVALIDATED"
-    approval_status = str(rule.get("approval_status") or playbook.get("approval_status") or "UNAPPROVED")
+    approval_status = str(rule.get("approval_status") or "UNAPPROVED")
     default_execution_status = "APPROVED_FOR_EXECUTION" if validation_status == "APPROVED" else "PILOT_REVIEW_ONLY"
     execution_status = (
         str(rule.get("execution_status") or default_execution_status)
