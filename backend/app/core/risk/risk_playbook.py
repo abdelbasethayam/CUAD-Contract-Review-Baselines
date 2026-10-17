@@ -265,7 +265,7 @@ _STRONG_RISK_KEYWORDS = {
     "exclusivity", "non-compete", "noncompete", "non-solicit", "nonsolicit",
     "non-solicitation", "solicit", "escrow", "royalty", "mfn", "rofr", "rofo",
     "rofn", "ip", "transferable", "disparagement", "penalty", "discount",
-    "adjustment", "transition", "wind-down", "revenue sharing", "profit sharing",
+    "adjustment", "price", "transition", "wind-down", "revenue sharing", "profit sharing",
     "net sales", "net revenue", "profit share", "liquidated damages",
     "minimum commitment", "take or pay", "change of control", "governing law",
     "intellectual property", "source code", "work product", "deliverables",
@@ -280,7 +280,7 @@ _STRONG_RISK_KEYWORDS = {
 _GENERIC_PLAYBOOK_KEYWORDS = {
     "upon reasonable notice", "for any reason", "under any circumstances",
     "requirements", "coverage", "customers", "employees", "territory",
-    "duration", "fees", "price", "notice", "term", "sole", "records", "report",
+    "duration", "fees", "notice", "term", "sole", "records", "report",
     "affiliate", "customer",
 }
 
