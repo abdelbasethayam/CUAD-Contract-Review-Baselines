@@ -245,6 +245,7 @@
       "required": [
         "status",
         "reviewer_ids",
+        "reviewer_decisions",
         "adjudicator_id",
         "adjudication_reference",
         "adjudicated_at",
@@ -260,6 +261,23 @@
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "uniqueItems": true
+        },
+        "reviewer_decisions": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["reviewer_id", "decision", "rationale", "reviewed_at"],
+            "properties": {
+              "reviewer_id": { "type": "string", "minLength": 1 },
+              "decision": {
+                "enum": ["POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE", "NOT_APPLICABLE"]
+              },
+              "rationale": { "type": "string", "minLength": 1 },
+              "reviewed_at": { "type": "string", "format": "date-time" }
+            },
+            "additionalProperties": false
+          }
         },
         "adjudicator_id": {
           "type": ["string", "null"]
