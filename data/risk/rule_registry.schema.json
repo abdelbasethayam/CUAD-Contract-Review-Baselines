@@ -240,6 +240,50 @@
       },
       "additionalProperties": false
     },
+    "review_governance": {
+      "type": "object",
+      "required": [
+        "status",
+        "reviewer_ids",
+        "adjudicator_id",
+        "adjudication_reference",
+        "adjudicated_at",
+        "approved_by",
+        "approved_at",
+        "approval_basis"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["NOT_STARTED", "IN_REVIEW", "ADJUDICATED", "APPROVED", "REJECTED"]
+        },
+        "reviewer_ids": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "adjudicator_id": {
+          "type": ["string", "null"]
+        },
+        "adjudication_reference": {
+          "type": ["string", "null"]
+        },
+        "adjudicated_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "approved_by": {
+          "type": ["string", "null"]
+        },
+        "approved_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "approval_basis": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": false
+    },
     "regression_cases": {
       "type": "object",
       "required": [
@@ -336,7 +380,7 @@
         ],
         "properties": {
           "execution_status": {
-            "const": "PILOT_REVIEW_ONLY"
+            "enum": ["PILOT_REVIEW_ONLY", "APPROVED_FOR_EXECUTION"]
           }
         }
       }
@@ -368,6 +412,59 @@
           "validation_status": {
             "const": "DRAFT_UNVALIDATED"
           }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_kind": { "const": "BASE_RULE" },
+          "validation_status": { "const": "ADJUDICATED" }
+        },
+        "required": ["record_kind", "validation_status"]
+      },
+      "then": {
+        "required": ["review_governance"],
+        "properties": {
+          "review_governance": {
+            "properties": { "status": { "const": "ADJUDICATED" } }
+          },
+          "execution_status": { "const": "PILOT_REVIEW_ONLY" },
+          "execution_eligible": { "const": true }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_kind": { "const": "BASE_RULE" },
+          "validation_status": { "const": "APPROVED" }
+        },
+        "required": ["record_kind", "validation_status"]
+      },
+      "then": {
+        "required": ["review_governance"],
+        "properties": {
+          "approval_status": { "const": "APPROVED" },
+          "review_governance": {
+            "properties": { "status": { "const": "APPROVED" } }
+          },
+          "execution_status": { "const": "APPROVED_FOR_EXECUTION" },
+          "execution_eligible": { "const": true }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_kind": { "const": "BASE_RULE" },
+          "validation_status": { "const": "REJECTED" }
+        },
+        "required": ["record_kind", "validation_status"]
+      },
+      "then": {
+        "properties": {
+          "execution_eligible": { "const": false }
         }
       }
     }
