@@ -10,7 +10,7 @@ from ..config import RISK_MAX_TOKENS, RISK_MODEL, RISK_NUM_CTX, RISK_SELF_CONSIS
 from ..rag.generator import call_ollama
 from .risk_engine import _evidence_valid, _majority, _severity_signal, _support_score
 from .risk_playbook import load_playbook, source_records
-from .risk_scoring import score_finding
+from .confidence_calibration import confidence_from_support_score, SUPPORT_SCORE_VERSION
 
 
 def _candidate_clauses(clauses: list[dict], pair: list[str]) -> list[dict]:
@@ -290,20 +290,11 @@ def analyze_contract_checks(
                 agreement=agreement,
                 indicator_match=False,
             )
-            score_details = score_finding({
-                "risk_status": status,
-                "risk": status == "POTENTIAL_RISK",
-                "risk_type": rep.get("risk_type"),
-                "question": by_source[check_id].get("question", ""),
-                "check_id": check_id,
-                "scope": kind,
-                "evidence": " ".join(str(x.get("quote") or "") for x in rep.get("evidence") or []),
-                "why_flagged": rep.get("why_flagged"),
-                "score_components": rep.get("score_components") or {},
-                "deterministic_cross_check": bool(deterministic_signals and any(x.get("id") == check_id for x in deterministic_signals)),
-            }) if status == "POTENTIAL_RISK" else None
-            severity_score = float(score_details["final_score"]) if score_details and score_details.get("final_score") is not None else None
-            severity_signal = round(severity_score / 20.0, 4) if severity_score is not None else None
+            confidence_details = (
+                confidence_from_support_score(raw_support, playbook_hash=playbook.get("playbook_hash"))
+                if status in {"POTENTIAL_RISK", "NO_RISK"}
+                else {"confidence": None, "confidence_status": "NOT_ESTIMATED", "confidence_target": "PREDICTION_CORRECTNESS", "confidence_calibration_version": None}
+            )
             check = by_source[check_id]
             supporting_sources = source_records(playbook, check.get("sources", []))
             primary_source = supporting_sources[0] if supporting_sources else {}
@@ -317,21 +308,23 @@ def analyze_contract_checks(
                 "risk_status": status,
                 "risk": status == "POTENTIAL_RISK",
                 "risk_type": rep.get("risk_type") if status == "POTENTIAL_RISK" else None,
-                "risk_level": score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None,
-                "severity": score_details["severity"] if score_details and status == "POTENTIAL_RISK" else None,
-                "raw_support_score": raw_support,
-                "severity_score": severity_score,
-                "severity_signal": severity_signal,
-                "score_components": score_details["score_components"] if score_details else {},
-                "base_score": score_details["base_score"] if score_details else None,
-                "score_modifiers": score_details["modifiers"] if score_details else [],
-                "final_score": score_details["final_score"] if score_details else None,
-                "score_override_reason": score_details["override_reason"] if score_details else None,
-                "human_review_required": score_details["human_review_required"] if score_details else True,
-                "review_escalation": score_details["escalation"] if score_details else "LEGAL_REVIEW",
-                "confidence": None,
-                "confidence_status": "UNCALIBRATED",
-                "severity_status": "RULE_BASED_TRIAGE" if severity_score is not None else ("INCOMPLETE" if score_details else "UNCALIBRATED"),
+                "risk_level": None,
+                "severity": None,
+                "raw_support_score": raw_support if status in {"POTENTIAL_RISK", "NO_RISK"} else None,
+                "severity_score": None,
+                "severity_signal": None,
+                "score_components": {},
+                "base_score": None,
+                "score_modifiers": [],
+                "final_score": None,
+                "score_override_reason": None,
+                "human_review_required": status in {"POTENTIAL_RISK", "INSUFFICIENT_EVIDENCE"},
+                "review_escalation": "LEGAL_REVIEW" if status in {"POTENTIAL_RISK", "INSUFFICIENT_EVIDENCE"} else "STANDARD_REVIEW",
+                "confidence": confidence_details.get("confidence"),
+                "confidence_status": confidence_details.get("confidence_status", "UNCALIBRATED"),
+                "confidence_target": confidence_details.get("confidence_target", "PREDICTION_CORRECTNESS"),
+                "confidence_calibration_version": confidence_details.get("confidence_calibration_version"),
+                "severity_status": "DEPRECATED_NOT_USED",
                 "severity_probabilities": {},
                 "ground_truth_status": "PLAYBOOK_DERIVED",
                 "clause_ids": [i for i in rep["clause_ids"] if i in contract_lookup],
@@ -349,9 +342,11 @@ def analyze_contract_checks(
                     "expected_passes": n_passes,
                     "missing_passes": max(0, n_passes - len(records)),
                     "agreement": agreement,
-                    "score_component_source": "LLM_SELF_REPORTED_UNVALIDATED" if status == "POTENTIAL_RISK" else None,
-                    "score_interpretation": "Triage heuristic only; not calibrated to real-world legal outcomes.",
-                    "score_version": score_details["score_version"] if score_details else None,
+                    "support_score_version": SUPPORT_SCORE_VERSION,
+                    "support_score_interpretation": "Uncalibrated diagnostic only; not a probability.",
+                    "confidence_target": confidence_details.get("confidence_target", "PREDICTION_CORRECTNESS"),
+                    "confidence_calibration_version": confidence_details.get("confidence_calibration_version"),
+                    "rule_registry_metadata": check.get("rule_registry_metadata", {}),
                     "check_batch_size": check_batch_size,
                     "model_batches_per_pass": len(batches),
                 },
@@ -365,8 +360,8 @@ def analyze_contract_checks(
                 "retrieval_date": primary_source.get("retrieval_date"),
                 "supporting_quote_or_paraphrase": primary_source.get("supporting_quote_or_paraphrase"),
                 "transferability": primary_source.get("transferability"),
-                "severity_factors": rep.get("severity_factors") or rep.get("score_components") or {},
-                "score_components_raw": rep.get("score_components") or {},
+                "severity_factors": {},
+                "score_components_raw": {},
             })
         # Missing outputs are unresolved rather than silently marked NO_RISK.
         returned = {x["check_id"] for x in results}
