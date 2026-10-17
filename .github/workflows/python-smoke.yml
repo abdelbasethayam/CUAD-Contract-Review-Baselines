@@ -23,6 +23,7 @@ jobs:
           python scripts/risk/build_rule_registry.py --check
           python scripts/risk/validate_rule_registry.py
           python scripts/risk/validate_clause_authority_map.py
+          python scripts/risk/validate_risk_gold.py --schema-only
           python scripts/risk/build_rule_review_queue.py --check
       - name: Test all backend tests
         env:
