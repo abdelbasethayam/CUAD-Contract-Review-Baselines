@@ -275,11 +275,12 @@
       "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
       "authority_ids": [
         "FTC_NONCOMPETE_STATUS_2025",
-        "DE_SUPREME_PAYSCALE_2026"
+        "DE_SUPREME_PAYSCALE_2026",
+        "CA_BPC_16600"
       ],
       "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
       "jurisdiction_policy": "STATE_LAW_AND_PARTY_RELATIONSHIP_REQUIRED; NO_NATIONWIDE_DEFAULT_RULE",
-      "scope_note": "The FTC's 2024 nationwide rule is not in effect following vacatur and the FTC's 2025 action. State law remains essential; the Delaware opinion is a pleading-stage decision, not a holding that a clause is ultimately enforceable.",
+      "scope_note": "The FTC's 2024 nationwide rule is not in effect following vacatur and the FTC's 2025 action. California Business and Professions Code § 16600 is linked as a state-law authority lead, but the official page returned HTTP 403 and its current text/effective dates remain unverified. State-specific analysis is essential; the Delaware opinion is a pleading-stage decision, not a holding of ultimate enforceability.",
       "legal_conclusion_allowed": false,
       "required_context": [
         "exact contract quote and clause location",
@@ -294,11 +295,12 @@
       "clause_type": "No-Solicit Of Customers",
       "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
       "authority_ids": [
-        "DE_SUPREME_PAYSCALE_2026"
+        "DE_SUPREME_PAYSCALE_2026",
+        "CA_BPC_16600"
       ],
       "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
       "jurisdiction_policy": "STATE_LAW_AND_PARTY_RELATIONSHIP_REQUIRED",
-      "scope_note": "Assess whether the clause concerns customers, confidential information, employees, or competition; scope, duration, consideration, role, and state law matter. The cited Delaware case does not decide ultimate enforceability.",
+      "scope_note": "Assess whether the clause concerns customers, confidential information, employees, or competition; scope, duration, consideration, role, and state law matter. California § 16600 is a candidate state-law lead whose current text has not been retrieved; the cited Delaware case does not decide ultimate enforceability.",
       "legal_conclusion_allowed": false,
       "required_context": [
         "exact contract quote and clause location",
@@ -314,11 +316,12 @@
       "review_trigger_class": "CONTRACT_TEXT_REVIEW_TRIGGER",
       "authority_ids": [
         "DE_SUPREME_PAYSCALE_2026",
-        "USC_15_1"
+        "USC_15_1",
+        "CA_BPC_16600"
       ],
       "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
       "jurisdiction_policy": "STATE_LAW_AND_PARTY_RELATIONSHIP_AND_MARKET_FACTS_REQUIRED",
-      "scope_note": "Employee no-poach provisions may raise employment and antitrust issues depending on parties and market effects; an ordinary customer non-solicit is not the same legal category.",
+      "scope_note": "Employee no-poach provisions may raise employment and antitrust issues depending on parties and market effects; California § 16600 is a state-law lead whose current text/effective dates remain unverified. An ordinary customer non-solicit is not the same legal category.",
       "legal_conclusion_allowed": false,
       "required_context": [
         "exact contract quote and clause location",
@@ -536,11 +539,12 @@
       "authority_ids": [
         "USC_15_1",
         "FTC_NONCOMPETE_STATUS_2025",
-        "DE_SUPREME_PAYSCALE_2026"
+        "DE_SUPREME_PAYSCALE_2026",
+        "CA_BPC_16600"
       ],
       "authority_coverage_status": "LIMITED_PRIMARY_AUTHORITY_LINKED",
       "jurisdiction_policy": "RESTRICTION_TYPE_STATE_LAW_AND_MARKET_FACTS_REQUIRED",
-      "scope_note": "Separate exclusivity, employee non-compete, non-solicit, and market-allocation restrictions. Exceptions do not themselves establish enforceability; apply state law and antitrust facts.",
+      "scope_note": "Separate exclusivity, employee non-compete, non-solicit, and market-allocation restrictions. California § 16600 is a state-specific authority lead but its current text was not retrievable in this audit. Exceptions do not themselves establish enforceability; apply state law and antitrust facts.",
       "legal_conclusion_allowed": false,
       "required_context": [
         "exact contract quote and clause location",
