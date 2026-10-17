@@ -6,6 +6,8 @@ import json
 import sys
 from pathlib import Path
 
+from jsonschema import Draft202012Validator, FormatChecker
+
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT / "scripts" / "risk") not in sys.path:
     sys.path.insert(0, str(ROOT / "scripts" / "risk"))
@@ -14,8 +16,13 @@ from build_rule_registry import (
     REGISTRY_PATH,
     SOURCE_REGISTRY_PATH,
     PLAYBOOK_PATH,
+    CONTRACT_PROFILES,
+    _base_inputs,
     build_artifacts,
 )
+
+RULE_SCHEMA_PATH = ROOT / "data" / "risk" / "rule_registry.schema.json"
+SOURCE_SCHEMA_PATH = ROOT / "data" / "risk" / "source_registry.schema.json"
 
 def main() -> int:
     playbook = json.loads(PLAYBOOK_PATH.read_text(encoding="utf-8"))
@@ -35,6 +42,33 @@ def main() -> int:
     records = [json.loads(line) for line in REGISTRY_PATH.read_text(encoding="utf-8").splitlines() if line.strip()]
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     sources = json.loads(SOURCE_REGISTRY_PATH.read_text(encoding="utf-8"))
+    rule_schema = json.loads(RULE_SCHEMA_PATH.read_text(encoding="utf-8"))
+    source_schema = json.loads(SOURCE_SCHEMA_PATH.read_text(encoding="utf-8"))
+    Draft202012Validator.check_schema(rule_schema)
+    Draft202012Validator.check_schema(source_schema)
+    rule_validator = Draft202012Validator(rule_schema, format_checker=FormatChecker())
+    source_validator = Draft202012Validator(source_schema, format_checker=FormatChecker())
+    schema_errors: list[str] = []
+    for record_number, record in enumerate(records, start=1):
+        for error in rule_validator.iter_errors(record):
+            schema_errors.append(
+                f"rule_schema:record_{record_number}:{'/'.join(str(part) for part in error.absolute_path)}:{error.message}"
+            )
+            if len(schema_errors) >= 100:
+                break
+        if len(schema_errors) >= 100:
+            break
+    for source in sources.get("sources", []):
+        for error in source_validator.iter_errors(source):
+            schema_errors.append(
+                f"source_schema:{source.get('source_id', '<missing-id>')}:{'/'.join(str(part) for part in error.absolute_path)}:{error.message}"
+            )
+            if len(schema_errors) >= 100:
+                break
+        if len(schema_errors) >= 100:
+            break
+    if schema_errors:
+        problems.extend(f"schema_validation_error:{item}" for item in schema_errors)
     ids = [item["rule_id"] for item in records]
     if len(ids) != len(set(ids)):
         problems.append("duplicate_rule_ids")
@@ -44,12 +78,56 @@ def main() -> int:
         problems.append("base_rule_count_mismatch")
     if sum(item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE" for item in records) != manifest["candidate_rule_count"]:
         problems.append("candidate_rule_count_mismatch")
-    if manifest["production_approved_rule_count"] != 0:
-        problems.append("unexpected_approved_rules_without_review")
+    approved_rules = [
+        item for item in records
+        if item.get("record_kind") == "BASE_RULE"
+        and item.get("validation_status") == "APPROVED"
+        and item.get("approval_status") == "APPROVED"
+        and item.get("execution_eligible") is True
+    ]
+    if manifest["production_approved_rule_count"] != len(approved_rules):
+        problems.append("manifest_approved_rule_count_mismatch")
+    if approved_rules and playbook.get("approval_status") != "APPROVED":
+        problems.append("approved_rule_under_unapproved_playbook")
     if any(item["execution_eligible"] for item in records if item["record_kind"] == "CONTEXT_VARIANT_CANDIDATE"):
         problems.append("candidate_rule_enabled_for_execution")
-    if any(item["validation_status"] != "DRAFT_UNVALIDATED" for item in records):
-        problems.append("unreviewed_rule_misrepresented_as_validated")
+    for item in records:
+        if item.get("record_kind") != "BASE_RULE":
+            continue
+        status = item.get("validation_status")
+        approval_status = item.get("approval_status")
+        execution_status = item.get("execution_status")
+        eligible = item.get("execution_eligible") is True
+        governance = item.get("review_governance") or {}
+        if status in {"ADJUDICATED", "APPROVED"}:
+            reviewers = governance.get("reviewer_ids") or []
+            adjudicator = str(governance.get("adjudicator_id") or "").strip()
+            if (
+                governance.get("status") != status
+                or len(set(reviewers)) < 2
+                or any(not str(reviewer).strip() for reviewer in reviewers)
+                or not adjudicator
+                or adjudicator in set(reviewers)
+                or not str(governance.get("adjudication_reference") or "").strip()
+                or not str(governance.get("adjudicated_at") or "").strip()
+            ):
+                problems.append(f"independent_adjudication_metadata_incomplete:{item.get('rule_id')}")
+        if status == "APPROVED":
+            if (
+                approval_status != "APPROVED"
+                or execution_status != "APPROVED_FOR_EXECUTION"
+                or not eligible
+                or not str(governance.get("approved_by") or "").strip()
+                or not str(governance.get("approved_at") or "").strip()
+                or not str(governance.get("approval_basis") or "").strip()
+            ):
+                problems.append(f"approved_rule_missing_approval_gate:{item.get('rule_id')}")
+        elif approval_status == "APPROVED" or execution_status == "APPROVED_FOR_EXECUTION":
+            problems.append(f"rule_approval_state_inconsistent:{item.get('rule_id')}")
+        if status == "REJECTED" and eligible:
+            problems.append(f"rejected_rule_execution_enabled:{item.get('rule_id')}")
+        if item.get("legal_conclusion_allowed") is not False:
+            problems.append(f"rule_must_not_emit_legal_conclusion:{item.get('rule_id')}")
     for item in records:
         if item["record_kind"] != "BASE_RULE" or item.get("rule_family") != "DETERMINISTIC_REGEX":
             continue
@@ -119,12 +197,40 @@ def main() -> int:
             not source.get("pinpoint_citation") or source.get("citation_status") != "VERIFIED_PINPOINT"
         ):
             problems.append(f"unsupported_authority_claim:{source.get('source_id')}")
-    if manifest["base_rule_count"] != 121:
-        problems.append(f"unexpected_base_rule_count:{manifest['base_rule_count']}")
+    expected_base_count = len(_base_inputs(playbook))
+    if manifest["base_rule_count"] != expected_base_count:
+        problems.append(f"base_rule_count_does_not_match_playbook:{manifest['base_rule_count']}:{expected_base_count}")
+    if manifest["candidate_profile_count"] != len(CONTRACT_PROFILES):
+        problems.append("candidate_profile_count_mismatch")
+    if manifest["candidate_rule_count"] != expected_base_count * len(CONTRACT_PROFILES):
+        problems.append("candidate_count_not_derived_from_base_rules_and_profiles")
     if manifest["candidate_rule_count"] < 1000:
         problems.append(f"candidate_registry_below_target:{manifest['candidate_rule_count']}")
-    if manifest["verified_pinpoint_source_count"] != 0:
-        problems.append("legacy_sources_must_not_be_marked_verified_without_review")
+    verified_pinpoint_sources = [
+        source for source in sources.get("sources", [])
+        if source.get("citation_status") == "VERIFIED_PINPOINT"
+        and str(source.get("pinpoint_citation") or "").strip()
+    ]
+    mislabeled_verified_sources = [
+        source.get("source_id")
+        for source in sources.get("sources", [])
+        if source.get("citation_status") == "VERIFIED_PINPOINT"
+        and not str(source.get("pinpoint_citation") or "").strip()
+    ]
+    if mislabeled_verified_sources:
+        problems.append(f"verified_citation_missing_pinpoint:{mislabeled_verified_sources}")
+    verified_count = len(verified_pinpoint_sources)
+    if manifest["verified_pinpoint_source_count"] != verified_count:
+        problems.append("manifest_verified_pinpoint_count_mismatch")
+    if sources.get("verified_pinpoint_source_count") != verified_count:
+        problems.append("source_registry_verified_pinpoint_count_mismatch")
+    expected_source_status = (
+        "INCOMPLETE_SOURCE_CITATIONS" if verified_count == 0
+        else "ALL_PINPOINT_CITATIONS_VERIFIED" if verified_count == len(sources.get("sources", []))
+        else "PARTIALLY_VERIFIED_SOURCE_CITATIONS"
+    )
+    if sources.get("status") != expected_source_status:
+        problems.append("source_registry_status_mismatch")
 
     report = {
         "status": "PASS" if not problems else "FAIL",
