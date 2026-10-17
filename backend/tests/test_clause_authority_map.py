@@ -77,7 +77,6 @@ def test_authority_catalog_has_traceable_source_provenance_and_no_unreferenced_r
     assert all(item["pinpoint"].strip() for item in by_id.values())
     assert all(item["retrieval_date"] == catalog["retrieval_date"] for item in by_id.values())
     assert all(item["scope_limit"].strip() for item in by_id.values())
-    assert all(item["legal_conclusion_allowed"] is False for item in by_id.values()) if "legal_conclusion_allowed" in by_id.values() else True
 
 
 def test_noncompete_mapping_does_not_repeat_the_vacated_ftc_rule_as_current_law():
