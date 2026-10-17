@@ -1,68 +1,16 @@
 {
-  "checks": [
-    {
-      "name": "train_test_contract_overlap",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "gold_uses_train_docs_only",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "gold_partition_disjoint",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "silver_uses_test_docs_only",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "silver_train_overlap",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "expert_presence_uses_test_docs_only",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "cuad_train_payload_train_only",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "cuad_train_payload_test_overlap",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "cuad_train_mpnet_payload_train_only",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "cuad_train_mpnet_payload_test_overlap",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "cuad_train_hashing_payload_train_only",
-      "passed": true,
-      "value": 0
-    },
-    {
-      "name": "cuad_train_hashing_payload_test_overlap",
-      "passed": true,
-      "value": 0
-    }
-  ],
-  "train_contracts": 410,
-  "test_contracts": 100,
-  "train_rows": 10545,
-  "test_rows": 2556
+  "schema_version": 2,
+  "status": "NOT_RUN",
+  "validation_scope": "CUAD_CLAUSE_CLASSIFICATION_INDEX_ISOLATION_ONLY",
+  "risk_annotations_read": false,
+  "human_gold_required": false,
+  "train_contracts": null,
+  "test_contracts": null,
+  "train_clause_rows": null,
+  "test_clause_rows": null,
+  "checks_total": 0,
+  "checks_passed": 0,
+  "all_passed": false,
+  "checks": [],
+  "interpretation": "Placeholder only after replacing annotation-queue validation with classification-index isolation checks. Run scripts/risk/run_release_checks.py with the backend stopped to verify train/test contract disjointness and that classifier Qdrant payloads contain training-contract IDs only. This validator does not read risk-text-span datasets. Risk detection is a separate playbook-rule and question conformance path."
 }

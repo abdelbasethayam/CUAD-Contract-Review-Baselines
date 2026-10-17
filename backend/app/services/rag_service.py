@@ -18,15 +18,17 @@ from ..core.config import (
     LEGAL_KNOWLEDGE_COLLECTION,
     RISK_CONTEXT_TOP_K,
     RISK_MODEL,
+    RISK_MAX_TOKENS,
+    RISK_NUM_CTX,
+    RISK_TEMPERATURE,
     RISK_SELF_CONSISTENCY_PASSES,
+    LEGAL_KNOWLEDGE_TOP_K,
     RISK_PLAYBOOK_PATH,
-    RISK_CALIBRATION_PATH,
     RISK_ENABLE_CROSS_CLAUSE,
     RISK_ENABLE_DOCUMENT_CHECKS,
     RUNS_DIR,
     RISK_USE_CONTEXT,
     RISK_USE_LEGAL_GUIDANCE,
-    RISK_USE_PLAYBOOK,
     TOP_K,
     load_labels,
 )
@@ -46,7 +48,8 @@ from ..core.risk.contract_metadata import extract_contract_metadata
 from ..core.risk.contract_coverage import build_contract_coverage
 from ..core.risk.contract_risk_engine import aggregate_clause_risks, build_risk_only_view
 from ..core.risk.risk_engine import analyze_clause_risk
-from ..core.risk.risk_playbook import load_playbook
+from ..core.risk.deterministic_rules import RULE_ENGINE_VERSION
+from ..core.risk.risk_playbook import applicable_checks, load_playbook
 from ..core.risk.run_store import AnalysisRun, create_or_resume_run, mark_run_complete, mark_run_failed
 from ..core.risk.evidence_compressor import compress_cuad_evidence
 
@@ -150,6 +153,10 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
         "code_fingerprint": _code_fingerprint(),
         "top_k": int(top_k),
         "risk_model": RISK_MODEL,
+        "risk_temperature": RISK_TEMPERATURE,
+        "risk_max_tokens": RISK_MAX_TOKENS,
+        "risk_num_ctx": RISK_NUM_CTX,
+        "legal_knowledge_top_k": LEGAL_KNOWLEDGE_TOP_K,
         "embedding_backend": EMBEDDING_BACKEND,
         "embedding_model": COHERE_MODEL if EMBEDDING_BACKEND == "cohere" else f"sklearn.HashingVectorizer(n_features={LOCAL_HASHING_DIM}, ngram_range=(1,2), norm=l2)",
         "qdrant_collection": QDRANT_COLLECTION,
@@ -158,13 +165,165 @@ def _pipeline_config(top_k: int, playbook: dict) -> dict:
         "risk_self_consistency_passes": RISK_SELF_CONSISTENCY_PASSES,
         "playbook_hash": playbook.get("playbook_hash"),
         "playbook_path": str(RISK_PLAYBOOK_PATH),
-        "calibration_hash": _file_hash(RISK_CALIBRATION_PATH),
-        "use_playbook": RISK_USE_PLAYBOOK,
+        "playbook_questions_enabled": True,
         "use_context": RISK_USE_CONTEXT,
         "use_legal_guidance": RISK_USE_LEGAL_GUIDANCE,
         "enable_cross_clause": RISK_ENABLE_CROSS_CLAUSE,
         "enable_document_checks": RISK_ENABLE_DOCUMENT_CHECKS,
     }
+
+
+def _apply_clause_risk_summary(row: dict, findings: list[dict]) -> dict:
+    """Replace the visible clause-level risk summary without leaking stale prior findings."""
+    positives = [
+        item for item in findings
+        if item.get("risk_status") == "POTENTIAL_RISK" and item.get("risk")
+    ]
+    unresolved = [
+        item for item in findings
+        if item.get("risk_status") == "INSUFFICIENT_EVIDENCE"
+    ]
+    row["risk_findings"] = findings
+    row["risk_status"] = "POTENTIAL_RISK" if positives else (
+        "INSUFFICIENT_EVIDENCE" if unresolved else "NO_RISK"
+    )
+    row.update({
+        "risk": False,
+        "risk_type": None,
+        "risk_level": None,
+        "risk_confidence": None,
+        "risk_confidence_status": "UNCALIBRATED",
+        "risk_severity_signal": None,
+        "risk_severity_status": "INCOMPLETE" if unresolved else None,
+        "risk_provenance": {},
+        "risk_evidence_clause_index": None,
+        "risk_evidence_scope": None,
+        "risk_evidence_source_status": None,
+        "risk_evidence_clause_candidates": [],
+        "risk_supporting_sources": [],
+        "risk_score_interpretation": None,
+        "why_flagged": "",
+        "evidence": "",
+    })
+    if positives:
+        best = max(
+            positives,
+            key=lambda item: (
+                float(item.get("raw_support_score") or 0.0),
+                float(item.get("severity_signal") or 0.0),
+            ),
+        )
+        provenance = best.get("provenance") or {}
+        row.update({
+            "risk": True,
+            "risk_type": best.get("risk_type"),
+            "risk_level": best.get("risk_level"),
+            "risk_confidence": best.get("confidence"),
+            "risk_confidence_status": best.get("confidence_status", "UNCALIBRATED"),
+            "risk_severity_signal": best.get("severity_signal"),
+            "risk_severity_status": best.get("severity_status", "UNCALIBRATED"),
+            "risk_provenance": provenance,
+            "risk_evidence_clause_index": best.get("evidence_clause_index"),
+            "risk_evidence_scope": best.get("evidence_scope"),
+            "risk_evidence_source_status": best.get("evidence_source_status"),
+            "risk_evidence_clause_candidates": best.get("evidence_clause_candidates", []),
+            "risk_supporting_sources": best.get("supporting_sources", []),
+            "risk_score_interpretation": provenance.get("score_interpretation"),
+            "why_flagged": best.get("why_flagged", ""),
+            "evidence": best.get("evidence", ""),
+        })
+    return row
+
+
+def _csv_safe_rows(rows: list[dict]) -> list[dict]:
+    """Serialize nested audit fields as JSON so exported CSV remains machine-readable."""
+    safe_rows: list[dict] = []
+    for row in rows:
+        safe = dict(row)
+        provenance = safe.get("provenance") or safe.get("risk_provenance") or {}
+        if isinstance(provenance, dict):
+            for key in ("score_component_source", "score_interpretation", "score_version"):
+                if safe.get(key) is None and provenance.get(key) is not None:
+                    safe[key] = provenance[key]
+        for key, value in safe.items():
+            if isinstance(value, (dict, list)):
+                safe[key] = json.dumps(value, ensure_ascii=False, sort_keys=True)
+        safe_rows.append(safe)
+    return safe_rows
+
+
+def _clause_risk_checkpoint_is_complete(
+    findings: list[dict],
+    expected_check_ids: set[str],
+    playbook_hash: str | None,
+) -> bool:
+    """A checkpoint is reusable only if all expected checks and model passes completed."""
+    if not findings or not expected_check_ids:
+        return False
+    found_ids = {str(item.get("check_id") or "") for item in findings}
+    if not expected_check_ids.issubset(found_ids):
+        return False
+    for finding in findings:
+        provenance = finding.get("provenance") or {}
+        if provenance.get("rule_engine_version") != RULE_ENGINE_VERSION:
+            return False
+        if provenance.get("playbook_hash") != playbook_hash:
+            return False
+        if str(finding.get("check_id") or "") in expected_check_ids:
+            try:
+                missing_passes = int(provenance.get("missing_passes", 0) or 0)
+            except (TypeError, ValueError, OverflowError):
+                return False
+            if missing_passes > 0:
+                return False
+    return True
+
+
+def _contract_checks_checkpoint_is_complete(
+    payload: dict,
+    playbook: dict,
+    *,
+    model: str,
+    cross_clause_enabled: bool,
+    document_checks_enabled: bool,
+) -> bool:
+    """Do not freeze contract checks whose model calls failed or omitted answers."""
+    if not isinstance(payload, dict):
+        return False
+    if payload.get("playbook_hash") != playbook.get("playbook_hash"):
+        return False
+    if payload.get("model") != model:
+        return False
+    if bool(payload.get("cross_clause_enabled")) != bool(cross_clause_enabled):
+        return False
+    if bool(payload.get("document_checks_enabled")) != bool(document_checks_enabled):
+        return False
+
+    groups = (
+        (
+            {str(item.get("id")) for item in (playbook.get("cross_clause_checks") or [])},
+            payload.get("cross_clause_findings") or [],
+        ),
+        (
+            {str(item.get("id")) for item in (playbook.get("document_level_checks") or [])},
+            payload.get("document_findings") or [],
+        ),
+    )
+    for expected_ids, findings in groups:
+        found = {str(item.get("check_id") or "") for item in findings}
+        if not expected_ids.issubset(found):
+            return False
+        for finding in findings:
+            if str(finding.get("check_id") or "") not in expected_ids:
+                continue
+            provenance = finding.get("provenance") or {}
+            try:
+                missing_passes = int(provenance.get("missing_passes", 0) or 0)
+            except (TypeError, ValueError, OverflowError):
+                return False
+            if missing_passes > 0:
+                return False
+    return True
 
 
 def _load_segments(run):
@@ -203,7 +362,7 @@ def resume_contract(
     expected = manifest.get("pipeline") or {}
     current = _pipeline_config(int(expected.get("top_k", TOP_K)), load_playbook())
     # Explicit resume must use the same experiment configuration. A changed
-    # playbook/model/calibration file starts a new run instead of mixing artifacts.
+    # playbook hash or deterministic rule version starts a new run instead of mixing artifacts.
     if expected and current != expected:
         raise RuntimeError(
             "Run configuration changed since this analysis started. "
@@ -465,20 +624,35 @@ def _classify_contract(
             run.write_json("contract_coverage.json", contract_coverage)
 
         # Phase 2 clause risk: each clause is checkpointed separately.
+        clause_risks_refreshed = False
         risk_index = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
         for pos, item in enumerate(valid_items):
             idx = int(item["clause_index"])
             label = str(results_by_index[idx].get("predicted_label") or "")
-            finding_ids = {
-                str(key)
-                for key, value in risk_index.items()
+            findings_for_clause = [
+                value for value in risk_index.values()
                 if int(value.get("clause_index", -1)) == idx
+            ]
+            finding_ids = {
+                str(value.get("check_id") or str(value.get("finding_id") or "").rsplit(":", 1)[-1])
+                for value in findings_for_clause
             }
             checks_expected = {
-                str(c.get("id"))
-                for c in (playbook.get("clause_types", {}).get(label, {}).get("checklist") or [])
+                str(check.get("id"))
+                for check in applicable_checks(
+                    playbook,
+                    label,
+                    clause_text=str(item.get("clause_text") or ""),
+                )
             }
-            if checks_expected and len(finding_ids) >= len(checks_expected):
+            if not checks_expected:
+                checks_expected = {"OPEN-RISK-1"}
+            # Missing model passes are retryable failures, not completed checkpoints.
+            if _clause_risk_checkpoint_is_complete(
+                findings_for_clause,
+                checks_expected,
+                playbook.get("playbook_hash"),
+            ):
                 continue
 
             findings = analyze_clause_risk(
@@ -492,6 +666,7 @@ def _classify_contract(
                 playbook=playbook,
                 qdrant_client=qdrant_client,
             )
+            clause_risks_refreshed = True
             # Idempotent checkpoint: replace only the clause's prior rows.
             existing_lines = run.read_jsonl_index("risk_findings.jsonl", "finding_id")
             existing_for_clause = [
@@ -508,33 +683,7 @@ def _classify_contract(
                     handle.write(json.dumps(finding, ensure_ascii=False) + "\n")
             tmp.replace(target)
 
-            row = results_by_index[idx]
-            row["risk_findings"] = findings
-            positives = [x for x in findings if x.get("risk_status") == "POTENTIAL_RISK" and x.get("risk")]
-            unresolved = [x for x in findings if x.get("risk_status") == "INSUFFICIENT_EVIDENCE"]
-            row["risk_status"] = "POTENTIAL_RISK" if positives else (
-                "INSUFFICIENT_EVIDENCE" if unresolved else "NO_RISK"
-            )
-            if positives:
-                best = max(
-                    positives,
-                    key=lambda x: (
-                        float(x.get("raw_support_score") or 0.0),
-                        float(x.get("severity_signal") or 0.0),
-                    ),
-                )
-                row["risk"] = True
-                row["risk_type"] = best.get("risk_type")
-                row["risk_level"] = best.get("risk_level")
-                row["risk_confidence"] = best.get("confidence")
-                row["risk_confidence_status"] = best.get("confidence_status", "UNCALIBRATED")
-                row["risk_severity_signal"] = best.get("severity_signal")
-                row["risk_severity_status"] = best.get("severity_status", "UNCALIBRATED")
-                row["risk_provenance"] = best.get("provenance", {})
-                row["why_flagged"] = best.get("why_flagged", "")
-                row["evidence"] = best.get("evidence", "")
-            else:
-                row["risk"] = False
+            row = _apply_clause_risk_summary(results_by_index[idx], findings)
 
             # Rewrite the clause record atomically so the GUI sees a coherent row
             # after a restart.
@@ -561,22 +710,38 @@ def _classify_contract(
             run.write_json("deterministic_cross_checks.json", deterministic_signals)
 
         contract_checks_path = run.root / "contract_checks.json"
-        if contract_checks_path.exists():
-            contract_checks = run.read_json("contract_checks.json", {}) or {}
-            cross_findings = contract_checks.get("cross_clause_findings", [])
-            document_findings = contract_checks.get("document_findings", [])
+        effective_playbook = dict(playbook)
+        if not RISK_ENABLE_CROSS_CLAUSE:
+            effective_playbook["cross_clause_checks"] = []
+        if not RISK_ENABLE_DOCUMENT_CHECKS:
+            effective_playbook["document_level_checks"] = []
+
+        cached_contract_checks = (
+            run.read_json("contract_checks.json", {}) or {}
+            if contract_checks_path.exists()
+            else {}
+        )
+        contract_checks_refreshed = False
+        if contract_checks_path.exists() and _contract_checks_checkpoint_is_complete(
+            cached_contract_checks,
+            effective_playbook,
+            model=RISK_MODEL,
+            cross_clause_enabled=RISK_ENABLE_CROSS_CLAUSE,
+            document_checks_enabled=RISK_ENABLE_DOCUMENT_CHECKS,
+        ):
+            cross_findings = cached_contract_checks.get("cross_clause_findings", [])
+            document_findings = cached_contract_checks.get("document_findings", [])
         else:
             trace({
                 "type": "progress",
                 "stage": "cross_clause",
-                "message": "Running configured cross-clause/document checks",
+                "message": (
+                    "Retrying incomplete cross-clause/document checks"
+                    if contract_checks_path.exists()
+                    else "Running configured cross-clause/document checks"
+                ),
                 "total": 1,
             })
-            effective_playbook = dict(playbook)
-            if not RISK_ENABLE_CROSS_CLAUSE:
-                effective_playbook["cross_clause_checks"] = []
-            if not RISK_ENABLE_DOCUMENT_CHECKS:
-                effective_playbook["document_level_checks"] = []
             cross_findings, document_findings = analyze_contract_checks(
                 clause_rows,
                 playbook=effective_playbook,
@@ -595,9 +760,10 @@ def _classify_contract(
                     "document_checks_enabled": RISK_ENABLE_DOCUMENT_CHECKS,
                 },
             )
+            contract_checks_refreshed = True
 
         aggregate_path = run.root / "contract_risk.json"
-        if aggregate_path.exists():
+        if aggregate_path.exists() and not clause_risks_refreshed and not contract_checks_refreshed:
             assessment = run.read_json("contract_risk.json", {}) or {}
         else:
             assessment = aggregate_clause_risks(
@@ -617,24 +783,33 @@ def _classify_contract(
                 "clause_index", "clause_text", "predicted_label", "classification_status",
                 "classification_confidence", "risk_status", "risk", "risk_type",
                 "risk_level", "risk_confidence", "risk_confidence_status",
-                "risk_severity_signal", "risk_severity_status", "why_flagged", "evidence",
+                "risk_severity_signal", "risk_severity_status", "risk_evidence_clause_index",
+                "risk_evidence_scope", "risk_evidence_source_status", "risk_evidence_clause_candidates",
+                "risk_supporting_sources", "risk_score_interpretation", "risk_provenance",
+                "why_flagged", "evidence",
             ]
             writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
             writer.writeheader()
-            writer.writerows(clause_rows)
+            writer.writerows(_csv_safe_rows(clause_rows))
 
         risk_csv = run.path("risk_findings.csv")
         with risk_csv.open("w", newline="", encoding="utf-8") as handle:
             fields = [
-                "finding_id", "clause_index", "evidence_clause_index", "evidence_scope",
+                "finding_id", "scope", "clause_index", "clause_ids", "evidence_clause_index",
+                "evidence_scope", "evidence_source_status", "evidence_clause_candidates",
                 "predicted_label", "check_id", "risk_domain", "risk_subdomain", "question",
                 "answer", "risk_status", "risk_type", "risk_level", "raw_support_score",
                 "confidence", "confidence_status", "severity_signal", "severity_status",
-                "ground_truth_status", "why_flagged", "evidence",
+                "ground_truth_status", "source_tier", "jurisdiction", "effective_date",
+                "contract_type", "source_title", "source_url", "retrieval_date",
+                "supporting_quote_or_paraphrase", "supporting_sources", "provenance",
+                "score_component_source", "score_interpretation", "score_version",
+                "base_score", "final_score", "score_components_raw", "score_modifiers",
+                "human_review_required", "review_escalation", "why_flagged", "evidence",
             ]
             writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
             writer.writeheader()
-            writer.writerows(all_risk_findings + cross_findings + document_findings)
+            writer.writerows(_csv_safe_rows(all_risk_findings + cross_findings + document_findings))
 
         # Persist final status and a compact machine-readable result snapshot.
         clauses_out = []

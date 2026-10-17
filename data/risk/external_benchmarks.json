@@ -1,34 +1,196 @@
 {
+  "schema_version": 2,
+  "purpose": "Task-matched external validation only. None of these datasets alone is gold for this repository's buyer-side risk policy.",
   "benchmarks": [
     {
-      "id": "litigation_disputed_clause",
-      "repository": "ye-sylvette-sun/contract-risk",
-      "url": "https://github.com/ye-sylvette-sun/contract-risk",
-      "task": "Clause risk framed as whether a U.S. federal court construed the clause.",
-      "use": "secondary benchmark only",
-      "ground_truth_relation": "different target from customer/buyer playbook",
-      "license_status": "UNVERIFIED",
+      "id": "cuad",
+      "dataset": "Contract Understanding Atticus Dataset",
+      "url": "https://www.atticusprojectai.org/cuad/",
+      "paper_url": "https://arxiv.org/abs/2103.06268",
+      "task": "Expert-annotated contract clause presence and spans across 41 clause types.",
+      "use": "Clause retrieval, presence detection, and evidence-span evaluation.",
+      "metrics": [
+        "category precision/recall/F1",
+        "span exact-match or token F1",
+        "evidence clause localization"
+      ],
+      "cannot_validate": [
+        "whether a clause is commercially adverse",
+        "legal enforceability",
+        "risk severity",
+        "confidence calibration"
+      ],
+      "license_status": "Official Atticus dataset page lists CC BY 4.0; verify the exact file distribution and attribution obligations before redistribution.",
+      "do_not_bundle_data": true,
+      "repository_url": "https://github.com/The-Atticus-Project/cuad"
+    },
+    {
+      "id": "contractnli",
+      "dataset": "ContractNLI",
+      "url": "https://stanfordnlp.github.io/contract-nli/",
+      "paper_url": "https://aclanthology.org/2021.findings-emnlp.164/",
+      "task": "Document-level three-way NLI (entailment, contradiction, not mentioned) and evidence-span identification over 607 NDAs and 17 fixed hypotheses.",
+      "use": "Long-context evidence retrieval, negation, exception handling, and entailment/contradiction tests.",
+      "metrics": [
+        "entailment/contradiction/not-mentioned accuracy",
+        "evidence span F1",
+        "abstention accuracy"
+      ],
+      "cannot_validate": [
+        "general buyer-side risk policy correctness",
+        "commercial loss severity",
+        "jurisdiction-specific enforceability"
+      ],
+      "license_status": "Verify the current upstream dataset license and any source-document restrictions before redistribution.",
+      "do_not_bundle_data": true,
+      "repository_url": "https://github.com/ShubhamKathiriya/Contract_NLI"
+    },
+    {
+      "id": "acord",
+      "dataset": "Attorney-annotated Contract Retrieval (ACORD)",
+      "url": "https://www.atticusprojectai.org/acord/",
+      "paper_url": "https://arxiv.org/abs/2411.01120",
+      "task": "Attorney-rated relevance for 126,000+ query-clause pairs across 114 contract-review queries, with graded relevance.",
+      "use": "Evaluate retrieval of clauses relevant to a natural-language risk question.",
+      "metrics": [
+        "Recall@k",
+        "MRR",
+        "nDCG@k",
+        "attorney-relevance agreement"
+      ],
+      "cannot_validate": [
+        "whether a retrieved clause is legally risky",
+        "legal enforceability",
+        "risk severity"
+      ],
+      "license_status": "Official Atticus dataset page lists CC BY 4.0; verify the dataset card and attribution obligations before redistribution.",
+      "do_not_bundle_data": true,
+      "dataset_url": "https://huggingface.co/datasets/theatticusproject/acord"
+    },
+    {
+      "id": "maud",
+      "dataset": "Merger Agreement Understanding Dataset (MAUD)",
+      "url": "https://www.atticusprojectai.org/maud/",
+      "repository_url": "https://github.com/The-Atticus-Project/maud",
+      "task": "Expert-annotated M&A deal-point questions over merger agreements.",
+      "use": "Specialized extraction and evidence evaluation for the M&A contract profile only.",
+      "metrics": [
+        "deal-point answer accuracy",
+        "evidence-span F1",
+        "question-level coverage"
+      ],
+      "cannot_validate": [
+        "non-M&A contract risk rules",
+        "global commercial risk accuracy",
+        "jurisdiction-independent legal conclusions"
+      ],
+      "license_status": "Verify upstream license and redistribution rights before use.",
+      "do_not_bundle_data": true,
+      "paper_url": "https://arxiv.org/abs/2301.00876"
+    },
+    {
+      "id": "contracteval",
+      "dataset": "ContractEval",
+      "url": "https://aclanthology.org/2025.nllp-1.19/",
+      "task": "Published evaluation of legal-risk identification and risk-related span extraction in commercial contract clauses.",
+      "use": "Closest published methodological comparator for clause-level risk identification; use only task-aligned metrics and report protocol differences.",
+      "metrics": [
+        "risk-span precision/recall/F1 as defined by the paper",
+        "evidence-span quality"
+      ],
+      "cannot_validate": [
+        "this repository's exact buyer-side rule taxonomy",
+        "jurisdiction-specific legal correctness",
+        "calibrated probability of loss"
+      ],
+      "license_status": "Paper is citable; dataset reuse and redistribution rights must be checked separately.",
+      "do_not_bundle_data": true,
+      "paper_citation": "Liu, Shuang; Li, Zelong; Ma, Ruoyun; Zhao, Haiyan; Du, Mengnan. ContractEval: Benchmarking LLMs for Clause-Level Legal Risk Identification in Commercial Contracts. NLLP 2025. DOI: 10.18653/v1/2025.nllp-1.19.",
+      "dataset_status": "PUBLISHED_BENCHMARK_PAPER; verify the paper's exact data/artifact availability and terms before treating it as a directly runnable external test set."
+    },
+    {
+      "id": "legalbench",
+      "dataset": "LegalBench",
+      "url": "https://github.com/HazyResearch/legalbench",
+      "paper_url": "https://arxiv.org/abs/2308.11462",
+      "task": "A collection of legal reasoning tasks with different labels, formats, and evaluation protocols.",
+      "use": "Only task-level tests that map directly to a documented rule reasoning primitive; never aggregate unrelated task scores into a contract-risk accuracy score.",
+      "metrics": [
+        "the metric defined by the mapped task"
+      ],
+      "cannot_validate": [
+        "the entire Phase 2 risk policy",
+        "contract-specific evidence provenance unless task labels it",
+        "legal-risk confidence without matching adjudicated labels"
+      ],
+      "license_status": "Review license and individual task terms before use.",
       "do_not_bundle_data": true
     },
     {
       "id": "synthetic_legal_risk",
-      "dataset": "Mr-Dintov/Legal-Contract-Clause-Risk-Corpus",
+      "dataset": "Legal-Contract-Clause-Risk-Corpus",
       "url": "https://huggingface.co/datasets/Mr-Dintov/Legal-Contract-Clause-Risk-Corpus",
       "task": "Synthetic clause-level risk, severity, and phrase-level danger annotations.",
-      "use": "synthetic robustness / prompt-development benchmark",
-      "ground_truth_relation": "not a substitute for human-adjudicated gold",
-      "license_status": "CC BY 4.0 for the public sample; verify full access/licensing before redistribution",
+      "use": "Synthetic robustness, negation, exception, and prompt-development tests only.",
+      "metrics": [
+        "mutation-test pass rate",
+        "unsupported-positive rate on synthetic cases"
+      ],
+      "cannot_validate": [
+        "real-world precision/recall",
+        "severity agreement",
+        "probability calibration"
+      ],
+      "license_status": "Verify current license and terms before use.",
       "do_not_bundle_data": true
     },
     {
-      "id": "cuad",
-      "dataset": "CUAD",
-      "url": "https://huggingface.co/datasets/theatticusproject/cuad",
-      "task": "Contract understanding / clause-category extraction.",
-      "use": "Phase 1 classification and evidence retrieval",
-      "ground_truth_relation": "not a risk-label dataset",
-      "license_status": "CC BY 4.0",
-      "do_not_treat_as_risk_gold": true
+      "id": "litigation_disputed_clause",
+      "dataset": "Contract risk/litigation disputed-clause corpus",
+      "url": "https://github.com/ye-sylvette-sun/contract-risk",
+      "task": "Clause risk framed around how a U.S. federal court construed disputed clauses.",
+      "use": "Secondary comparison only; the outcome target differs from prospective buyer-side contract review.",
+      "metrics": [
+        "paper/repository-defined task metrics only"
+      ],
+      "cannot_validate": [
+        "general buyer-side review accuracy",
+        "risk-free conclusions",
+        "jurisdiction-independent legal rules"
+      ],
+      "license_status": "UNVERIFIED",
+      "do_not_bundle_data": true
+    },
+    {
+      "id": "phase2_adjudicated_risk_gold",
+      "dataset": "Project-specific dual-annotator and adjudicated contract-risk set",
+      "url": null,
+      "task": "For each system YES/NO prediction, two independent reviewers label the finding and evidence; an adjudicator resolves disagreement under a versioned review policy.",
+      "use": "Required benchmark for this product's risk-finding precision/recall, evidence correctness, and confidence calibration.",
+      "metrics": [
+        "finding precision/recall/F1 by rule family",
+        "exact quote and clause-ID accuracy",
+        "cross-clause precision/recall",
+        "unsupported-positive and unresolved rates",
+        "Brier score and ECE for prediction-correctness confidence"
+      ],
+      "cannot_validate": [
+        "legal outcomes beyond the sampled jurisdictions/contracts",
+        "causal claims about realized financial loss without outcome data"
+      ],
+      "license_status": "Internal data governance and confidentiality review required.",
+      "do_not_bundle_data": true,
+      "status": "NOT_YET_COLLECTED",
+      "template_path": "data/risk/gold/risk_finding_adjudication_template.csv"
     }
-  ]
+  ],
+  "evaluation_policy": {
+    "split_unit": "contract",
+    "split_requirement": "No contract may appear in more than one of calibration or locked-test partitions.",
+    "calibration_target": "PREDICTION_CORRECTNESS",
+    "confidence_is_not": "risk severity, probability of loss, or enforceability",
+    "accuracy_claim_gate": "Requires a frozen, contract-disjoint, independently adjudicated risk set and published per-domain metrics.",
+    "source_verification_date": "2026-10-17",
+    "source_note": "External benchmark descriptions checked against official Atticus, Stanford NLP, and ACL Anthology pages; licenses and redistribution rights must be checked at the exact artifact level."
+  }
 }

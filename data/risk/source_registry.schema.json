@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Phase 2 legal and practice source record",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_id",
+    "source_title",
+    "source_url",
+    "source_tier",
+    "authority_status",
+    "jurisdiction",
+    "contract_type",
+    "effective_date",
+    "effective_date_status",
+    "pinpoint_citation",
+    "retrieval_date",
+    "citation_status",
+    "license_status",
+    "transferability",
+    "can_support_legal_conclusion",
+    "missing_metadata"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uri"
+    },
+    "source_tier": {
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ]
+    },
+    "authority_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "jurisdiction": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "effective_date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "effective_date_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pinpoint_citation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "retrieval_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "citation_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "license_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transferability": {
+      "type": "string",
+      "minLength": 1
+    },
+    "can_support_legal_conclusion": {
+      "type": "boolean"
+    },
+    "missing_metadata": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from .api.routes import documents
+from .api.routes import documents, query
 
 app = FastAPI(
     title="CUAD Contract Classifier",
@@ -82,6 +82,7 @@ def api_docs() -> str:
 
 
 app.include_router(documents.router)
+app.include_router(query.router)
 
 if FRONTEND_DIST_DIR.exists():
     app.mount("/", StaticFiles(directory=FRONTEND_DIST_DIR, html=True), name="frontend")

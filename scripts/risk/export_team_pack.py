@@ -53,6 +53,7 @@ def main() -> int:
 
     cross_rows = list(playbook.get("cross_clause_checks") or [])
     doc_rows = list(playbook.get("document_level_checks") or [])
+    deterministic_rows = list(playbook.get("deterministic_rules") or [])
 
     clause_columns = [
         "clause_type", "check_id", "risk_domain", "risk_subdomain", "risk_type",
@@ -68,10 +69,15 @@ def main() -> int:
         "id", "risk_domain", "risk_subdomain", "risk_type", "question", "flag_if",
         "dependencies", "jurisdiction_scope", "sources",
     ]
+    deterministic_columns = [
+        "id", "risk_domain", "risk_type", "question", "pattern",
+        "exclude_patterns", "explanation", "sources",
+    ]
 
     write_csv(OUT / "risk_clause_checks.csv", clause_columns, clause_rows)
     write_csv(OUT / "risk_cross_clause_checks.csv", cross_columns, cross_rows)
     write_csv(OUT / "risk_document_checks.csv", doc_columns, doc_rows)
+    write_csv(OUT / "risk_deterministic_rules.csv", deterministic_columns, deterministic_rows)
     shutil.copyfile(PLAYBOOK, OUT / "risk_playbook_exact.json")
     shutil.copyfile(TAXONOMY, OUT / "risk_taxonomy.json")
     shutil.copyfile(REGISTRY, OUT / "source_registry.json")
@@ -81,7 +87,7 @@ def main() -> int:
         for item in taxonomy.get("risk_domains") or []
         if item.get("risk_domain")
     }
-    all_checks = clause_rows + cross_rows + doc_rows
+    all_checks = clause_rows + cross_rows + doc_rows + deterministic_rows
     invalid = [
         (item.get("id") or item.get("check_id"), item.get("risk_domain"))
         for item in all_checks
@@ -92,7 +98,8 @@ def main() -> int:
 
     files = [
         "risk_clause_checks.csv", "risk_cross_clause_checks.csv",
-        "risk_document_checks.csv", "risk_playbook_exact.json",
+        "risk_document_checks.csv", "risk_deterministic_rules.csv",
+        "risk_playbook_exact.json",
         "risk_taxonomy.json", "source_registry.json",
     ]
     manifest = {
@@ -102,6 +109,7 @@ def main() -> int:
         "clause_check_count": len(clause_rows),
         "cross_clause_check_count": len(cross_rows),
         "document_check_count": len(doc_rows),
+        "deterministic_rule_count": len(deterministic_rows),
         "canonical_domain_count": len(canonical_domains),
         "domain_mapping_validation": "PASS",
         "sources": {
@@ -110,9 +118,10 @@ def main() -> int:
             "source_registry_sha256": digest(REGISTRY),
         },
         "exports": {name: {"sha256": digest(OUT / name)} for name in files},
+        "deterministic_rule_count": len(playbook.get("deterministic_rules") or []),
+        "risk_evidence_policy": "Only exact text from the uploaded contract can support a positive finding; no retrieved CUAD example span is used as risk evidence.",
         "warning": (
-            "Playbook and taxonomy are review guidance, not human gold labels "
-            "or evidence of a fact in an uploaded contract."
+            "Playbook and taxonomy are review guidance, not evidence of a fact in an uploaded contract."
         ),
     }
     (OUT / "export_manifest.json").write_text(
@@ -129,10 +138,12 @@ Source-of-truth playbook version: {manifest['playbook_source_version']}.
 - risk_clause_checks.csv — {len(clause_rows)} clause-level checks.
 - risk_cross_clause_checks.csv — {len(cross_rows)} cross-clause checks.
 - risk_document_checks.csv — {len(doc_rows)} document-level checks.
+- risk_deterministic_rules.csv — {len(deterministic_rows)} executable text predicates and exclusion rules.
 - risk_playbook_exact.json — byte-for-byte copy of the source playbook.
 - risk_taxonomy.json — canonical broad risk domains and guidance.
 - source_registry.json — legal-knowledge source metadata.
-- export_manifest.json — source/export hashes and validation counts.
+- export_manifest.json — source/export hashes, validation counts, and deterministic rule count.
+- The exact playbook JSON also contains the executable deterministic risk predicates.
 
 ## Risk-domain policy
 
@@ -143,11 +154,12 @@ matches are supplementary signals and must not override an explicit domain.
 
 ## Evidence and evaluation caveat
 
-The playbook and taxonomy are **review guidance, not contract evidence and not
-human gold labels**. A positive risk finding must be supported by exact evidence
-from the uploaded contract. The project still requires expert annotation and
-adjudication of its 300-task gold queue before reporting human-gold accuracy for
-the custom risk predicates.
+The playbook and taxonomy are **review guidance, not contract evidence**. A positive
+risk finding must cite exact text from the uploaded contract. Deterministic rules
+are evaluated against the uploaded clause text independently of the CUAD category
+label. Retrieved CUAD training examples are not included in risk prompts or treated
+as risk evidence. Release acceptance measures rule/pipeline conformance, not legal
+risk accuracy or enforceability.
 """,
         encoding="utf-8",
     )

@@ -1,6 +1,8 @@
-# CUAD Contract Clause Classification
+# CUAD Contract Review Baselines
 
-**Student project:** classify commercial contract clauses into CUAD categories using retrieval and large language models.
+An evidence-grounded research workspace for commercial contract clause classification and Phase 2 risk-review experiments.
+
+> **Scope and safety:** This is a research/demo system, not legal advice or an autonomous legal decision-maker. Risk findings are review triggers, not legal conclusions. The current playbook has zero production-approved rules, no project-specific adjudicated risk-gold set, and no validated risk-confidence calibration. Passing CI proves software conformance—not legal accuracy.
 
 ### GitHub links
 
@@ -11,6 +13,24 @@
 | **Clone** | `git clone https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines.git` |
 | **Fine-tune guide** | https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/FINETUNE.md |
 | **Hybrid / Qwen notes** | https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines/blob/main/docs/QWEN_IMPROVEMENTS.md |
+
+## Current product demo
+
+The Phase 2 workspace includes a guided synthetic-contract walkthrough, clause and contract-level review findings, evidence quotes, audit-artifact downloads, and a contract-linked Q&A assistant. On a clean install, **Open guided demo** generates a deterministic demo result from the checked-in fixture; it does not require a prior upload or a model call to render the walkthrough. The Q&A assistant uses the configured local Ollama model when available and falls back to source excerpts only if the model is unavailable.
+
+- [Recorded-demo runbook](docs/PHASE2_DEMO_RUNBOOK.md)
+- [Phase 2 research and release protocol](docs/PHASE2_Q1_PAPER_PROTOCOL.md)
+- [Risk-gold annotation guide](docs/PHASE2_RISK_GOLD_ANNOTATION_GUIDE.md)
+
+Before recording, start the API and configured local Ollama model, then run the six-question chatbot semantic/citation smoke check:
+
+```bash
+python scripts/risk/evaluate_contract_chat_demo.py --out data/risk/results/contract_chat_demo_evaluation.json
+```
+
+The check covers party-specific liability caps and termination rights, governing-law uncertainty, insurance limits, post-termination data handling, indemnity/liability-cap interaction, and exact citation provenance. It is a demo smoke test, not a statistically valid accuracy benchmark. Fix failures before presenting the chatbot as working.
+
+The demo is synthetic and intentionally labelled. Do not present its illustrative findings as independently validated legal analysis.
 
 ---
 
@@ -135,7 +155,7 @@ Details: [docs/FINETUNE.md](https://github.com/abdelbasethayam/CUAD-Contract-Rev
 
 ## Phase 2 — Uploadable contract risk review
 
-The repository now contains an end-to-end PDF/TXT upload application that performs clause segmentation, CUAD clause classification, buyer-side playbook risk checks, exact contract-evidence validation, cross-clause/document checks, and contract-level triage. The current interactive profile uses one risk reasoning pass for lower latency; this does not constitute multi-pass agreement, risk confidence remains uncalibrated without human gold, and exact-evidence gating remains enabled. Set `RISK_SELF_CONSISTENCY_PASSES=3` for a slower repeated-pass diagnostic run.
+The repository includes an end-to-end PDF/TXT upload application with clause segmentation, a separate CUAD clause-category classifier, rule-first buyer-side contract-risk screening, exact contract-evidence validation, cross-clause/document questions, and contract-level triage. The seven deterministic risk predicates run against every clause independently of the predicted CUAD label. The risk prompt never receives retrieved CUAD training example spans, and every positive must preserve exact evidence from the uploaded agreement. Rule hits are review triggers, not legal conclusions; severity/confidence are not calibrated.
 
 **Start the UI/API:** configure Ollama and backend/.env, then run bash scripts/start_all.sh. The API health check is curl -fsS http://127.0.0.1:8000/health; the frontend is usually on port 5173.
 
@@ -148,6 +168,7 @@ For a PDF test fixture, run `python scripts/risk/smoke_upload_api.py --file test
 **Rebuild the no-network retrieval profile from source:** stop the backend, then run `bash scripts/risk/build_local_retrieval_profile.sh`. This rebuilds both 768-dimensional local hashing indexes, proves train/test/index isolation, checks representative legal guidance retrieval, regenerates the team export/report, and runs the release suite. Start the app afterward with `bash scripts/start_all.sh`. Do not rebuild the embedded Qdrant collections while the backend is running.
 
 **Regenerate reproducible artifacts (without rebuilding indexes):**
+    .venv/bin/python scripts/risk/validate_playbook_rules.py
     .venv/bin/python scripts/risk/validate_evaluation_integrity.py
     .venv/bin/python scripts/risk/normalize_playbook_domains.py
     .venv/bin/python scripts/risk/export_team_pack.py
@@ -156,7 +177,7 @@ For a PDF test fixture, run `python scripts/risk/smoke_upload_api.py --file test
 
 Full guides: docs/PHASE2_RISK_PIPELINE.md, docs/PHASE2_REPRODUCIBILITY.md, and docs/PHASE2_PAPER_DRAFT.md. Release validation can be recorded with python scripts/risk/run_release_checks.py.
 
-The risk playbook is review guidance, not legal ground truth. The 300-case risk benchmark is model-generated **silver**, not human gold. Custom-risk accuracy is therefore unavailable; the paper and reports intentionally make no precision/recall/F1 claims for the custom risk predicates.
+Phase 2 release checks are explicitly independent of risk-span annotation datasets. They validate playbook rule definitions, taxonomy coverage, exact-quote provenance, classifier-index isolation, synthetic playbook-question regressions, upload smoke tests, and backend behavior. These are system-conformance checks, not estimates of legal-risk accuracy, enforceability, precision, recall, or F1. See docs/PHASE2_RULE_CONFORMANCE_PROTOCOL.md.
 
 **Privacy and offline mode:** the default `EMBEDDING_BACKEND=cohere` sends clause/query text to Cohere for embeddings and requires network access. For a local-only mode, set `EMBEDDING_BACKEND=local_hashing`, `LOCAL_HASHING_DIM=768`, `QDRANT_COLLECTION=cuad_train_hashing`, and `LEGAL_KNOWLEDGE_COLLECTION=legal_knowledge_hashing` in `backend/.env`, then stop the backend and run `bash scripts/risk/build_local_retrieval_profile.sh`. Restart with `bash scripts/start_all.sh`. This local mode uses deterministic HashingVectorizer/cosine retrieval (lexical-vector baseline), not a pretrained semantic embedding model, and must be evaluated as a separate configuration. Ollama generation and Qdrant remain local; do not upload confidential documents to any network-enabled mode unless the transfer is authorized.
 

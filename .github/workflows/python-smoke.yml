@@ -13,20 +13,43 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install runtime dependencies
-        run: python -m pip install -q fastapi pydantic requests numpy pandas scikit-learn scipy qdrant-client cohere python-dotenv
+        run: python -m pip install -q pytest httpx python-multipart fastapi pydantic requests numpy pandas scikit-learn scipy qdrant-client cohere python-dotenv pdfplumber 'jsonschema>=4.22,<5'
       - name: Compile Python sources
         run: python -m compileall -q backend scripts data/scripts
+      - name: Validate playbook rule and taxonomy contract
+        run: python scripts/risk/validate_playbook_rules.py
+      - name: Validate governed registry reproducibility and source metadata
+        run: |
+          python scripts/risk/build_rule_registry.py --check
+          python scripts/risk/validate_rule_registry.py
+          python scripts/risk/validate_clause_authority_map.py
+          python scripts/risk/validate_risk_gold.py --schema-only
+          python scripts/risk/build_rule_review_queue.py --check
+      - name: Test all backend tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}
+        run: python -m pytest -q backend/tests
       - name: Import Phase 2 modules
         run: |
           python - <<'PY'
           from backend.app.models.schemas import ContractClassificationResponse, RiskFinding
-          from backend.app.core.risk.risk_playbook import starter_playbook
+          from backend.app.core.risk.risk_playbook import load_playbook, starter_playbook
+          from backend.app.core.risk.confidence_calibration import confidence_from_support_score
           from backend.app.core.risk.contract_risk_engine import aggregate_clause_risks
           from backend.app.core.risk.risk_scoring import score_finding
           from backend.app.core.risk.risk_engine import _evidence_valid, _severity_signal
           assert starter_playbook()["playbook_hash"]
-          assert _evidence_valid("bounded", "a bounded liability cap", [])
-          assert score_finding({"risk_type": "uncapped liability", "question": "test", "score_components": {"exposure_magnitude": 5, "likelihood_uncertainty": 5, "scope_duration": 5, "control_weakness": 5}})["severity"] == "CRITICAL"
-          assert _severity_signal({"exposure_magnitude": 4, "likelihood_uncertainty": 3, "scope_duration": 2, "control_weakness": 1}) == 0.5
+          assert _evidence_valid("bounded liability", "a bounded liability cap", [])
+          assert score_finding({"risk_type": "uncapped liability", "question": "test"})["severity"] is None
+          assert _severity_signal({"exposure_magnitude": 4, "likelihood_uncertainty": 3, "scope_duration": 2, "control_weakness": 1}) is None
+          import json
+          from pathlib import Path
+          active = load_playbook()
+          manifest = json.loads(Path("data/risk/rule_registry_manifest.json").read_text(encoding="utf-8"))
+          assert active["rule_registry"]["base_rule_count"] == manifest["base_rule_count"]
+          assert active["rule_registry"]["candidate_rule_count"] == manifest["candidate_rule_count"]
+          assert manifest["candidate_rule_count"] == manifest["base_rule_count"] * manifest["candidate_profile_count"]
+          assert manifest["candidate_rule_count"] >= 1000
+          assert confidence_from_support_score(0.8, playbook_hash=active["playbook_hash"])["confidence"] is None
           print("Phase 2 imports OK")
           PY

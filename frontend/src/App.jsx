@@ -1,11 +1,13 @@
-import { Component, useMemo, useState } from "react";
+import { Component, useEffect, useMemo, useState } from "react";
 
 const API_URL = "/documents/classify/stream";
 
-function RiskBadge({ status, level }) {
+function RiskBadge({ status }) {
   const label = status === "POTENTIAL_RISK"
-    ? (level || "POTENTIAL RISK")
-    : status === "NO_RISK" ? "NO RISK" : (status || "NOT ANALYZED");
+    ? "POTENTIAL RISK · REVIEW"
+    : status === "NO_RISK" ? "NO RISK FOUND"
+      : status === "INSUFFICIENT_EVIDENCE" ? "UNRESOLVED"
+        : (status || "NOT ANALYZED");
   const cls = status === "POTENTIAL_RISK"
     ? "risk-badge risk-badge--risk"
     : status === "NO_RISK" ? "risk-badge risk-badge--clear" : "risk-badge risk-badge--unsupported";
@@ -14,8 +16,12 @@ function RiskBadge({ status, level }) {
 
 function RiskCard({ finding }) {
   const confidence = finding.confidence == null
-    ? "Uncalibrated"
+    ? "Not calibrated"
     : Math.round(finding.confidence * 100) + "%";
+  const supportScore = finding.raw_support_score == null
+    ? "Not available"
+    : Number(finding.raw_support_score).toFixed(2);
+  const ruleMetadata = finding.provenance?.rule_registry_metadata || {};
 
   return (
     <article className="risk-card">
@@ -24,7 +30,7 @@ function RiskCard({ finding }) {
           <div className="eyebrow">{finding.scope || "clause"} · {finding.check_id}</div>
           <h3>{finding.risk_type || finding.question || "Risk review item"}</h3>
         </div>
-        <RiskBadge status={finding.risk_status} level={finding.risk_level} />
+        <RiskBadge status={finding.risk_status} />
       </div>
 
       <div className="risk-grid">
@@ -36,15 +42,32 @@ function RiskCard({ finding }) {
             <span className="field-note">{finding.evidence_scope === "related_contract_clause" ? "Retrieved from another clause in this contract" : "Quote from this clause"}</span>
           </div>
         )}
+        {finding.evidence_source_status && (
+          <div>
+            <span className="field-label">Evidence verification</span>
+            <strong>{finding.evidence_source_status}</strong>
+            {finding.evidence_source_status !== "VERIFIED" && finding.evidence_clause_candidates?.length > 0 && (
+              <span className="field-note">Possible source clauses: {finding.evidence_clause_candidates.join(", ")}</span>
+            )}
+          </div>
+        )}
         <div>
-          <span className="field-label">Confidence</span>
+          <span className="field-label">Confidence in prediction correctness</span>
           <strong>{confidence}</strong>
           <span className="field-note">{finding.confidence_status || "UNCALIBRATED"}</span>
         </div>
         <div>
-          <span className="field-label">Ground truth / provenance</span>
-          <strong>{finding.ground_truth_status || "NOT_AVAILABLE"}</strong>
-          <span className="field-note">Not gold unless manually adjudicated.</span>
+          <span className="field-label">Support signal (not a probability)</span>
+          <strong>{supportScore}</strong>
+          <span className="field-note">Uncalibrated diagnostic from answer support, evidence, and model agreement.</span>
+        </div>
+        <div>
+          <span className="field-label">Rule governance</span>
+          <strong>{ruleMetadata.validation_status || finding.ground_truth_status || "PLAYBOOK_DERIVED"}</strong>
+          <span className="field-note">{ruleMetadata.execution_status || "Review trigger only; not a legal conclusion."}</span>
+          {ruleMetadata.jurisdiction_review_required && (
+            <span className="field-note">Jurisdiction/applicability requires reviewer verification.</span>
+          )}
         </div>
       </div>
 
@@ -77,12 +100,24 @@ function RiskCard({ finding }) {
         <details>
           <summary>Supporting sources</summary>
           <ul className="evidence-list">
-            {finding.supporting_sources.map((source, index) => (
-              <li key={String(source.id || source.url || "source") + index}>
-                <strong>{source.id || source.name || "Source"}</strong> {source.citation || source.title || ""}
-                {source.url && <> — <a href={source.url} target="_blank" rel="noreferrer">source</a></>}
-              </li>
-            ))}
+            {finding.supporting_sources.map((source, index) => {
+              const title = source.source_title || source.source_name || source.citation || source.title || "";
+              const url = source.source_url || source.url;
+              const note = source.supporting_quote_or_paraphrase;
+              return (
+                <li key={String(source.id || url || "source") + index}>
+                  <strong>{source.id || source.name || "Source"}</strong> {title}
+                  {note && note !== title && <> — {note}</>}
+                  {url && <> — <a href={url} target="_blank" rel="noreferrer">source</a></>}
+                  <div className="field-note">
+                    Tier {source.source_tier || "unknown"} · {source.authority_status || "authority status unknown"} · Jurisdiction: {source.jurisdiction || "unspecified"}
+                  </div>
+                  <div className="field-note">
+                    Citation: {source.pinpoint_citation || source.citation_status || "pinpoint not recorded"} · Effective date: {source.effective_date || source.effective_date_status || "not recorded"} · Licence: {source.license_status || "not checked"}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </details>
       )}
@@ -115,6 +150,110 @@ function ContractReview() {
   const [trace, setTrace] = useState([]);
   const [tab, setTab] = useState("overview");
   const [riskFilter, setRiskFilter] = useState("all");
+  const [clauseSearch, setClauseSearch] = useState("");
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState(null);
+  const [phase2Metrics, setPhase2Metrics] = useState(null);
+  const [demoNotice, setDemoNotice] = useState(null);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [apiStatus, setApiStatus] = useState("checking");
+
+  useEffect(() => {
+    let cancelled = false;
+    const checkApi = async () => {
+      try {
+        const response = await fetch("/health", { cache: "no-store" });
+        if (!response.ok) throw new Error("API unavailable");
+        const data = await response.json();
+        if (!cancelled) setApiStatus(data.status === "ok" ? "online" : "degraded");
+      } catch {
+        if (!cancelled) setApiStatus("offline");
+      }
+    };
+    checkApi();
+    const intervalId = window.setInterval(checkApi, 15000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (apiStatus !== "online") return undefined;
+    let cancelled = false;
+    const loadMetrics = async () => {
+      try {
+        const response = await fetch("/query/phase2-metrics", { cache: "no-store" });
+        if (!response.ok) throw new Error("Metrics unavailable");
+        const data = await response.json();
+        if (!cancelled) setPhase2Metrics(data);
+      } catch {
+        if (!cancelled) setPhase2Metrics(null);
+      }
+    };
+    loadMetrics();
+    const intervalId = window.setInterval(loadMetrics, 30000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [apiStatus]);
+
+  async function loadSavedDemo() {
+    if (demoLoading || loading) return;
+    setDemoLoading(true);
+    setError(null);
+    setChatError(null);
+    setDemoNotice(null);
+    setChatMessages([]);
+    setTrace([]);
+    try {
+      const response = await fetch("/query/demo-analysis");
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || "The guided demo is unavailable.");
+      setResult(data);
+      setDemoNotice(data.notice || "Loaded the synthetic demo.");
+      setTab("overview");
+      setRiskFilter("all");
+      setClauseSearch("");
+    } catch (err) {
+      setError(err.message || "Could not load the guided demo.");
+    } finally {
+      setDemoLoading(false);
+    }
+  }
+
+  async function askContract(questionOverride) {
+    const question = String(questionOverride ?? chatInput).trim();
+    if (!result?.analysis_id || !question || chatLoading) return;
+    setChatMessages((messages) => [...messages, { role: "user", text: question }]);
+    setChatInput("");
+    setChatError(null);
+    setChatLoading(true);
+    try {
+      const response = await fetch("/query/contract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analysis_id: result.analysis_id,
+          question,
+          history: chatMessages.slice(-8).map((message) => ({
+            role: message.role,
+            content: message.role === "user" ? message.text : (message.answer || ""),
+          })).filter((message) => message.content.trim()),
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || ("Assistant request failed (" + response.status + ")"));
+      setChatMessages((messages) => [...messages, { role: "assistant", ...data }]);
+    } catch (err) {
+      setChatError(err.message || "The contract assistant could not answer this question.");
+    } finally {
+      setChatLoading(false);
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -123,8 +262,12 @@ function ContractReview() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setDemoNotice(null);
     setTrace([]);
+    setChatMessages([]);
+    setChatError(null);
     setTab("overview");
+    setClauseSearch("");
 
     try {
       const formData = new FormData();
@@ -175,6 +318,14 @@ function ContractReview() {
 
   const assessment = result?.contract_risk_assessment || {};
   const clauses = result?.clauses || [];
+  const visibleClauses = useMemo(() => {
+    const query = clauseSearch.trim().toLowerCase();
+    if (!query) return clauses;
+    return clauses.filter((clause) =>
+      [clause.clause_index, clause.predicted_label, clause.heading, clause.section_path, clause.clause_text]
+        .some((value) => String(value || "").toLowerCase().includes(query))
+    );
+  }, [clauses, clauseSearch]);
   const risks = useMemo(
     () => clauses.flatMap((clause) =>
       (clause.risk_findings || []).map((finding) => ({
@@ -196,30 +347,143 @@ function ContractReview() {
   const visibleRisks = riskFilter === "potential"
     ? potential
     : riskFilter === "uncertain" ? uncertain : allRisks;
+  function openCitedClause(clauseIndex) {
+    const clause = clauses.find((item) => String(item.clause_index) === String(clauseIndex));
+    setTab("clauses");
+    setClauseSearch(clause?.heading || clause?.section_path || String(clauseIndex));
+  }
+
+  const latestAssistantMessage = [...chatMessages].reverse().find((message) => message.role === "assistant");
+  const chatModeLabel = latestAssistantMessage?.model === "EXTRACTIVE_FALLBACK"
+    ? "Source-only fallback"
+    : latestAssistantMessage?.model === "DETERMINISTIC_HELP"
+      ? "Product help"
+      : latestAssistantMessage?.model === "RETRIEVAL_ABSTENTION"
+        ? "Evidence-first abstention"
+        : "Contract-linked assistant";
 
   return (
     <main className="page">
-      <header className="hero">
-        <div>
-          <div className="eyebrow">CUAD Contract Review · Phase 1 + Phase 2</div>
-          <h1>Evidence-grounded contract risk review.</h1>
-          <p>Upload a contract to segment and classify clauses, then inspect risk findings with exact evidence and reproducible provenance.</p>
+      <header className="app-bar">
+        <div className="brand-lockup">
+          <div className="brand-mark" aria-hidden="true"><span>C</span><i /></div>
+          <div><strong>Clausewise</strong><span>CONTRACT INTELLIGENCE</span></div>
         </div>
-        {result?.analysis_id && (
-          <div className="analysis-id"><span>Analysis ID</span><code>{result.analysis_id}</code></div>
-        )}
+        <div className="app-bar__right">
+          <span className={"system-status system-status--" + apiStatus}>
+            <i /> {apiStatus === "online" ? "API connected" : apiStatus === "checking" ? "Checking workspace" : apiStatus === "degraded" ? "API needs attention" : "API offline"}
+          </span>
+          <span className="workspace-tag">PHASE 2 WORKSPACE</span>
+        </div>
       </header>
 
-      <form className="upload-form" onSubmit={handleSubmit}>
-        <input type="file" accept=".pdf,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={loading} />
-        <button type="submit" disabled={!file || loading}>{loading ? "Analyzing…" : "Analyze contract"}</button>
-      </form>
-      <p className="muted" role="note">
-        Privacy notice: LLM inference runs locally, but clause text is sent to the configured Cohere embedding API.
-        Do not upload confidential contracts unless that transfer is authorized. This build is not fully offline.
-      </p>
+      <header className="hero">
+        <div className="hero-copy">
+          <div className="eyebrow">AI-assisted review · evidence-first workflow</div>
+          <h1>Know what your contract says. See why it matters.</h1>
+          <p>Classify clauses, surface commercial review triggers, inspect exact wording, and ask grounded questions about the agreement—all in one auditable workspace.</p>
+          <div className="hero-points">
+            <span><i /> Exact-text evidence</span>
+            <span><i /> Cross-clause review</span>
+            <span><i /> Traceable findings</span>
+          </div>
+        </div>
+        <div className="hero-side">
+          <div className="hero-orbit" aria-hidden="true"><span>§</span><i /><b /></div>
+          <div className="hero-side__caption">REVIEW WITH CONTEXT<br /><strong>Not just a risk score.</strong></div>
+          {result?.demo_mode && <span className="demo-mode-pill">SYNTHETIC DEMO</span>}
+          {result?.analysis_id && (
+            <div className="analysis-id"><span>Analysis ID</span><code>{result.analysis_id}</code></div>
+          )}
+        </div>
+      </header>
 
-      {error && <div className="error">{error}</div>}
+      <section className="intake-panel" aria-label="Start contract review">
+        <div className="intake-heading">
+          <div><span className="step-tag">01 / START HERE</span><h2>Review a contract</h2></div>
+          <span className="intake-note">PDF or plain text · analysis results stay linked to this workspace</span>
+        </div>
+        <form className="upload-form" onSubmit={handleSubmit}>
+          <label className="file-picker">
+            <span className="file-picker__icon" aria-hidden="true">↑</span>
+            <span className="file-picker__copy"><strong>{file ? file.name : "Choose a contract file"}</strong><small>{file ? (file.size / 1024).toFixed(1) + " KB · ready to analyze" : "Select a PDF or TXT document from your computer"}</small></span>
+            <span className="file-picker__button">Browse files</span>
+            <input type="file" accept=".pdf,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} disabled={loading || demoLoading} />
+          </label>
+          <div className="upload-actions">
+            <button type="submit" disabled={!file || loading || demoLoading}>{loading ? "Analyzing contract…" : "Analyze contract"} <span aria-hidden="true">→</span></button>
+            <button type="button" className="button-secondary" onClick={loadSavedDemo} disabled={loading || demoLoading}>{demoLoading ? "Preparing demo…" : "Open guided demo"}</button>
+            <a className="sample-link" href="/query/demo-contract" download>Download sample agreement ↗</a>
+          </div>
+        </form>
+        <p className="privacy-note" role="note"><span aria-hidden="true">ⓘ</span> Privacy: inference runs locally, but clause text is sent to the configured Cohere embedding API. Do not upload confidential documents unless that transfer is authorized; this build is not fully offline.</p>
+      </section>
+
+      {!result && !loading && (
+        <section className="welcome-grid" aria-label="How the workspace works">
+          <article className="welcome-card welcome-card--primary">
+            <span className="step-tag">02 / INSPECT</span><div className="welcome-icon">⌕</div>
+            <h3>Evidence before conclusions</h3>
+            <p>Every displayed risk candidate points back to contract wording. Unverified interpretations should remain unresolved—not become confident legal claims.</p>
+          </article>
+          <article className="welcome-card">
+            <span className="step-tag">03 / ASK</span><div className="welcome-icon">↗</div>
+            <h3>Ask the contract</h3>
+            <p>Explore termination, liability, payment, IP ownership, and interactions between clauses with source-backed answers and explicit uncertainty.</p>
+          </article>
+          <article className="welcome-card">
+            <span className="step-tag">BUILT FOR REVIEW</span><div className="welcome-icon">◎</div>
+            <h3>Auditable by design</h3>
+            <p>Inspect rule status, evidence provenance, and downloadable artifacts. A passed software check is never presented as proof of legal accuracy.</p>
+          </article>
+        </section>
+      )}
+
+      {phase2Metrics?.production_release_readiness && (
+        <section className="release-banner" aria-label="Production release readiness">
+          <div className="release-banner__icon" aria-hidden="true">!</div>
+          <div className="release-banner__copy">
+            <span className="step-tag">RELEASE GATE · TRANSPARENT STATUS</span>
+            <h2>{phase2Metrics.production_release_readiness.status === "BLOCKED" ? "Production release is blocked" : "Production approval still requires review"}</h2>
+            <p>{phase2Metrics.production_release_readiness.production_approved_rule_count ?? 0} individually approved rules. {phase2Metrics.production_release_readiness.complete_rule_test_suites ?? 0} of {phase2Metrics.production_release_readiness.base_rule_count ?? "—"} base rules have complete positive, negative, and edge-case suites; {phase2Metrics.production_release_readiness.rules_without_authority_refs ?? 0} still need context-specific authority mapping. CI success is not legal validation.</p>
+          </div>
+          <div className="release-banner__stat">
+            <strong>{phase2Metrics.production_release_readiness.status}</strong>
+            <span>Current release gate</span>
+          </div>
+        </section>
+      )}
+
+      {demoNotice && <p className="demo-notice" role="status">{demoNotice}</p>}
+      {error && <div className="error" role="alert">{error}</div>}
+
+      <details className="experiment-snapshot">
+        <summary>Technical validation snapshot <span className="snapshot-hint">Open to inspect runtime metrics</span></summary>
+        <div className="experiment-snapshot__body">
+          <div className="experiment-metrics">
+            <div><strong>{phase2Metrics?.playbook?.deterministic_rule_count ?? "—"}</strong><span>Executable playbook rules</span></div>
+            <div><strong>{phase2Metrics?.playbook?.clause_question_count ?? "—"}</strong><span>Clause-level playbook questions</span></div>
+            <div><strong>{phase2Metrics?.playbook?.cross_clause_question_count ?? "—"}</strong><span>Cross-clause questions</span></div>
+            <div><strong>{phase2Metrics?.playbook?.document_question_count ?? "—"}</strong><span>Document-level questions</span></div>
+            <div><strong>{phase2Metrics?.rule_validation?.status || "NOT_RUN"}</strong><span>Rule configuration / taxonomy validation</span></div>
+            <div><strong>{phase2Metrics?.classification_index_isolation?.status || "NOT_RUN"}</strong><span>Separate CUAD classifier-index isolation</span></div>
+            <div><strong>{phase2Metrics?.release_validation?.status || "NOT_RUN"}</strong><span>Recorded release-check run</span></div>
+            <div><strong>{phase2Metrics?.production_release_readiness?.status || "NOT_CHECKED"}</strong><span>Production release readiness</span></div>
+            <div><strong>{phase2Metrics?.production_release_readiness ? (phase2Metrics.production_release_readiness.rules_with_authority_refs + "/" + phase2Metrics.production_release_readiness.base_rule_count) : "—"}</strong><span>Base rules with authority mapping</span></div>
+            <div><strong>{phase2Metrics?.playbook?.taxonomy_domain_count ?? "—"}</strong><span>Canonical risk domains</span></div>
+          </div>
+          <p>
+            {phase2Metrics ? "Playbook v" + (phase2Metrics.playbook?.source_version || "—") + ". Rule tests and release reports are shown as NOT_RUN until their source scripts execute." : "Could not load the saved Phase 2 configuration and conformance reports."}
+          </p>
+          <p>
+            {phase2Metrics?.separate_cuad_category_baseline?.accuracy == null
+              ? "The separate CUAD clause-category retrieval baseline has not been loaded."
+              : "Separate CUAD category baseline: " + (phase2Metrics.separate_cuad_category_baseline.accuracy * 100).toFixed(1) + "% accuracy and " + (phase2Metrics.separate_cuad_category_baseline.macro_f1 * 100).toFixed(1) + "% macro-F1 across " + (phase2Metrics.separate_cuad_category_baseline.test_clauses ?? "—") + " held-out clauses. These are clause-category metrics, not risk accuracy."}
+          </p>
+          <p><strong>Interpretation:</strong> direct rule hits are review triggers with exact contract quotes. The release reports conformance, rule integrity and evidence provenance—not legal-risk accuracy, enforceability or calibrated probability. A rule miss is not proof that a contract is safe.</p>
+          <p><a href="/query/phase2-metrics" target="_blank" rel="noreferrer">Open metrics JSON</a></p>
+        </div>
+      </details>
 
       {loading && (
         <section className="trace" aria-live="polite">
@@ -255,7 +519,7 @@ function ContractReview() {
               <div><span>Effective date</span><strong>{result.contract_metadata?.effective_date || "Not extracted"}</strong></div>
               <div><span>Expiration date</span><strong>{result.contract_metadata?.expiration_date || "Not extracted"}</strong></div>
               <div><span>Governing law</span><strong>{result.contract_metadata?.governing_law || "Not extracted"}</strong></div>
-              <div><span>Ground truth</span><strong>{assessment.gold_status || "PLAYBOOK_DERIVED"}</strong></div>
+              <div><span>Risk source</span><strong>{assessment.gold_status === "PLAYBOOK_DERIVED" ? "Playbook-derived" : (assessment.gold_status || "Playbook-derived")}</strong></div>
             </div>
           </section>
 
@@ -263,6 +527,7 @@ function ContractReview() {
             <button type="button" className={tab === "overview" ? "tab tab--active" : "tab"} onClick={() => setTab("overview")}>Overview</button>
             <button type="button" className={tab === "clauses" ? "tab tab--active" : "tab"} onClick={() => setTab("clauses")}>Clauses</button>
             <button type="button" className={tab === "risks" ? "tab tab--active" : "tab"} onClick={() => setTab("risks")}>Risks ({potential.length})</button>
+            <button type="button" className={tab === "chat" ? "tab tab--active" : "tab"} onClick={() => setTab("chat")}>Ask this contract</button>
           </nav>
 
           {tab === "overview" && (
@@ -272,10 +537,11 @@ function ContractReview() {
                 <h2>{assessment.status === "POTENTIAL_RISK" ? "Potential risk identified" : (assessment.status || "Assessment unavailable")}</h2>
                 <p>{assessment.reason}</p>
                 <div className="status-line">
-                  <span>Overall severity: {assessment.overall_risk || "Not calibrated"}</span>
-                  <span>Confidence: {assessment.overall_confidence == null ? "Not calibrated" : Math.round(assessment.overall_confidence * 100) + "%"}</span>
+                  <span>Review status: {assessment.status || "Not available"}</span>
+                  <span>Contract-level confidence: not estimated</span>
                 </div>
-                <p className="muted">This uploaded contract has no independent gold label. Findings are tagged {assessment.gold_status || "PLAYBOOK_DERIVED"}.</p>
+                <p className="muted">Clause-level confidence is shown only after adjudicated calibration. No ordinal severity labels or aggregate contract probability are used.</p>
+                <p className="muted">Policy: {assessment.rule_registry?.status || "PILOT_REVIEW_ONLY"} · Source citations: {assessment.rule_registry?.source_citation_status || "incomplete"} · Findings: {assessment.gold_status || "PLAYBOOK_DERIVED"}.</p>
               </article>
 
               <article className="panel">
@@ -298,13 +564,16 @@ function ContractReview() {
 
           {tab === "clauses" && (
             <section className="results">
-              <div className="section-heading"><div><div className="eyebrow">Clause-by-clause</div><h2>{clauses.length} extracted segments</h2></div></div>
+              <div className="section-heading">
+                <div><div className="eyebrow">Clause-by-clause</div><h2>{clauseSearch.trim() ? visibleClauses.length + " matching segments" : clauses.length + " extracted segments"}</h2></div>
+                <label className="clause-search"><span aria-hidden="true">⌕</span><input type="search" value={clauseSearch} onChange={(event) => setClauseSearch(event.target.value)} placeholder="Search clause text or label…" aria-label="Search clauses" /></label>
+              </div>
               <div className="clause-list">
-                {clauses.map((clause) => (
+                {visibleClauses.map((clause) => (
                   <article key={clause.clause_index} className="clause-card">
                     <div className="clause-card__header">
                       <div><span className="field-label">Clause {clause.clause_index}</span><h3>{clause.predicted_label || "No applicable label"}</h3></div>
-                      <RiskBadge status={clause.risk_status} level={clause.risk_level} />
+                      <RiskBadge status={clause.risk_status} />
                     </div>
                     <p className="clause-text">{clause.clause_text}</p>
                     <div className="classification-row">
@@ -316,6 +585,7 @@ function ContractReview() {
                     ))}
                   </article>
                 ))}
+                {!visibleClauses.length && <div className="panel"><h3>No clauses match this search.</h3><p>Try a different term, section heading, or clause category.</p></div>}
               </div>
             </section>
           )}
@@ -365,6 +635,80 @@ function ContractReview() {
                   </div>
                 </section>
               )}
+            </section>
+          )}
+
+          {tab === "chat" && (
+            <section className="contract-chat">
+              <div className="chat-heading">
+                <div>
+                  <div className="eyebrow">Contract-aware assistant</div>
+                  <h2>Ask questions about {result.contract_metadata?.name || result.filename}</h2>
+                  <p className="muted">Answers are grounded in this analysis. Each material contract claim should cite exact wording; if the source does not support an answer, the assistant should say so rather than guess.</p>
+                </div>
+                <div className="chat-heading__actions">
+                  <span className="chat-model">{chatModeLabel}</span>
+                  <button
+                    type="button"
+                    className="chat-clear-button"
+                    onClick={() => { setChatMessages([]); setChatError(null); setChatInput(""); }}
+                    disabled={!chatMessages.length || chatLoading}
+                  >Clear conversation</button>
+                </div>
+              </div>
+
+              <div className="suggested-questions" aria-label="Suggested questions">
+                {[
+                  "How does the supplier liability cap compare with the customer's cap?",
+                  "What termination rights does each party have?",
+                  "Can we determine the governing law from this agreement alone?",
+                  "What insurance must the supplier maintain, and are minimum policy limits stated?",
+                  "What happens to customer data after termination, and does the agreement specify retention or deletion?",
+                ].map((question) => (
+                  <button key={question} type="button" onClick={() => askContract(question)} disabled={chatLoading}>{question}</button>
+                ))}
+              </div>
+
+              <div className="chat-messages" aria-live="polite" aria-label="Conversation">
+                {!chatMessages.length && (
+                  <div className="chat-empty">
+                    <strong>Ask a question or choose a suggested prompt.</strong>
+                    <span>Try a plain-language explanation, a comparison of clauses, or ask what exact wording triggered a playbook rule.</span>
+                  </div>
+                )}
+                {chatMessages.map((message, index) => (
+                  <article key={String(message.role) + index} className={message.role === "user" ? "chat-message chat-message--user" : "chat-message chat-message--assistant"}>
+                    <div className="chat-message__role">{message.role === "user" ? "You" : "Contract assistant"}{message.insufficient_evidence ? " · evidence limited" : ""}</div>
+                    <p>{message.role === "user" ? message.text : message.answer}</p>
+                    {message.citations?.length > 0 && (
+                      <div className="chat-citations">
+                        <strong>Verified contract evidence</strong>
+                        {message.citations.map((citation, citationIndex) => (
+                          <blockquote key={String(citation.clause_index) + citationIndex}>
+                            <span>Clause {citation.clause_index}{citation.reason ? " · " + citation.reason : ""}</span>
+                            “{citation.quote}”
+                             <button type="button" className="citation-open-button" onClick={() => openCitedClause(citation.clause_index)}>Open clause →</button>
+                          </blockquote>
+                        ))}
+                      </div>
+                    )}
+                    {message.role === "assistant" && message.disclaimer && <span className="chat-disclaimer">{message.disclaimer}</span>}
+                    {message.follow_up_questions?.length > 0 && (
+                      <div className="chat-followups">
+                        {message.follow_up_questions.map((question) => <button key={question} type="button" onClick={() => askContract(question)} disabled={chatLoading}>{question}</button>)}
+                      </div>
+                    )}
+                  </article>
+                ))}
+                {chatLoading && <div className="chat-thinking"><span className="chat-thinking__dot" /> Checking the relevant contract clauses…</div>}
+              </div>
+
+              {chatError && <div className="error" role="alert">{chatError}</div>}
+              <form className="chat-composer" onSubmit={(event) => { event.preventDefault(); askContract(); }}>
+                <textarea value={chatInput} onChange={(event) => setChatInput(event.target.value)} placeholder="Ask something specific about this contract…" rows={3} maxLength={1200} disabled={chatLoading} aria-label="Question about this contract" />
+                <button type="submit" disabled={chatLoading || !chatInput.trim()}>{chatLoading ? "Thinking…" : "Ask question"}</button>
+              </form>
+              <p className="chat-safety-note">AI-assisted review only, not legal advice. The model may still misinterpret a clause. Risk findings are review triggers, not calibrated probabilities.</p>
             </section>
           )}
         </>

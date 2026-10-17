@@ -1,121 +1,83 @@
-# Phase 2 Contract Risk System — Logical Model and Reproduction Notes
+# Phase 2 Contract Risk Review — Rule-First Logical Model
 
-## 1. What this system answers
+## Purpose
 
-The system keeps four different questions separate:
+The risk service answers a different question from the clause classifier. It looks for buyer-side contract provisions that satisfy explicit review rules and asks the playbook questions that need more nuanced interpretation. Its evidence source is the contract the user uploaded.
 
-1. **Clause classification:** what type of provision does the text resemble?
-2. **Risk predicate:** what concrete buyer-side condition should be checked?
-3. **Contract evidence:** is the condition supported by the uploaded agreement?
-4. **Evaluation truth:** do independent labels tell us whether the decision was correct?
+There is no fine-tuning step in this risk pipeline. Retrieved CUAD clause examples are not inserted into risk prompts, are not evidence for risks, and do not create risk flags. CUAD retrieval remains a separate clause-category classification component only.
 
-The playbook is a test specification, not evidence. RAG examples and legal/practice sources are guidance. A positive risk finding must cite the uploaded contract.
+## End-to-end flow
 
-## 2. End-to-end logical graph
+1. Accept and extract the uploaded PDF/TXT contract.
+2. Segment the document into clauses while preserving clause IDs and source text.
+3. Run the separate clause-category classifier. Its label can organize the interface and route category-specific checklist questions, but it cannot gate the deterministic rule scan.
+4. Run every executable deterministic rule in the versioned playbook against every extracted clause, independently of the predicted clause category.
+5. Run applicable playbook questions for nuanced clause risks. For these questions, the LLM sees the current clause, related clauses from the same uploaded contract, the relevant question, the playbook's flag conditions, and optional legal-practice guidance. It does not see retrieved CUAD training text spans.
+6. Run the ten cross-clause checks and three document-level checks against the uploaded document's clauses and explicit playbook questions.
+7. Verify that each positive finding's cited text is an exact contiguous quote from the uploaded contract, and identify the source clause.
+8. Aggregate the surviving findings by declared playbook domain, apply deterministic review-triage scoring, write the report/artifacts, and preserve configuration and playbook fingerprints.
 
-```mermaid
-flowchart TD
-    A[PDF/TXT uploaded] --> B[Extract text and segment clauses]
-    B --> C[Clause classification]
-    C --> D[Training-only CUAD retrieval]
-    D --> E[Predicted clause type + confidence]
-    E --> F[Risk playbook lookup]
-    P[Playbook v1.1: 37 clause types, 101 clause checks] --> F
-    P2[10 cross-clause checks + 3 document checks] --> K
-    F --> G[Current clause + same-contract context]
-    L[Separate legal/practice knowledge RAG] --> G
-    G --> H[Structured risk reasoning]
-    H --> I[Exact quote/evidence validation]
-    I --> J[Clause finding: POTENTIAL_RISK / NO_RISK / INSUFFICIENT_EVIDENCE / ERROR]
-    B --> K[Cross-clause/document analysis in batches of 4 checks per response]
-    J --> M[Canonical risk-domain mapping]
-    K --> N[Validate each quote against cited clause ID]
-    N --> M
-    M --> O[Rule-based severity/triage score]
-    O --> Q[Contract-level profile + risk register + downloads]
-    Q --> R[Run manifest, trace, CSV/JSON, hashes]
-    R --> S[External task-matched benchmark / regression tests]
-    R --> T[Human-gold evaluation when qualified labels exist]
-```
+## Root-cause fix
 
-## 3. Taxonomy, checks and risk domain
+The previous architecture allowed two sources to be confused with contract evidence: retrieved CUAD examples in the legacy risk prompt, and the predicted CUAD label as the gate to risk indicators. The current design removes both connections.
 
-The current source-of-truth playbook is `data/risk/commercial_clause_risk_playbook.json`, source version 1.1:
+- The legacy risk prompt no longer accepts or renders CUAD examples or candidate labels.
+- The text-indicator scanner checks all rule families for every clause, regardless of the classifier label.
+- The active Phase 2 risk engine runs the playbook's deterministic predicates independently of the LLM's answer to checklist questions. A matching rule is preserved as a separate review finding.
+- Every deterministic finding records its rule ID, pattern, playbook hash, rule-engine version, risk domain and exact quote.
+- Resume logic checks both the rule-engine version and normalized playbook hash, so changing a playbook rule invalidates stale findings and triggers re-analysis.
 
-- 37 clause types (36 CUAD-substantive types plus supplemental Indemnification)
-- 101 clause-level checks
-- 10 cross-clause checks
-- 3 document-level checks
-- 10 canonical domains in `backend/data/legal_knowledge/risk_taxonomy.json`
+## Playbook and taxonomy
 
-The **declared playbook domain is authoritative** for routing/aggregation. A finer old label is preserved as `risk_subdomain`; text/keyword matches are emitted as supplemental suggestions only. Neither the taxonomy nor a check definition establishes facts about a contract.
+Source of truth: data/risk/commercial_clause_risk_playbook.json, version 1.2.
 
-Each check has an ID, question, `flag_if`, sometimes `do_not_flag_if`, evidence constraints, dependencies, and source references. `FLAG IF` governs risk polarity: the natural-language question may be answered YES while the risk label is NO, or vice versa.
+The playbook includes:
+- 37 clause-category question checklists with 101 clause-level questions;
+- 7 initial executable text predicates for explicit wording patterns;
+- 10 cross-clause questions;
+- 3 document-level questions;
+- cited source records and declared flag conditions.
 
-## 4. The three scopes of analysis
+The taxonomy in backend/data/legal_knowledge/risk_taxonomy.json provides ten canonical domains and mitigation guidance. A taxonomy term or a question definition can organize a review but is not evidence that the uploaded contract contains a risk.
 
-### Clause-level
-For an extracted clause, the system predicts a CUAD category, obtains applicable playbook checks, passes the clause and related same-contract context to the risk model, and validates evidence quotes. The classification retrieval index contains training contracts only.
+The seven deterministic rules currently cover explicit uncapped-liability wording, indemnification outside a cap, liquidated damages outside a cap, immediate/no-notice termination, broad IP-license wording, early-exit remaining-term fees, and absolute assignment prohibition. This is a deliberately explicit starter rule set, not an exhaustive list of every possible adverse clause. Rule matches are review triggers, not legal conclusions.
 
-### Cross-clause
-Ten checks inspect relationships such as liability cap vs indemnification, liability cap vs liquidated damages, assignment vs change of control, termination vs minimum commitment, and IP ownership vs license rights. These checks can require multiple clause IDs. The engine currently requests four check definitions per model response to reduce JSON truncation; if a batch fails, only that batch's checks fall back to insufficient evidence.
+## Status semantics
 
-### Document-level
-Three checks examine incorporated materials/package completeness, precedence terms, and governing-law/forum/dispute consistency. Missing referenced documents should be marked unread/unknown or insufficient; absence from an incomplete packet is not proof that a term is absent from the full executed contract.
+- POTENTIAL_RISK: an executable rule matched or a playbook question returned a positive result with valid uploaded-contract evidence.
+- NO_RISK: the applicable playbook question was answered as not meeting its flag condition, with evidence supporting that answer.
+- INSUFFICIENT_EVIDENCE: the text needed to decide the question is absent, ambiguous, or not supported by exact contract evidence.
+- ERROR: execution or output validation failed.
 
-## 5. Retrieval and evidence boundaries
+No deterministic pattern match does not imply NO_RISK. It only means no rule in the current explicit set matched that text. Nuanced risks continue to be handled by playbook questions, and unresolved checks remain visible.
 
-- **CUAD classification retrieval:** similar labeled examples from the training-only index.
-- **Same-contract context retrieval:** related clauses from the uploaded agreement.
-- **Legal/practice RAG:** separate authority/guidance records.
-- **Contract evidence:** exact text from the uploaded agreement and cited clause ID.
+## Evaluation contract
 
-External guidance can help explain why a predicate matters, but it cannot prove that the agreement contains the relevant term. Exact quote validation checks provenance, not semantic/legal correctness.
+The release is assessed against reproducible system invariants, not against a risk-span dataset:
+- deterministic rule IDs are unique and regexes compile;
+- every rule maps to a canonical taxonomy domain;
+- deterministic positives carry exact quotes from the uploaded contract;
+- prompts do not inject retrieved CUAD example spans;
+- playbook question output obeys the source-evidence boundary;
+- cross-clause/document checks cite existing clause IDs and exact quotes;
+- the separate CUAD category index has zero train/test contract overlap;
+- the synthetic playbook-question regression suite and backend unit tests pass.
 
-## 6. Outputs and traceability
+These measurements establish implementation and rule conformance, not legal correctness or real-world recall. The system does not report risk accuracy, precision, recall, F1, calibrated probability, or enforceability. These are not release gates and no annotation queue is required to operate or release the risk engine.
 
-Each uploaded run should preserve:
-- original file hash and run/analysis ID;
-- extracted/segmented clause list;
-- predicted CUAD category, retrieval and risk-check results;
-- risk status, evidence quote, cited clause IDs, rationale and severity/score when available;
-- cross/document check outputs and unresolved checks;
-- configuration/playbook/calibration and code fingerprints;
-- CSV/JSON/report/download paths;
-- progress trace and reproducibility manifest.
+## Commands
 
-The primary operational artifact is the per-run folder under `data/runs/<analysis_id>/`.
+From the repository root, with the backend stopped before accessing embedded Qdrant:
 
-## 7. Evaluation sources and claims
+    .venv/bin/python scripts/risk/validate_playbook_rules.py
+    .venv/bin/python scripts/risk/validate_evaluation_integrity.py
+    .venv/bin/python scripts/risk/normalize_playbook_domains.py
+    .venv/bin/python scripts/risk/audit_cross_document_scenario_suite.py
+    PYTHONPATH="$PWD:$PWD/backend:$PWD/.venv/lib/python3.12/site-packages" .venv/bin/python -m pytest -q backend/tests
+    .venv/bin/python scripts/risk/report_phase2_experiment.py
 
-The project has three different evidence sources:
+Then run scripts/risk/run_release_checks.py and verify that every check reports PASS. Embedded/local Qdrant uses an exclusive file lock, so the API service must be stopped during the index-isolation check and restarted afterward.
 
-1. **External CUAD expert-derived data:** suitable for the mapped clause/category presence/evidence task. It is not gold for the custom buyer-side risk predicates.
-2. **Machine-silver risk queue (300 tasks):** useful for reproducibility, disagreement, abstention and error analysis. It is not human gold; its observed labels must not be used to claim custom-risk accuracy.
-3. **Synthetic cross/document matrix (39 cases):** three authored scenarios for each of 10 cross-clause and 3 document-level checks. This is a regression test. Its status-conformance rate measures fixture behavior only, not real-world generalization.
+## Operational boundary
 
-Current one-shot-vs-batched synthetic comparison: 11/39 (28.2%) vs 27/39 (69.2%) expected-status matches on the same authored fixtures. Batching reduced the failure where a single oversized JSON response caused all 13 checks to abstain. The result does **not** establish legal-risk accuracy; the protected-control set still has false positives/abstentions, and some positive cases are missed.
-
-The 300-row human annotation queue remains unannotated. Final custom-risk accuracy requires qualified labels and adjudication, or a different external benchmark whose label semantics genuinely match the specific claims being measured.
-
-## 8. Important commands
-
-From repository root:
-
-```bash
-.venv/bin/python scripts/risk/validate_evaluation_integrity.py
-.venv/bin/python scripts/risk/normalize_playbook_domains.py
-.venv/bin/python scripts/risk/export_team_pack.py
-.venv/bin/python scripts/risk/build_cross_document_scenario_suite.py
-.venv/bin/python scripts/risk/audit_cross_document_scenario_suite.py
-.venv/bin/python scripts/risk/run_cross_document_model_scenarios.py --passes 1 --resume
-.venv/bin/python scripts/risk/render_cross_document_model_report.py
-.venv/bin/python scripts/risk/compare_cross_document_model_runs.py
-PYTHONPATH="$PWD:$PWD/backend:$PWD/.venv/lib/python3.12/site-packages" pytest -q backend/tests
-```
-
-For the full release check, stop the backend first because the embedded/local Qdrant store enforces an exclusive lock. Then run `scripts/risk/run_release_checks.py`, restart the backend, and verify `GET /health`. The release check includes upload-smoke audits and regenerates the reproducibility report.
-
-## 9. Limitations
-
-This is a screening/review aid, not autonomous legal advice. The current test fixtures are authored synthetic examples; the model-silver set is machine-labeled; custom-risk accuracy and calibrated severity are therefore unmeasured. The score is deterministic review triage, not a probability of loss. The risk playbook expresses a buyer-side review policy and may need jurisdiction-specific review before operational use.
+This is an AI-assisted commercial contract review-prioritization tool, not a legal decision-maker. Every displayed positive finding must show the source clause and exact quote. Severity is a deterministic triage signal, not a probability of loss. Legal/practice guidance remains explanatory context and never substitutes for the text of the uploaded agreement.

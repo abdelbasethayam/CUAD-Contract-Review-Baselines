@@ -52,6 +52,7 @@ def test_unknown_classification_still_runs_risk_analysis(monkeypatch):
     assert calls
     assert result["risk_status"] == "POTENTIAL_RISK"
     assert result["evidence"] == "Liability is unlimited."
+    assert result["risk_level"] is None
 
 
 def test_malformed_classification_status_does_not_skip_risk_analysis(monkeypatch):
@@ -95,7 +96,7 @@ def test_multiple_clause_findings_are_aggregated_without_score_averaging():
     assessment = aggregator.aggregate_contract_risk(findings, use_llm=False)
 
     assert assessment["overall_status"] == "POTENTIAL_RISK"
-    assert assessment["overall_risk"] == "HIGH"
+    assert assessment["overall_risk"] == "POTENTIAL_RISK"
     assert assessment["affected_clauses"] == [0, 1]
     assert len(assessment["supporting_clause_findings"]) == 2
     assert "score" not in assessment
@@ -155,26 +156,15 @@ def test_insufficient_evidence_is_preserved_when_no_positive_finding_exists():
     )
 
     assert assessment["overall_status"] == "INSUFFICIENT_EVIDENCE"
-    assert assessment["overall_risk"] is None
+    assert assessment["overall_risk"] == "INSUFFICIENT_EVIDENCE"
 
 
-def test_openrouter_can_safely_synthesize_contract_assessment(monkeypatch):
-    monkeypatch.setattr(
-        aggregator,
-        "call_ollama",
-        lambda prompt: json.dumps(
-            {
-                "overall_risk": "LOW",
-                "reason": "The validated finding is limited in scope.",
-                "recommendations": ["Review the liability wording."],
-            }
-        ),
-    )
-
+def test_contract_aggregator_never_synthesizes_ordinal_severity():
     assessment = aggregator.aggregate_contract_risk([_positive_finding()])
 
-    assert assessment["synthesis_provider"] == "ollama"
-    assert assessment["overall_risk"] == "LOW"
+    assert assessment["synthesis_provider"] == "categorical_evidence_aggregation"
+    assert assessment["overall_risk"] == "POTENTIAL_RISK"
+    assert "overall_severity" not in assessment
     assert assessment["evidence"][0]["text"] == "Liability is unlimited."
 
 
@@ -195,7 +185,7 @@ def test_api_response_exposes_contract_assessment_and_clause_findings():
         ],
         contract_risk_assessment={
             "overall_status": "POTENTIAL_RISK",
-            "overall_risk": "HIGH",
+            "overall_risk": "POTENTIAL_RISK",
             "affected_clauses": [0],
             "deterministic_cross_checks": [
                 {
@@ -209,7 +199,8 @@ def test_api_response_exposes_contract_assessment_and_clause_findings():
     )
 
     payload = response.model_dump() if hasattr(response, "model_dump") else response.dict()
-    assert payload["contract_risk_assessment"]["overall_risk"] == "HIGH"
+    assert payload["contract_risk_assessment"]["overall_risk"] == "POTENTIAL_RISK"
+    assert payload["contract_risk_assessment"]["overall_severity"] is None
     assert payload["contract_risk_assessment"]["deterministic_cross_checks"][0]["id"] == "DET-REMEDY-MISMATCH"
     # Contract evidence is part of the explainability output, not a field to strip.
     assert payload["clauses"][0]["evidence"] == "Liability is unlimited."
@@ -229,6 +220,8 @@ def test_evidence_source_identifies_the_exact_related_clause():
     assert source == {
         "evidence_clause_index": 4,
         "evidence_scope": "related_contract_clause",
+        "evidence_source_status": "VERIFIED",
+        "evidence_clause_candidates": [4],
     }
 
     target = _evidence_source(
@@ -240,6 +233,8 @@ def test_evidence_source_identifies_the_exact_related_clause():
     assert target == {
         "evidence_clause_index": 1,
         "evidence_scope": "target_clause",
+        "evidence_source_status": "VERIFIED",
+        "evidence_clause_candidates": [1],
     }
 
 

@@ -1,0 +1,1 @@
+contract_id,finding_id,check_id,playbook_hash,support_score_version,predicted_risk,adjudicated_risk,raw_support_score,split,adjudication_status,annotator_1_id,annotator_1_risk,annotator_2_id,annotator_2_risk,adjudicator_id,adjudication_notes

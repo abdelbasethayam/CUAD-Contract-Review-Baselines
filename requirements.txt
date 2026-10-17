@@ -19,6 +19,7 @@ rtree==1.4.1
 
 # --- Config / environment ---
 python-dotenv           # loads .env (COHERE_API_KEY, QDRANT_URL, etc.)
+jsonschema>=4.22,<5    # validates governed Phase 2 rule and source registries
 
 # --- Data pipeline (split_cuad.py, embed_train.py, build_qdrant.py) ---
 pandas                  # CSV loading/reshaping, config.load_labels()

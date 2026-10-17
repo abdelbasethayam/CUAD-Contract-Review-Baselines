@@ -48,6 +48,12 @@ def main() -> int:
         raise SystemExit("pytest is not installed; install requirements-dev.txt before release checks.")
     commands = [
         ("compileall", [sys.executable, "-m", "compileall", "-q", "backend/app", "scripts/risk"]),
+        ("playbook_rule_validation", [sys.executable, "scripts/risk/validate_playbook_rules.py"]),
+        ("rule_registry_reproducibility", [sys.executable, "scripts/risk/build_rule_registry.py", "--check"]),
+        ("rule_registry_governance", [sys.executable, "scripts/risk/validate_rule_registry.py"]),
+        ("clause_authority_map", [sys.executable, "scripts/risk/validate_clause_authority_map.py"]),
+        ("risk_gold_schema", [sys.executable, "scripts/risk/validate_risk_gold.py", "--schema-only"]),
+        ("rule_review_queue_reproducibility", [sys.executable, "scripts/risk/build_rule_review_queue.py", "--check"]),
         ("evaluation_integrity", [sys.executable, "scripts/risk/validate_evaluation_integrity.py"]),
         ("playbook_domain_validation", [sys.executable, "scripts/risk/normalize_playbook_domains.py"]),
         ("team_export", [sys.executable, "scripts/risk/export_team_pack.py"]),
@@ -66,8 +72,40 @@ def main() -> int:
         ("phase2_report", [sys.executable, "scripts/risk/report_phase2_experiment.py"]),
         ("backend_tests", [pytest_cmd, "-q", "backend/tests"]),
     ]
-    results = []
+    # Historical upload audits point at run directories created by a live API
+    # process.  Those runtime directories are intentionally git-ignored, so a
+    # clean clone must not fail the release gate merely because the optional
+    # replay artifacts are absent.  Keep the check visible as SKIPPED and run it
+    # automatically whenever the corresponding manifest is available.
+    filtered_commands = []
     for name, command in commands:
+        if name.startswith("upload_smoke_audit"):
+            input_path = ROOT / "data/risk/results/smoke_upload_api_result.json"
+            if "--input" in command:
+                input_path = ROOT / command[command.index("--input") + 1]
+            try:
+                record = json.loads(input_path.read_text(encoding="utf-8"))
+                analysis_id = (record.get("response") or {}).get("analysis_id")
+                if not analysis_id or not (ROOT / "data/runs" / analysis_id / "manifest.json").is_file():
+                    results_entry = {
+                        "name": name, "command": command, "exit_code": None,
+                        "duration_seconds": 0.0, "passed": True,
+                        "status": "SKIPPED_MISSING_RUNTIME_ARTIFACT",
+                        "output": "Skipped: live upload run directory is not present in this checkout.",
+                    }
+                    print(f"[SKIP] {name} (runtime artifact unavailable)", flush=True)
+                    filtered_commands.append(results_entry)
+                    continue
+            except (OSError, ValueError, TypeError):
+                pass
+        filtered_commands.append((name, command))
+
+    results = []
+    for item in filtered_commands:
+        if isinstance(item, dict):
+            results.append(item)
+            continue
+        name, command = item
         start = time.monotonic()
         proc = subprocess.run(
             command, cwd=ROOT, env=env, text=True,
@@ -89,6 +127,21 @@ def main() -> int:
     inputs = [
         ROOT / "data/risk/EVALUATION_INTEGRITY_REPORT.json",
         ROOT / "data/risk/results/phase2_reproducible_report.json",
+        ROOT / "data/risk/authority_catalog.json",
+        ROOT / "data/risk/authority_catalog.schema.json",
+        ROOT / "data/risk/clause_authority_map.json",
+        ROOT / "data/risk/clause_authority_map.schema.json",
+        ROOT / "data/risk/evaluation/risk_gold.schema.json",
+        ROOT / "docs/PHASE2_RISK_GOLD_ANNOTATION_GUIDE.md",
+        ROOT / "scripts/risk/validate_risk_gold.py",
+        ROOT / "data/risk/rule_registry.jsonl",
+        ROOT / "data/risk/rule_registry_manifest.json",
+        ROOT / "data/risk/source_registry.json",
+        ROOT / "data/risk/rule_review_queue.csv",
+        ROOT / "scripts/risk/build_rule_registry.py",
+        ROOT / "scripts/risk/validate_rule_registry.py",
+        ROOT / "scripts/risk/validate_clause_authority_map.py",
+        ROOT / "scripts/risk/build_rule_review_queue.py",
         ROOT / "data/risk/results/local_hashing_cuad_index_manifest.json",
         ROOT / "data/risk/results/local_hashing_index_manifest.json",
         ROOT / "data/risk/results/legal_knowledge_retrieval_validation.json",
@@ -117,9 +170,28 @@ def main() -> int:
         ROOT / "scripts/risk/compare_cross_document_model_runs.py",
         ROOT / "scripts/risk/render_cross_document_model_report.py",
         ROOT / "data/risk/team_export/export_manifest.json",
-        ROOT / "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.csv",
-        ROOT / "data/risk/silver/silver_annotations_final_v5_qwen3_gemma3_20261007.jsonl",
+        ROOT / "data/risk/team_export/risk_playbook_exact.json",
+        ROOT / "data/risk/team_export/risk_deterministic_rules.csv",
+        ROOT / "data/risk/results/playbook_rule_validation.json",
         ROOT / "data/risk/commercial_clause_risk_playbook.json",
+        ROOT / "backend/app/core/risk/deterministic_rules.py",
+        ROOT / "backend/app/core/risk/risk_playbook.py",
+        ROOT / "backend/app/core/risk/risk_engine.py",
+        ROOT / "backend/app/core/risk/risk_detector.py",
+        ROOT / "backend/app/core/risk/contract_checks.py",
+        ROOT / "backend/app/services/rag_service.py",
+        ROOT / "backend/app/api/routes/query.py",
+        ROOT / "backend/app/api/routes/documents.py",
+        ROOT / "backend/app/main.py",
+        ROOT / "backend/app/core/config.py",
+        ROOT / "scripts/risk/validate_playbook_rules.py",
+        ROOT / "backend/tests/test_deterministic_playbook_rules.py",
+        ROOT / "backend/tests/test_rule_first_release_contract.py",
+        ROOT / "backend/tests/test_contract_chat.py",
+        ROOT / "backend/tests/test_contract_checks_evaluation.py",
+        ROOT / "frontend/src/App.jsx",
+        ROOT / "frontend/src/index.css",
+        ROOT / "frontend/vite.config.js",
         ROOT / "backend/data/legal_knowledge/risk_taxonomy.json",
         ROOT / "scripts/risk/smoke_upload_api.py",
         ROOT / "backend/app/core/risk/contract_checks.py",
@@ -129,10 +201,13 @@ def main() -> int:
         ROOT / "scripts/risk/report_phase2_experiment.py",
         ROOT / "scripts/risk/run_release_checks.py",
         ROOT / "docs/PHASE2_PAPER_DRAFT.md",
+        ROOT / "docs/PHASE2_Q1_PAPER_PROTOCOL.md",
+        ROOT / "docs/PHASE2_JURISDICTION_POLICY.md",
+        ROOT / "docs/PHASE2_RULE_REGISTRY_GOVERNANCE.md",
+        ROOT / "docs/PHASE2_RULE_REGISTRY_AUDIT.md",
         ROOT / "docs/PHASE2_REPRODUCIBILITY.md",
         ROOT / "docs/PHASE2_CLAIM_EVIDENCE_MATRIX.md",
         ROOT / "docs/PHASE2_LOGICAL_MODEL.md",
-        ROOT / "data/risk/GOLD_STATUS.md",
         ROOT / "backend/tests/test_contract_checks_batching.py",
     ]
     report = {
@@ -148,9 +223,9 @@ def main() -> int:
             for path in inputs
         },
         "interpretation": (
-            "Release checks validate code/data invariants and unit behavior. "
-            "They do not estimate custom risk accuracy or legal correctness; "
-            "human gold remains unavailable."
+            "Release checks validate executable playbook predicates, exact contract quotes, "
+            "taxonomy coverage, classifier-index isolation, playbook-question regressions and unit behavior. "
+            "No risk-span annotation dataset is used by the risk flagging path or release gates."
         ),
     }
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -177,7 +252,7 @@ def main() -> int:
         "",
         "## Interpretation",
         "",
-        "These checks validate implementation/data integrity, not custom-risk accuracy. Human-gold annotations are still absent. Review captured stdout/stderr in the JSON file for detailed counts and warnings.",
+        "These checks validate explicit playbook rules, exact evidence provenance, taxonomy coverage, classifier-index isolation, synthetic regressions and operational tests. The release path does not read risk-span annotation datasets and does not estimate legal-risk accuracy. Review captured stdout/stderr in the JSON file for detailed counts and warnings.",
         "",
         "## SHA-256",
         "",
