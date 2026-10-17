@@ -364,7 +364,13 @@ def _is_jurisdiction_sensitive(rule: dict[str, Any]) -> bool:
     ]).lower()
     return any(term in blob for term in JURISDICTION_SENSITIVE_TERMS)
 
-def _record(rule: dict[str, Any], playbook: dict[str, Any], *, candidate_profile: dict[str, str] | None = None) -> dict[str, Any]:
+def _record(
+    rule: dict[str, Any],
+    playbook: dict[str, Any],
+    source_by_id: dict[str, dict[str, Any]],
+    *,
+    candidate_profile: dict[str, str] | None = None,
+) -> dict[str, Any]:
     family = rule["rule_family"]
     category = rule.get("clause_type")
     registry_key = f"{family}::{category}::{rule['base_rule_id']}" if category else f"{family}::{rule['base_rule_id']}"
@@ -379,7 +385,58 @@ def _record(rule: dict[str, Any], playbook: dict[str, Any], *, candidate_profile
             "a reviewer must verify the contract context and approve applicability."
         )
     source_ids = list(rule.get("source_ids") or [])
-    source_status = "NO_SOURCE_LINKED" if not source_ids else "INCOMPLETE_SOURCE_CITATION"
+    source_refs = [
+        {
+            "source_id": source_id,
+            "source_title": source_by_id[source_id].get("source_title"),
+            "source_url": source_by_id[source_id].get("source_url"),
+            "source_tier": source_by_id[source_id].get("source_tier"),
+            "authority_status": source_by_id[source_id].get("authority_status"),
+            "jurisdiction": source_by_id[source_id].get("jurisdiction"),
+            "contract_type": source_by_id[source_id].get("contract_type"),
+            "effective_date": source_by_id[source_id].get("effective_date"),
+            "effective_date_status": source_by_id[source_id].get("effective_date_status"),
+            "pinpoint_citation": source_by_id[source_id].get("pinpoint_citation"),
+            "citation_status": source_by_id[source_id].get("citation_status"),
+            "retrieval_date": source_by_id[source_id].get("retrieval_date"),
+            "license_status": source_by_id[source_id].get("license_status"),
+            "transferability": source_by_id[source_id].get("transferability"),
+            "can_support_legal_conclusion": source_by_id[source_id].get("can_support_legal_conclusion", False),
+        }
+        for source_id in source_ids
+        if source_id in source_by_id
+    ]
+    source_tiers = sorted({str(item.get("source_tier")) for item in source_refs if item.get("source_tier")})
+    authority_jurisdictions = sorted({str(item.get("jurisdiction")) for item in source_refs if item.get("jurisdiction")})
+    effective_dates = [
+        {"source_id": item["source_id"], "effective_date": item.get("effective_date"), "status": item.get("effective_date_status")}
+        for item in source_refs
+    ]
+    pinpoint_citations = [
+        {"source_id": item["source_id"], "pinpoint_citation": item.get("pinpoint_citation"), "status": item.get("citation_status")}
+        for item in source_refs
+    ]
+    all_pinpoints_verified = bool(source_refs) and all(
+        item.get("citation_status") == "VERIFIED_PINPOINT" and item.get("pinpoint_citation")
+        for item in source_refs
+    )
+    citation_status = (
+        "NO_SOURCE_LINKED" if not source_ids
+        else "VERIFIED_PINPOINT" if all_pinpoints_verified
+        else "INCOMPLETE_SOURCE_CITATION"
+    )
+    source_status = citation_status if source_refs or not source_ids else "DANGLING_SOURCE_REFERENCE"
+    legal_authority = {
+        "sources": source_refs,
+        "source_tiers": source_tiers,
+        "jurisdictions": authority_jurisdictions,
+        "effective_dates": effective_dates,
+        "pinpoint_citations": pinpoint_citations,
+        "citation_status": citation_status,
+        "can_support_legal_conclusion": bool(source_refs) and all(
+            item.get("can_support_legal_conclusion") is True for item in source_refs
+        ) and all_pinpoints_verified,
+    }
     jurisdiction_scope = list(rule.get("jurisdiction_scope") or ["UNSPECIFIED"])
     jurisdiction_status = "UNRESOLVED" if any(str(x).upper() == "UNSPECIFIED" for x in jurisdiction_scope) else "DECLARED_NOT_VERIFIED"
     return {
@@ -405,6 +462,12 @@ def _record(rule: dict[str, Any], playbook: dict[str, Any], *, candidate_profile
         "evidence_contract": rule["evidence_contract"],
         "source_ids": source_ids,
         "source_status": source_status,
+        "source_tier": source_tiers,
+        "authority_jurisdictions": authority_jurisdictions,
+        "effective_dates": effective_dates,
+        "pinpoint_citations": pinpoint_citations,
+        "citation_status": citation_status,
+        "legal_authority": legal_authority,
         "rationale": rule["rationale"],
         "severity_rationale": {
             "status": "NOT_USED",
@@ -442,7 +505,9 @@ def _candidate_record(rule: dict[str, Any], playbook: dict[str, Any], profile: d
         "inherited_fields": [
             "rule_family", "title", "risk_domain", "risk_subdomain", "risk_type",
             "perspective", "jurisdiction_scope", "decision_logic", "evidence_contract",
-            "source_ids", "source_status", "rationale", "confidence_policy", "regression_cases",
+            "source_ids", "source_status", "source_tier", "authority_jurisdictions",
+            "effective_dates", "pinpoint_citations", "citation_status", "legal_authority",
+            "rationale", "confidence_policy", "regression_cases",
         ],
         "candidate_note": profile["note"],
         "validation_status": "DRAFT_UNVALIDATED",
@@ -458,15 +523,20 @@ def build_artifacts(playbook: dict[str, Any]) -> tuple[str, str, str]:
     # any rule invalidates the generated registry even if a declared field is stale.
     playbook = dict(playbook)
     playbook["_source_blob_sha"] = _git_blob_sha(PLAYBOOK_PATH.read_bytes())
+    source_registry = _source_registry(playbook)
+    source_by_id = {
+        str(item["source_id"]): item
+        for item in source_registry["sources"]
+        if item.get("source_id")
+    }
     base_rules = _base_inputs(playbook)
-    base_records = [_record(rule, playbook) for rule in base_rules]
+    base_records = [_record(rule, playbook, source_by_id) for rule in base_rules]
     candidate_records = [
         _candidate_record(rule, playbook, profile)
         for rule in base_rules
         for profile in CONTRACT_PROFILES
     ]
     records = base_records + candidate_records
-    source_registry = _source_registry(playbook)
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "registry_version": REGISTRY_VERSION,
