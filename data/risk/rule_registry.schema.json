@@ -255,11 +255,20 @@
       ],
       "properties": {
         "status": {
-          "enum": ["NOT_STARTED", "IN_REVIEW", "ADJUDICATED", "APPROVED", "REJECTED"]
+          "enum": [
+            "NOT_STARTED",
+            "IN_REVIEW",
+            "ADJUDICATED",
+            "APPROVED",
+            "REJECTED"
+          ]
         },
         "reviewer_ids": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "uniqueItems": true
         },
         "reviewer_decisions": {
@@ -267,37 +276,74 @@
           "minItems": 2,
           "items": {
             "type": "object",
-            "required": ["reviewer_id", "decision", "rationale", "reviewed_at"],
+            "required": [
+              "reviewer_id",
+              "decision",
+              "rationale",
+              "reviewed_at"
+            ],
             "properties": {
-              "reviewer_id": { "type": "string", "minLength": 1 },
-              "decision": {
-                "enum": ["POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE", "NOT_APPLICABLE"]
+              "reviewer_id": {
+                "type": "string",
+                "minLength": 1
               },
-              "rationale": { "type": "string", "minLength": 1 },
-              "reviewed_at": { "type": "string", "format": "date-time" }
+              "decision": {
+                "enum": [
+                  "POTENTIAL_RISK",
+                  "NO_RISK",
+                  "INSUFFICIENT_EVIDENCE",
+                  "NOT_APPLICABLE"
+                ]
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reviewed_at": {
+                "type": "string",
+                "format": "date-time"
+              }
             },
             "additionalProperties": false
           }
         },
         "adjudicator_id": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "adjudication_reference": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "adjudicated_at": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "format": "date-time"
         },
         "approved_by": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "approved_at": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "format": "date-time"
         },
         "approval_basis": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "additionalProperties": false
@@ -364,6 +410,147 @@
       "items": {
         "type": "string"
       }
+    },
+    "authority_map": {
+      "type": "object",
+      "required": [
+        "clause_type",
+        "authority_ids",
+        "authority_sources",
+        "authority_coverage_status",
+        "scope_note",
+        "jurisdiction_policy",
+        "review_status"
+      ],
+      "properties": {
+        "clause_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "authority_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "authority_sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "authority_id",
+              "title",
+              "citation",
+              "source_type",
+              "url",
+              "pinpoint",
+              "jurisdiction",
+              "source_tier",
+              "authority_status",
+              "effective_date",
+              "effective_date_status",
+              "retrieval_date",
+              "verification_status",
+              "currentness_status",
+              "scope_limit"
+            ],
+            "properties": {
+              "authority_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "citation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_type": {
+                "enum": [
+                  "FEDERAL_STATUTE",
+                  "STATE_STATUTE",
+                  "REGULATOR_STATUS_NOTICE",
+                  "PRIMARY_COURT_OPINION_REPUBLISHED"
+                ]
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "pinpoint": {
+                "type": "string",
+                "minLength": 1
+              },
+              "jurisdiction": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_tier": {
+                "enum": [
+                  "A",
+                  "B"
+                ]
+              },
+              "authority_status": {
+                "type": "string",
+                "minLength": 1
+              },
+              "effective_date": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "effective_date_status": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retrieval_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "verification_status": {
+                "type": "string",
+                "minLength": 1
+              },
+              "currentness_status": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scope_limit": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "authority_coverage_status": {
+          "enum": [
+            "LIMITED_PRIMARY_AUTHORITY_LINKED",
+            "NO_UNIVERSAL_PRIMARY_AUTHORITY_IDENTIFIED",
+            "RULE_FAMILY_SPECIFIC_AUTHORITY_REVIEW_REQUIRED"
+          ]
+        },
+        "scope_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jurisdiction_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_status": {
+          "const": "RESEARCH_SEED_NOT_LEGALLY_APPROVED"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "allOf": [
@@ -398,7 +585,10 @@
         ],
         "properties": {
           "execution_status": {
-            "enum": ["PILOT_REVIEW_ONLY", "APPROVED_FOR_EXECUTION"]
+            "enum": [
+              "PILOT_REVIEW_ONLY",
+              "APPROVED_FOR_EXECUTION"
+            ]
           }
         }
       }
@@ -436,54 +626,116 @@
     {
       "if": {
         "properties": {
-          "record_kind": { "const": "BASE_RULE" },
-          "validation_status": { "const": "ADJUDICATED" }
+          "record_kind": {
+            "const": "BASE_RULE"
+          },
+          "validation_status": {
+            "const": "ADJUDICATED"
+          }
         },
-        "required": ["record_kind", "validation_status"]
+        "required": [
+          "record_kind",
+          "validation_status"
+        ]
       },
       "then": {
-        "required": ["review_governance"],
+        "required": [
+          "review_governance"
+        ],
         "properties": {
           "review_governance": {
-            "properties": { "status": { "const": "ADJUDICATED" } }
+            "properties": {
+              "status": {
+                "const": "ADJUDICATED"
+              }
+            }
           },
-          "execution_status": { "const": "PILOT_REVIEW_ONLY" },
-          "execution_eligible": { "const": true }
+          "execution_status": {
+            "const": "PILOT_REVIEW_ONLY"
+          },
+          "execution_eligible": {
+            "const": true
+          }
         }
       }
     },
     {
       "if": {
         "properties": {
-          "record_kind": { "const": "BASE_RULE" },
-          "validation_status": { "const": "APPROVED" }
+          "record_kind": {
+            "const": "BASE_RULE"
+          },
+          "validation_status": {
+            "const": "APPROVED"
+          }
         },
-        "required": ["record_kind", "validation_status"]
+        "required": [
+          "record_kind",
+          "validation_status"
+        ]
       },
       "then": {
-        "required": ["review_governance"],
+        "required": [
+          "review_governance"
+        ],
         "properties": {
-          "approval_status": { "const": "APPROVED" },
-          "review_governance": {
-            "properties": { "status": { "const": "APPROVED" } }
+          "approval_status": {
+            "const": "APPROVED"
           },
-          "execution_status": { "const": "APPROVED_FOR_EXECUTION" },
-          "execution_eligible": { "const": true }
+          "review_governance": {
+            "properties": {
+              "status": {
+                "const": "APPROVED"
+              }
+            }
+          },
+          "execution_status": {
+            "const": "APPROVED_FOR_EXECUTION"
+          },
+          "execution_eligible": {
+            "const": true
+          }
         }
       }
     },
     {
       "if": {
         "properties": {
-          "record_kind": { "const": "BASE_RULE" },
-          "validation_status": { "const": "REJECTED" }
+          "record_kind": {
+            "const": "BASE_RULE"
+          },
+          "validation_status": {
+            "const": "REJECTED"
+          }
         },
-        "required": ["record_kind", "validation_status"]
+        "required": [
+          "record_kind",
+          "validation_status"
+        ]
       },
       "then": {
         "properties": {
-          "execution_eligible": { "const": false }
+          "execution_eligible": {
+            "const": false
+          }
         }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_kind": {
+            "const": "BASE_RULE"
+          }
+        },
+        "required": [
+          "record_kind"
+        ]
+      },
+      "then": {
+        "required": [
+          "authority_map"
+        ]
       }
     }
   ],
