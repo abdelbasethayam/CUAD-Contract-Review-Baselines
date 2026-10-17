@@ -345,3 +345,25 @@ def test_contract_chat_answers_product_help_without_model_or_contract_claims(mon
     assert data["citations"] == []
     assert "summarize the agreement" in data["answer"]
     assert "not legal advice" in data["disclaimer"]
+
+def test_demo_retrieval_selects_the_expected_sections_for_recording_questions():
+    fixture = Path(query.PROJECT_ROOT) / "data" / "risk" / "demo_contract_for_reproduction.txt"
+    fixture_hash = hashlib.sha256(fixture.read_bytes()).hexdigest()
+    demo_id = "0123456789abcdef-0123456789abcdef"
+    result = query._build_synthetic_demo_result(fixture, fixture_hash, demo_id)
+    clauses = result["clauses"]
+
+    cases = [
+        ("How does the supplier liability cap compare with the customer's cap?", 3),
+        ("What termination rights does each party have?", 5),
+        ("Can we determine the governing law from this agreement alone?", 10),
+        ("What insurance limits are required?", 7),
+        ("What happens to customer data after termination?", 11),
+    ]
+    for question, expected_clause in cases:
+        selected = query._select_clauses(clauses, question)
+        assert selected, question
+        assert selected[0]["clause_index"] == expected_clause, (
+            f"{question!r} should prioritize clause {expected_clause}, "
+            f"got {[item['clause_index'] for item in selected[:4]]}"
+        )
