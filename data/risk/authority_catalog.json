@@ -183,16 +183,16 @@
     },
     {
       "authority_id": "FTC_NONCOMPETE_STATUS_2025",
-      "title": "Federal Trade Commission — September 5, 2025 update on vacatur of the Non-Compete Clause Rule",
-      "citation": "FTC press release dated September 5, 2025; read with the FTC Noncompete Rule status page",
+      "title": "Federal Trade Commission — Noncompete Rule status page",
+      "citation": "FTC, Noncompete Rule status page (current agency status statement)",
       "source_type": "REGULATOR_STATUS_NOTICE",
       "jurisdiction": "US-FEDERAL",
       "source_tier": "B",
-      "url": "https://www.ftc.gov/news-events/news/press-releases/2025/09/federal-trade-commission-files-accede-vacatur-non-compete-clause-rule",
-      "pinpoint": "Release paragraphs describing withdrawal of appeals and acceding to vacatur",
-      "verification_status": "OFFICIAL_STATUS_NOTICE_RETRIEVED",
-      "currentness_status": "RULE_NOT_IN_EFFECT_PER_FTC_STATUS_PAGE_RETRIEVED_2026-10-17; CHECK_LATER_CASES_AND_STATE_LAW",
-      "scope_limit": "Status evidence only, not a substitute for state non-compete law or a conclusion about enforceability.",
+      "url": "https://www.ftc.gov/legal-library/browse/rules/noncompete-rule",
+      "pinpoint": "Rule Summary: states the rule is not in effect and not enforceable; summarizes the FTC's September 5, 2025 appeal-dismissal action",
+      "verification_status": "OFFICIAL_STATUS_PAGE_RETRIEVED_2026-10-17",
+      "currentness_status": "FTC status page retrieved 2026-10-17 says the rule is not in effect and not enforceable; state law remains relevant; re-check each release",
+      "scope_limit": "Official agency status only, not a binding statute or a substitute for state non-compete law or an enforceability analysis.",
       "retrieval_date": "2026-10-17",
       "effective_date": null,
       "authority_status": "OFFICIAL_REGULATOR_STATUS_NOTICE_NOT_BINDING_STATUTE",
@@ -554,6 +554,23 @@
       "effective_date": null,
       "authority_status": "PRIMARY_COURT_OPINION_REPUBLISHED_HOST_NOT_OFFICIAL",
       "effective_date_status": "DECISION_DATE_2026-03-19; OFFICIAL_DOCKET_AND_SUBSEQUENT_HISTORY_REVIEW_REQUIRED"
+    },
+    {
+      "authority_id": "CA_BPC_16600",
+      "title": "California Business and Professions Code § 16600 — restraint of trade",
+      "citation": "Cal. Bus. & Prof. Code § 16600; related provisions §§ 16600.1–16600.5 may be relevant",
+      "source_type": "STATE_STATUTE",
+      "jurisdiction": "US-CA",
+      "source_tier": "A",
+      "url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=BPC&sectionNum=16600",
+      "pinpoint": "Cal. Bus. & Prof. Code § 16600; related exceptions and amendments require review",
+      "verification_status": "OFFICIAL_URL_LINKED_BUT_CONTENT_FETCH_BLOCKED_403",
+      "currentness_status": "Official California Legislature URL identified, but text retrieval returned HTTP 403; current text, amendments, and effective dates are not verified",
+      "scope_limit": "California-specific restraint-of-trade authority lead only. Review related statutory exceptions, amendment history, transaction date, party relationship, and relevant case law before relying on it.",
+      "retrieval_date": "2026-10-17",
+      "effective_date": null,
+      "authority_status": "PRIMARY_STATE_STATUTE",
+      "effective_date_status": "CURRENT_TEXT_AND_AMENDMENT_EFFECTIVE_DATES_NOT_REVIEWED"
     }
   ]
 }
