@@ -402,7 +402,11 @@ Use at most 4 citations and 2 follow-up questions. No markdown fences.
     parsed = extract_json_object(raw_text) or {}
     answer = str(parsed.get("answer") or "").strip()
     citations = _verified_citations(parsed.get("citations"), source_texts)
-    insufficient = bool(parsed.get("insufficient_evidence", False))
+    raw_insufficient = parsed.get("insufficient_evidence", False)
+    insufficient = (
+        raw_insufficient is True
+        or (isinstance(raw_insufficient, str) and raw_insufficient.strip().lower() in {"true", "yes", "1"})
+    )
     if not answer:
         raise HTTPException(status_code=502, detail="The assistant did not return a usable answer. Try a narrower question.")
     if parsed.get("citations") and not citations:
