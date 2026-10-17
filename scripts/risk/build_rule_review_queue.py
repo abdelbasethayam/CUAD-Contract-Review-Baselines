@@ -28,6 +28,7 @@ from build_rule_registry import (  # noqa: E402
 
 OUTPUT_PATH = ROOT / "data" / "risk" / "rule_review_queue.csv"
 AUTHORITY_MAP_PATH = ROOT / "data" / "risk" / "clause_authority_map.json"
+AUTHORITY_CATALOG_PATH = ROOT / "data" / "risk" / "authority_catalog.json"
 FIELDNAMES = [
     "queue_schema_version",
     "source_playbook_hash",
@@ -49,6 +50,7 @@ FIELDNAMES = [
     "source_citation_status",
     "authority_map_clause_type",
     "authority_map_ids_json",
+    "authority_sources_json",
     "authority_coverage_status",
     "authority_scope_note",
     "authority_jurisdiction_policy",
@@ -112,6 +114,12 @@ def _reviewer_decision(governance: dict[str, Any], position: int) -> dict[str, A
 def build_queue_text() -> tuple[str, int, int]:
     playbook = json.loads(PLAYBOOK_PATH.read_text(encoding="utf-8"))
     authority_map = json.loads(AUTHORITY_MAP_PATH.read_text(encoding="utf-8"))
+    authority_catalog = json.loads(AUTHORITY_CATALOG_PATH.read_text(encoding="utf-8"))
+    authority_by_id = {
+        str(item["authority_id"]): item
+        for item in authority_catalog.get("authorities", [])
+        if item.get("authority_id")
+    }
     authority_by_clause = {
         str(item["clause_type"]): item
         for item in authority_map.get("clauses", [])
@@ -188,6 +196,19 @@ def build_queue_text() -> tuple[str, int, int]:
         if authority_entry:
             authority_map_clause_type = str(authority_entry["clause_type"])
             authority_map_ids = list(authority_entry.get("authority_ids") or [])
+            authority_sources = [
+                {
+                    key: authority_by_id[authority_id].get(key)
+                    for key in (
+                        "authority_id", "title", "citation", "url", "pinpoint",
+                        "jurisdiction", "source_tier", "authority_status",
+                        "effective_date", "effective_date_status", "retrieval_date",
+                        "verification_status", "currentness_status", "scope_limit",
+                    )
+                }
+                for authority_id in authority_map_ids
+                if authority_id in authority_by_id
+            ]
             authority_coverage_status = str(authority_entry["authority_coverage_status"])
             authority_scope_note = str(authority_entry["scope_note"])
             authority_jurisdiction_policy = str(authority_entry["jurisdiction_policy"])
@@ -195,6 +216,7 @@ def build_queue_text() -> tuple[str, int, int]:
         else:
             authority_map_clause_type = ""
             authority_map_ids = []
+            authority_sources = []
             authority_coverage_status = "RULE_FAMILY_SPECIFIC_AUTHORITY_REVIEW_REQUIRED"
             authority_scope_note = "Cross-clause, document-level, and regex rules require authority mapping based on their actual trigger and contract facts."
             authority_jurisdiction_policy = "GOVERNING_LAW_AND_RULE_CONTEXT_REQUIRED"
@@ -221,6 +243,7 @@ def build_queue_text() -> tuple[str, int, int]:
             "source_citation_status": citation_status,
             "authority_map_clause_type": authority_map_clause_type,
             "authority_map_ids_json": _json(authority_map_ids),
+            "authority_sources_json": _json(authority_sources),
             "authority_coverage_status": authority_coverage_status,
             "authority_scope_note": authority_scope_note,
             "authority_jurisdiction_policy": authority_jurisdiction_policy,
