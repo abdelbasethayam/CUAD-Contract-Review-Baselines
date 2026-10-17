@@ -133,13 +133,21 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
             return [], []
 
     def parse_group(items, valid_ids):
+        items = items or []
+        raw_id_counts = Counter(
+            str(item.get("check_id") or "").strip()
+            for item in items
+            if isinstance(item, dict)
+            and str(item.get("check_id") or "").strip() in valid_ids
+        )
         out = []
-        for item in items or []:
+        for item in items:
             if not isinstance(item, dict):
                 continue
             check_id = str(item.get("check_id") or "").strip()
             answer = str(item.get("answer") or "").strip().upper().replace("UNKNOWN", "DON'T KNOW")
-            if check_id not in valid_ids or answer not in {"YES", "NO", "DON'T KNOW"}:
+            # Duplicate IDs make the response ambiguous; never count them as extra votes.
+            if check_id not in valid_ids or answer not in {"YES", "NO", "DON'T KNOW"} or raw_id_counts[check_id] != 1:
                 continue
             status = str(item.get("status") or "").strip().upper()
             if status not in {"POTENTIAL_RISK", "NO_RISK", "INSUFFICIENT_EVIDENCE"}:
@@ -175,7 +183,8 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
                     for key in ("exposure_magnitude", "likelihood_uncertainty", "scope_duration", "control_weakness")
                 },
             })
-        return out
+        counts = Counter(item["check_id"] for item in out)
+        return [item for item in out if counts[item["check_id"]] == 1]
 
     return (
         parse_group(parsed.get("cross_clause_findings"), valid_cross),
@@ -267,7 +276,7 @@ def analyze_contract_checks(
                     [],
                 )
                 for ev in rep["evidence"]
-            ) and evidence_ids.issubset(declared_ids)
+            ) and evidence_ids == declared_ids
             if answer == "YES":
                 status = "POTENTIAL_RISK" if evidence_ok else "INSUFFICIENT_EVIDENCE"
             elif answer == "NO":
@@ -340,6 +349,9 @@ def analyze_contract_checks(
                     "expected_passes": n_passes,
                     "missing_passes": max(0, n_passes - len(records)),
                     "agreement": agreement,
+                    "score_component_source": "LLM_SELF_REPORTED_UNVALIDATED" if status == "POTENTIAL_RISK" else None,
+                    "score_interpretation": "Triage heuristic only; not calibrated to real-world legal outcomes.",
+                    "score_version": score_details["score_version"] if score_details else None,
                     "check_batch_size": check_batch_size,
                     "model_batches_per_pass": len(batches),
                 },
@@ -387,8 +399,12 @@ def analyze_contract_checks(
                     "playbook_hash": playbook.get("playbook_hash"),
                     "source_ids": check.get("sources", []),
                     "model": RISK_MODEL,
-                    "passes": n_passes,
+                    "passes": 0,
+                    "expected_passes": n_passes,
+                    "missing_passes": n_passes,
                     "agreement": 0.0,
+                    "score_component_source": "NONE",
+                    "score_interpretation": "Triage heuristic only; not calibrated to real-world legal outcomes.",
                     "check_batch_size": check_batch_size,
                     "model_batches_per_pass": len(batches),
                 },
