@@ -82,3 +82,22 @@ def test_retired_annotation_queue_tools_and_inputs_are_not_in_release_tree():
     ]
     existing = [relative for relative in retired_paths if (ROOT / relative).exists()]
     assert existing == [], f"Retired annotation workflow is still present: {existing}"
+
+
+
+def test_run_fingerprint_captures_risk_generation_settings(monkeypatch):
+    from app.services import rag_service
+
+    monkeypatch.setattr(rag_service, "_code_fingerprint", lambda: "test-code-fingerprint")
+    monkeypatch.setattr(rag_service, "RISK_TEMPERATURE", 0.17)
+    monkeypatch.setattr(rag_service, "RISK_MAX_TOKENS", 2345)
+    monkeypatch.setattr(rag_service, "RISK_NUM_CTX", 12288)
+    monkeypatch.setattr(rag_service, "LEGAL_KNOWLEDGE_TOP_K", 6)
+
+    config = rag_service._pipeline_config(12, {"playbook_hash": "test-playbook"})
+
+    assert config["code_fingerprint"] == "test-code-fingerprint"
+    assert config["risk_temperature"] == 0.17
+    assert config["risk_max_tokens"] == 2345
+    assert config["risk_num_ctx"] == 12288
+    assert config["legal_knowledge_top_k"] == 6
