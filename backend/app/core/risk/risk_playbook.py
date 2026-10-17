@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -64,6 +65,7 @@ def normalize_playbook(raw: dict) -> dict:
             checklist.append(
                 {
                     "id": str(item.get("id") or "").strip(),
+                    "clause_type": str(name),
                     "risk_domain": str(item.get("risk_domain") or "").strip() or None,
                     "risk_subdomain": str(item.get("risk_subdomain") or "").strip() or None,
                     "risk_type": str(item.get("risk_type") or "").strip() or None,
@@ -245,11 +247,157 @@ def starter_playbook() -> dict:
     )
 
 
+def _git_blob_sha(data: bytes) -> str:
+    """Return Git's content-addressed blob SHA for exact file bytes."""
+    return hashlib.sha1(
+        b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+    ).hexdigest()
+
+
+@lru_cache(maxsize=4)
+def _load_registry_bundle(directory: str, expected_blob_sha: str) -> tuple[dict, dict, dict]:
+    root = Path(directory)
+    manifest_path = root / "rule_registry_manifest.json"
+    registry_path = root / "rule_registry.jsonl"
+    source_path = root / "source_registry.json"
+    for required_path in (manifest_path, registry_path, source_path):
+        if not required_path.exists():
+            raise RuntimeError(f"Governed rule registry is incomplete: missing {required_path}")
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        source_registry = json.loads(source_path.read_text(encoding="utf-8"))
+        records = [
+            json.loads(line)
+            for line in registry_path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Governed rule registry cannot be parsed: {exc}") from exc
+
+    if manifest.get("source_playbook_hash") != expected_blob_sha:
+        raise RuntimeError(
+            "Governed rule registry is stale: its source_playbook_hash does not match "
+            "the exact committed playbook bytes. Regenerate the registry before running Phase 2."
+        )
+    if source_registry.get("source_playbook_hash") != expected_blob_sha:
+        raise RuntimeError("Source registry fingerprint does not match the current playbook.")
+    if len(records) != int(manifest.get("total_rule_records") or -1):
+        raise RuntimeError("Rule registry record count does not match its manifest.")
+
+    base_records = [item for item in records if item.get("record_kind") == "BASE_RULE"]
+    candidate_records = [
+        item for item in records
+        if item.get("record_kind") == "CONTEXT_VARIANT_CANDIDATE"
+    ]
+    if len(base_records) != int(manifest.get("base_rule_count") or -1):
+        raise RuntimeError("Base rule count does not match the registry manifest.")
+    if len(candidate_records) != int(manifest.get("candidate_rule_count") or -1):
+        raise RuntimeError("Candidate rule count does not match the registry manifest.")
+    if any(item.get("execution_eligible") is not False for item in candidate_records):
+        raise RuntimeError("A context candidate is incorrectly enabled for execution.")
+
+    by_key: dict[str, dict] = {}
+    for item in base_records:
+        key = str(item.get("base_rule_key") or "")
+        if not key or key in by_key:
+            raise RuntimeError(f"Duplicate or missing base rule registry key: {key!r}")
+        by_key[key] = item
+    sources = {
+        str(item.get("source_id")): item
+        for item in (source_registry.get("sources") or [])
+        if item.get("source_id")
+    }
+    return sources, by_key, manifest
+
+
+def _registry_public_metadata(record: dict) -> dict:
+    return {
+        "registry_rule_id": record.get("rule_id"),
+        "base_rule_key": record.get("base_rule_key"),
+        "validation_status": record.get("validation_status"),
+        "approval_status": record.get("approval_status"),
+        "execution_status": record.get("execution_status"),
+        "execution_eligible": record.get("execution_eligible"),
+        "jurisdiction_scope": record.get("jurisdiction_scope") or ["UNSPECIFIED"],
+        "jurisdiction_status": record.get("jurisdiction_status") or "UNRESOLVED",
+        "jurisdiction_review_required": bool(record.get("jurisdiction_review_required", True)),
+        "source_status": record.get("source_status") or "INCOMPLETE_SOURCE_CITATION",
+        "source_ids": record.get("source_ids") or [],
+        "legal_conclusion_allowed": False,
+        "source_playbook_hash": record.get("source_playbook_hash"),
+    }
+
+
+def _attach_rule_registry(normalized: dict, raw: dict, path: Path) -> dict:
+    source_bytes = path.read_bytes()
+    expected_blob_sha = _git_blob_sha(source_bytes)
+    source_by_id, base_by_key, manifest = _load_registry_bundle(
+        str(path.parent), expected_blob_sha
+    )
+
+    # Replace vague legacy source metadata with explicit source records. Unknown
+    # fields stay null and carry a citation_status; they are never guessed.
+    merged_sources = {}
+    for source_id, old_record in (normalized.get("sources") or {}).items():
+        record = dict(old_record)
+        if source_id in source_by_id:
+            record.update(source_by_id[source_id])
+        record["id"] = source_id
+        record["source_url"] = record.get("source_url") or record.get("url")
+        record["url"] = record.get("source_url")
+        merged_sources[source_id] = record
+    normalized["sources"] = merged_sources
+
+    def attach(item: dict, family: str, category: str | None = None) -> None:
+        item_id = str(item.get("id") or "").strip()
+        key = f"{family}::{category}::{item_id}" if category else f"{family}::{item_id}"
+        record = base_by_key.get(key)
+        if record is None:
+            raise RuntimeError(f"Rule registry is missing active playbook check {key!r}")
+        item["rule_registry_metadata"] = _registry_public_metadata(record)
+        item["jurisdiction_scope"] = record.get("jurisdiction_scope") or ["UNSPECIFIED"]
+
+    for category, payload in (normalized.get("clause_types") or {}).items():
+        for item in payload.get("checklist") or []:
+            attach(item, "CLAUSE_CHECK", category)
+    for item in normalized.get("cross_clause_checks") or []:
+        attach(item, "CROSS_CLAUSE_CHECK")
+    for item in normalized.get("document_level_checks") or []:
+        attach(item, "DOCUMENT_CHECK")
+    for item in normalized.get("deterministic_rules") or []:
+        attach(item, "DETERMINISTIC_REGEX")
+
+    normalized["rule_registry"] = {
+        "version": manifest.get("registry_version"),
+        "status": "PILOT_REVIEW_ONLY",
+        "policy_status": manifest.get("policy_status"),
+        "source_playbook_blob_sha": expected_blob_sha,
+        "base_rule_count": manifest.get("base_rule_count"),
+        "candidate_rule_count": manifest.get("candidate_rule_count"),
+        "production_approved_rule_count": manifest.get("production_approved_rule_count"),
+        "source_citation_status": "INCOMPLETE",
+        "legal_conclusion_allowed": False,
+    }
+    # Include the attached governance/source metadata in the run identity.
+    normalized.pop("playbook_hash", None)
+    normalized["playbook_hash"] = playbook_hash(normalized)
+    return normalized
+
+
 def load_playbook(path: Path | None = None) -> dict:
     path = Path(path or RISK_PLAYBOOK_PATH)
     if path.exists():
         try:
-            return normalize_playbook(json.loads(path.read_text(encoding="utf-8")))
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            normalized = normalize_playbook(raw)
+            registry_files = (
+                path.parent / "rule_registry_manifest.json",
+                path.parent / "rule_registry.jsonl",
+                path.parent / "source_registry.json",
+            )
+            if any(item.exists() for item in registry_files):
+                normalized = _attach_rule_registry(normalized, raw, path)
+            return normalized
         except (OSError, json.JSONDecodeError, TypeError) as exc:
             raise RuntimeError(
                 f"Configured risk playbook is present but invalid: {path}: {exc}"
