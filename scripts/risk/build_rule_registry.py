@@ -191,6 +191,7 @@ def _source_registry(playbook: dict[str, Any]) -> dict[str, Any]:
         1 for item in result
         if item.get("citation_status") == "VERIFIED_PINPOINT"
         and str(item.get("pinpoint_citation") or "").strip()
+        and str(item.get("retrieval_date") or "").strip()
     )
     if verified_pinpoint_count == 0:
         registry_status = "INCOMPLETE_SOURCE_CITATIONS"
@@ -452,7 +453,9 @@ def _record(
         for item in source_refs
     ]
     all_pinpoints_verified = bool(source_refs) and all(
-        item.get("citation_status") == "VERIFIED_PINPOINT" and item.get("pinpoint_citation")
+        item.get("citation_status") == "VERIFIED_PINPOINT"
+        and str(item.get("pinpoint_citation") or "").strip()
+        and str(item.get("retrieval_date") or "").strip()
         for item in source_refs
     )
     citation_status = (
