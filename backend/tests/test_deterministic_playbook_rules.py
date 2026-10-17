@@ -206,4 +206,4 @@ def test_direct_rule_survives_related_clause_retrieval_and_llm_failure(monkeypat
     assert finding["evidence"] in text
     assert finding["provenance"]["source"] == "DETERMINISTIC_PLAYBOOK_RULE"
     assert {source.get("id") for source in finding["supporting_sources"]} >= {"P2", "P4"}
-    assert all(source.get("citation") for source in finding["supporting_sources"])
+    assert all(source.get("supporting_quote_or_paraphrase") for source in finding["supporting_sources"])
