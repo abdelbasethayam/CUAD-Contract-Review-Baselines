@@ -44,7 +44,7 @@ jobs:
           from backend.app.core.risk.risk_scoring import score_finding
           from backend.app.core.risk.risk_engine import _evidence_valid, _severity_signal
           assert starter_playbook()["playbook_hash"]
-          assert _evidence_valid("bounded", "a bounded liability cap", [])
+          assert _evidence_valid("bounded liability", "a bounded liability cap", [])
           assert score_finding({"risk_type": "uncapped liability", "question": "test", "score_components": {"exposure_magnitude": 5, "likelihood_uncertainty": 5, "scope_duration": 5, "control_weakness": 5}})["severity"] == "CRITICAL"
           assert _severity_signal({"exposure_magnitude": 4, "likelihood_uncertainty": 3, "scope_duration": 2, "control_weakness": 1}) == 0.5
           print("Phase 2 imports OK")
