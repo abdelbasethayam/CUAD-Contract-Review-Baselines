@@ -396,6 +396,8 @@ def test_clause_number_references_retrieve_the_named_provisions():
     selected = query._select_clauses(clauses, "Compare clauses 3 and 4.")
     assert [item["clause_index"] for item in selected[:2]] == [3, 4]
 
+    assert query._select_clauses(clauses, "Explain clause 99.") == []
+
 
 def test_contract_chat_does_not_send_unrelated_questions_to_the_model(monkeypatch, tmp_path):
     analysis_id = "0123456789abcdef-0123456789abcdef"
