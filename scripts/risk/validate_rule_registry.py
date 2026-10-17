@@ -242,6 +242,8 @@ def main() -> int:
                 problems.append(f"unsupported_authority_claim:{source.get('source_id')}")
     if manifest["source_count"] != len(sources.get("sources", [])):
         problems.append("manifest_source_count_mismatch")
+    if sources.get("source_count") != len(sources.get("sources", [])):
+        problems.append("source_registry_source_count_mismatch")
     expected_base_count = len(_base_inputs(playbook))
     if manifest["base_rule_count"] != expected_base_count:
         problems.append(f"base_rule_count_does_not_match_playbook:{manifest['base_rule_count']}:{expected_base_count}")
@@ -255,12 +257,16 @@ def main() -> int:
         source for source in sources.get("sources", [])
         if source.get("citation_status") == "VERIFIED_PINPOINT"
         and str(source.get("pinpoint_citation") or "").strip()
+        and str(source.get("retrieval_date") or "").strip()
     ]
     mislabeled_verified_sources = [
         source.get("source_id")
         for source in sources.get("sources", [])
         if source.get("citation_status") == "VERIFIED_PINPOINT"
-        and not str(source.get("pinpoint_citation") or "").strip()
+        and (
+            not str(source.get("pinpoint_citation") or "").strip()
+            or not str(source.get("retrieval_date") or "").strip()
+        )
     ]
     if mislabeled_verified_sources:
         problems.append(f"verified_citation_missing_pinpoint:{mislabeled_verified_sources}")
@@ -277,9 +283,27 @@ def main() -> int:
     if sources.get("status") != expected_source_status:
         problems.append("source_registry_status_mismatch")
 
+    base_rules = [item for item in records if item.get("record_kind") == "BASE_RULE"]
+    by_family: dict[str, dict[str, int]] = {}
+    complete_exception_suite_count = 0
+    for item in base_rules:
+        cases = item.get("regression_cases") or {}
+        complete = all(cases.get(key) for key in ("positive", "negative", "edge"))
+        complete_exception_suite_count += int(complete)
+        family = str(item.get("rule_family") or "UNKNOWN")
+        counts = by_family.setdefault(family, {"rules": 0, "complete_exception_suites": 0})
+        counts["rules"] += 1
+        counts["complete_exception_suites"] += int(complete)
+
     report = {
         "status": "PASS" if not problems else "FAIL",
         "base_rule_count": manifest["base_rule_count"],
+        "rule_test_coverage": {
+            "base_rules": len(base_rules),
+            "complete_positive_negative_edge_suites": complete_exception_suite_count,
+            "missing_complete_suites": len(base_rules) - complete_exception_suite_count,
+            "by_rule_family": by_family,
+        },
         "disabled_context_candidates": manifest["candidate_rule_count"],
         "total_rule_records": manifest["total_rule_records"],
         "source_count": manifest["source_count"],
