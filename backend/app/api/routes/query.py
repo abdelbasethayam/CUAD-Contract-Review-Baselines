@@ -761,6 +761,10 @@ def load_demo_analysis() -> dict[str, Any]:
         except (OSError, json.JSONDecodeError):
             continue
         metadata = saved.get("contract_metadata") or {}
+        # Only reuse a result created by this deterministic demo endpoint. An older
+        # model-generated run of the same fixture must not change the recorded demo.
+        if saved.get("demo_mode") is not True:
+            continue
         if (
             saved.get("filename") == fixture_path.name
             and isinstance(saved.get("clauses"), list)
