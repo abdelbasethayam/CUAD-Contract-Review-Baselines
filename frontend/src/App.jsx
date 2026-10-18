@@ -1,4 +1,3 @@
-import { Component, useEffect, useMemo, useRef, useState } from "react";
 
 const APP_BASE = import.meta.env.BASE_URL || "/";
 const appPath = (path) => APP_BASE + String(path || "").replace(/^\/+/, "");
@@ -17,111 +16,41 @@ function RiskBadge({ status }) {
 }
 
 function RiskCard({ finding }) {
-  const confidence = finding.confidence == null
-    ? "Not calibrated"
-    : Math.round(finding.confidence * 100) + "%";
-  const supportScore = finding.raw_support_score == null
-    ? "Not available"
-    : Number(finding.raw_support_score).toFixed(2);
-  const ruleMetadata = finding.provenance?.rule_registry_metadata || {};
-
+  const unresolved = finding.risk_status === "INSUFFICIENT_EVIDENCE";
   return (
     <article className="risk-card">
       <div className="risk-card__header">
         <div>
           <div className="eyebrow">{finding.scope || "clause"} · {finding.check_id}</div>
           <h3>{finding.risk_type || finding.question || "Risk review item"}</h3>
+          {finding.clause_id != null && <span className="field-note">Finding clause: {finding.clause_id}</span>}
         </div>
         <RiskBadge status={finding.risk_status} />
       </div>
-
-      <div className="risk-grid">
-        <div><span className="field-label">Finding clause</span><strong>{finding.clause_id ?? "—"}</strong></div>
-        {finding.evidence_clause_index != null && (
-          <div>
-            <span className="field-label">Evidence source clause</span>
-            <strong>{finding.evidence_clause_index}</strong>
-            <span className="field-note">{finding.evidence_scope === "related_contract_clause" ? "Retrieved from another clause in this contract" : "Quote from this clause"}</span>
-          </div>
-        )}
-        {finding.evidence_source_status && (
-          <div>
-            <span className="field-label">Evidence verification</span>
-            <strong>{finding.evidence_source_status}</strong>
-            {finding.evidence_source_status !== "VERIFIED" && finding.evidence_clause_candidates?.length > 0 && (
-              <span className="field-note">Possible source clauses: {finding.evidence_clause_candidates.join(", ")}</span>
-            )}
-          </div>
-        )}
-        <div>
-          <span className="field-label">Calibration status</span>
-          <strong>{finding.confidence_status || "UNCALIBRATED"}</strong>
-          <span className="field-note">No calibrated probability is available for this finding.</span>
-        </div>
-        <div>
-          <span className="field-label">Evidence-support diagnostic</span>
-          <strong>{supportScore}</strong>
-          <span className="field-note">Internal score only—not a probability, confidence percentage, or legal-accuracy estimate.</span>
-        </div>
-        <div>
-          <span className="field-label">Rule governance</span>
-          <strong>{ruleMetadata.validation_status || finding.ground_truth_status || "PLAYBOOK_DERIVED"}</strong>
-          <span className="field-note">{ruleMetadata.execution_status || "Review trigger only; not a legal conclusion."}</span>
-          {ruleMetadata.jurisdiction_review_required && (
-            <span className="field-note">Jurisdiction/applicability requires reviewer verification.</span>
-          )}
-        </div>
-      </div>
-
+      {unresolved && <p className="risk-detail">The available contract evidence is not sufficient to confirm or rule out this issue. Review the cited wording and related clauses; unresolved does not mean the contract is safe.</p>}
       {finding.why_flagged && <div className="risk-detail"><strong>Why flagged:</strong> {finding.why_flagged}</div>}
       {finding.evidence && (
         <div className="evidence-quote">
           <strong>Exact contract evidence</strong>
-          {Array.isArray(finding.evidence) ? (
-            finding.evidence.map((item, index) => (
-              <blockquote key={index}>Clause {item.clause_id}: “{item.quote}”</blockquote>
-            ))
-          ) : (
-            <blockquote>“{finding.evidence}”</blockquote>
-          )}
+          {Array.isArray(finding.evidence) ? finding.evidence.map((item, index) => (
+            <blockquote key={index}>Clause {item.clause_id}: “{item.quote}”</blockquote>
+          )) : <blockquote>“{finding.evidence}”</blockquote>}
         </div>
       )}
-
-      <div className="provenance-row">
-        <span>Check: {finding.check_id || "—"}</span>
-        {finding.provenance?.model && <span>Model: {finding.provenance.model}</span>}
-        {finding.provenance?.agreement != null && (
-          <span>Self-consistency: {Math.round(finding.provenance.agreement * 100)}%</span>
-        )}
-        {finding.provenance?.playbook_hash && (
-          <span>Playbook: {finding.provenance.playbook_hash.slice(0, 12)}…</span>
-        )}
-      </div>
-
+      {finding.evidence_clause_index != null && <p className="field-note">Evidence source: clause {finding.evidence_clause_index}{finding.evidence_scope === "related_contract_clause" ? " (related clause)" : ""}{finding.evidence_source_status === "VERIFIED" ? " · source verified" : ""}</p>}
       {finding.supporting_sources?.length > 0 && (
-        <details>
-          <summary>Supporting sources</summary>
-          <ul className="evidence-list">
-            {finding.supporting_sources.map((source, index) => {
-              const title = source.source_title || source.source_name || source.citation || source.title || "";
-              const url = source.source_url || source.url;
-              const note = source.supporting_quote_or_paraphrase;
-              return (
-                <li key={String(source.id || url || "source") + index}>
-                  <strong>{source.id || source.name || "Source"}</strong> {title}
-                  {note && note !== title && <> — {note}</>}
-                  {url && <> — <a href={url} target="_blank" rel="noreferrer">source</a></>}
-                  <div className="field-note">
-                    Tier {source.source_tier || "unknown"} · {source.authority_status || "authority status unknown"} · Jurisdiction: {source.jurisdiction || "unspecified"}
-                  </div>
-                  <div className="field-note">
-                    Citation: {source.pinpoint_citation || source.citation_status || "pinpoint not recorded"} · Effective date: {source.effective_date || source.effective_date_status || "not recorded"} · Licence: {source.license_status || "not checked"}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </details>
+        <details><summary>Supporting sources</summary><ul className="evidence-list">
+          {finding.supporting_sources.map((source, index) => {
+            const title = source.source_title || source.source_name || source.citation || source.title || "";
+            const url = source.source_url || source.url;
+            const note = source.supporting_quote_or_paraphrase;
+            return <li key={String(source.id || url || "source") + index}>
+              <strong>{source.id || source.name || "Source"}</strong> {title}
+              {note && note !== title && <> — {note}</>}
+              {url && <> — <a href={url} target="_blank" rel="noreferrer">source</a></>}
+            </li>;
+          })}
+        </ul></details>
       )}
     </article>
   );
@@ -425,9 +354,7 @@ function ContractReview() {
   const allRisks = [...risks, ...contractWideRisks];
   const potential = allRisks.filter((item) => item.risk_status === "POTENTIAL_RISK");
   const uncertain = allRisks.filter((item) => item.risk_status === "INSUFFICIENT_EVIDENCE");
-  const visibleRisks = riskFilter === "potential"
-    ? potential
-    : riskFilter === "uncertain" ? uncertain : allRisks;
+  const visibleRisks = riskFilter === "potential" ? potential : allRisks;
   function openCitedClause(clauseIndex) {
     const clause = clauses.find((item) => String(item.clause_index) === String(clauseIndex));
     setTab("clauses");
@@ -520,20 +447,6 @@ function ContractReview() {
         </section>
       )}
 
-      {phase2Metrics?.production_release_readiness && (
-        <section className="release-banner" aria-label="Production release readiness">
-          <div className="release-banner__icon" aria-hidden="true">!</div>
-          <div className="release-banner__copy">
-            <span className="step-tag">RELEASE GATE · TRANSPARENT STATUS</span>
-            <h2>{phase2Metrics.production_release_readiness.status === "BLOCKED" ? "Production release is blocked" : "Production approval still requires review"}</h2>
-            <p>{phase2Metrics.production_release_readiness.production_approved_rule_count ?? 0} individually approved rules. {phase2Metrics.production_release_readiness.complete_rule_test_suites ?? 0} of {phase2Metrics.production_release_readiness.base_rule_count ?? "—"} base rules have complete positive, negative, and edge-case suites; {phase2Metrics.production_release_readiness.rules_without_authority_refs ?? 0} still need context-specific authority mapping. CI success is not legal validation.</p>
-          </div>
-          <div className="release-banner__stat">
-            <strong>{phase2Metrics.production_release_readiness.status}</strong>
-            <span>Current release gate</span>
-          </div>
-        </section>
-      )}
 
       {demoNotice && <p className="demo-notice" role="status">{demoNotice}</p>}
       {error && <div className="error" role="alert">{error}</div>}
@@ -563,19 +476,13 @@ function ContractReview() {
               <h2>{result.contract_metadata?.name || result.filename}</h2>
               <p className="muted">{result.filename}</p>
             </div>
-            <div className="metric-strip">
-              <div><span>Clauses</span><strong>{result.total_clauses}</strong></div>
-              <div><span>Potential risks</span><strong>{potential.length}</strong></div>
-              <div><span>Unresolved</span><strong>{uncertain.length}</strong></div>
-              <div><span>Calibration</span><strong>{assessment.confidence_status || "UNCALIBRATED"}</strong></div>
-            </div>
             <div className="metadata-grid">
+              <div><span>Clauses in this review</span><strong>{clauses.length}</strong></div>
               <div><span>Parties</span><strong>{result.contract_metadata?.parties?.join(" · ") || "Not found in the extracted text"}</strong></div>
               <div><span>Agreement date</span><strong>{result.contract_metadata?.agreement_date || "Not stated"}</strong></div>
               <div><span>Effective date</span><strong>{result.contract_metadata?.effective_date || (result.contract_metadata?.effective_date_condition ? "Triggered by contract condition" : "Not stated")}</strong></div>
               <div><span>Expiration / term</span><strong>{result.contract_metadata?.expiration_date || result.contract_metadata?.expiration_terms || "Not stated"}</strong></div>
               <div><span>Governing law</span><strong>{result.contract_metadata?.governing_law || "Not stated"}</strong></div>
-              <div><span>Risk evidence basis</span><strong>{assessment.gold_status === "PLAYBOOK_DERIVED" ? "Rule / playbook-derived" : (assessment.gold_status || "Rule / playbook-derived")}</strong></div>
               {result.contract_metadata?.dispute_forum && <div><span>Dispute forum (not governing law)</span><strong>{result.contract_metadata.dispute_forum}</strong></div>}
             </div>
             {result.contract_metadata?.effective_date_condition && <p className="contract-parties"><strong>Effective-date condition:</strong> {result.contract_metadata.effective_date_condition}</p>}
@@ -664,9 +571,9 @@ function ContractReview() {
               <div className="section-heading">
                 <div><div className="eyebrow">Risk-only review</div><h2>Inspect the flags without reading every clause</h2></div>
                 <div className="filter-row">
-                  {["all", "potential", "uncertain"].map((value) => (
+                  {["all", "potential"].map((value) => (
                     <button key={value} type="button" className={riskFilter === value ? "filter-button filter-button--active" : "filter-button"} onClick={() => setRiskFilter(value)}>
-                      {value === "all" ? "All" : value === "potential" ? "Potential" : "Uncertain"}
+                      {value === "all" ? "All findings" : "Potential risks"}
                     </button>
                   ))}
                 </div>
@@ -785,7 +692,7 @@ function ContractReview() {
 
       {result && (
       <details className="experiment-snapshot">
-        <summary>Research diagnostics (advanced) <span className="snapshot-hint">Optional engineering and validation details</span></summary>
+        <summary>Technical diagnostics (optional) <span className="snapshot-hint">Rule coverage, validation status, and research benchmark details</span></summary>
         <div className="experiment-snapshot__body">
           <div className="experiment-metrics">
             <div><strong>{phase2Metrics?.playbook?.deterministic_rule_count ?? "—"}</strong><span>Executable playbook rules</span></div>
