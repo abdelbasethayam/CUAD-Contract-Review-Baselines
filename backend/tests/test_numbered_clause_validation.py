@@ -1,3 +1,4 @@
+from app.services.rag_service import _is_numbered_structural_clause
 
 
 def test_numbered_final_clause_with_signature_tail_survives_model_validator():
