@@ -93,7 +93,8 @@ def test_cross_clause_finding_abstains_when_evidence_clause_is_not_declared(monk
 
     finding = next(item for item in cross if item["check_id"] == "X-1")
     assert finding["risk_status"] == "INSUFFICIENT_EVIDENCE"
-    assert finding["evidence"] == []
+    assert {item["clause_id"] for item in finding["evidence"]} == {1, 2}
+    assert all(item["quote"] in {clause["clause_text"] for clause in clauses} for item in finding["evidence"])
 
 
 
@@ -200,7 +201,8 @@ def test_cross_clause_positive_requires_evidence_for_every_declared_clause(monke
 
     finding = next(item for item in cross if item["check_id"] == "X-1")
     assert finding["risk_status"] == "INSUFFICIENT_EVIDENCE"
-    assert finding["evidence"] == []
+    assert {item["clause_id"] for item in finding["evidence"]} == {1, 2}
+    assert all(item["quote"] in {clause["clause_text"] for clause in clauses} for item in finding["evidence"])
 
 
 
@@ -291,3 +293,5 @@ def test_contradictory_no_answer_cannot_become_a_positive_clause_finding(monkeyp
     finding = next(item for item in findings if item["check_id"] == "C-1")
     assert finding["risk_status"] == "INSUFFICIENT_EVIDENCE"
     assert finding["risk"] is False
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

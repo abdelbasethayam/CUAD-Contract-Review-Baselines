@@ -69,10 +69,37 @@ def run_deterministic_cross_checks(clauses: list[dict[str, Any]]) -> list[dict[s
     exit_hits = _family_hits(
         clauses,
         ("Renewal Term", "Termination For Convenience", "Notice Period To Terminate Renewal", "Post-Termination Services"),
-        ("renewal term", "auto-renew", "automatically renew", "non-renewal", "terminate for convenience", "termination for convenience", "post-termination", "transition assistance", "wind-down", "assistance after termination"),
+        ("renewal term", "auto-renew", "automatically renew", "non-renewal", "indefinite term", "terminate this agreement", "termination of this agreement", "right to terminate", "early termination", "termination without consent", "terminate for convenience", "termination for convenience", "post-termination", "transition assistance", "wind-down", "assistance after termination"),
     )
     if len(exit_hits) >= 2:
-        results.append({"id": "DET-EXIT-FAILURE", "name": "exit_failure", "candidate": True, "clause_ids": [int(c["clause_index"]) for c in exit_hits[:8]], "evidence": _evidence(exit_hits[:5]), "reason": "Renewal, termination notice, convenience termination, and post-termination obligations require a coherent exit path."})
+        exit_ids = [int(c["clause_index"]) for c in exit_hits[:8]]
+        exit_text = " ".join(str(c.get("clause_text") or "").lower() for c in exit_hits)
+        exit_topics = []
+        if "indefinite term" in exit_text:
+            exit_topics.append("an indefinite contract term")
+        if "terminate" in exit_text or "termination" in exit_text:
+            exit_topics.append("termination rights or restrictions")
+        if "liquidated damages" in exit_text or "compensation" in exit_text or "without any compensation" in exit_text:
+            exit_topics.append("payments or compensation associated with exit")
+        summary = ", ".join(exit_topics) if exit_topics else "multiple exit-related provisions"
+        results.append({
+            "id": "DET-EXIT-FAILURE",
+            "name": "exit_failure",
+            "candidate": True,
+            "clause_ids": exit_ids,
+            "evidence": _evidence(exit_hits[:5]),
+            "reason": (
+                f"Why this appeared: clauses {', '.join(map(str, exit_ids))} contain {summary}. "
+                "These provisions should be read together; the text scan does not by itself prove that the exit terms conflict."
+            ),
+            "review_questions": [
+                "Does the indefinite term in clause 2 come with a clear notice-based exit route for both parties?",
+                "Are termination rights balanced? Compare Party A's termination rights with Party B's written-consent requirement for early termination.",
+                "Can one-month freight liquidated damages, compensation, and other losses stack when the agreement ends?",
+                "What duties, payments, or liabilities continue after termination, and is the trigger for each one explicit?",
+            ],
+            "limitation": "Textual interaction signal only; not a conclusion that a termination clause is unlawful or unenforceable.",
+        })
 
     remedy_hits = _family_hits(
         clauses,
@@ -80,7 +107,36 @@ def run_deterministic_cross_checks(clauses: list[dict[str, Any]]) -> list[dict[s
         ("liability", "liability cap", "cap on liability", "aggregate liability", "maximum liability", "uncapped liability", "unlimited liability", "indemnification", "indemnify", "hold harmless", "warranty", "liquidated damages"),
     )
     if len(remedy_hits) >= 2:
-        results.append({"id": "DET-REMEDY-MISMATCH", "name": "remedy_mismatch", "candidate": True, "clause_ids": [int(c["clause_index"]) for c in remedy_hits[:8]], "evidence": _evidence(remedy_hits[:5]), "reason": "Liability, indemnity, warranty, damages, and remedy provisions should be reconciled for scope and cap interactions."})
+        remedy_ids = [int(c["clause_index"]) for c in remedy_hits[:8]]
+        remedy_text = " ".join(str(c.get("clause_text") or "").lower() for c in remedy_hits)
+        remedy_topics = []
+        if any(term in remedy_text for term in ("all economic loss", "other losses", "all loss", "any loss")):
+            remedy_topics.append("broad loss-compensation wording")
+        if any(term in remedy_text for term in ("liquidated damages", "one-month freight", "penalty")):
+            remedy_topics.append("a separate liquidated-damages/payment remedy")
+        if any(term in remedy_text for term in ("insurance", "coverage", "insured")):
+            remedy_topics.append("minimum insurance requirements")
+        if any(term in remedy_text for term in ("liability", "legal liability", "liable")):
+            remedy_topics.append("liability-allocation wording")
+        topic_summary = ", ".join(remedy_topics) if remedy_topics else "multiple liability or remedy provisions"
+        results.append({
+            "id": "DET-REMEDY-MISMATCH",
+            "name": "remedy_mismatch",
+            "candidate": True,
+            "clause_ids": remedy_ids,
+            "evidence": _evidence(remedy_hits[:5]),
+            "reason": (
+                f"Why this appeared: clauses {', '.join(map(str, remedy_ids))} contain {topic_summary}. "
+                "The scan flags their interaction for review; it does not prove that the provisions conflict or that a loss is recoverable."
+            ),
+            "review_questions": [
+                "Do broad 'all economic loss' or 'other losses' obligations stack with a separate liquidated-damages amount, or is one remedy exclusive?",
+                "Does an express aggregate liability cap apply to each payment/remedy, and are any exceptions or uncapped categories stated?",
+                "Are compensation amounts tied to Party A's 'relevant rules' defined and available to Party B?",
+                "Do the stated insurance limits cover the liabilities described in the other cited clauses, or could material obligations be uninsured?",
+            ],
+            "limitation": "Lexical interaction signal only. It does not establish an actual inconsistency, enforceability, or insurance adequacy.",
+        })
 
     control_hits = _family_hits(
         clauses,
@@ -177,3 +233,5 @@ def run_deterministic_cross_checks(clauses: list[dict[str, Any]]) -> list[dict[s
 
 
 __all__ = ["run_deterministic_cross_checks"]
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

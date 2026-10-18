@@ -1,3 +1,5 @@
+import React, { Component, useEffect, useMemo, useRef, useState } from "react";
+
 
 const APP_BASE = import.meta.env.BASE_URL || "/";
 const appPath = (path) => APP_BASE + String(path || "").replace(/^\/+/, "");
@@ -29,14 +31,16 @@ function RiskCard({ finding }) {
       </div>
       {unresolved && <p className="risk-detail">The available contract evidence is not sufficient to confirm or rule out this issue. Review the cited wording and related clauses; unresolved does not mean the contract is safe.</p>}
       {finding.why_flagged && <div className="risk-detail"><strong>Why flagged:</strong> {finding.why_flagged}</div>}
-      {finding.evidence && (
+      {finding.evidence && (Array.isArray(finding.evidence) ? finding.evidence.length > 0 : Boolean(String(finding.evidence).trim())) ? (
         <div className="evidence-quote">
           <strong>Exact contract evidence</strong>
           {Array.isArray(finding.evidence) ? finding.evidence.map((item, index) => (
             <blockquote key={index}>Clause {item.clause_id}: “{item.quote}”</blockquote>
           )) : <blockquote>“{finding.evidence}”</blockquote>}
         </div>
-      )}
+      ) : unresolved ? (
+        <p className="field-note">No exact excerpt could be matched automatically for this check. The result remains unresolved; it is not evidence that the contract is safe.</p>
+      ) : null}
       {finding.evidence_clause_index != null && <p className="field-note">Evidence source: clause {finding.evidence_clause_index}{finding.evidence_scope === "related_contract_clause" ? " (related clause)" : ""}{finding.evidence_source_status === "VERIFIED" ? " · source verified" : ""}</p>}
       {finding.supporting_sources?.length > 0 && (
         <details><summary>Supporting sources</summary><ul className="evidence-list">
@@ -354,6 +358,10 @@ function ContractReview() {
   const allRisks = [...risks, ...contractWideRisks];
   const potential = allRisks.filter((item) => item.risk_status === "POTENTIAL_RISK");
   const uncertain = allRisks.filter((item) => item.risk_status === "INSUFFICIENT_EVIDENCE");
+  const deterministicCandidates = assessment.deterministic_cross_checks || [];
+  // The tab count represents work that needs review, not only positive model findings.
+  // Otherwise unresolved checks and rule-only candidates make the risk count look smaller.
+  const reviewItemCount = allRisks.filter((item) => item.risk_status !== "NO_RISK").length + deterministicCandidates.length;
   const visibleRisks = riskFilter === "potential" ? potential : allRisks;
   function openCitedClause(clauseIndex) {
     const clause = clauses.find((item) => String(item.clause_index) === String(clauseIndex));
@@ -500,7 +508,7 @@ function ContractReview() {
             <button type="button" className={tab === "overview" ? "tab tab--active" : "tab"} onClick={() => setTab("overview")}>Overview</button>
             <button type="button" className={tab === "clauses" ? "tab tab--active" : "tab"} onClick={() => setTab("clauses")}>Classified ({classifiedClauses.length})</button>
             <button type="button" className={tab === "unclassified" ? "tab tab--active" : "tab"} onClick={() => setTab("unclassified")}>Unclassified ({unclassifiedClauses.length})</button>
-            <button type="button" className={tab === "risks" ? "tab tab--active" : "tab"} onClick={() => setTab("risks")}>Risks to review ({potential.length})</button>
+            <button type="button" className={tab === "risks" ? "tab tab--active" : "tab"} onClick={() => setTab("risks")}>Risks to review ({reviewItemCount})</button>
             <button type="button" className={tab === "chat" ? "tab tab--active" : "tab"} onClick={() => setTab("chat")} disabled={Boolean(result.partial) || loading} title={result.partial || loading ? "Ask contract becomes available after analysis completes" : "Ask questions grounded in the saved contract"}>Ask contract</button>
           </nav>
 
@@ -528,8 +536,8 @@ function ContractReview() {
 
               <article className="panel">
                 <div className="eyebrow">Risk snapshot</div>
-                <h2>{potential.length} evidence-supported checks</h2>
-                <p>{uncertain.length} checks remain unresolved and should not be treated as no-risk.</p>
+                <h2>{reviewItemCount} items to review</h2>
+                <p>{potential.length} evidence-supported potential risks, {uncertain.length} unresolved checks, and {deterministicCandidates.length} deterministic interaction candidates. Unresolved checks are not no-risk results; rule candidates are prompts for review, not confirmed findings.</p>
               </article>
             </section>
           )}
@@ -562,7 +570,7 @@ function ContractReview() {
           {tab === "unclassified" && (
             <section className="results">
               <div className="section-heading"><div><div className="eyebrow">Classification abstentions</div><h2>{unclassifiedClauses.length} unclassified sections</h2><p className="muted">These sections are retained, but no CUAD category was assigned. They are not silently mixed with classified clauses.</p></div></div>
-              {!unclassifiedClauses.length ? <div className="empty-state"><h3>No unclassified sections</h3><p>All returned sections have a category for this run.</p></div> : <div className="clause-list">{unclassifiedClauses.map((clause) => <article key={clause.clause_index} className="clause-card clause-card--unclassified"><div className="clause-card__header"><div><span className="field-label">Section {clause.clause_index}</span><h3>No applicable CUAD category</h3></div><span className="risk-badge risk-badge--unsupported">Unclassified</span></div><p className="clause-text">{clause.clause_text}</p><details className="classification-details"><summary>Classification details</summary><p>Status: {clause.classification_status || "NO_APPLICABLE_LABEL"}.</p><p>Category score: {clause.classification_confidence == null ? "Unavailable" : Number(clause.classification_confidence).toFixed(3)} <span className="muted">(internal score, not a calibrated probability)</span></p></details></article>)}</div>}
+              {!unclassifiedClauses.length ? <div className="empty-state"><h3>No unclassified sections</h3><p>All returned sections have a category for this run.</p></div> : <div className="clause-list">{unclassifiedClauses.map((clause) => <article key={clause.clause_index} className="clause-card clause-card--unclassified"><div className="clause-card__header"><div><span className="field-label">Section {clause.clause_index}</span><h3>No applicable CUAD category</h3></div><span className="risk-badge risk-badge--unsupported">Unclassified</span></div><p className="clause-text">{clause.clause_text}</p><details className="classification-details"><summary>Classification details</summary><p>Status: {clause.classification_status || "NO_APPLICABLE_LABEL"}.</p><p>Category score: {clause.classification_confidence == null ? "Unavailable" : Number(clause.classification_confidence).toFixed(3)} <span className="muted">(internal score, not a calibrated probability)</span></p></details>{clause.risk_findings?.filter((finding) => finding.risk_status !== "NO_RISK").map((finding, index) => <RiskCard key={String(clause.clause_index) + "-unclassified-" + String(finding.check_id || index)} finding={{ ...finding, clause_id: clause.clause_index }} />)}</article>)}</div>}
             </section>
           )}
 
@@ -598,6 +606,13 @@ function ContractReview() {
                           <span className="risk-badge risk-badge--unsupported">REVIEW</span>
                         </div>
                         <p>{signal.reason}</p>
+                        {signal.review_questions?.length > 0 && (
+                          <div className="risk-detail">
+                            <strong>What to verify</strong>
+                            <ul>{signal.review_questions.map((question, index) => <li key={signal.id + "-question-" + index}>{question}</li>)}</ul>
+                          </div>
+                        )}
+                        {signal.limitation && <p className="field-note">Limit: {signal.limitation}</p>}
                         {signal.evidence?.length > 0 && (
                           <div className="evidence-quote">
                             <strong>Source clauses</strong>
@@ -726,3 +741,5 @@ function ContractReview() {
 export default function AppWithErrorBoundary() {
   return <AppErrorBoundary><ContractReview /></AppErrorBoundary>;
 }
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

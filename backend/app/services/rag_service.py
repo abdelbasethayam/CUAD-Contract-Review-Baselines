@@ -68,6 +68,31 @@ def _is_contract_header_metadata(text: str, clause_index: int) -> bool:
     return bool(party_a and party_b and not numbered)
 
 
+def _preserve_risk_findings_for_unclassified_clause(item: dict) -> dict:
+    """Keep independent risk screening results even when CUAD classification abstains.
+
+    Classification and risk review are separate tasks: NO_APPLICABLE_LABEL is not
+    permission to discard risk findings supported by the clause's actual wording.
+    """
+    if item.get("classification_status") != "NO_APPLICABLE_LABEL":
+        return item
+    result = {**item, "risk_findings": list(item.get("risk_findings") or [])}
+    findings = result["risk_findings"]
+    statuses = {str(finding.get("risk_status") or "") for finding in findings}
+    if "POTENTIAL_RISK" in statuses:
+        result["risk_status"] = "POTENTIAL_RISK"
+        result["risk"] = True
+    elif "INSUFFICIENT_EVIDENCE" in statuses:
+        result["risk_status"] = "INSUFFICIENT_EVIDENCE"
+        result["risk"] = False
+    elif findings and statuses <= {"NO_RISK"}:
+        result["risk_status"] = "NO_RISK"
+        result["risk"] = False
+    elif not result.get("risk_status"):
+        result["risk_status"] = "NOT_ANALYZED"
+    return result
+
+
 def _is_numbered_structural_clause(text: str, metadata: dict) -> bool:
     """Trust a numbered top-level segment over a secondary yes/no model veto."""
     return bool(
@@ -858,12 +883,8 @@ def _classify_contract(
         for item in sorted(results_by_index.values(), key=lambda x: int(x["clause_index"])):
             if _is_contract_header_metadata(str(item.get("clause_text") or ""), int(item.get("clause_index", -1))) or item.get("classification_status") == "DOCUMENT_METADATA":
                 continue
-            if item.get("classification_status") == "NO_APPLICABLE_LABEL":
-                item = {
-                    **item,
-                    "risk_findings": [],
-                    "risk_status": "NOT_ANALYZED",
-                }
+            # Classification abstention must not suppress independently generated risk findings.
+            item = _preserve_risk_findings_for_unclassified_clause(item)
             clauses_out.append(item)
 
         run.write_json(
@@ -916,3 +937,5 @@ def _classify_contract(
             "analysis_id": run.analysis_id,
         })
         raise
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

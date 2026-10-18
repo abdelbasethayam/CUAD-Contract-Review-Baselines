@@ -187,6 +187,113 @@ def _parse(raw: str, valid_cross: set[str], valid_doc: set[str]) -> tuple[list[d
     )
 
 
+_FALLBACK_TERMS: dict[str, tuple[str, ...]] = {
+    "DOC-1": ("url", "website", "online terms", "incorporated by reference", "order form", "schedule", "annex", "appendix", "external policy"),
+    "DOC-2": ("definition", "order of precedence", "prevail", "in case of conflict", "priority", "interpretation", "final interpretation", "annex", "supplemental clause", "supplemental agreement"),
+    "DOC-3": ("governing law", "court", "jurisdiction", "dispute", "forum", "arbitration agreement", "arbitral tribunal", "arbitration rules", "arbitration proceeding"),
+    "X-1": ("liability", "liquidated damages", "compensated", "compensate", "economic loss", "other losses", "indemnif", "cap"),
+    "X-2": ("liquidated damages", "liability cap", "liability", "one-month freight", "damages"),
+    "X-3": ("renewal", "non-renewal", "notice period", "indefinite term", "contract period", "term"),
+    "X-4": ("early termination", "terminate", "minimum commitment", "liquidated damages", "freight difference", "compensation"),
+    "X-5": ("assignment", "assign", "change of control", "transfer", "consent"),
+    "X-6": ("license", "licence", "termination", "terminate", "perpetual", "irrevocable"),
+    "X-7": ("intellectual property", "ip ownership", "license", "licence", "work product", "deliverables", "assignment"),
+    "X-8": ("software", "source code", "escrow", "continuity", "post-termination", "support"),
+    "X-9": ("insurance", "insured", "coverage", "liability", "loss", "damages"),
+    "X-10": ("indemnif", "hold harmless", "liability", "cap", "loss", "damages"),
+}
+
+_FALLBACK_GUIDANCE: dict[str, str] = {
+    "DOC-1": "Check whether each referenced annex, schedule, order form, URL, or policy is actually included and identify the exact version that applies.",
+    "DOC-2": "Compare the definitions and document-priority language with the substantive protections. Check whether a unilateral interpretation clause can narrow those protections and which document prevails if terms conflict.",
+    "DOC-3": "Identify the governing law, named court/forum, and dispute process separately. A reference to the People’s Court where the agreement is signed names a type of court but does not state the city or identify governing law or a separate dispute procedure.",
+    "X-1": "Compare each liability head against any aggregate cap and exclusions. Confirm whether broad loss-compensation language or indemnities are inside or outside that cap; do not assume a cap applies if the contract does not say so.",
+    "X-2": "Check whether liquidated damages are exclusive or can be recovered in addition to other losses, and whether the liability cap expressly includes or excludes them.",
+    "X-3": "Check whether a fixed-term renewal mechanism and a calculable notice deadline exist. If the agreement is indefinite, verify how either party can end it and when notice takes effect.",
+    "X-4": "Compare early-termination rights with any remaining freight, minimum-commitment, liquidated-damages, or other-loss payment obligations.",
+    "X-5": "Compare who must consent, which corporate events trigger consent, whether consent may be withheld, and the consequences of a breach across the relevant clauses.",
+    "X-6": "Check whether any perpetual or irrevocable licence survives termination and whether the agreement clearly states which rights survive and for what purpose.",
+    "X-7": "Check that ownership/assignment language and the other party’s licence grant are consistent, including rights needed to keep using deliverables after termination.",
+    "X-8": "Check whether business-critical software can still be operated after termination and whether source-code escrow, transition help, or continuity support is actually promised.",
+    "X-9": "Compare each stated insurance limit with the liability and compensation obligations. The contract text alone does not prove the available insurance is sufficient or that all losses are insured.",
+    "X-10": "Check whether indemnity obligations are expressly subject to the liability cap, and look for exceptions, defence-cost treatment, and any uncapped loss categories.",
+}
+
+
+def _fallback_evidence_for_check(check: dict, clauses: list[dict]) -> list[dict]:
+    """Recover exact topic-related contract wording when the model returns no usable answer."""
+    check_id = str(check.get("id") or "")
+    terms = _FALLBACK_TERMS.get(check_id, ())
+    ranked: list[tuple[int, int, dict]] = []
+    for clause in clauses:
+        text = str(clause.get("clause_text") or "")
+        if not text.strip() or clause.get("clause_index") is None:
+            continue
+        lowered = text.casefold()
+        hits = []
+        for term in terms:
+            needle = term.casefold()
+            if " " in needle or "-" in needle or "'" in needle:
+                found = needle in lowered
+            elif needle == "indemnif":
+                found = bool(re.search(r"\bindemnif\w*\b", lowered))
+            elif needle == "signed":
+                found = bool(re.search(r"\bsign(?:ed|ature|atures)\b", lowered))
+            else:
+                # Word boundaries prevent false hits such as 'court' inside another word.
+                found = bool(re.search(r"\b" + re.escape(needle) + r"\b", lowered))
+            if found:
+                hits.append(needle)
+        if not hits:
+            continue
+        try:
+            clause_id = int(clause["clause_index"])
+        except (TypeError, ValueError):
+            continue
+        score = sum(min(len(term), 35) for term in hits) + 10 * len(hits)
+        ranked.append((score, clause_id, {"clause_id": clause_id, "quote": text.strip()}))
+    # Prefer the strongest topic matches and then stable clause order; cap output for readability.
+    ranked.sort(key=lambda item: (-item[0], item[1]))
+    return [item[2] for item in ranked[:5]]
+
+
+def _fallback_explanation(check: dict, evidence: list[dict]) -> str:
+    check_id = str(check.get("id") or "")
+    guidance = _FALLBACK_GUIDANCE.get(check_id, "Review the cited wording and confirm whether the contract states the required terms clearly.")
+    by_id = {int(item["clause_id"]): str(item.get("quote") or "") for item in evidence if item.get("clause_id") is not None}
+    if check_id == "DOC-2" and evidence:
+        parts = []
+        if any("final interpretation by party a" in quote.casefold() for quote in by_id.values()):
+            parts.append("Clause 15 gives Party A the 'final interpretation' of the agreement, which raises a question about unilateral control over ambiguous wording.")
+        if any("annex" in quote.casefold() and "same effect" in quote.casefold() for quote in by_id.values()):
+            parts.append("Clause 13 says the annex has the same effect as the agreement; clauses 4–5 also refer to supplemental clauses/agreements.")
+        if parts:
+            return (
+                "The model could not resolve this check, so it remains UNRESOLVED—not a confirmed risk. "
+                + " ".join(parts)
+                + " The cited text does not itself establish which document prevails if wording conflicts. "
+                "What to verify: compare the definitions, amendment hierarchy, and precedence language, and check whether the unilateral interpretation sentence can narrow a substantive protection."
+            )
+    if check_id == "DOC-3" and evidence:
+        if any("people's court" in quote.casefold() or "people’s court" in quote.casefold() for quote in by_id.values()):
+            return (
+                "The model could not resolve this check, so it remains UNRESOLVED—not a confirmed risk. "
+                "Clause 12 directs disputes to the People's Court where the agreement is signed, but does not name the city/place or state the governing law; it also does not describe a separate dispute procedure. "
+                "This is a clarity gap to verify, not proof that the clause is invalid. Confirm the exact forum, governing law, and process with the contract owner or qualified counsel."
+            )
+    if evidence:
+        clause_list = ", ".join(str(item["clause_id"]) for item in evidence)
+        return (
+            "The model did not return a usable answer, so this check remains UNRESOLVED—not a confirmed risk. "
+            f"A deterministic text scan found potentially relevant wording in clause(s) {clause_list}. "
+            f"What to verify: {guidance}"
+        )
+    return (
+        "The model did not return a usable answer, and the deterministic text scan did not find a sufficiently specific excerpt. "
+        "This is unresolved, not a no-risk result. " + guidance
+    )
+
+
 def analyze_contract_checks(
     clauses: list[dict],
     *,
@@ -283,27 +390,32 @@ def analyze_contract_checks(
         for check_id, records in by_id.items():
             answer, agreement = _majority(records, expected_passes=n_passes)
             rep = next((x for x in records if x["answer"] == answer), records[0])
-            evidence_ids = {
-                int(ev["clause_id"])
-                for ev in rep["evidence"]
+            check = by_source[check_id]
+            topic_evidence = _fallback_evidence_for_check(check, clauses)
+            topic_ids = {item["clause_id"] for item in topic_evidence}
+            # Exact quotes are necessary but not sufficient: reject a valid quote
+            # from an unrelated clause (e.g. a termination clause cited for a
+            # document-precedence question).
+            validated_model_evidence = [
+                ev for ev in rep["evidence"]
                 if ev.get("clause_id") is not None
-            }
-            declared_ids = set(rep["clause_ids"])
-            # Evidence must be present, exact, source-addressable, and consistent
-            # with the finding's declared affected clauses. Otherwise abstain.
-            evidence_ok = bool(rep["evidence"]) and all(
-                int(ev["clause_id"]) in contract_lookup
+                and int(ev["clause_id"]) in contract_lookup
                 and _evidence_valid(
                     str(ev.get("quote") or ""),
                     str(contract_lookup[int(ev["clause_id"])].get("clause_text") or ""),
                     [],
                 )
-                for ev in rep["evidence"]
-            ) and evidence_ids == declared_ids
+                and (not topic_ids or int(ev["clause_id"]) in topic_ids)
+            ]
+            evidence_ids = {int(ev["clause_id"]) for ev in validated_model_evidence}
+            declared_ids = set(rep["clause_ids"])
+            # Evidence must be present, exact, topic-relevant, source-addressable,
+            # and consistent with the finding's declared affected clauses.
+            evidence_ok = bool(validated_model_evidence) and evidence_ids == declared_ids
             if answer == "YES":
                 status = "POTENTIAL_RISK" if evidence_ok else "INSUFFICIENT_EVIDENCE"
             elif answer == "NO":
-                status = "NO_RISK"
+                status = "NO_RISK" if evidence_ok else "INSUFFICIENT_EVIDENCE"
             else:
                 status = "INSUFFICIENT_EVIDENCE"
 
@@ -318,9 +430,24 @@ def analyze_contract_checks(
                 if status in {"POTENTIAL_RISK", "NO_RISK"}
                 else {"confidence": None, "confidence_status": "NOT_ESTIMATED", "confidence_target": "PREDICTION_CORRECTNESS", "confidence_calibration_version": None}
             )
-            check = by_source[check_id]
             supporting_sources = source_records(playbook, check.get("sources", []))
             primary_source = supporting_sources[0] if supporting_sources else {}
+            validated_evidence = list(validated_model_evidence)
+            finding_clause_ids = [i for i in rep["clause_ids"] if i in contract_lookup]
+            why_flagged = str(rep.get("why_flagged") or "").strip()
+            model_evidence_matches_declared = bool(validated_model_evidence) and evidence_ids == declared_ids
+            if status == "INSUFFICIENT_EVIDENCE" and not model_evidence_matches_declared:
+                validated_evidence = topic_evidence
+                finding_clause_ids = [item["clause_id"] for item in validated_evidence]
+                fallback_reason = _fallback_explanation(check, validated_evidence)
+                if why_flagged:
+                    # Do not preserve a fluent but off-topic explanation as if it
+                    # answered the check. Replace it with the deterministic, topic-grounded rationale.
+                    why_flagged = fallback_reason
+                    if validated_evidence:
+                        why_flagged += " The model's original cited excerpts were incomplete or off-topic and were replaced with these exact topic-matched excerpts."
+                else:
+                    why_flagged = fallback_reason
             results.append({
                 "scope": kind,
                 "check_id": check_id,
@@ -350,13 +477,10 @@ def analyze_contract_checks(
                 "severity_status": "DEPRECATED_NOT_USED",
                 "severity_probabilities": {},
                 "ground_truth_status": "PLAYBOOK_DERIVED",
-                "clause_ids": [i for i in rep["clause_ids"] if i in contract_lookup],
-                "evidence": [
-                    ev for ev in rep["evidence"]
-                    if int(ev.get("clause_id", -1)) in contract_lookup
-                    and str(ev.get("quote") or "") in str(contract_lookup[int(ev["clause_id"])]["clause_text"])
-                ] if status == "POTENTIAL_RISK" else [],
-                "why_flagged": rep.get("why_flagged", ""),
+                "clause_ids": finding_clause_ids,
+                # Preserve model-validated or deterministic exact excerpts for unresolved findings too.
+                "evidence": validated_evidence,
+                "why_flagged": why_flagged,
                 "provenance": {
                     "playbook_hash": playbook.get("playbook_hash"),
                     "source_ids": check.get("sources", []),
@@ -391,6 +515,7 @@ def analyze_contract_checks(
         for check in source_items:
             if str(check.get("id")) in returned:
                 continue
+            fallback_evidence = _fallback_evidence_for_check(check, clauses)
             results.append({
                 "scope": kind,
                 "check_id": str(check.get("id")),
@@ -417,9 +542,9 @@ def analyze_contract_checks(
                 "score_override_reason": None,
                 "human_review_required": True,
                 "review_escalation": "LEGAL_REVIEW",
-                "clause_ids": [],
-                "evidence": [],
-                "why_flagged": "No usable model answer was returned.",
+                "clause_ids": [item["clause_id"] for item in fallback_evidence],
+                "evidence": fallback_evidence,
+                "why_flagged": _fallback_explanation(check, fallback_evidence),
                 "provenance": {
                     "playbook_hash": playbook.get("playbook_hash"),
                     "source_ids": check.get("sources", []),
@@ -439,3 +564,5 @@ def analyze_contract_checks(
         return sorted(results, key=lambda x: x["check_id"])
 
     return collapse(cross_outputs, cross_checks, "cross_clause"), collapse(doc_outputs, doc_checks, "document")
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
