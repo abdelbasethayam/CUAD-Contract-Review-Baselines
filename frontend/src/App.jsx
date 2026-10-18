@@ -819,5 +819,3 @@ function ContractReview() {
 export default function AppWithErrorBoundary() {
   return <AppErrorBoundary><ContractReview /></AppErrorBoundary>;
 }
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

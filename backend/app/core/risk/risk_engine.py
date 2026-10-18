@@ -715,5 +715,3 @@ def analyze_clause_risk(
     # lexical trigger must not disappear because the question-answering model said NO.
     findings.extend(rule_findings)
     return sorted(findings, key=lambda item: (item["clause_index"], item["check_id"]))
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

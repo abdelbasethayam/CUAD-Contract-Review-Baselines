@@ -53,5 +53,3 @@ def test_party_block_is_document_metadata_not_a_substantive_clause():
     assert _is_contract_header_metadata(party_block, 0) is True
     assert _is_contract_header_metadata("1. The carrier shall provide services.", 1) is False
     assert _is_contract_header_metadata(party_block, 1) is False
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
