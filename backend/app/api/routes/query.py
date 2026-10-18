@@ -11,6 +11,7 @@ import hashlib
 import io
 import json
 import re
+import shutil
 from pathlib import Path
 from typing import Any, Literal
 
@@ -931,6 +932,16 @@ def load_demo_analysis() -> dict[str, Any]:
         saved_id = str(saved_result.get("analysis_id") or saved_root.name)
         if not _ANALYSIS_ID.fullmatch(saved_id):
             raise HTTPException(status_code=422, detail="Saved demo result has an invalid analysis ID.")
+        if not any(saved_root.glob("source.*")):
+            shutil.copyfile(fixture_path, saved_root / "source.txt")
+        manifest_path = saved_root / "manifest.json"
+        try:
+            saved_manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.is_file() else {}
+        except (OSError, json.JSONDecodeError):
+            saved_manifest = {}
+        if not (saved_manifest.get("source") or {}).get("filename"):
+            saved_manifest["source"] = {**(saved_manifest.get("source") or {}), "filename": fixture_path.name}
+            manifest_path.write_text(json.dumps(saved_manifest, ensure_ascii=False, indent=2), encoding="utf-8")
         return {
             "filename": saved_result.get("filename"),
             "total_clauses": len(saved_result["clauses"]),
@@ -939,9 +950,12 @@ def load_demo_analysis() -> dict[str, Any]:
             "contract_risk_assessment": saved_result.get("contract_risk_assessment") or {},
             "contract_metadata": saved_result.get("contract_metadata") or {"name": "Synthetic demo contract"},
             "downloads": {
-                name.replace(".", "_"): f"/documents/runs/{saved_id}/artifact/{name}"
-                for name in ("result.json", "contract_risk.json", "risk_findings.jsonl", "risk_findings.csv", "clauses.csv", "classification.jsonl", "manifest.json")
-                if (saved_root / name).is_file()
+                **{
+                    name.replace(".", "_"): f"/documents/runs/{saved_id}/artifact/{name}"
+                    for name in ("result.json", "contract_risk.json", "risk_findings.jsonl", "risk_findings.csv", "clauses.csv", "classification.jsonl", "manifest.json")
+                    if (saved_root / name).is_file()
+                },
+                "contract_bundle_zip": f"/documents/runs/{saved_id}/bundle.zip",
             },
             "demo_mode": True,
             "notice": "Loaded the saved analysis of the repository's hash-matched synthetic demo fixture. Findings remain uncalibrated and require review.",
@@ -953,6 +967,9 @@ def load_demo_analysis() -> dict[str, Any]:
     if runs_root not in run_root.parents:
         raise HTTPException(status_code=500, detail="Invalid demo storage location.")
     run_root.mkdir(parents=True, exist_ok=True)
+    source_copy = run_root / "source.txt"
+    if not source_copy.is_file():
+        source_copy.write_bytes(fixture_path.read_bytes())
     result_path = run_root / "result.json"
     try:
         result = json.loads(result_path.read_text(encoding="utf-8")) if result_path.is_file() else {}
@@ -977,10 +994,12 @@ def load_demo_analysis() -> dict[str, Any]:
                 writer.writerow({key: clause.get(key) for key in writer.fieldnames})
         (run_root / "manifest.json").write_text(json.dumps({
             "analysis_id": analysis_id,
+            "source": {"filename": fixture_path.name},
             "demo_mode": True,
             "document_sha256": fixture_hash,
             "result_sha256": hashlib.sha256(result_path.read_bytes()).hexdigest(),
-            "provenance": "Deterministic synthetic demo; not an AI-generated contract analysis.",
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]            "provenance": "Deterministic synthetic demo; not an AI-generated contract analysis.",
         }, indent=2), encoding="utf-8")
     return {
         "filename": result.get("filename"),
@@ -990,10 +1009,15 @@ def load_demo_analysis() -> dict[str, Any]:
         "contract_risk_assessment": result.get("contract_risk_assessment") or {},
         "contract_metadata": result.get("contract_metadata") or {"name": "Synthetic demo contract"},
         "downloads": {
-            name.replace(".", "_"): f"/documents/runs/{analysis_id}/artifact/{name}"
-            for name in ("result.json", "contract_risk.json", "risk_findings.jsonl", "clauses.csv", "manifest.json")
-            if (run_root / name).is_file()
+            **{
+                name.replace(".", "_"): f"/documents/runs/{analysis_id}/artifact/{name}"
+                for name in ("result.json", "contract_risk.json", "risk_findings.jsonl", "clauses.csv", "manifest.json")
+                if (run_root / name).is_file()
+            },
+            "contract_bundle_zip": f"/documents/runs/{analysis_id}/bundle.zip",
         },
         "demo_mode": True,
         "notice": result.get("notice") or "Synthetic walkthrough; illustrative findings only.",
     }
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

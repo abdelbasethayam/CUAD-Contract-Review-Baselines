@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 ROOT=/home/jovyan/CUAD-Contract-Review-Baselines
 cd "$ROOT"
 
@@ -11,11 +11,32 @@ else
   echo "Started backend (logs: /tmp/cuad_backend.log)"
 fi
 
-if curl -sf http://127.0.0.1:5173/ >/dev/null 2>&1; then
-  echo "Frontend already running on port 5173."
+# In JupyterHub, localhost:5173 refers to the remote server from inside the
+# container, not the user's browser. Start with the Hub proxy prefix so Vite
+# assets and API requests work when opened through the browser.
+if [[ -n "${JUPYTERHUB_SERVICE_PREFIX:-}" ]]; then
+  FRONTEND_PORT=${CONTRACT_REVIEW_PORT:-5174}
+  FRONTEND_BASE="${JUPYTERHUB_SERVICE_PREFIX%/}/proxy/${FRONTEND_PORT}/"
+  FRONTEND_CHECK_URL="http://127.0.0.1:${FRONTEND_PORT}${FRONTEND_BASE}"
 else
-  nohup npm --prefix "$ROOT/frontend" run dev -- --host 0.0.0.0 >/tmp/cuad_frontend.log 2>&1 &
-  echo "Started frontend (logs: /tmp/cuad_frontend.log)"
+  FRONTEND_PORT=${CONTRACT_REVIEW_PORT:-5173}
+  FRONTEND_BASE=${CONTRACT_REVIEW_BASE_PATH:-/}
+  FRONTEND_CHECK_URL="http://127.0.0.1:${FRONTEND_PORT}/"
 fi
 
-echo "CUAD Contract Review is available on port 5173."
+if curl -sf "$FRONTEND_CHECK_URL" >/dev/null 2>&1; then
+  echo "Frontend already running on port ${FRONTEND_PORT}."
+else
+  nohup env PORT="$FRONTEND_PORT" CONTRACT_REVIEW_BASE_PATH="$FRONTEND_BASE" \
+    npm --prefix "$ROOT/frontend" run dev -- --host 0.0.0.0 --port "$FRONTEND_PORT" --strictPort \
+    >/tmp/cuad_frontend.log 2>&1 &
+  echo "Started frontend on port ${FRONTEND_PORT} (logs: /tmp/cuad_frontend.log)"
+fi
+
+if [[ -n "${JUPYTERHUB_SERVICE_PREFIX:-}" ]]; then
+  echo "Open this path in the same JupyterHub browser: ${JUPYTERHUB_SERVICE_PREFIX%/}/proxy/${FRONTEND_PORT}/"
+else
+  echo "Open http://127.0.0.1:${FRONTEND_PORT}/ in the browser on the same machine."
+fi
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

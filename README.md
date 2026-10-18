@@ -157,7 +157,7 @@ Details: [docs/FINETUNE.md](https://github.com/abdelbasethayam/CUAD-Contract-Rev
 
 The repository includes an end-to-end PDF/TXT upload application with clause segmentation, a separate CUAD clause-category classifier, rule-first buyer-side contract-risk screening, exact contract-evidence validation, cross-clause/document questions, and contract-level triage. The seven deterministic risk predicates run against every clause independently of the predicted CUAD label. The risk prompt never receives retrieved CUAD training example spans, and every positive must preserve exact evidence from the uploaded agreement. Rule hits are review triggers, not legal conclusions; severity/confidence are not calibrated.
 
-**Start the UI/API:** configure Ollama and backend/.env, then run bash scripts/start_all.sh. The API health check is curl -fsS http://127.0.0.1:8000/health; the frontend is usually on port 5173.
+**Start the UI/API:** configure Ollama and `backend/.env`, then run `bash scripts/start_all.sh`. The API health check is `curl -fsS http://127.0.0.1:8000/health`. The startup script detects JupyterHub and prints the correct browser-facing proxy path. In JupyterHub, open that printed `/user/<user>/proxy/<port>/` URL; do not enter `127.0.0.1:<port>` in your own computer's browser, because that points to your computer rather than the remote server. Outside JupyterHub, use the localhost URL printed by the script.
 
 **Run the synthetic TXT smoke and audit, using the configured interactive setting:**
     .venv/bin/python scripts/risk/smoke_upload_api.py
@@ -236,3 +236,5 @@ Browse on GitHub: https://github.com/abdelbasethayam/CUAD-Contract-Review-Baseli
 - **Project repo:** [CUAD-Contract-Review-Baselines](https://github.com/abdelbasethayam/CUAD-Contract-Review-Baselines)
 
 *For course submission: report test-set accuracy and macro-F1 after running evaluation on your split; attach hybrid `--no-llm` shortlist recall as an ablation.*
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

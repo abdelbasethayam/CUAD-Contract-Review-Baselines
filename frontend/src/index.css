@@ -870,3 +870,42 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .release-banner { grid-template-columns: 38px minmax(0, 1fr); padding: 15px; }
   .release-banner__stat { grid-column: 2; justify-items: start; padding: 0; border: 0; }
 }
+
+
+/* Focused review UX: less metadata clutter, stronger actions, clearer abstentions. */
+.run-details { min-width:180px; max-width:240px; border:1px solid var(--line); border-radius:10px; padding:9px 12px; background:rgba(255,255,255,.82); font-size:.75rem; }
+.run-details summary { color:var(--muted); font-weight:700; cursor:pointer; }
+.run-details code { display:block; margin-top:8px; overflow-wrap:anywhere; color:var(--ink); font-size:.7rem; }
+.metadata-grid strong { overflow-wrap:anywhere; }
+.contract-parties { margin:10px 0 0; color:var(--muted); font-size:.88rem; line-height:1.5; }
+.contract-parties strong { color:var(--ink); }
+.metadata-evidence { margin-top:12px; padding-top:9px; border-top:1px solid var(--line); }
+.metadata-evidence summary,.classification-details summary,.download-details summary { color:var(--accent); font-size:.8rem; font-weight:700; cursor:pointer; }
+.metadata-evidence dl { display:grid; gap:8px; margin:12px 0 0; }
+.metadata-evidence dl>div { padding:10px 12px; border-radius:9px; background:#f5f7f4; }
+.metadata-evidence dt { margin-bottom:4px; color:var(--accent); font-size:.72rem; font-weight:750; text-transform:capitalize; }
+.metadata-evidence dd { margin:0; color:var(--muted); font-size:.82rem; line-height:1.45; overflow-wrap:anywhere; }
+.download-primary { display:flex; align-items:center; gap:12px; margin:14px 0 8px; padding:15px; border:1px solid #c9ded4; border-radius:13px; background:#edf5ef; color:#244c40; text-decoration:none; transition:background .16s ease,transform .16s ease; }
+.download-primary:hover { background:#e0eee4; transform:translateY(-1px); }
+.download-primary__icon { display:grid; place-items:center; flex:0 0 40px; height:40px; border-radius:11px; background:#24594f; color:white; font-size:1.4rem; }
+.download-primary strong,.download-primary small { display:block; }
+.download-primary strong { font-size:.9rem; }
+.download-primary small { margin-top:4px; color:#61756b; font-size:.74rem; line-height:1.4; }
+.download-details { padding-top:4px; }
+.download-details summary { padding:8px 0; }
+.classification-details { margin-top:10px; padding-top:7px; border-top:1px solid var(--line); }
+.classification-details p { margin:7px 0 0; color:var(--muted); font-size:.78rem; line-height:1.45; }
+.clause-card--unclassified { border-style:dashed; background:#fbfcf8; }
+.empty-state { padding:28px 24px; border:1px dashed #cbd8d0; border-radius:14px; background:#fbfcf9; }
+.empty-state h3 { margin:0 0 6px; }
+.empty-state p { margin:0; color:var(--muted); line-height:1.5; }
+.experiment-snapshot { margin-top:30px; }
+@media(max-width:760px) { .run-details{max-width:100%}.download-primary{align-items:flex-start}.metadata-grid{grid-template-columns:1fr} }
+.partial-results-notice { display:flex; align-items:center; justify-content:space-between; gap:18px; margin:18px 0; padding:15px 18px; border:1px solid #d6c99f; border-radius:13px; background:#fbf7e9; color:#554b2c; }
+.partial-results-notice strong,.partial-results-notice span { display:block; }
+.partial-results-notice strong { margin-bottom:4px; font-size:.9rem; }
+.partial-results-notice span { color:#766b4b; font-size:.8rem; line-height:1.45; }
+.partial-results-notice button { flex-shrink:0; border:1px solid #c9b778; border-radius:9px; padding:9px 12px; background:#fffdf6; color:#554b2c; font-weight:700; cursor:pointer; }
+@media(max-width:680px) { .partial-results-notice { align-items:flex-start; flex-direction:column; } }
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

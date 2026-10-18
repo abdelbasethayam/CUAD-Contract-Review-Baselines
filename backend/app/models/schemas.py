@@ -87,8 +87,13 @@ class ContractMetadata(BaseModel):
     parties: list[str] = Field(default_factory=list)
     agreement_date: str | None = None
     effective_date: str | None = None
+    effective_date_condition: str | None = None
     expiration_date: str | None = None
+    expiration_terms: str | None = None
     governing_law: str | None = None
+    dispute_forum: str | None = None
+    evidence: dict[str, Any] = Field(default_factory=dict)
+    provenance: str | None = None
     source_filename: str | None = None
 
 
@@ -155,3 +160,5 @@ class ContractClassificationResponse(BaseModel):
         default_factory=ContractRiskAssessment
     )
     downloads: dict[str, str] = Field(default_factory=dict)
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
