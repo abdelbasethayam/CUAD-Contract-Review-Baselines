@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import time
 from pathlib import Path
 from threading import Lock
@@ -58,6 +59,17 @@ ProgressCallback = Callable[[dict], None]
 _CLASSIFICATION_LOCK = Lock()
 
 
+def _is_contract_header_metadata(text: str, clause_index: int) -> bool:
+    """Recognize the unnumbered front-page party block, not a substantive clause."""
+    if int(clause_index) != 0:
+        return False
+    value = str(text or "")
+    party_a = re.search(r"\bParty\s+A(?:\s*\([^)]*\))?\s*:\s*[^\n]{2,}", value, re.I)
+    party_b = re.search(r"\bParty\s+B(?:\s*\([^)]*\))?\s*:\s*[^\n]{2,}", value, re.I)
+    numbered = re.match(r"^\s*\d{1,3}\s*[.)]", value)
+    return bool(party_a and party_b and not numbered)
+
+
 def _emit(
     callback: ProgressCallback | None,
     stage: str,
@@ -83,6 +95,7 @@ def _trace_callback(run, callback: ProgressCallback | None):
         sequence += 1
         event = {
             **event,
+            "analysis_id": run.analysis_id,
             "sequence": sequence,
             "elapsed_seconds": round(time.monotonic() - started, 3),
         }
@@ -470,7 +483,7 @@ def _classify_contract(
             validation_records = []
             for item in segments_json:
                 text = str(item["text"])
-                if item.get("metadata", {}).get("is_signature_metadata"):
+                if item.get("metadata", {}).get("is_signature_metadata") or _is_contract_header_metadata(text, int(item["clause_index"])):
                     status = "DOCUMENT_METADATA"
                 else:
                     status = "VALID_CLAUSE" if is_real_clause(text) else "NO_APPLICABLE_LABEL"
@@ -711,8 +724,15 @@ def _classify_contract(
             tmp_c.replace(target_c)
             results_by_index[idx] = row
 
-        all_risk_findings = list(run.read_jsonl_index("risk_findings.jsonl", "finding_id").values())
-        clause_rows = sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
+        all_risk_findings = [
+            finding for finding in run.read_jsonl_index("risk_findings.jsonl", "finding_id").values()
+            if not _is_contract_header_metadata(str(finding.get("clause_text") or ""), int(finding.get("clause_index", -1)))
+        ]
+        clause_rows = [
+            row for row in sorted(results_by_index.values(), key=lambda x: int(x["clause_index"]))
+            if not _is_contract_header_metadata(str(row.get("clause_text") or ""), int(row.get("clause_index", -1)))
+            and row.get("classification_status") != "DOCUMENT_METADATA"
+        ]
 
         deterministic_signals = run.read_json("deterministic_cross_checks.json", None)
         if deterministic_signals is None:
@@ -824,6 +844,8 @@ def _classify_contract(
         # Persist final status and a compact machine-readable result snapshot.
         clauses_out = []
         for item in sorted(results_by_index.values(), key=lambda x: int(x["clause_index"])):
+            if _is_contract_header_metadata(str(item.get("clause_text") or ""), int(item.get("clause_index", -1))) or item.get("classification_status") == "DOCUMENT_METADATA":
+                continue
             if item.get("classification_status") == "NO_APPLICABLE_LABEL":
                 item = {
                     **item,
@@ -837,13 +859,13 @@ def _classify_contract(
             {
                 "analysis_id": run.analysis_id,
                 "filename": filename,
-                "total_clauses": len(segments_json),
+                "total_clauses": len(clauses_out),
                 "clauses": clauses_out,
                 "contract_risk_assessment": assessment,
                 "contract_coverage": contract_coverage,
                 "deterministic_cross_checks": deterministic_signals,
                 "contract_metadata": {
-                    **extract_contract_metadata(filename, clauses_out),
+                    **extract_contract_metadata(filename, segments_json),
                     "document_hash": _file_hash(file_path),
                     "document_version": _file_hash(file_path),
                 },
@@ -851,7 +873,7 @@ def _classify_contract(
         )
         mark_run_complete(
             run,
-            total_clauses=len(segments_json),
+            total_clauses=len(clauses_out),
             valid_clauses=len(valid_items),
             playbook_hash=playbook.get("playbook_hash"),
         )
@@ -867,7 +889,7 @@ def _classify_contract(
             "filename": filename,
             "clauses": clauses_out,
             "contract_risk_assessment": assessment,
-            "contract_metadata": extract_contract_metadata(filename, clauses_out),
+            "contract_metadata": extract_contract_metadata(filename, segments_json),
             "contract_coverage": contract_coverage,
             "deterministic_cross_checks": deterministic_signals,
             "run_dir": str(run.root),
@@ -882,3 +904,5 @@ def _classify_contract(
             "analysis_id": run.analysis_id,
         })
         raise
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

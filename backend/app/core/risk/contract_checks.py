@@ -218,10 +218,34 @@ def analyze_contract_checks(
         for start in range(0, len(combined_checks), check_batch_size)
     ]
 
+    def emit_batch_progress(message: str, *, current: int, total: int, pass_index: int, batch_index: int) -> None:
+        if not callable(progress_callback):
+            return
+        try:
+            progress_callback({
+                "type": "progress",
+                "stage": "cross_clause",
+                "message": message,
+                "current": current,
+                "total": total,
+                "pass": pass_index + 1,
+                "passes": n_passes,
+                "batch": batch_index,
+                "batches": len(batches),
+            })
+        except Exception:
+            logging.getLogger(__name__).exception("Could not publish cross-clause progress event")
+
     for pass_index in range(n_passes):
         for batch_index, batch in enumerate(batches, start=1):
+            current_batch = pass_index * len(batches) + batch_index
+            total_batches = n_passes * len(batches)
             batch_cross = [check for kind, check in batch if kind == "cross_clause"]
             batch_doc = [check for kind, check in batch if kind == "document"]
+            emit_batch_progress(
+                f"Evaluating contract-wide check batch {batch_index}/{len(batches)} ({len(batch)} checks)",
+                current=current_batch, total=total_batches, pass_index=pass_index, batch_index=batch_index,
+            )
             prompt = _prompt(clauses, batch_cross, batch_doc, deterministic_signals)
             try:
                 parsed_cross, parsed_doc = _parse(
@@ -244,6 +268,10 @@ def analyze_contract_checks(
                 parsed_cross, parsed_doc = [], []
             cross_outputs[pass_index].extend(parsed_cross)
             doc_outputs[pass_index].extend(parsed_doc)
+            emit_batch_progress(
+                f"Completed contract-wide check batch {batch_index}/{len(batches)}",
+                current=current_batch, total=total_batches, pass_index=pass_index, batch_index=batch_index,
+            )
 
     def collapse(outputs: list[list[dict]], source_items: list[dict], kind: str) -> list[dict]:
         by_id = defaultdict(list)
@@ -411,3 +439,5 @@ def analyze_contract_checks(
         return sorted(results, key=lambda x: x["check_id"])
 
     return collapse(cross_outputs, cross_checks, "cross_clause"), collapse(doc_outputs, doc_checks, "document")
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

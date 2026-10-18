@@ -1,6 +1,8 @@
 import { Component, useEffect, useMemo, useRef, useState } from "react";
 
-const API_URL = "/documents/classify/stream";
+const APP_BASE = import.meta.env.BASE_URL || "/";
+const appPath = (path) => APP_BASE + String(path || "").replace(/^\/+/, "");
+const API_URL = appPath("documents/classify/stream");
 
 function RiskBadge({ status }) {
   const label = status === "POTENTIAL_RISK"
@@ -52,14 +54,14 @@ function RiskCard({ finding }) {
           </div>
         )}
         <div>
-          <span className="field-label">Confidence in prediction correctness</span>
-          <strong>{confidence}</strong>
-          <span className="field-note">{finding.confidence_status || "UNCALIBRATED"}</span>
+          <span className="field-label">Calibration status</span>
+          <strong>{finding.confidence_status || "UNCALIBRATED"}</strong>
+          <span className="field-note">No calibrated probability is available for this finding.</span>
         </div>
         <div>
-          <span className="field-label">Support signal (not a probability)</span>
+          <span className="field-label">Evidence-support diagnostic</span>
           <strong>{supportScore}</strong>
-          <span className="field-note">Uncalibrated diagnostic from answer support, evidence, and model agreement.</span>
+          <span className="field-note">Internal score only—not a probability, confidence percentage, or legal-accuracy estimate.</span>
         </div>
         <div>
           <span className="field-label">Rule governance</span>
@@ -161,6 +163,7 @@ function ContractReview() {
   const [apiStatus, setApiStatus] = useState("checking");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [restoring, setRestoring] = useState(false);
+  const [activeRunId, setActiveRunId] = useState(null);
   const abortRef = useRef(null);
 
   useEffect(() => {
@@ -168,7 +171,7 @@ function ContractReview() {
     if (!savedId) return undefined;
     let cancelled = false;
     setRestoring(true);
-    fetch("/documents/runs/" + encodeURIComponent(savedId), { cache: "no-store" })
+    fetch(appPath("documents/runs/" + encodeURIComponent(savedId)), { cache: "no-store" })
       .then(async (response) => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.detail || "Saved analysis unavailable.");
@@ -190,10 +193,34 @@ function ContractReview() {
   }, [loading]);
 
   useEffect(() => {
+    if (!loading || !activeRunId) return undefined;
+    let cancelled = false;
+    let timerId = null;
+    const pollRun = async () => {
+      try {
+        const response = await fetch(appPath("documents/runs/" + encodeURIComponent(activeRunId)), { cache: "no-store" });
+        if (!response.ok) throw new Error("Run status unavailable");
+        const data = await response.json();
+        if (cancelled) return;
+        if (data.result_available && data.result) {
+          setResult({ ...data.result, partial: false });
+        } else if (data.partial_result) {
+          setResult((current) => current?.analysis_id === activeRunId && !current.partial ? current : data.partial_result);
+        }
+      } catch {
+        // The SSE stream remains the primary channel; polling is a recovery path.
+      }
+      if (!cancelled) timerId = window.setTimeout(pollRun, 3500);
+    };
+    pollRun();
+    return () => { cancelled = true; if (timerId) window.clearTimeout(timerId); };
+  }, [loading, activeRunId]);
+
+  useEffect(() => {
     let cancelled = false;
     const checkApi = async () => {
       try {
-        const response = await fetch("/health", { cache: "no-store" });
+        const response = await fetch(appPath("health"), { cache: "no-store" });
         if (!response.ok) throw new Error("API unavailable");
         const data = await response.json();
         if (!cancelled) setApiStatus(data.status === "ok" ? "online" : "degraded");
@@ -214,7 +241,7 @@ function ContractReview() {
     let cancelled = false;
     const loadMetrics = async () => {
       try {
-        const response = await fetch("/query/phase2-metrics", { cache: "no-store" });
+        const response = await fetch(appPath("query/phase2-metrics"), { cache: "no-store" });
         if (!response.ok) throw new Error("Metrics unavailable");
         const data = await response.json();
         if (!cancelled) setPhase2Metrics(data);
@@ -239,7 +266,7 @@ function ContractReview() {
     setChatMessages([]);
     setTrace([]);
     try {
-      const response = await fetch("/query/demo-analysis");
+      const response = await fetch(appPath("query/demo-analysis"));
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.detail || "The guided demo is unavailable.");
       setResult(data);
@@ -256,7 +283,7 @@ function ContractReview() {
 
   async function askContract(questionOverride) {
     const question = String(questionOverride ?? chatInput).trim();
-    if (!result?.analysis_id || !question || chatLoading) return;
+    if (!result?.analysis_id || result.partial || loading || !question || chatLoading) return;
     setChatMessages((messages) => [...messages, { role: "user", text: question }]);
     setChatInput("");
     setChatError(null);
@@ -264,7 +291,7 @@ function ContractReview() {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 90000);
     try {
-      const response = await fetch("/query/contract", {
+      const response = await fetch(appPath("query/contract"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
@@ -295,6 +322,8 @@ function ContractReview() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setActiveRunId(null);
+    window.sessionStorage.removeItem("clausewise.analysis_id");
     setDemoNotice(null);
     setTrace([]);
     setChatMessages([]);
@@ -327,11 +356,18 @@ function ContractReview() {
         const event = JSON.parse(line.slice(5).trim());
         if (event.type === "progress") {
           setTrace((items) => [...items, event]);
+          if (event.analysis_id) {
+            setActiveRunId(event.analysis_id);
+            window.sessionStorage.setItem("clausewise.analysis_id", event.analysis_id);
+          }
         } else if (event.type === "heartbeat") {
           setTrace((items) => [...items, event]);
         } else if (event.type === "result") {
-          setResult(event.data);
-          if (event.data?.analysis_id) window.sessionStorage.setItem("clausewise.analysis_id", event.data.analysis_id);
+          setResult({ ...event.data, partial: false });
+          if (event.data?.analysis_id) {
+            setActiveRunId(event.data.analysis_id);
+            window.sessionStorage.setItem("clausewise.analysis_id", event.data.analysis_id);
+          }
           receivedResult = true;
         } else if (event.type === "error") {
           throw new Error(event.message || "Analysis failed.");
@@ -358,14 +394,19 @@ function ContractReview() {
 
   const assessment = result?.contract_risk_assessment || {};
   const clauses = result?.clauses || [];
+  const isUnclassified = (clause) => clause.classification_status === "NO_APPLICABLE_LABEL"
+    || clause.predicted_label === "NO_APPLICABLE_LABEL"
+    || clause.predicted_label === "No applicable label";
+  const classifiedClauses = useMemo(() => clauses.filter((clause) => !isUnclassified(clause)), [clauses]);
+  const unclassifiedClauses = useMemo(() => clauses.filter(isUnclassified), [clauses]);
   const visibleClauses = useMemo(() => {
     const query = clauseSearch.trim().toLowerCase();
-    if (!query) return clauses;
-    return clauses.filter((clause) =>
+    if (!query) return classifiedClauses;
+    return classifiedClauses.filter((clause) =>
       [clause.clause_index, clause.predicted_label, clause.heading, clause.section_path, clause.clause_text]
         .some((value) => String(value || "").toLowerCase().includes(query))
     );
-  }, [clauses, clauseSearch]);
+  }, [classifiedClauses, clauseSearch]);
   const risks = useMemo(
     () => clauses.flatMap((clause) =>
       (clause.risk_findings || []).map((finding) => ({
@@ -433,7 +474,7 @@ function ContractReview() {
           <div className="hero-side__caption">REVIEW WITH CONTEXT<br /><strong>Not just a risk score.</strong></div>
           {result?.demo_mode && <span className="demo-mode-pill">SYNTHETIC DEMO</span>}
           {result?.analysis_id && (
-            <div className="analysis-id"><span>Analysis ID</span><code>{result.analysis_id}</code></div>
+            <details className="run-details"><summary>Run details</summary><code>{result.analysis_id}</code></details>
           )}
         </div>
       </header>
@@ -453,7 +494,7 @@ function ContractReview() {
           <div className="upload-actions">
             <button type="submit" disabled={!file || loading || demoLoading}>{loading ? "Analyzing contract…" : "Analyze contract"} <span aria-hidden="true">→</span></button>
             <button type="button" className="button-secondary" onClick={loadSavedDemo} disabled={loading || demoLoading}>{demoLoading ? "Preparing demo…" : "Open guided demo"}</button>
-            <a className="sample-link" href="/query/demo-contract" download>Download sample agreement ↗</a>
+            <a className="sample-link" href={appPath("query/demo-contract")} download>Download sample agreement ↗</a>
           </div>
         </form>
         <p className="privacy-note" role="note"><span aria-hidden="true">ⓘ</span> Privacy: inference runs locally, but clause text is sent to the configured Cohere embedding API. Do not upload confidential documents unless that transfer is authorized; this build is not fully offline.</p>
@@ -497,33 +538,7 @@ function ContractReview() {
       {demoNotice && <p className="demo-notice" role="status">{demoNotice}</p>}
       {error && <div className="error" role="alert">{error}</div>}
 
-      <details className="experiment-snapshot">
-        <summary>Technical validation snapshot <span className="snapshot-hint">Open to inspect runtime metrics</span></summary>
-        <div className="experiment-snapshot__body">
-          <div className="experiment-metrics">
-            <div><strong>{phase2Metrics?.playbook?.deterministic_rule_count ?? "—"}</strong><span>Executable playbook rules</span></div>
-            <div><strong>{phase2Metrics?.playbook?.clause_question_count ?? "—"}</strong><span>Clause-level playbook questions</span></div>
-            <div><strong>{phase2Metrics?.playbook?.cross_clause_question_count ?? "—"}</strong><span>Cross-clause questions</span></div>
-            <div><strong>{phase2Metrics?.playbook?.document_question_count ?? "—"}</strong><span>Document-level questions</span></div>
-            <div><strong>{phase2Metrics?.rule_validation?.status || "NOT_RUN"}</strong><span>Rule configuration / taxonomy validation</span></div>
-            <div><strong>{phase2Metrics?.classification_index_isolation?.status || "NOT_RUN"}</strong><span>Separate CUAD classifier-index isolation</span></div>
-            <div><strong>{phase2Metrics?.release_validation?.status || "NOT_RUN"}</strong><span>Recorded release-check run</span></div>
-            <div><strong>{phase2Metrics?.production_release_readiness?.status || "NOT_CHECKED"}</strong><span>Production release readiness</span></div>
-            <div><strong>{phase2Metrics?.production_release_readiness ? (phase2Metrics.production_release_readiness.rules_with_authority_refs + "/" + phase2Metrics.production_release_readiness.base_rule_count) : "—"}</strong><span>Base rules with authority mapping</span></div>
-            <div><strong>{phase2Metrics?.playbook?.taxonomy_domain_count ?? "—"}</strong><span>Canonical risk domains</span></div>
-          </div>
-          <p>
-            {phase2Metrics ? "Playbook v" + (phase2Metrics.playbook?.source_version || "—") + ". Rule tests and release reports are shown as NOT_RUN until their source scripts execute." : "Could not load the saved Phase 2 configuration and conformance reports."}
-          </p>
-          <p>
-            {phase2Metrics?.separate_cuad_category_baseline?.accuracy == null
-              ? "The separate CUAD clause-category retrieval baseline has not been loaded."
-              : "Separate CUAD category baseline: " + (phase2Metrics.separate_cuad_category_baseline.accuracy * 100).toFixed(1) + "% accuracy and " + (phase2Metrics.separate_cuad_category_baseline.macro_f1 * 100).toFixed(1) + "% macro-F1 across " + (phase2Metrics.separate_cuad_category_baseline.test_clauses ?? "—") + " held-out clauses. These are clause-category metrics, not risk accuracy."}
-          </p>
-          <p><strong>Interpretation:</strong> direct rule hits are review triggers with exact contract quotes. The release reports conformance, rule integrity and evidence provenance—not legal-risk accuracy, enforceability or calibrated probability. A rule miss is not proof that a contract is safe.</p>
-          <p><a href="/query/phase2-metrics" target="_blank" rel="noreferrer">Open metrics JSON</a></p>
-        </div>
-      </details>
+
 
       {loading && (
         <section className="trace" aria-live="polite">
@@ -555,20 +570,31 @@ function ContractReview() {
               <div><span>Calibration</span><strong>{assessment.confidence_status || "UNCALIBRATED"}</strong></div>
             </div>
             <div className="metadata-grid">
-              <div><span>Parties</span><strong>{result.contract_metadata?.parties?.join(" · ") || "Not extracted"}</strong></div>
-              <div><span>Agreement date</span><strong>{result.contract_metadata?.agreement_date || "Not extracted"}</strong></div>
-              <div><span>Effective date</span><strong>{result.contract_metadata?.effective_date || "Not extracted"}</strong></div>
-              <div><span>Expiration date</span><strong>{result.contract_metadata?.expiration_date || "Not extracted"}</strong></div>
-              <div><span>Governing law</span><strong>{result.contract_metadata?.governing_law || "Not extracted"}</strong></div>
-              <div><span>Risk source</span><strong>{assessment.gold_status === "PLAYBOOK_DERIVED" ? "Playbook-derived" : (assessment.gold_status || "Playbook-derived")}</strong></div>
+              <div><span>Parties</span><strong>{result.contract_metadata?.parties?.join(" · ") || "Not found in the extracted text"}</strong></div>
+              <div><span>Agreement date</span><strong>{result.contract_metadata?.agreement_date || "Not stated"}</strong></div>
+              <div><span>Effective date</span><strong>{result.contract_metadata?.effective_date || (result.contract_metadata?.effective_date_condition ? "Triggered by contract condition" : "Not stated")}</strong></div>
+              <div><span>Expiration / term</span><strong>{result.contract_metadata?.expiration_date || result.contract_metadata?.expiration_terms || "Not stated"}</strong></div>
+              <div><span>Governing law</span><strong>{result.contract_metadata?.governing_law || "Not stated"}</strong></div>
+              <div><span>Risk evidence basis</span><strong>{assessment.gold_status === "PLAYBOOK_DERIVED" ? "Rule / playbook-derived" : (assessment.gold_status || "Rule / playbook-derived")}</strong></div>
+              {result.contract_metadata?.dispute_forum && <div><span>Dispute forum (not governing law)</span><strong>{result.contract_metadata.dispute_forum}</strong></div>}
             </div>
+            {result.contract_metadata?.effective_date_condition && <p className="contract-parties"><strong>Effective-date condition:</strong> {result.contract_metadata.effective_date_condition}</p>}
+            {result.contract_metadata?.evidence && <details className="metadata-evidence"><summary>Metadata source evidence</summary><dl>{Object.entries(result.contract_metadata.evidence).map(([key, value]) => <div key={key}><dt>{key.replaceAll("_", " ")}</dt><dd>{Array.isArray(value) ? value.filter(Boolean).join(" · ") : String(value || "")}</dd></div>)}</dl></details>}
           </section>
 
-          <nav className="tabs">
+          {result.partial && (
+            <div className="partial-results-notice" role="status">
+              <div><strong>Partial results — analysis is still running</strong><span>Completed classifications are available now. Risk checks and contract-wide findings may still be incomplete.</span></div>
+              <button type="button" onClick={() => setTab("clauses")}>View current results →</button>
+            </div>
+          )}
+
+          <nav className="tabs" aria-label="Contract review sections">
             <button type="button" className={tab === "overview" ? "tab tab--active" : "tab"} onClick={() => setTab("overview")}>Overview</button>
-            <button type="button" className={tab === "clauses" ? "tab tab--active" : "tab"} onClick={() => setTab("clauses")}>Clauses</button>
-            <button type="button" className={tab === "risks" ? "tab tab--active" : "tab"} onClick={() => setTab("risks")}>Risks ({potential.length})</button>
-            <button type="button" className={tab === "chat" ? "tab tab--active" : "tab"} onClick={() => setTab("chat")}>Ask this contract</button>
+            <button type="button" className={tab === "clauses" ? "tab tab--active" : "tab"} onClick={() => setTab("clauses")}>Classified ({classifiedClauses.length})</button>
+            <button type="button" className={tab === "unclassified" ? "tab tab--active" : "tab"} onClick={() => setTab("unclassified")}>Unclassified ({unclassifiedClauses.length})</button>
+            <button type="button" className={tab === "risks" ? "tab tab--active" : "tab"} onClick={() => setTab("risks")}>Risks to review ({potential.length})</button>
+            <button type="button" className={tab === "chat" ? "tab tab--active" : "tab"} onClick={() => setTab("chat")} disabled={Boolean(result.partial) || loading} title={result.partial || loading ? "Ask contract becomes available after analysis completes" : "Ask questions grounded in the saved contract"}>Ask contract</button>
           </nav>
 
           {tab === "overview" && (
@@ -585,14 +611,12 @@ function ContractReview() {
                 <p className="muted">Policy: {assessment.rule_registry?.status || "PILOT_REVIEW_ONLY"} · Source citations: {assessment.rule_registry?.source_citation_status || "incomplete"} · Findings: {assessment.gold_status || "PLAYBOOK_DERIVED"}.</p>
               </article>
 
-              <article className="panel">
-                <div className="eyebrow">Audit artifacts</div>
-                <h2>Downloads</h2>
-                <div className="download-list">
-                  {Object.entries(result.downloads || {}).map(([key, url]) => (
-                    <a key={key} href={url} download>{String(key).replaceAll("_", " ")}</a>
-                  ))}
-                </div>
+              <article className="panel downloads-panel">
+                <div className="eyebrow">Contract package</div>
+                <h2>Everything in one download</h2>
+                <p>Includes the original contract, current review tables, evidence, and saved analysis artifacts.</p>
+                {result.downloads?.contract_bundle_zip ? <a className="download-primary" href={appPath(result.downloads.contract_bundle_zip)} download><span className="download-primary__icon">↓</span><span><strong>Download complete review package</strong><small>ZIP · original contract + all available review artifacts</small></span></a> : <p className="muted">A complete package is not available for this result.</p>}
+                <details className="download-details"><summary>Individual files (advanced)</summary><div className="download-list">{Object.entries(result.downloads || {}).filter(([key]) => key !== "contract_bundle_zip").map(([key, url]) => <a key={key} href={appPath(url)} download>{String(key).replaceAll("_", " ")}</a>)}</div></details>
               </article>
 
               <article className="panel">
@@ -606,7 +630,7 @@ function ContractReview() {
           {tab === "clauses" && (
             <section className="results">
               <div className="section-heading">
-                <div><div className="eyebrow">Clause-by-clause</div><h2>{clauseSearch.trim() ? visibleClauses.length + " matching segments" : clauses.length + " extracted segments"}</h2></div>
+                <div><div className="eyebrow">Clause-by-clause review</div><h2>{clauseSearch.trim() ? visibleClauses.length + " matching clauses" : classifiedClauses.length + " classified clauses"}</h2><p className="muted">Category-assigned clauses only. Sections without an applicable category are kept in their own tab.</p></div>
                 <label className="clause-search"><span aria-hidden="true">⌕</span><input type="search" value={clauseSearch} onChange={(event) => setClauseSearch(event.target.value)} placeholder="Search clause text or label…" aria-label="Search clauses" /></label>
               </div>
               <div className="clause-list">
@@ -617,10 +641,7 @@ function ContractReview() {
                       <RiskBadge status={clause.risk_status} />
                     </div>
                     <p className="clause-text">{clause.clause_text}</p>
-                    <div className="classification-row">
-                      <span>CUAD status: <strong>{clause.classification_status}</strong></span>
-                      <span>Classification confidence: <strong>{clause.classification_confidence == null ? "not calibrated" : Math.round(clause.classification_confidence * 100) + "%"}</strong></span>
-                    </div>
+                    <details className="classification-details"><summary>Classification details</summary><p>Status: {clause.classification_status || "Not available"}.</p><p>Category score: {clause.classification_confidence == null ? "Unavailable" : Number(clause.classification_confidence).toFixed(3)} <span className="muted">(internal score, not a calibrated probability)</span></p></details>
                     {clause.risk_findings?.filter((finding) => finding.risk_status !== "NO_RISK").map((finding, index) => (
                       <RiskCard key={String(clause.clause_index) + "-" + String(finding.check_id || index)} finding={finding} />
                     ))}
@@ -628,6 +649,13 @@ function ContractReview() {
                 ))}
                 {!visibleClauses.length && <div className="panel"><h3>No clauses match this search.</h3><p>Try a different term, section heading, or clause category.</p></div>}
               </div>
+            </section>
+          )}
+
+          {tab === "unclassified" && (
+            <section className="results">
+              <div className="section-heading"><div><div className="eyebrow">Classification abstentions</div><h2>{unclassifiedClauses.length} unclassified sections</h2><p className="muted">These sections are retained, but no CUAD category was assigned. They are not silently mixed with classified clauses.</p></div></div>
+              {!unclassifiedClauses.length ? <div className="empty-state"><h3>No unclassified sections</h3><p>All returned sections have a category for this run.</p></div> : <div className="clause-list">{unclassifiedClauses.map((clause) => <article key={clause.clause_index} className="clause-card clause-card--unclassified"><div className="clause-card__header"><div><span className="field-label">Section {clause.clause_index}</span><h3>No applicable CUAD category</h3></div><span className="risk-badge risk-badge--unsupported">Unclassified</span></div><p className="clause-text">{clause.clause_text}</p><details className="classification-details"><summary>Classification details</summary><p>Status: {clause.classification_status || "NO_APPLICABLE_LABEL"}.</p><p>Category score: {clause.classification_confidence == null ? "Unavailable" : Number(clause.classification_confidence).toFixed(3)} <span className="muted">(internal score, not a calibrated probability)</span></p></details></article>)}</div>}
             </section>
           )}
 
@@ -754,6 +782,36 @@ function ContractReview() {
           )}
         </>
       )}
+
+      {result && (
+      <details className="experiment-snapshot">
+        <summary>Research diagnostics (advanced) <span className="snapshot-hint">Optional engineering and validation details</span></summary>
+        <div className="experiment-snapshot__body">
+          <div className="experiment-metrics">
+            <div><strong>{phase2Metrics?.playbook?.deterministic_rule_count ?? "—"}</strong><span>Executable playbook rules</span></div>
+            <div><strong>{phase2Metrics?.playbook?.clause_question_count ?? "—"}</strong><span>Clause-level playbook questions</span></div>
+            <div><strong>{phase2Metrics?.playbook?.cross_clause_question_count ?? "—"}</strong><span>Cross-clause questions</span></div>
+            <div><strong>{phase2Metrics?.playbook?.document_question_count ?? "—"}</strong><span>Document-level questions</span></div>
+            <div><strong>{phase2Metrics?.rule_validation?.status || "NOT_RUN"}</strong><span>Rule configuration / taxonomy validation</span></div>
+            <div><strong>{phase2Metrics?.classification_index_isolation?.status || "NOT_RUN"}</strong><span>Separate CUAD classifier-index isolation</span></div>
+            <div><strong>{phase2Metrics?.release_validation?.status || "NOT_RUN"}</strong><span>Recorded release-check run</span></div>
+            <div><strong>{phase2Metrics?.production_release_readiness?.status || "NOT_CHECKED"}</strong><span>Production release readiness</span></div>
+            <div><strong>{phase2Metrics?.production_release_readiness ? (phase2Metrics.production_release_readiness.rules_with_authority_refs + "/" + phase2Metrics.production_release_readiness.base_rule_count) : "—"}</strong><span>Base rules with authority mapping</span></div>
+            <div><strong>{phase2Metrics?.playbook?.taxonomy_domain_count ?? "—"}</strong><span>Canonical risk domains</span></div>
+          </div>
+          <p>
+            {phase2Metrics ? "Playbook v" + (phase2Metrics.playbook?.source_version || "—") + ". Rule tests and release reports are shown as NOT_RUN until their source scripts execute." : "Could not load the saved Phase 2 configuration and conformance reports."}
+          </p>
+          <p>
+            {phase2Metrics?.separate_cuad_category_baseline?.accuracy == null
+              ? "The separate CUAD clause-category retrieval baseline has not been loaded."
+              : "Separate CUAD category baseline: " + (phase2Metrics.separate_cuad_category_baseline.accuracy * 100).toFixed(1) + "% accuracy and " + (phase2Metrics.separate_cuad_category_baseline.macro_f1 * 100).toFixed(1) + "% macro-F1 across " + (phase2Metrics.separate_cuad_category_baseline.test_clauses ?? "—") + " held-out clauses. These are clause-category metrics, not risk accuracy."}
+          </p>
+          <p><strong>Interpretation:</strong> direct rule hits are review triggers with exact contract quotes. The release reports conformance, rule integrity and evidence provenance—not legal-risk accuracy, enforceability or calibrated probability. A rule miss is not proof that a contract is safe.</p>
+          <p><a href={appPath("query/phase2-metrics")} target="_blank" rel="noreferrer">Open metrics JSON</a></p>
+        </div>
+      </details>
+      )}
     </main>
   );
 }
@@ -761,3 +819,5 @@ function ContractReview() {
 export default function AppWithErrorBoundary() {
   return <AppErrorBoundary><ContractReview /></AppErrorBoundary>;
 }
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

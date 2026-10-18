@@ -376,6 +376,8 @@ def analyze_clause_risk(
     playbook: dict | None = None,
     passes: int | None = None,
     qdrant_client=None,
+    clause_position: int | None = None,
+    total_clauses: int | None = None,
 ) -> list[dict]:
     playbook = playbook or load_playbook()
     # Direct uploaded-text predicates execute before optional retrieval and model
@@ -494,7 +496,14 @@ def analyze_clause_risk(
     n_passes = max(1, int(passes if passes is not None else RISK_SELF_CONSISTENCY_PASSES))
     outputs: list[list[dict]] = []
     valid_ids = {str(item["id"]) for item in checks}
-    _emit(progress_callback, "risk_clause", f"Evaluating risk checks for clause {clause_index}", clause_index=clause_index)
+    _emit(
+        progress_callback,
+        "risk_clause",
+        f"Evaluating risk checks for clause {clause_position or clause_index} of {total_clauses or '?'}",
+        clause_index=clause_index,
+        current=clause_position,
+        total=total_clauses,
+    )
 
     for pass_index in range(n_passes):
         try:
@@ -518,7 +527,7 @@ def analyze_clause_risk(
         outputs.append(parsed)
         _emit(
             progress_callback,
-            "risk_clause",
+            "risk_pass",
             f"Risk pass {pass_index + 1}/{n_passes} complete",
             clause_index=clause_index,
             current=pass_index + 1,
@@ -706,3 +715,5 @@ def analyze_clause_risk(
     # lexical trigger must not disappear because the question-answering model said NO.
     findings.extend(rule_findings)
     return sorted(findings, key=lambda item: (item["clause_index"], item["check_id"]))
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
