@@ -72,10 +72,11 @@ def test_cross_document_checks_are_batched_and_all_13_results_survive(monkeypatc
     assert len(calls) == 4  # ceil((10 cross + 3 document checks) / 4)
     assert {item["check_id"] for item in cross} == {f"X-{i}" for i in range(1, 11)}
     assert {item["check_id"] for item in document} == {f"DOC-{i}" for i in range(1, 4)}
-    assert all(item["risk_status"] == "NO_RISK" for item in cross + document)
+    # A negative answer without exact, topic-relevant evidence is not a supported no-risk result.
+    assert all(item["risk_status"] == "INSUFFICIENT_EVIDENCE" for item in cross + document)
 
 
-def test_malformed_model_batch_only_abstains_for_that_batch(monkeypatch):
+def test_malformed_batch_abstains_and_negative_without_evidence_is_not_no_risk(monkeypatch):
     calls = []
 
     def fake_call(prompt, **kwargs):
@@ -103,5 +104,8 @@ def test_malformed_model_batch_only_abstains_for_that_batch(monkeypatch):
         assert cross_by_id[f"X-{i}"]["risk_status"] == "INSUFFICIENT_EVIDENCE"
         assert cross_by_id[f"X-{i}"]["answer"] == "DON'T KNOW"
     for i in range(5, 11):
-        assert cross_by_id[f"X-{i}"]["risk_status"] == "NO_RISK"
-    assert all(item["risk_status"] == "NO_RISK" for item in document_by_id.values())
+        assert cross_by_id[f"X-{i}"]["risk_status"] == "INSUFFICIENT_EVIDENCE"
+        assert cross_by_id[f"X-{i}"]["answer"] == "NO"
+    assert all(item["risk_status"] == "INSUFFICIENT_EVIDENCE" for item in document_by_id.values())
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

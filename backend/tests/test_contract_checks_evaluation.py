@@ -139,7 +139,9 @@ def test_cross_clause_finding_with_nonexistent_quote_abstains(monkeypatch):
     )
     x10 = next(item for item in cross if item["check_id"] == "X-10")
     assert x10["risk_status"] == "INSUFFICIENT_EVIDENCE"
-    assert x10["evidence"] == []
+    assert x10["evidence"]
+    assert all(ev["quote"] in {clause["clause_text"] for clause in _contract_clauses()} for ev in x10["evidence"])
+    assert "outside any liability cap" in " ".join(ev["quote"] for ev in x10["evidence"])
 
 
 def test_omitted_cross_clause_and_document_checks_are_preserved_as_unresolved(monkeypatch):
@@ -158,3 +160,5 @@ def test_omitted_cross_clause_and_document_checks_are_preserved_as_unresolved(mo
     )
     assert len(cross) == 1 and cross[0]["risk_status"] == "INSUFFICIENT_EVIDENCE"
     assert len(document) == 1 and document[0]["risk_status"] == "INSUFFICIENT_EVIDENCE"
+
+[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
