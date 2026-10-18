@@ -997,9 +997,7 @@ def load_demo_analysis() -> dict[str, Any]:
             "source": {"filename": fixture_path.name},
             "demo_mode": True,
             "document_sha256": fixture_hash,
-            "result_sha256": hashlib.sha256(result_path.read_bytes()).hexdigest(),
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]            "provenance": "Deterministic synthetic demo; not an AI-generated contract analysis.",
+            "result_sha256": hashlib.sha256(result_path.read_bytes()).hexdigest(),            "provenance": "Deterministic synthetic demo; not an AI-generated contract analysis.",
         }, indent=2), encoding="utf-8")
     return {
         "filename": result.get("filename"),
@@ -1019,5 +1017,3 @@ def load_demo_analysis() -> dict[str, Any]:
         "demo_mode": True,
         "notice": result.get("notice") or "Synthetic walkthrough; illustrative findings only.",
     }
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

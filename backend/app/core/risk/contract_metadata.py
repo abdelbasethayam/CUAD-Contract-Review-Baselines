@@ -116,5 +116,3 @@ def extract_contract_metadata(filename: str, clauses: list[dict]) -> dict:
         metadata["evidence"]["expiration_terms"] = indefinite.group(0).strip()
 
     return metadata
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

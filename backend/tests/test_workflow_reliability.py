@@ -99,5 +99,3 @@ def test_run_status_exposes_saved_partial_classifications(tmp_path, monkeypatch)
     assert payload["partial_result"]["partial"] is True
     assert payload["partial_result"]["total_clauses"] == 1
     assert [row["clause_index"] for row in payload["partial_result"]["clauses"]] == [1]
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

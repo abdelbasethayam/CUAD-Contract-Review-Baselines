@@ -341,5 +341,3 @@ def download_artifact(analysis_id: str, artifact: str):
     if not candidate.exists():
         raise HTTPException(status_code=404, detail="Artifact not found.")
     return FileResponse(candidate, filename=artifact)
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

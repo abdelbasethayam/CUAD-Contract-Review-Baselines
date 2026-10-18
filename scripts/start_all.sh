@@ -38,5 +38,3 @@ if [[ -n "${JUPYTERHUB_SERVICE_PREFIX:-}" ]]; then
 else
   echo "Open http://127.0.0.1:${FRONTEND_PORT}/ in the browser on the same machine."
 fi
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
