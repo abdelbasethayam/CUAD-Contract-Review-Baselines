@@ -294,4 +294,3 @@ def test_contradictory_no_answer_cannot_become_a_positive_clause_finding(monkeyp
     assert finding["risk_status"] == "INSUFFICIENT_EVIDENCE"
     assert finding["risk"] is False
 
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

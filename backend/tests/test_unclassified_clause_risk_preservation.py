@@ -35,4 +35,3 @@ def test_classified_clause_is_not_changed():
     clause = {"classification_status": "Insurance", "risk_findings": []}
     assert _preserve_risk_findings_for_unclassified_clause(clause) is clause
 
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

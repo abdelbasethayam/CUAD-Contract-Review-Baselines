@@ -125,4 +125,3 @@ def test_exact_but_off_topic_model_quote_is_replaced_for_document_precedence_che
     assert 15 in finding["clause_ids"]
     assert "off-topic" in finding["why_flagged"]
 
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
