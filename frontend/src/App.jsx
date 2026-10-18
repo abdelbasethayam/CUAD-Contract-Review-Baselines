@@ -100,7 +100,11 @@ function ContractReview() {
   const abortRef = useRef(null);
 
   useEffect(() => {
-    const savedId = window.sessionStorage.getItem("clausewise.analysis_id");
+    // Allow a completed workspace to be reopened from a shareable local URL,
+    // even if a transient API outage cleared the sessionStorage recovery key.
+    const requestedId = new URLSearchParams(window.location.search).get("analysis_id");
+    const savedId = requestedId || window.sessionStorage.getItem("clausewise.analysis_id");
+    if (requestedId) window.sessionStorage.setItem("clausewise.analysis_id", requestedId);
     if (!savedId) return undefined;
     let cancelled = false;
     setRestoring(true);
