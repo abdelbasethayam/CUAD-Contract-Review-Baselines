@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import csv
 import json
@@ -67,6 +66,14 @@ def _is_contract_header_metadata(text: str, clause_index: int) -> bool:
     party_b = re.search(r"\bParty\s+B(?:\s*\([^)]*\))?\s*:\s*[^\n]{2,}", value, re.I)
     numbered = re.match(r"^\s*\d{1,3}\s*[.)]", value)
     return bool(party_a and party_b and not numbered)
+
+
+def _is_numbered_structural_clause(text: str, metadata: dict) -> bool:
+    """Trust a numbered top-level segment over a secondary yes/no model veto."""
+    return bool(
+        metadata.get("marker_kind") == "TOP_LEVEL"
+        and re.match(r"^\s*\d{1,3}\s*[.)]", str(text or ""))
+    )
 
 
 def _emit(
@@ -482,8 +489,14 @@ def _classify_contract(
             validation_records = []
             for item in segments_json:
                 text = str(item["text"])
-                if item.get("metadata", {}).get("is_signature_metadata") or _is_contract_header_metadata(text, int(item["clause_index"])):
+                metadata = item.get("metadata", {})
+                if metadata.get("is_signature_metadata") or _is_contract_header_metadata(text, int(item["clause_index"])):
                     status = "DOCUMENT_METADATA"
+                elif _is_numbered_structural_clause(text, metadata):
+                    # A structurally extracted numbered provision is substantive contract
+                    # text even when a local yes/no validator mistakes appended signature
+                    # lines for metadata. Do not let that secondary model silently drop it.
+                    status = "VALID_CLAUSE"
                 else:
                     status = "VALID_CLAUSE" if is_real_clause(text) else "NO_APPLICABLE_LABEL"
                 validation_records.append(
