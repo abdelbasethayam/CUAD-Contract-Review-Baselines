@@ -108,4 +108,3 @@ def test_malformed_batch_abstains_and_negative_without_evidence_is_not_no_risk(m
         assert cross_by_id[f"X-{i}"]["answer"] == "NO"
     assert all(item["risk_status"] == "INSUFFICIENT_EVIDENCE" for item in document_by_id.values())
 
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

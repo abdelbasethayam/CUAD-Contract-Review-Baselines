@@ -58,4 +58,3 @@ echo "Backend log: $LOG_DIR/cuad-uvicorn.log"
 echo "Frontend log: $LOG_DIR/cuad-frontend-5173.log"
 echo "Open the APP_URL above in the server browser."
 
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

@@ -234,4 +234,3 @@ def run_deterministic_cross_checks(clauses: list[dict[str, Any]]) -> list[dict[s
 
 __all__ = ["run_deterministic_cross_checks"]
 
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
