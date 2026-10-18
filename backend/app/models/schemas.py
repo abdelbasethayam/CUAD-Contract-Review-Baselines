@@ -1,8 +1,7 @@
-from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class RiskFinding(BaseModel):
@@ -145,6 +144,13 @@ class ClauseResult(BaseModel):
     risk_severity_signal: float | None = Field(default=None, description="Deprecated.")
     risk_severity_status: str = "DEPRECATED_NOT_USED"
     risk_provenance: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("risk_severity_status", mode="before")
+    @classmethod
+    def normalize_legacy_severity_status(cls, value: Any) -> str:
+        # Older saved runs may contain null even though the API contract requires a string.
+        # Severity is deprecated; preserve a truthful non-probabilistic status for those runs.
+        return value if isinstance(value, str) and value.strip() else "NOT_APPLICABLE"
     why_flagged: str = ""
     evidence: str = ""
 

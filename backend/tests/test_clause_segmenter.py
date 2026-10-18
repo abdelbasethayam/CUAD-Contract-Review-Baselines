@@ -1,10 +1,10 @@
-from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
 
 from app.core.rag.clause_segmenter import (
+    _is_signature,
     _build_nodes,
     _segment_blocks,
     format_diagnostics,
@@ -110,6 +110,16 @@ def test_signature_metadata_is_marked_without_being_classified():
         "docling",
     )
     assert nodes[0].metadata["is_signature_metadata"] is True
+
+
+def test_numbered_final_clause_with_signature_lines_is_not_metadata():
+    text = (
+        "15.Any different interpretation of this Agreement by both Parties is subject to "
+        "final interpretation by Party A. Party A: ZTO Express Co., Ltd. "
+        "Party B: Tonglu Tongze Logistics Ltd. Company seal: /s/ ZTO Express Co., Ltd. "
+        "Company seal: /s/ Tonglu Tongze Logistics Ltd. Date: December 22, 2014"
+    )
+    assert _is_signature(text) is False
 
 
 def test_one_docling_block_splits_same_line_top_level_clauses():

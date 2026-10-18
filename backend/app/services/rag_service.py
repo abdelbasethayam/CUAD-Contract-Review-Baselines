@@ -1,4 +1,3 @@
-"""End-to-end, resumable contract classification + risk analysis service."""
 from __future__ import annotations
 
 import csv
@@ -217,7 +216,7 @@ def _apply_clause_risk_summary(row: dict, findings: list[dict]) -> dict:
         "risk_confidence": None,
         "risk_confidence_status": "UNCALIBRATED",
         "risk_severity_signal": None,
-        "risk_severity_status": "INCOMPLETE" if unresolved else None,
+        "risk_severity_status": "INCOMPLETE" if unresolved else "NOT_APPLICABLE",
         "risk_provenance": {},
         "risk_evidence_clause_index": None,
         "risk_evidence_scope": None,

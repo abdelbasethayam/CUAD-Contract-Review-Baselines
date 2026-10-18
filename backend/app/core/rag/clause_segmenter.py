@@ -1,4 +1,3 @@
-"""Contract-aware segmentation over structured parser blocks."""
 
 from __future__ import annotations
 
@@ -82,8 +81,21 @@ class _ClauseAccumulator:
 
 
 def _is_signature(text: str) -> bool:
-    matches = len(SIGNATURE_RE.findall(text))
-    return matches >= 2 and len(text) < 800
+    """Detect a standalone signature block, never a numbered clause ending in signatures.
+
+    Contract provisions commonly include Party A/Party B and dates after the operative
+    text. Treating two signature-like labels anywhere in a short fragment as metadata
+    silently discarded legitimate final clauses (e.g. clause 15 followed by signatures).
+    """
+    value = str(text or "").strip()
+    if not value or len(value) >= 800:
+        return False
+    # A numbered or explicitly titled provision remains substantive even when its tail
+    # contains the parties' signature lines.
+    if re.match(r"^(?:\d{1,3}\s*[.)]|(?:section|article)\s+\d+)\s*", value, re.IGNORECASE):
+        return False
+    matches = len(SIGNATURE_RE.findall(value))
+    return matches >= 2
 
 
 def _marker_kind(marker: str | None) -> str:
