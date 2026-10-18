@@ -766,6 +766,20 @@ def _build_synthetic_demo_result(fixture_path: Path, fixture_hash: str, analysis
         })
 
     clause_by_id = {int(item["clause_index"]): item for item in clauses}
+    # Playbook risk domains (see backend/data/legal_knowledge/risk_taxonomy.json) so the UI can group findings.
+    demo_domains = {
+        "DEMO-FEE-001": "Financial Risk",
+        "DEMO-LIABILITY-001": "Liability Risk",
+        "DEMO-INDEMNITY-001": "Liability Risk",
+        "DEMO-TERM-001": "Termination Risk",
+        "DEMO-IP-001": "Intellectual Property Risk",
+        "DEMO-ASSIGN-001": "Assignment / Control Risk",
+        "DEMO-ONLINE-001": "Commercial Risk",
+        "DEMO-LAW-001": "Dispute Resolution Risk",
+        "DEMO-EXIT-001": "Termination Risk",
+        "DEMO-X-001": "Liability Risk",
+        "DEMO-DOC-001": "Commercial Risk",
+    }
     def add_finding(clause_index: int, check_id: str, risk_type: str, quote: str, why: str) -> dict[str, Any]:
         if quote not in clause_by_id[clause_index]["clause_text"] or len(quote) < 12:
             raise ValueError(f"Synthetic demo evidence is not an exact source span: {check_id}")
@@ -773,6 +787,7 @@ def _build_synthetic_demo_result(fixture_path: Path, fixture_hash: str, analysis
             "check_id": check_id,
             "scope": "clause",
             "risk_type": risk_type,
+            "risk_domain": demo_domains.get(check_id),
             "question": risk_type,
             "risk_status": "POTENTIAL_RISK",
             "confidence": None,
@@ -828,6 +843,7 @@ def _build_synthetic_demo_result(fixture_path: Path, fixture_hash: str, analysis
         "check_id": "DEMO-X-001",
         "scope": "cross_clause",
         "risk_type": "Liability cap and indemnity interaction",
+        "risk_domain": demo_domains["DEMO-X-001"],
         "risk_status": "POTENTIAL_RISK",
         "clause_ids": [3, 4],
         "why_flagged": "Review how the broad customer indemnity and the different liability caps interact; the fixture does not establish a legal conclusion.",
@@ -843,6 +859,7 @@ def _build_synthetic_demo_result(fixture_path: Path, fixture_hash: str, analysis
         "check_id": "DEMO-DOC-001",
         "scope": "document",
         "risk_type": "Incorporated online terms may override the signed agreement",
+        "risk_domain": demo_domains["DEMO-DOC-001"],
         "risk_status": "POTENTIAL_RISK",
         "clause_ids": [9],
         "why_flagged": "The online terms may be updated and expressly prevail over the Agreement in a conflict.",
