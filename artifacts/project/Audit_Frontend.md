@@ -18,3 +18,18 @@ The frontend build configuration is present and `frontend/dist` exists, but a
 current Vite build was NOT VERIFIED because the environment contained frontend
 dependencies but no Node runtime executable.
 
+## Update: interface redesign
+
+The interface now shows only what a reviewer needs: the contract name, parties
+and governing law; a list of risks, each with a one-line reason and the exact
+quoted wording; and an "Ask this contract" chat. Full clause text opens on
+demand from any quoted clause reference.
+
+- Risks are de-duplicated across clause, cross-clause, document and rule-based
+  sources. Unresolved checks are kept separate and are never presented as safe.
+- Internal status strings, calibration notes, run diagnostics, clause browser
+  and per-file download lists were removed from the main view. The metrics
+  endpoint is unchanged.
+- No severity or probability is displayed, consistent with
+  `data/risk/RISK_SCORE_POLICY.md`.
+- `npm run build` was run successfully with Node 22 / Vite 5.
