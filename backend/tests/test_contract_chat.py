@@ -367,6 +367,11 @@ def test_demo_retrieval_selects_the_expected_sections_for_recording_questions():
         ("Can we determine the governing law from this agreement alone?", 10),
         ("What insurance limits are required?", 7),
         ("What happens to customer data after termination?", 11),
+        # These are the exact suggested-question button labels in ChatPanel.jsx.
+        ("Who can terminate this agreement, and on what notice?", 5),
+        ("How do the two parties' liability caps compare?", 3),
+        ("Which law governs, and where would disputes be heard?", 10),
+        ("What happens to our data when the contract ends?", 11),
     ]
     for question, expected_clause in cases:
         selected = query._select_clauses(clauses, question)
@@ -464,6 +469,95 @@ def test_contract_chat_answers_supported_explicit_clause_question(monkeypatch, t
     data = response.json()
     assert data["insufficient_evidence"] is False
     assert data["citations"][0]["clause_index"] == 3
+
+def test_party_identity_question_uses_verified_metadata_evidence_without_model(monkeypatch, tmp_path):
+    analysis_id = "0123456789abcdef-0123456789abcdef"
+    run_root = tmp_path / analysis_id
+    run_root.mkdir()
+    evidence = 'This Agreement is entered into by Northstar Analytics Ltd. ("Customer") and VendorCo Ltd. ("Supplier").'
+    (run_root / "result.json").write_text(json.dumps({
+        "analysis_id": analysis_id,
+        "contract_metadata": {
+            "parties": ['Northstar Analytics Ltd. ("Customer")', 'VendorCo Ltd. ("Supplier")'],
+            "evidence": {"parties": evidence},
+        },
+        # The opening party block is intentionally absent from the segmented clauses.
+        "clauses": [
+            {"clause_index": 1, "heading": "Term", "clause_text": "The initial term is one year."},
+        ],
+        "contract_risk_assessment": {},
+    }), encoding="utf-8")
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+
+    def model_must_not_be_called(*args, **kwargs):
+        raise AssertionError("A verified party-metadata lookup should not require a model call.")
+
+    monkeypatch.setattr(query, "_call_local_chat", model_must_not_be_called)
+    response = TestClient(app).post("/query/contract", json={
+        "analysis_id": analysis_id,
+        "question": "Who are the parties to this contract?",
+    })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["model"] == "DETERMINISTIC_PARTY_LOOKUP"
+    assert data["insufficient_evidence"] is False
+    assert "Northstar Analytics Ltd." in data["answer"]
+    assert "VendorCo Ltd." in data["answer"]
+    assert data["citations"][0]["source_type"] == "contract_metadata"
+    assert data["citations"][0]["quote"] == evidence
+
+
+def test_simple_clause_question_returns_heading_and_exact_source_without_model(monkeypatch, tmp_path):
+    analysis_id = "0123456789abcdef-0123456789abcdef"
+    run_root = tmp_path / analysis_id
+    run_root.mkdir()
+    source = (
+        'This Agreement is entered into by Northstar Analytics Ltd. ("Customer") and VendorCo Ltd. ("Supplier"). '
+        "The initial term is one year and automatically renews for successive one-year periods unless either party "
+        "gives written notice at least 120 days before the end of the then-current term."
+    )
+    (run_root / "result.json").write_text(json.dumps({
+        "analysis_id": analysis_id,
+        "clauses": [{
+            "clause_index": 1,
+            "heading": "1. PARTIES AND TERM",
+            "clause_text": source,
+        }],
+        "contract_risk_assessment": {},
+    }), encoding="utf-8")
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+
+    def model_must_not_be_called(*args, **kwargs):
+        raise AssertionError("A direct clause lookup should not depend on model citation formatting.")
+
+    monkeypatch.setattr(query, "_call_local_chat", model_must_not_be_called)
+    response = TestClient(app).post("/query/contract", json={
+        "analysis_id": analysis_id,
+        "question": "What is clause 1 about?",
+    })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["model"] == "DETERMINISTIC_CLAUSE_LOOKUP"
+    assert data["insufficient_evidence"] is False
+    assert "identifies the contracting parties" in data["answer"]
+    assert data["citations"][0]["clause_index"] == 1
+    assert data["citations"][0]["quote"] == source
+
+
+def test_citation_verification_accepts_typographic_variants_but_returns_exact_source():
+    source = "Supplier’s aggregate liability shall not exceed “fees paid” during the Term."
+    proposed_quote = """Supplier's aggregate liability shall not exceed "fees paid" during the Term."""
+    citations = query._verified_citations(
+        [{"clause_index": 3, "quote": proposed_quote, "reason": "Liability cap."}],
+        {3: source},
+    )
+    assert len(citations) == 1
+    assert citations[0]["quote"] == source
+    assert query._has_unverified_citation(
+        [{"clause_index": 3, "quote": proposed_quote, "reason": "Liability cap."}],
+        {3: source},
+    ) is False
+
 
 def test_chatbot_semantic_evaluator_checks_all_required_concepts_and_clause_citations():
     spec = {

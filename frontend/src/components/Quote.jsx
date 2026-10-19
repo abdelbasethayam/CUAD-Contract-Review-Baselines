@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 const LIMIT = 300;
 
-export default function Quote({ children, cite, onCite }) {
+export default function Quote({ children, cite, label, onCite }) {
   const text = String(children || "");
   const [open, setOpen] = useState(false);
   const long = text.length > LIMIT;
@@ -16,6 +16,7 @@ export default function Quote({ children, cite, onCite }) {
             ? <button type="button" className="link" onClick={() => onCite(cite)}>Clause {cite}</button>
             : <span>Clause {cite}</span>
         )}
+        {cite == null && label && <span>{label}</span>}
         {long && <button type="button" className="link" onClick={() => setOpen((value) => !value)}>{open ? "Show less" : "Show full wording"}</button>}
       </footer>
     </blockquote>

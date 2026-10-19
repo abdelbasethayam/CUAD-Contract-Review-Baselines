@@ -15,7 +15,12 @@ function Sources({ citations, onOpenClause }) {
     <details className="sources" open={citations.length <= 2}>
       <summary>{plural(citations.length, "passage")} from the contract</summary>
       {citations.map((citation, index) => (
-        <Quote key={String(citation.clause_index) + index} cite={citation.clause_index} onCite={onOpenClause}>
+        <Quote
+          key={String(citation.source_type || "clause") + String(citation.field || citation.clause_index) + index}
+          cite={citation.clause_index}
+          label={citation.source_label}
+          onCite={citation.clause_index != null ? onOpenClause : undefined}
+        >
           {citation.quote}
         </Quote>
       ))}
