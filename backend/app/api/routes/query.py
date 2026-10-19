@@ -12,6 +12,7 @@ import io
 import json
 import re
 import shutil
+import unicodedata
 from pathlib import Path
 from typing import Any, Literal
 
@@ -116,13 +117,19 @@ _CONCEPT_EXPANSIONS: dict[str, set[str]] = {
     r"\bdata\b|\bprivacy\b|\bsecurity\b|\bpersonal information\b": {
         "data", "privacy", "security", "personal", "information", "export", "access", "confidential", "share", "sharing", "disclose", "disclosure", "retain", "retention", "delete", "deletion"
     },
+    r"\bpart(?:y|ies)\b|\bcounterpart(?:y|ies)\b|\bsignator(?:y|ies)\b": {
+        "party", "parties", "customer", "supplier", "vendor", "buyer", "seller", "counterparty", "signatory", "entered", "between"
+    },
+    r"\bgoverning law\b|\blaw\s+governs?\b|\bjurisdiction\b|\bforum\b|\bdisput(?:e|es)\b": {
+        "governing", "law", "jurisdiction", "forum", "dispute", "disputes", "court", "venue", "arbitration", "order", "applicable", "procedure"
+    },
     r"\bobligation|\bdut(?:y|ies)\b|\bmust\b|\bshall\b": {
         "obligation", "obligations", "duty", "duties", "shall", "must", "provide", "maintain", "pay", "deliver", "notice"
     },
 }
 _RISK_INTENT = re.compile(r"\b(risk|risks|exposure|red flags?|concerns?|issues?|findings?|flagged|triggered|evidence|unfavo[u]?rable|one[- ]sided|imbalanc(?:e|ed)|problematic)\b", re.I)
 _EVIDENCE_GAP_INTENT = re.compile(r"\b(insufficient evidence|more evidence|need(?:s)? more evidence|evidence gap|unresolved|uncertain|uncertainty)\b", re.I)
-_OVERVIEW_INTENT = re.compile(r"\b(summar(?:y|ize|ise)|overview|key points?|main obligations|overall review|what(?:'s| is) this contract about)\b", re.I)
+_OVERVIEW_INTENT = re.compile(r"\b(summar(?:y|ize|ise)|overview|key points?|main obligations|overall review|what(?:'s| is) (?:this|the) (?:contract|agreement) about)\b", re.I)
 _FOCUS_TERMS: list[tuple[str, set[str], int]] = [
     (r"\bdata\b|\bprivacy\b|\bpersonal information\b|\bexport\b|\bretention\b|\bsharing\b|\bdisclos(?:e|ure)\b", {
         "data", "privacy", "personal", "information", "export", "retention", "retain", "delete", "deletion", "access", "backup", "share", "sharing", "disclose", "disclosure"
@@ -147,6 +154,255 @@ _FOCUS_TERMS: list[tuple[str, set[str], int]] = [
     }, 8),
 ]
 _META_HELP_INTENT = re.compile(r"\s*(?:hi|hello|hey|thanks|thank you|help|what can you do(?: with (?:this )?contract)?|what questions can i ask|how do i use (?:this )?assistant)[?.! ]*\s*", re.I)
+_PARTY_IDENTITY_INTENT = re.compile(
+    r"\b(?:who\s+(?:are|is)\s+(?:the\s+)?(?:contracting\s+)?parties|"
+    r"(?:what|who)\s+are\s+(?:the\s+)?(?:contracting\s+)?parties|"
+    r"(?:identify|name|list)\s+(?:the\s+)?(?:contracting\s+)?parties|"
+    r"parties\s+to\s+(?:this|the)\s+(?:contract|agreement)|"
+    r"who\s+(?:is|are)\s+(?:the\s+)?(?:customer|supplier|vendor|buyer|seller|counterparty)|"
+    r"(?:signatories|counterparties)\s+to\s+(?:this|the)\s+(?:contract|agreement))\b",
+    re.I,
+)
+_CLAUSE_REFERENCE = re.compile(r"\b(?:clauses?|sections?|paragraphs?|provisions?)\s+(\d{1,4})\b", re.I)
+_CITATION_TRANSLATION = str.maketrans({
+    "\u2018": "'", "\u2019": "'", "\u02bc": "'",
+    "\u201c": '"', "\u201d": '"',
+    "\u2010": "-", "\u2011": "-", "\u2012": "-",
+    "\u2013": "-", "\u2014": "-", "\u2212": "-",
+})
+
+
+def _normalized_text_with_offsets(value: str) -> tuple[str, list[int], list[int]]:
+    """Normalize typographic variants while retaining offsets into the source."""
+    characters: list[str] = []
+    starts: list[int] = []
+    ends: list[int] = []
+    for offset, original in enumerate(str(value or "")):
+        normalized = unicodedata.normalize("NFKC", original).casefold().translate(_CITATION_TRANSLATION)
+        for character in normalized:
+            if character.isspace():
+                if not characters:
+                    continue
+                if characters[-1] == " ":
+                    ends[-1] = offset + 1
+                    continue
+                character = " "
+            characters.append(character)
+            starts.append(offset)
+            ends.append(offset + 1)
+    while characters and characters[-1] == " ":
+        characters.pop()
+        starts.pop()
+        ends.pop()
+    return "".join(characters), starts, ends
+
+
+def _find_source_quote(source: str, proposed_quote: str) -> str | None:
+    """Verify a quote against source text, tolerating only Unicode/punctuation/spacing variants."""
+    source_normalized, starts, ends = _normalized_text_with_offsets(source)
+    quote_normalized, _, _ = _normalized_text_with_offsets(proposed_quote)
+    if len(quote_normalized) < 12:
+        return None
+    position = source_normalized.find(quote_normalized)
+    if position < 0:
+        return None
+    start = starts[position]
+    end = ends[position + len(quote_normalized) - 1]
+    exact_source_quote = str(source or "")[start:end].strip()
+    return exact_source_quote if len(exact_source_quote) >= 12 else None
+
+
+def _metadata_evidence_sources(result: dict[str, Any]) -> dict[str, list[str]]:
+    """Return only extractor-retained source passages that can support metadata citations."""
+    metadata = result.get("contract_metadata") or {}
+    evidence = metadata.get("evidence") if isinstance(metadata, dict) else {}
+    if not isinstance(evidence, dict):
+        return {}
+    sources: dict[str, list[str]] = {}
+    for field, raw in evidence.items():
+        values = [raw] if isinstance(raw, str) else raw if isinstance(raw, list) else []
+        verified_values = []
+        for value in values:
+            if not isinstance(value, str) or len(_normalized_text_with_offsets(value)[0]) < 12:
+                continue
+            if value.strip() not in verified_values:
+                verified_values.append(value.strip())
+        if verified_values:
+            sources[str(field)] = verified_values
+    return sources
+
+
+def _simple_clause_lookup_number(question: str) -> int | None:
+    matches = list(_CLAUSE_REFERENCE.finditer(question))
+    if len(matches) != 1:
+        return None
+    if not re.search(
+        r"\b(?:what|explain|summari[sz]e|describe|tell|about|meaning|purpose|cover|say|overview|summary)\b",
+        question,
+        re.I,
+    ):
+        return None
+    neutral = _STOP | {
+        "say", "says", "mean", "means", "cover", "covers", "describe", "describes",
+        "purpose", "overview", "meaning", "summarise", "summarize", "summary",
+    }
+    terms = {term.lower() for term in _WORDS.findall(question)} - neutral
+    terms.discard(matches[0].group(1))
+    if terms:
+        return None
+    return int(matches[0].group(1))
+
+
+def _clause_topic_summary(heading: str) -> str:
+    clean = re.sub(r"^\s*(?:(?:clause|section)\s+)?\d+(?:\.\d+)*[\s:.)-]*", "", heading, flags=re.I).strip(" .:-")
+    lowered = clean.casefold()
+    if "part" in lowered and ("term" in lowered or "renew" in lowered):
+        return "identifies the contracting parties and sets the agreement's term and renewal conditions"
+    if "termination" in lowered:
+        return "sets out when and under what conditions the parties may end the agreement"
+    if "liability" in lowered:
+        return "sets liability limits and any stated exceptions"
+    if "indemn" in lowered:
+        return "describes the parties' indemnification obligations"
+    if "payment" in lowered or "fee" in lowered or "price" in lowered:
+        return "covers fees, payment, or related financial commitments"
+    if "governing law" in lowered or ("law" in lowered and "dispute" in lowered):
+        return "identifies the governing law and dispute procedure"
+    if "intellectual property" in lowered or "license" in lowered or "licence" in lowered:
+        return "addresses intellectual-property ownership or usage rights"
+    if "data" in lowered or "privacy" in lowered:
+        return "addresses data handling or privacy obligations"
+    return f"covers the topic named in the heading: {clean or heading}"
+
+
+def _direct_party_answer(result: dict[str, Any], analysis_id: str) -> dict[str, Any] | None:
+    metadata = result.get("contract_metadata") or {}
+    raw_parties = metadata.get("parties") if isinstance(metadata, dict) else []
+    parties = [str(value).strip() for value in raw_parties if isinstance(value, str) and value.strip()] if isinstance(raw_parties, list) else []
+    if not parties:
+        return None
+
+    metadata_sources = _metadata_evidence_sources(result)
+    clause_texts: dict[int, str] = {}
+    for clause in result.get("clauses") or []:
+        if not isinstance(clause, dict):
+            continue
+        try:
+            index = int(clause.get("clause_index"))
+        except (TypeError, ValueError):
+            continue
+        clause_texts[index] = str(clause.get("clause_text") or "")
+
+    proposed_citations: list[dict[str, Any]] = []
+    for evidence_quote in metadata_sources.get("parties", []):
+        matching_clause = next(
+            (
+                (index, _find_source_quote(source, evidence_quote))
+                for index, source in clause_texts.items()
+                if _find_source_quote(source, evidence_quote)
+            ),
+            None,
+        )
+        if matching_clause and matching_clause[1]:
+            proposed_citations.append({
+                "clause_index": matching_clause[0],
+                "quote": matching_clause[1],
+                "reason": "Exact contract wording identifying the parties.",
+            })
+        else:
+            proposed_citations.append({
+                "source_type": "contract_metadata",
+                "source_label": "Extracted party metadata",
+                "field": "parties",
+                "quote": evidence_quote,
+                "reason": "Exact source passage retained by the deterministic party extractor.",
+            })
+
+    if not proposed_citations:
+        for party in parties:
+            for index, source in clause_texts.items():
+                if party.casefold() in source.casefold() and len(source.strip()) >= 12:
+                    proposed_citations.append({
+                        "clause_index": index,
+                        "quote": source.strip()[:650],
+                        "reason": "Contract clause containing the extracted party name.",
+                    })
+                    break
+
+    verified = _verified_citations(proposed_citations, clause_texts, metadata_sources)
+    if not verified:
+        return None
+    if metadata_sources.get("parties") and len(verified) < len(metadata_sources["parties"]):
+        return None
+
+    return {
+        "analysis_id": analysis_id,
+        "answer": "The extracted contract metadata identifies these parties: " + "; ".join(parties) + ".",
+        "insufficient_evidence": False,
+        "citations": verified[:4],
+        "follow_up_questions": [
+            "What obligations does each party have?",
+            "What termination rights does each party have?",
+        ],
+        "model": "DETERMINISTIC_PARTY_LOOKUP",
+        "evidence_policy": "Party names are taken from stored metadata and supported by source passages retained during extraction.",
+        "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
+    }
+
+
+def _direct_clause_answer(result: dict[str, Any], analysis_id: str, question: str) -> dict[str, Any] | None:
+    clause_number = _simple_clause_lookup_number(question)
+    if clause_number is None:
+        return None
+    clause = next(
+        (
+            item for item in result.get("clauses") or []
+            if isinstance(item, dict) and str(item.get("clause_index", "")) == str(clause_number)
+        ),
+        None,
+    )
+    if clause is None:
+        return {
+            "analysis_id": analysis_id,
+            "answer": f"I couldn't find a stored clause numbered {clause_number} in this analysis. Try the clause number shown in the review.",
+            "insufficient_evidence": True,
+            "citations": [],
+            "follow_up_questions": ["Which clause number would you like me to inspect?", "Would you like a summary of the whole agreement?"],
+            "model": "DETERMINISTIC_CLAUSE_LOOKUP",
+            "evidence_policy": "No matching clause was present in the stored analysis.",
+            "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
+        }
+    source = str(clause.get("clause_text") or "").strip()
+    if len(source) < 12:
+        return None
+    heading = str(clause.get("heading") or clause.get("section_path") or clause.get("predicted_label") or clause.get("clause_type") or "").strip()
+    display_heading = re.sub(r"^\s*(?:(?:clause|section)\s+)?\d+(?:\.\d+)*[\s:.)-]*", "", heading, flags=re.I).strip(" .:-")
+    citation = {
+        "clause_index": clause_number,
+        "quote": source[:650],
+        "reason": f"Exact wording stored for clause {clause_number}.",
+    }
+    verified = _verified_citations([citation], {clause_number: source})
+    if not verified:
+        return None
+    if display_heading:
+        summary = _clause_topic_summary(display_heading)
+        answer = f"Clause {clause_number} is titled '{display_heading}'. It {summary}. The exact wording is quoted below."
+    else:
+        answer = f"The saved analysis has no reliable heading for Clause {clause_number}, so the exact stored wording is quoted below."
+    return {
+        "analysis_id": analysis_id,
+        "answer": answer,
+        "insufficient_evidence": False,
+        "citations": verified,
+        "follow_up_questions": [
+            "Would you like me to explain a specific obligation in this clause?",
+            "Would you like me to compare it with another clause?",
+        ],
+        "model": "DETERMINISTIC_CLAUSE_LOOKUP",
+        "evidence_policy": "The requested clause is identified by its stored clause index and quoted directly from the uploaded-contract analysis.",
+        "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
+    }
 
 
 def _question_terms(question: str) -> set[str]:
@@ -324,12 +580,14 @@ def _context_for(
             break
 
     metadata = result.get("contract_metadata") or {}
+    metadata_evidence = metadata.get("evidence") if isinstance(metadata, dict) else {}
     payload = {
         "filename": result.get("filename"),
         "metadata": {
             key: metadata.get(key)
             for key in ("name", "parties", "agreement_date", "effective_date", "expiration_date", "governing_law")
         },
+        "metadata_evidence": metadata_evidence if isinstance(metadata_evidence, dict) else {},
         "contract_assessment": {
             key: assessment.get(key)
             for key in ("status", "reason", "overall_risk", "overall_score", "severity_status", "confidence_status")
@@ -346,35 +604,70 @@ def _context_for(
     return payload, source_texts
 
 
-def _verified_citations(raw: Any, source_texts: dict[int, str]) -> list[dict[str, Any]]:
+def _verified_citations(
+    raw: Any,
+    source_texts: dict[int, str],
+    metadata_sources: dict[str, list[str]] | None = None,
+) -> list[dict[str, Any]]:
     if not isinstance(raw, list):
         return []
-    verified = []
+    metadata_sources = metadata_sources or {}
+    verified: list[dict[str, Any]] = []
     seen = set()
     for item in raw[:8]:
         if not isinstance(item, dict):
+            continue
+        source_type = str(item.get("source_type") or "clause").strip().lower()
+        proposed_quote = str(item.get("quote") or "")
+        if source_type == "contract_metadata":
+            field = str(item.get("field") or "")
+            exact_quote = next(
+                (
+                    matched for source in metadata_sources.get(field, [])
+                    if (matched := _find_source_quote(source, proposed_quote)) is not None
+                ),
+                None,
+            )
+            if exact_quote is None:
+                continue
+            identity = ("contract_metadata", field, exact_quote)
+            if identity in seen:
+                continue
+            seen.add(identity)
+            verified.append({
+                "source_type": "contract_metadata",
+                "source_label": str(item.get("source_label") or "Contract metadata")[:100],
+                "field": field,
+                "quote": exact_quote[:650],
+                "reason": str(item.get("reason") or "")[:350],
+            })
+            continue
+        if source_type != "clause":
             continue
         try:
             index = int(item.get("clause_index"))
         except (TypeError, ValueError):
             continue
-        quote = re.sub(r"\s+", " ", str(item.get("quote") or "")).strip()
-        original = re.sub(r"\s+", " ", source_texts.get(index, "")).strip()
-        if not quote or len(quote) < 12 or quote not in original:
+        exact_quote = _find_source_quote(source_texts.get(index, ""), proposed_quote)
+        if exact_quote is None:
             continue
-        identity = (index, quote)
+        identity = ("clause", index, exact_quote)
         if identity in seen:
             continue
         seen.add(identity)
         verified.append({
             "clause_index": index,
-            "quote": quote[:650],
+            "quote": exact_quote[:650],
             "reason": str(item.get("reason") or "")[:350],
         })
     return verified
 
 
-def _has_unverified_citation(raw: Any, source_texts: dict[int, str]) -> bool:
+def _has_unverified_citation(
+    raw: Any,
+    source_texts: dict[int, str],
+    metadata_sources: dict[str, list[str]] | None = None,
+) -> bool:
     """Return True if the model supplied any malformed or unverifiable citation."""
     if raw is None:
         return False
@@ -382,16 +675,24 @@ def _has_unverified_citation(raw: Any, source_texts: dict[int, str]) -> bool:
         return True
     if len(raw) > 8:
         return True
+    metadata_sources = metadata_sources or {}
     for item in raw:
         if not isinstance(item, dict):
+            return True
+        source_type = str(item.get("source_type") or "clause").strip().lower()
+        proposed_quote = str(item.get("quote") or "")
+        if source_type == "contract_metadata":
+            field = str(item.get("field") or "")
+            if not any(_find_source_quote(source, proposed_quote) is not None for source in metadata_sources.get(field, [])):
+                return True
+            continue
+        if source_type != "clause":
             return True
         try:
             index = int(item.get("clause_index"))
         except (TypeError, ValueError):
             return True
-        quote = re.sub(r"\s+", " ", str(item.get("quote") or "")).strip()
-        original = re.sub(r"\s+", " ", source_texts.get(index, "")).strip()
-        if len(quote) < 12 or quote not in original:
+        if _find_source_quote(source_texts.get(index, ""), proposed_quote) is None:
             return True
     return False
 
@@ -451,6 +752,14 @@ def query_contract(request: ContractQuestion) -> dict[str, Any]:
             "evidence_policy": "Product guidance only; no contract-specific interpretation was made.",
             "disclaimer": "AI-assisted contract review, not legal advice. Risk findings are review triggers, not calibrated probabilities.",
         }
+    if _PARTY_IDENTITY_INTENT.search(question):
+        party_answer = _direct_party_answer(result, request.analysis_id)
+        if party_answer is not None:
+            return party_answer
+    clause_answer = _direct_clause_answer(result, request.analysis_id, question)
+    if clause_answer is not None:
+        return clause_answer
+
     history = request.history[-8:]
     retrieval_question = " ".join(
         [turn.content for turn in history if turn.role == "user"][-3:] + [question]
@@ -484,17 +793,26 @@ Prior assistant responses are conversational context, not proof. Do not invent c
 parties, governing law, obligations, or risk findings. Explain text in plain English and distinguish
 the contract's actual words from a cautious interpretation. Do not give a definitive legal opinion.
 If relevant contract evidence is absent or unclear, say so and set insufficient_evidence=true.
-Every material contract-specific claim must cite an exact contiguous quote from a supplied clause.
-Never fabricate a quote. Only cite clause indices in relevant_clauses. If uncertain, abstain rather
-than bluff. A direct playbook rule hit is a review trigger, not a legal conclusion. Risk confidence
-is uncalibrated; the current playbook rules do not estimate legal-risk accuracy.
+Every material contract-specific claim must cite an exact contiguous quote from a supplied clause or
+from the supplied metadata_evidence. Never fabricate a quote. A clause citation must copy the
+actual integer in that clause object's clause_index field; it is NOT the clause's position in the
+array and must never be guessed. Copy the quote from the source wording, not from your paraphrase.
+If uncertain, abstain rather than bluff. A direct playbook rule hit is a review trigger, not a legal
+conclusion. Risk confidence is uncalibrated; the current playbook rules do not estimate legal-risk
+accuracy.
 
 Return only a JSON object:
 {"answer":"plain-language answer","insufficient_evidence":false,
- "citations":[{"clause_index":1,"quote":"exact source quote","reason":"how it supports the answer"}],
+ "citations":[{"source_type":"clause","clause_index":1,"quote":"exact source quote","reason":"how it supports the answer"}],
  "follow_up_questions":["optional useful follow-up"]}
+For metadata-only evidence, use {"source_type":"contract_metadata","field":"parties","quote":"exact metadata_evidence passage","reason":"how it supports the answer"}.
 Use at most 4 citations and 2 follow-up questions. No markdown fences.
 """.strip()
+    system_prompt += (
+        "\n\nAvailable clause_index values for this question (copy exactly): "
+        + ", ".join(str(index) for index in sorted(source_texts))
+        + ". Never cite an index not listed here."
+    )
 
     messages = [{"role": "system", "content": system_prompt}]
     messages.extend({
@@ -549,8 +867,9 @@ Use at most 4 citations and 2 follow-up questions. No markdown fences.
     parsed = extract_json_object(raw_text) or {}
     answer = str(parsed.get("answer") or "").strip()
     raw_citations = parsed.get("citations")
-    citations = _verified_citations(raw_citations, source_texts)
-    citation_integrity_error = _has_unverified_citation(raw_citations, source_texts)
+    metadata_sources = _metadata_evidence_sources(result)
+    citations = _verified_citations(raw_citations, source_texts, metadata_sources)
+    citation_integrity_error = _has_unverified_citation(raw_citations, source_texts, metadata_sources)
     raw_insufficient = parsed.get("insufficient_evidence", False)
     insufficient = (
         raw_insufficient is True
