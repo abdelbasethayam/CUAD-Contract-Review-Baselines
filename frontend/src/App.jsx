@@ -6,7 +6,7 @@ import Intake from "./components/Intake.jsx";
 import Progress from "./components/Progress.jsx";
 import ContractBar from "./components/ContractBar.jsx";
 import RiskReview from "./components/RiskReview.jsx";
-import ClauseList from "./components/ClauseList.jsx";
+import ClauseDialog from "./components/ClauseDialog.jsx";
 import ChatPanel from "./components/ChatPanel.jsx";
 
 class AppErrorBoundary extends Component {
@@ -54,7 +54,7 @@ function ContractReview() {
   const [trace, setTrace] = useState([]);
   const [elapsed, setElapsed] = useState(0);
   const [view, setView] = useState("risks");
-  const [focus, setFocus] = useState(null);
+  const [openClauseId, setOpenClauseId] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState(null);
@@ -140,7 +140,7 @@ function ContractReview() {
     setChatMessages([]);
     setChatError(null);
     setView("risks");
-    setFocus(null);
+    setOpenClauseId(null);
   }, []);
 
   async function loadSample() {
@@ -156,7 +156,7 @@ function ContractReview() {
       if (!response.ok) throw new Error(data.detail || "The sample contract is unavailable right now.");
       setResult(data);
       setView("risks");
-      setFocus(null);
+      setOpenClauseId(null);
     } catch (err) {
       setError(err.message || "Could not open the sample contract.");
     } finally {
@@ -205,7 +205,7 @@ function ContractReview() {
     setChatMessages([]);
     setChatError(null);
     setView("risks");
-    setFocus(null);
+    setOpenClauseId(null);
     setElapsed(0);
     const controller = new AbortController();
     abortRef.current = controller;
@@ -263,20 +263,13 @@ function ContractReview() {
   const review = useMemo(() => buildReview(result), [result]);
   const partial = Boolean(result?.partial);
   const chatDisabled = partial || loading || !result?.analysis_id;
-  const activeView = wide && view === "ask" ? "risks" : view;
+  const activeView = wide || view !== "ask" ? "risks" : "ask";
   const contractName = result?.contract_metadata?.name || result?.filename;
 
-  function openClause(clauseIndex) {
-    setFocus({ id: clauseIndex, token: Date.now() });
-    setView("clauses");
-    window.setTimeout(() => setFocus((current) => (current && current.id === clauseIndex ? null : current)), 4500);
-  }
+  const openClause = (clauseIndex) => setOpenClauseId(clauseIndex);
+  const openedClause = clauses.find((item) => String(item.clause_index) === String(openClauseId)) || null;
 
-  const tabs = [
-    ["risks", "Terms to review", review.total],
-    ["clauses", "Clauses", clauses.length],
-    ...(wide ? [] : [["ask", "Ask", null]]),
-  ];
+  const tabs = wide ? [] : [["risks", "Risks", review.total], ["ask", "Ask", null]];
 
   const chat = (
     <ChatPanel
@@ -313,32 +306,34 @@ function ContractReview() {
         <main className="shell shell--workspace">
           <div className={"workspace" + (wide ? " workspace--split" : "")}>
             <div className="workspace__main">
-              <ContractBar result={result} review={review} clauseCount={clauses.length} />
+              <ContractBar result={result} />
 
               {partial && (
                 <div className="notice notice--live" role="status">
                   <i aria-hidden="true" />
-                  <span><strong>Still analysing.</strong> Categories are ready. Flagged terms and answers will fill in when the checks finish{elapsed ? ` (${elapsed}s)` : ""}.</span>
+                  <span><strong>Still analysing.</strong> Risks and answers appear when the checks finish{elapsed ? ` (${elapsed}s)` : ""}.</span>
                 </div>
               )}
               {error && <div className="notice notice--error" role="alert">{error}</div>}
 
-              <nav className="tabs" aria-label="Sections">
-                {tabs.map(([key, label, count]) => (
-                  <button key={key} type="button" className={"tab" + (activeView === key ? " tab--on" : "")} aria-current={activeView === key ? "page" : undefined} onClick={() => setView(key)}>
-                    {label}{count != null && <span>{count}</span>}
-                  </button>
-                ))}
-              </nav>
+              {tabs.length > 0 && (
+                <nav className="tabs" aria-label="Sections">
+                  {tabs.map(([key, label, count]) => (
+                    <button key={key} type="button" className={"tab" + (activeView === key ? " tab--on" : "")} aria-current={activeView === key ? "page" : undefined} onClick={() => setView(key)}>
+                      {label}{count != null && <span>{count}</span>}
+                    </button>
+                  ))}
+                </nav>
+              )}
 
-              {activeView === "risks" && <RiskReview review={review} clauses={clauses} onOpenClause={openClause} partial={partial} />}
-              {activeView === "clauses" && <ClauseList clauses={clauses} perClause={review.perClause} focus={focus} onShowRisks={() => setView("risks")} />}
+              {activeView === "risks" && <RiskReview review={review} onOpenClause={openClause} partial={partial} />}
               {activeView === "ask" && chat}
             </div>
             {wide && <aside className="workspace__rail">{chat}</aside>}
           </div>
         </main>
       )}
+      <ClauseDialog clause={openedClause} onClose={() => setOpenClauseId(null)} />
     </div>
   );
 }

@@ -20,16 +20,16 @@ dependencies but no Node runtime executable.
 
 ## Update: interface redesign
 
-The interface was rebuilt around a document-first layout: a landing page with a
-single upload action, a results workspace with "Terms to review" and "Clauses"
-views, and a persistent "Ask this contract" panel.
+The interface now shows only what a reviewer needs: the contract name, parties
+and governing law; a list of risks, each with a one-line reason and the exact
+quoted wording; and an "Ask this contract" chat. Full clause text opens on
+demand from any quoted clause reference.
 
-- Findings are grouped by risk domain, de-duplicated across clause, cross-clause,
-  document and rule-based sources, and each shows the exact quoted wording.
-- Unresolved checks are kept separate and are never presented as safe.
-- Internal status strings, calibration notes, run diagnostics and per-file
-  download lists were removed from the main view. The metrics endpoint is unchanged.
+- Risks are de-duplicated across clause, cross-clause, document and rule-based
+  sources. Unresolved checks are kept separate and are never presented as safe.
+- Internal status strings, calibration notes, run diagnostics, clause browser
+  and per-file download lists were removed from the main view. The metrics
+  endpoint is unchanged.
 - No severity or probability is displayed, consistent with
   `data/risk/RISK_SCORE_POLICY.md`.
 - `npm run build` was run successfully with Node 22 / Vite 5.
-
