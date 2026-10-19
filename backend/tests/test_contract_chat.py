@@ -546,7 +546,7 @@ def test_simple_clause_question_returns_heading_and_exact_source_without_model(m
 
 def test_citation_verification_accepts_typographic_variants_but_returns_exact_source():
     source = "Supplier’s aggregate liability shall not exceed “fees paid” during the Term."
-    proposed_quote = "Supplier's aggregate liability shall not exceed \\"fees paid\\" during the Term."
+    proposed_quote = """Supplier's aggregate liability shall not exceed "fees paid" during the Term."""
     citations = query._verified_citations(
         [{"clause_index": 3, "quote": proposed_quote, "reason": "Liability cap."}],
         {3: source},
