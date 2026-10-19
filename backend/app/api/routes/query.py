@@ -243,8 +243,9 @@ def _simple_clause_lookup_number(question: str) -> int | None:
     ):
         return None
     neutral = _STOP | {
+        "clause", "clauses", "section", "sections", "paragraph", "paragraphs", "provision", "provisions",
         "say", "says", "mean", "means", "cover", "covers", "describe", "describes",
-        "purpose", "overview", "meaning", "summarise", "summarize", "summary",
+        "purpose", "overview", "meaning", "summarise", "summarize", "summary", "simple",
     }
     terms = {term.lower() for term in _WORDS.findall(question)} - neutral
     terms.discard(matches[0].group(1))
@@ -375,7 +376,8 @@ def _direct_clause_answer(result: dict[str, Any], analysis_id: str, question: st
     source = str(clause.get("clause_text") or "").strip()
     if len(source) < 12:
         return None
-    heading = str(clause.get("heading") or clause.get("section_path") or clause.get("predicted_label") or clause.get("clause_type") or "").strip()
+    heading = str(clause.get("heading") or clause.get("section_path") or "").strip()
+    classification_label = str(clause.get("predicted_label") or clause.get("clause_type") or "").strip()
     display_heading = re.sub(r"^\s*(?:(?:clause|section)\s+)?\d+(?:\.\d+)*[\s:.)-]*", "", heading, flags=re.I).strip(" .:-")
     citation = {
         "clause_index": clause_number,
@@ -388,6 +390,8 @@ def _direct_clause_answer(result: dict[str, Any], analysis_id: str, question: st
     if display_heading:
         summary = _clause_topic_summary(display_heading)
         answer = f"Clause {clause_number} is titled '{display_heading}'. It {summary}. The exact wording is quoted below."
+    elif classification_label:
+        answer = f"The classifier labels Clause {clause_number} as '{classification_label}', but the label is only a hint. The exact stored contract wording is quoted below."
     else:
         answer = f"The saved analysis has no reliable heading for Clause {clause_number}, so the exact stored wording is quoted below."
     return {
