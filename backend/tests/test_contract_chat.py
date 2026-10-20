@@ -102,8 +102,13 @@ def test_contract_chat_rejects_unverifiable_quote(monkeypatch, tmp_path):
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["insufficient_evidence"] is True
-    assert data["citations"] == []
+    assert data["model"] == "SOURCE_EXCERPTS"
     assert "couldn't verify" in data["answer"]
+    # The fabricated claim is never shown, but the contract's own wording is.
+    assert "unlimited" not in data["answer"].lower()
+    assert "fabricated" not in json.dumps(data["citations"])
+    assert data["citations"] and data["citations"][0]["clause_index"] == 4
+    assert data["citations"][0]["quote"] in "The Supplier aggregate liability is capped at the fees paid during the Term."
 
 
 def test_metrics_endpoint_never_returns_annotation_queue_metrics(monkeypatch, tmp_path):
@@ -198,8 +203,10 @@ def test_contract_chat_fails_closed_when_contract_question_has_no_verified_citat
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["insufficient_evidence"] is True
-    assert data["citations"] == []
-    assert "couldn't verify a supporting quote" in data["answer"]
+    assert data["model"] == "SOURCE_EXCERPTS"
+    assert "30-day" not in data["answer"]
+    assert "couldn't verify" in data["answer"]
+    assert data["citations"][0]["quote"] == "Supplier may terminate with notice."
 
 
 def test_contract_chat_returns_verified_extractive_fallback_when_local_model_is_unavailable(monkeypatch, tmp_path):
@@ -321,7 +328,8 @@ def test_contract_chat_abstains_if_any_citation_is_unverifiable(monkeypatch, tmp
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["insufficient_evidence"] is True
-    assert "one or more" in data["answer"]
+    assert "couldn't verify" in data["answer"]
+    assert "$10 million" not in data["answer"]
     assert len(data["citations"]) == 1
     assert data["citations"][0]["quote"] == source
 
@@ -498,3 +506,105 @@ def test_chatbot_semantic_evaluator_checks_all_required_concepts_and_clause_cita
     result = _evaluate_question(spec, incomplete_answer, clauses)
     assert result["checks"]["answer_contains_all_required_concepts"] is False
     assert result["passed"] is False
+
+
+
+def _store(tmp_path, clauses, metadata=None):
+    analysis_id = "0123456789abcdef-0123456789abcdef"
+    run_root = tmp_path / analysis_id
+    run_root.mkdir()
+    (run_root / "result.json").write_text(json.dumps({
+        "analysis_id": analysis_id,
+        "filename": "c.txt",
+        "contract_metadata": metadata or {},
+        "clauses": clauses,
+        "contract_risk_assessment": {},
+    }), encoding="utf-8")
+    return analysis_id
+
+
+def test_resolve_quote_tolerates_typography_case_spacing_and_gaps_but_not_new_words():
+    source = 'Customer shall pay the \u201cFees\u201d within thirty days.\nSupplier may suspend service for non-payment.'
+    assert query._resolve_quote('Customer shall pay the "Fees" within thirty days.', source) == source.split("\n")[0]
+    assert query._resolve_quote("customer  shall pay the fees within thirty days", source)
+    assert query._resolve_quote("Customer shall pay ... suspend service for non-payment", source)
+    assert query._resolve_quote("Customer shall pay the Fees within sixty days.", source) is None
+    assert query._resolve_quote("too short", source) is None
+
+
+def test_chat_accepts_quote_with_curly_quotes_and_different_case(monkeypatch, tmp_path):
+    source = 'The \u201cSupplier\u201d may terminate this Agreement immediately for any breach.'
+    analysis_id = _store(tmp_path, [{"clause_index": 5, "heading": "Termination", "predicted_label": "Termination", "clause_text": source}])
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(query, "_call_local_chat", lambda *a, **k: json.dumps({
+        "answer": "The supplier can terminate immediately for any breach.",
+        "insufficient_evidence": False,
+        "citations": [{"clause_index": 5, "quote": 'the "supplier" may terminate this agreement immediately for any breach', "reason": "Termination right."}],
+        "follow_up_questions": [],
+    }))
+    data = TestClient(app).post("/query/contract", json={"analysis_id": analysis_id, "question": "Who can terminate?"}).json()
+    assert data["insufficient_evidence"] is False
+    assert data["citations"][0]["quote"] == source[:-1]
+
+
+def test_chat_retries_once_when_first_quotes_do_not_match(monkeypatch, tmp_path):
+    source = "Supplier may terminate this Agreement immediately for any breach."
+    analysis_id = _store(tmp_path, [{"clause_index": 5, "heading": "Termination", "predicted_label": "Termination", "clause_text": source}])
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+    calls = []
+
+    def flaky(messages, *args, **kwargs):
+        calls.append(messages)
+        quote = "Supplier can end the Agreement at once for breach." if len(calls) == 1 else source
+        return json.dumps({
+            "answer": "The supplier can terminate immediately for breach.",
+            "insufficient_evidence": False,
+            "citations": [{"clause_index": 5, "quote": quote, "reason": "Termination right."}],
+            "follow_up_questions": [],
+        })
+
+    monkeypatch.setattr(query, "_call_local_chat", flaky)
+    data = TestClient(app).post("/query/contract", json={"analysis_id": analysis_id, "question": "Who can terminate?"}).json()
+    assert len(calls) == 2
+    assert data["insufficient_evidence"] is False
+    assert data["model"] != "SOURCE_EXCERPTS"
+    assert data["citations"][0]["quote"] == source
+
+
+def test_chat_answers_parties_from_metadata_without_calling_the_model(monkeypatch, tmp_path):
+    analysis_id = _store(
+        tmp_path,
+        [{"clause_index": 1, "heading": "PARTIES AND TERM", "predicted_label": "Contract Term",
+          "clause_text": '1. PARTIES AND TERM\nThis Agreement is entered into by Northstar Analytics Ltd. ("Customer") and VendorCo Ltd. ("Supplier"). The initial term is one year.'}],
+        {"parties": ["Northstar Analytics Ltd. (Customer)", "VendorCo Ltd. (Supplier)"]},
+    )
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+
+    def model_must_not_be_called(*args, **kwargs):
+        raise AssertionError("Parties come from metadata.")
+
+    monkeypatch.setattr(query, "_call_local_chat", model_must_not_be_called)
+    client = TestClient(app)
+    for question in ("What are the parties of this contract?", "Who are the parties?", "who is this agreement between"):
+        data = client.post("/query/contract", json={"analysis_id": analysis_id, "question": question}).json()
+        assert data["insufficient_evidence"] is False, question
+        assert "Northstar Analytics Ltd. (Customer) and VendorCo Ltd. (Supplier)" in data["answer"]
+        assert data["citations"][0]["clause_index"] == 1
+        assert "Northstar Analytics Ltd." in data["citations"][0]["quote"]
+    # A question about the parties' obligations is not a "who are the parties" question.
+    assert query._parties_answer({"contract_metadata": {"parties": ["A Ltd."]}, "clauses": []}, "x", "What are the parties' obligations?") is None
+
+
+def test_chat_explains_named_clause_even_when_model_quotes_the_heading(monkeypatch, tmp_path):
+    body = "The initial term is one year and renews automatically unless either party gives 120 days notice."
+    analysis_id = _store(tmp_path, [{"clause_index": 1, "heading": "PARTIES AND TERM", "predicted_label": "Contract Term", "clause_text": "1. PARTIES AND TERM\n" + body}])
+    monkeypatch.setattr(query, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(query, "_call_local_chat", lambda *a, **k: json.dumps({
+        "answer": "Clause 1 sets a one year term that renews automatically.",
+        "insufficient_evidence": False,
+        "citations": [{"clause_index": 1, "quote": "1. parties and term\nthe initial term is one year and renews automatically", "reason": "Term."}],
+        "follow_up_questions": [],
+    }))
+    data = TestClient(app).post("/query/contract", json={"analysis_id": analysis_id, "question": "what is clause 1 about"}).json()
+    assert data["insufficient_evidence"] is False
+    assert data["citations"][0]["clause_index"] == 1

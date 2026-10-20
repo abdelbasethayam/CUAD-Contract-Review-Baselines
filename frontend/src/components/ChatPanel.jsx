@@ -12,7 +12,7 @@ const STARTERS = [
 
 function Sources({ citations, onOpenClause }) {
   return (
-    <details className="sources" open={citations.length <= 2}>
+    <details className="sources" open>
       <summary>{plural(citations.length, "passage")} from the contract</summary>
       {citations.map((citation, index) => (
         <Quote key={String(citation.clause_index) + index} cite={citation.clause_index} onCite={onOpenClause}>
@@ -78,7 +78,8 @@ export default function ChatPanel({ name, messages, loading, error, onAsk, onCle
           ) : (
             <div key={index} className="msg msg--assistant">
               <RichText text={message.answer} />
-              {message.insufficient_evidence && <p className="msg__note">The contract text gives limited support for this answer.</p>}
+              {message.model === "SOURCE_EXCERPTS" && <p className="msg__note">These are the contract's exact words. The assistant's own explanation could not be checked against them, so it is not shown.</p>}
+              {message.insufficient_evidence && message.model !== "SOURCE_EXCERPTS" && message.model !== "EXTRACTIVE_FALLBACK" && <p className="msg__note">The contract text gives limited support for this answer.</p>}
               {message.model === "EXTRACTIVE_FALLBACK" && <p className="msg__note">The language model was unavailable, so this answer only quotes the contract.</p>}
               {message.citations?.length > 0 && <Sources citations={message.citations} onOpenClause={onOpenClause} />}
             </div>

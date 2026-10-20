@@ -12,6 +12,7 @@ import io
 import json
 import re
 import shutil
+import unicodedata
 from pathlib import Path
 from typing import Any, Literal
 
@@ -346,6 +347,71 @@ def _context_for(
     return payload, source_texts
 
 
+_FOLD_TABLE = {
+    ord("\u201c"): '"', ord("\u201d"): '"', ord("\u201e"): '"', ord("\u201f"): '"',
+    ord("\u2018"): "'", ord("\u2019"): "'", ord("\u201a"): "'", ord("\u201b"): "'",
+    ord("\u2013"): "-", ord("\u2014"): "-", ord("\u2212"): "-", ord("\u00a0"): " ",
+}
+
+
+def _fold_with_map(text: str) -> tuple[str, list[int]]:
+    """Fold typography, case and whitespace so harmless differences do not fail a quote.
+
+    Returns the folded text plus, for every folded character, its index in the original.
+    """
+    out: list[str] = []
+    index: list[int] = []
+    previous_space = True
+    for position, char in enumerate(text):
+        for folded in unicodedata.normalize("NFKC", char).translate(_FOLD_TABLE).casefold():
+            if folded in "\"'`":
+                # Quote marks and apostrophes are typography, not wording; models often drop or swap them.
+                continue
+            if folded.isspace():
+                if previous_space:
+                    continue
+                out.append(" ")
+                index.append(position)
+                previous_space = True
+            else:
+                out.append(folded)
+                index.append(position)
+                previous_space = False
+    return "".join(out), index
+
+
+def _resolve_quote(quote: Any, original: str) -> str | None:
+    """Return the exact source wording a model quote points at, or None if it is not in the source.
+
+    Differences in quote marks, dashes, case, spacing and "..." gaps are tolerated. Any words that
+    are not in the source are not: the quote must still be real contract text.
+    """
+    folded_quote, _ = _fold_with_map(str(quote or ""))
+    folded_quote = folded_quote.strip()
+    if not folded_quote:
+        return None
+    folded_source, index = _fold_with_map(original)
+    segments = [segment.strip(" .,;:") for segment in re.split(r"\.{3,}", folded_quote)]
+    segments = [segment for segment in segments if len(segment) >= 8]
+    if not segments or max(len(segment) for segment in segments) < 12:
+        return None
+    pieces: list[str] = []
+    cursor = 0
+    for segment in segments:
+        found = folded_source.find(segment, cursor)
+        if found < 0:
+            return None
+        end = found + len(segment) - 1
+        stop = index[end] + 1
+        # Keep the sentence's closing punctuation when the quote included it and the source has it.
+        if segment is segments[-1]:
+            while stop < len(original) and original[stop] in ".;:" and folded_quote.endswith(original[stop]):
+                stop += 1
+        pieces.append(original[index[found]:stop].strip())
+        cursor = found + len(segment)
+    return " \u2026 ".join(pieces)
+
+
 def _verified_citations(raw: Any, source_texts: dict[int, str]) -> list[dict[str, Any]]:
     if not isinstance(raw, list):
         return []
@@ -358,17 +424,16 @@ def _verified_citations(raw: Any, source_texts: dict[int, str]) -> list[dict[str
             index = int(item.get("clause_index"))
         except (TypeError, ValueError):
             continue
-        quote = re.sub(r"\s+", " ", str(item.get("quote") or "")).strip()
-        original = re.sub(r"\s+", " ", source_texts.get(index, "")).strip()
-        if not quote or len(quote) < 12 or quote not in original:
+        resolved = _resolve_quote(item.get("quote"), source_texts.get(index, ""))
+        if not resolved:
             continue
-        identity = (index, quote)
+        identity = (index, resolved)
         if identity in seen:
             continue
         seen.add(identity)
         verified.append({
             "clause_index": index,
-            "quote": quote[:650],
+            "quote": resolved[:650],
             "reason": str(item.get("reason") or "")[:350],
         })
     return verified
@@ -389,11 +454,109 @@ def _has_unverified_citation(raw: Any, source_texts: dict[int, str]) -> bool:
             index = int(item.get("clause_index"))
         except (TypeError, ValueError):
             return True
-        quote = re.sub(r"\s+", " ", str(item.get("quote") or "")).strip()
-        original = re.sub(r"\s+", " ", source_texts.get(index, "")).strip()
-        if len(quote) < 12 or quote not in original:
+        if _resolve_quote(item.get("quote"), source_texts.get(index, "")) is None:
             return True
     return False
+
+
+_SENTENCE_END = re.compile(
+    r"(?<!\bLtd)(?<!\bInc)(?<!\bCo)(?<!\bCorp)(?<!\bLLC)(?<!\bPLC)(?<!\bLLP)(?<!\bNo)(?<!\bSt)(?<!\bvs)(?<!\bet al)"
+    r"[.;]\s+(?=[A-Z0-9\"\u201c(])|\n+"
+)
+
+
+def _sentence_around(text: str, position: int, limit: int = 420) -> str:
+    """The sentence containing `position`, without splitting on 'Ltd.', 'Inc.' and similar."""
+    start = 0
+    end = len(text)
+    for match in _SENTENCE_END.finditer(text):
+        if match.end() <= position:
+            start = match.end()
+        elif match.start() >= position:
+            end = match.start() + (1 if text[match.start()] in ".;" else 0)
+            break
+    return text[start:end].strip()[:limit].strip()
+
+
+def _excerpt_citations(context: dict[str, Any], source_texts: dict[int, str], limit: int = 3) -> list[dict[str, Any]]:
+    """Exact, verifiable excerpts from the most relevant clauses. No interpretation is attached."""
+    excerpts = []
+    for clause in context.get("relevant_clauses", [])[:limit]:
+        try:
+            index = int(clause.get("clause_index"))
+        except (TypeError, ValueError):
+            continue
+        source = source_texts.get(index, "").strip()
+        lines = source.split("\n")
+        # Many contracts repeat the heading as the first line of the clause body.
+        if len(lines) > 1 and lines[0].strip() == lines[0].strip().upper() and len(lines[0].strip()) < 90:
+            source = "\n".join(lines[1:]).strip()
+        quote = source[:420].strip()
+        if len(source) > 420:
+            cut = max(quote.rfind(". "), quote.rfind("; "))
+            if cut > 120:
+                quote = quote[:cut + 1].strip()
+        if len(quote) >= 12:
+            excerpts.append({
+                "clause_index": index,
+                "quote": quote,
+                "reason": "Relevant wording from the contract.",
+            })
+    return excerpts
+
+
+_PARTIES_INTENT = re.compile(
+    r"(?:\b(?:who|which|what)\b[^?.]{0,20}\b(?:are|is)\b[^?.]{0,20}\bparties\b)"
+    r"|(?:\bparties\b[^?.]{0,25}\b(?:to|of|in)\b[^?.]{0,15}\b(?:this|the)\b[^?.]{0,15}\b(?:contract|agreement)\b)"
+    r"|(?:\bbetween whom\b)|(?:\bwho\b[^?.]{0,15}\b(?:signed|signing)\b)"
+    r"|(?:\bwho\b[^?.]{0,20}\b(?:contract|agreement)\b[^?.]{0,15}\bbetween\b)"
+    r"|(?:^\s*(?:the\s+)?parties\s*[?.!]*\s*$)",
+    re.I,
+)
+
+
+def _parties_answer(result: dict[str, Any], analysis_id: str, question: str) -> dict[str, Any] | None:
+    """Answer 'who are the parties' from extracted metadata, quoting the sentence that names them."""
+    if not _PARTIES_INTENT.search(question):
+        return None
+    parties = [str(item).strip() for item in ((result.get("contract_metadata") or {}).get("parties") or []) if str(item).strip()]
+    if not parties:
+        return None
+    clauses = [item for item in result.get("clauses") or [] if isinstance(item, dict)]
+    citations: list[dict[str, Any]] = []
+    for party in parties:
+        name = re.sub(r"\s*\([^)]*\)", "", party).strip().rstrip(",")
+        if len(name) < 4:
+            continue
+        for clause in clauses:
+            text = str(clause.get("clause_text") or "")
+            found = text.lower().find(name.lower())
+            try:
+                index = int(clause.get("clause_index"))
+            except (TypeError, ValueError):
+                continue
+            if found >= 0:
+                quote = _sentence_around(text, found)
+                overlaps = any(
+                    item["clause_index"] == index and (item["quote"] in quote or quote in item["quote"])
+                    for item in citations
+                )
+                if len(quote) >= 12 and not overlaps:
+                    citations.append({"clause_index": index, "quote": quote, "reason": "Names the party."})
+                break
+    if not citations:
+        return None
+    listed = parties[0] if len(parties) == 1 else ", ".join(parties[:-1]) + " and " + parties[-1]
+    return {
+        "analysis_id": analysis_id,
+        "answer": f"The parties are {listed}.",
+        "insufficient_evidence": False,
+        "citations": citations[:3],
+        "follow_up_questions": ["What is the term of the agreement?", "Who can terminate it, and on what notice?"],
+        "model": "METADATA",
+        "evidence_policy": "Parties come from the extracted contract metadata; quoted sentences are exact source text.",
+        "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
+    }
 
 
 def _call_local_chat(messages: list[dict[str, str]]) -> str:
@@ -451,6 +614,9 @@ def query_contract(request: ContractQuestion) -> dict[str, Any]:
             "evidence_policy": "Product guidance only; no contract-specific interpretation was made.",
             "disclaimer": "AI-assisted contract review, not legal advice. Risk findings are review triggers, not calibrated probabilities.",
         }
+    parties_response = _parties_answer(result, request.analysis_id, question)
+    if parties_response is not None:
+        return parties_response
     history = request.history[-8:]
     retrieval_question = " ".join(
         [turn.content for turn in history if turn.role == "user"][-3:] + [question]
@@ -509,69 +675,88 @@ Use at most 4 citations and 2 follow-up questions. No markdown fences.
         }, ensure_ascii=False),
     })
 
-    try:
-        raw_text = _call_local_chat(messages)
-    except Exception:
-        # Keep the assistant useful when the local model is unavailable, but never
-        # disguise an extractive fallback as an LLM interpretation.
-        fallback_citations = []
-        for clause in context.get("relevant_clauses", [])[:3]:
-            try:
-                index = int(clause.get("clause_index"))
-            except (TypeError, ValueError):
-                continue
-            source = source_texts.get(index, "")
-            quote = source.strip()[:420].strip()
-            if len(quote) >= 12:
-                fallback_citations.append({
-                    "clause_index": index,
-                    "quote": quote,
-                    "reason": "Relevant source text shown without an AI interpretation.",
-                })
+    retry_notice = json.dumps({
+        "retry": (
+            "Your previous reply could not be matched to the contract text. Answer again. Every citation quote "
+            "must be copied character for character from a supplied clause text, using the shortest sentence "
+            "that supports the answer. Never paraphrase inside a quote."
+        )
+    })
+    parsed: dict[str, Any] = {}
+    answer = ""
+    citations: list[dict[str, Any]] = []
+    citation_integrity_error = False
+    attempt_messages = messages
+    for attempt in range(2):
+        try:
+            raw_text = _call_local_chat(attempt_messages)
+        except Exception:
+            if attempt == 1:
+                break
+            # Keep the assistant useful when the local model is unavailable, but never
+            # disguise an extractive fallback as an LLM interpretation.
+            fallback_citations = _excerpt_citations(context, source_texts)
+            return {
+                "analysis_id": request.analysis_id,
+                "answer": (
+                    "The local language model is unavailable, so I have not generated an interpretation. "
+                    "I retrieved the most relevant clause text below; use these exact provisions as the starting point "
+                    "and retry when the configured local model is running."
+                    if fallback_citations else
+                    "The local language model is unavailable, and I could not retrieve a sufficiently relevant clause. "
+                    "Please retry when the model is running or ask about a specific section."
+                ),
+                "insufficient_evidence": True,
+                "citations": fallback_citations,
+                "follow_up_questions": ["Which specific clause should I explain?", "Would you like a clause-by-clause summary?"],
+                "model": "EXTRACTIVE_FALLBACK",
+                "evidence_policy": "Fallback displays verified source excerpts only; it does not interpret the contract.",
+                "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
+            }
+        parsed = extract_json_object(raw_text) or {}
+        answer = str(parsed.get("answer") or "").strip()
+        raw_citations = parsed.get("citations")
+        citations = _verified_citations(raw_citations, source_texts)
+        citation_integrity_error = _has_unverified_citation(raw_citations, source_texts)
+        if answer and citations and not citation_integrity_error:
+            break
+        if attempt == 0:
+            attempt_messages = messages + [
+                {"role": "assistant", "content": raw_text[:2000]},
+                {"role": "user", "content": retry_notice},
+            ]
+
+    if not answer or not citations or citation_integrity_error:
+        # The interpretation is not backed by exact quotes, so it is not shown. The reader still gets
+        # the contract's own wording for the question instead of a dead end.
+        shown = list(citations)
+        for excerpt in _excerpt_citations(context, source_texts):
+            if len(shown) >= 3:
+                break
+            if not any(item["clause_index"] == excerpt["clause_index"] and item["quote"] == excerpt["quote"] for item in shown):
+                shown.append(excerpt)
         return {
             "analysis_id": request.analysis_id,
             "answer": (
-                "The local language model is unavailable, so I have not generated an interpretation. "
-                "I retrieved the most relevant clause text below; use these exact provisions as the starting point "
-                "and retry when the configured local model is running."
-                if fallback_citations else
-                "The local language model is unavailable, and I could not retrieve a sufficiently relevant clause. "
-                "Please retry when the model is running or ask about a specific section."
+                "I couldn't verify the assistant's interpretation against the contract text, so I'm not showing it. "
+                "Here is the contract's own wording that is most relevant to your question."
+                if shown else
+                "I couldn't verify an answer against the contract text, so I won't guess. "
+                "Try naming a topic such as termination, liability, payment or governing law, or a clause number."
             ),
             "insufficient_evidence": True,
-            "citations": fallback_citations,
-            "follow_up_questions": ["Which specific clause should I explain?", "Would you like a clause-by-clause summary?"],
-            "model": "EXTRACTIVE_FALLBACK",
-            "evidence_policy": "Fallback displays verified source excerpts only; it does not interpret the contract.",
+            "citations": shown,
+            "follow_up_questions": ["Can you explain this clause in plain English?", "Which other clauses relate to this?"],
+            "model": "SOURCE_EXCERPTS",
+            "evidence_policy": "Only exact, checked contract text is shown; no interpretation was generated.",
             "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
         }
 
-    parsed = extract_json_object(raw_text) or {}
-    answer = str(parsed.get("answer") or "").strip()
-    raw_citations = parsed.get("citations")
-    citations = _verified_citations(raw_citations, source_texts)
-    citation_integrity_error = _has_unverified_citation(raw_citations, source_texts)
     raw_insufficient = parsed.get("insufficient_evidence", False)
     insufficient = (
         raw_insufficient is True
         or (isinstance(raw_insufficient, str) and raw_insufficient.strip().lower() in {"true", "yes", "1"})
     )
-    if not answer:
-        raise HTTPException(status_code=502, detail="The assistant did not return a usable answer. Try a narrower question.")
-    if citation_integrity_error:
-        insufficient = True
-        answer = (
-            "I couldn't verify one or more of the assistant's proposed quotes against the analyzed contract, "
-            "so I can't present the answer as fully evidence-grounded. Verified source excerpts, if any, are shown below; "
-            "try a narrower question about a specific clause."
-        )
-    elif not citations:
-        insufficient = True
-        answer = (
-            "I couldn't verify a supporting quote in the analyzed contract for that answer, "
-            "so I won't present it as a supported interpretation. Try asking about a specific clause, "
-            "such as termination, liability, payment, intellectual property, or governing law."
-        )
 
     followups = parsed.get("follow_up_questions")
     if not isinstance(followups, list):
