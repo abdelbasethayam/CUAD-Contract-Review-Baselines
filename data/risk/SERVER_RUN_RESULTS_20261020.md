@@ -18,5 +18,3 @@ python scripts/risk/verify_server_run_results.py /tmp/server-run-results data/ri
 ```
 
 These are recorded outputs from the server, so teammates can compare their results with the exact saved server JSON. A matching output is not guaranteed across model versions, runtime configurations, or nondeterministic inference. This snapshot intentionally excludes original uploaded PDFs/text, embeddings, traces, and other run artifacts; some source documents were public SEC exhibits, while synthetic test fixtures are represented only through their generated result JSON. Treat results as research/demo evidence, not legal advice or validated legal-risk accuracy.
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]

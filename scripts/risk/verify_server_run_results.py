@@ -25,5 +25,3 @@ def main():
     print(f"Verified {len(manifest['results'])} result files; all SHA-256 hashes match.")
     return 0
 if __name__=='__main__': raise SystemExit(main())
-
-[executed on device: jupyter-group-digi2026-g6 (a8417900-e68e-4ee2-bbe7-fc3493ade5e1)]
