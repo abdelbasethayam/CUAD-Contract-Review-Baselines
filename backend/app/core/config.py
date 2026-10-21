@@ -129,6 +129,8 @@ HYBRID_RERANK = os.getenv("HYBRID_RERANK", "true").strip().lower() in {"1", "tru
 HYBRID_RERANK_TOP_K = int(os.getenv("HYBRID_RERANK_TOP_K", "30"))
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+CHAT_PROVIDER = os.getenv("CHAT_PROVIDER", "ollama").strip().lower()
+OPENROUTER_CHAT_MODEL = os.getenv("OPENROUTER_CHAT_MODEL", "openrouter/free")
 OPENROUTER_MODEL = os.getenv(
     "OPENROUTER_MODEL", "nvidia/nemotron-3-ultra-550b-a55b:free"
 )
