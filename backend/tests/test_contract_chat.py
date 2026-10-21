@@ -7,6 +7,62 @@ from scripts.risk.evaluate_contract_chat_demo import _evaluate_question, _fact_a
 
 from app.main import app
 from app.api.routes import query
+from app.core.rag import thinking_client
+
+
+def test_openrouter_chat_provider_uses_configured_secret_and_model(monkeypatch):
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"choices": [{"message": {"content": '{"answer":"OK","citations":[]}'}}]}
+
+    captured = {}
+    def fake_post(url, **kwargs):
+        captured["url"] = url
+        captured.update(kwargs)
+        return FakeResponse()
+
+    monkeypatch.setattr(query, "CHAT_PROVIDER", "openrouter")
+    monkeypatch.setattr(query, "OPENROUTER_API_KEY", "test-secret")
+    monkeypatch.setattr(query, "OPENROUTER_BASE_URL", "https://example.invalid/v1")
+    monkeypatch.setattr(query, "OPENROUTER_CHAT_MODEL", "openrouter/free")
+    monkeypatch.setattr(query.requests, "post", fake_post)
+
+    content = query._call_local_chat([{"role": "user", "content": "hello"}])
+    assert '"answer":"OK"' in content
+    assert captured["url"] == "https://example.invalid/v1/chat/completions"
+    assert captured["headers"]["Authorization"] == "Bearer test-secret"
+    assert captured["json"]["model"] == "openrouter/free"
+
+
+def test_openrouter_model_provider_supports_classification_and_risk_calls(monkeypatch):
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"choices": [{"message": {"content": '{"clause_type":"Governing Law"}'} }]}
+
+    captured = {}
+    def fake_post(url, **kwargs):
+        captured["url"] = url
+        captured.update(kwargs)
+        return FakeResponse()
+
+    monkeypatch.setattr(thinking_client, "CHAT_PROVIDER", "openrouter")
+    monkeypatch.setattr(thinking_client, "OPENROUTER_API_KEY", "test-secret")
+    monkeypatch.setattr(thinking_client, "OPENROUTER_BASE_URL", "https://example.invalid/v1")
+    monkeypatch.setattr(thinking_client, "OPENROUTER_CHAT_MODEL", "openrouter/free")
+    monkeypatch.setattr(thinking_client, "OPENROUTER_TIMEOUT_SECONDS", 20)
+    monkeypatch.setattr(thinking_client.requests, "post", fake_post)
+
+    response = thinking_client.call_thinking_ollama("Return a JSON classification.")
+    assert "Governing Law" in response
+    assert captured["url"] == "https://example.invalid/v1/chat/completions"
+    assert captured["headers"]["Authorization"] == "Bearer test-secret"
+    assert captured["json"]["response_format"] == {"type": "json_object"}
 
 
 def test_contract_chat_validates_analysis_id_and_question():
