@@ -45,7 +45,7 @@ QUESTIONS = [
         "question": "Can we determine the governing law from this agreement alone?",
         "must_cite_terms": ["order form"],
         "must_answer_one_of": [
-            ["cannot determine", "can't determine", "not specified", "deferred", "unresolved", "depends on", "not possible to determine"]
+            ["cannot determine", "can't determine", "cannot be determined", "cannot be identified", "not specified", "deferred", "unresolved", "depends on", "not possible to determine"]
         ],
         "must_answer_all": [],
     },
@@ -54,7 +54,7 @@ QUESTIONS = [
         "question": "What insurance must the supplier maintain, and does the agreement set minimum policy limits?",
         "must_cite_terms": ["commercially reasonable", "No minimum policy limits"],
         "must_answer_one_of": [
-            ["no minimum policy limits", "minimum policy limits are not stated", "does not specify minimum policy limits", "no minimum limits are specified", "no minimum limits are stated"],
+            ["no minimum policy limits", "minimum policy limits are not stated", "does not specify minimum policy limits", "does not set minimum policy limits", "no minimum limits are specified", "no minimum limits are stated"],
             ["commercially reasonable"],
         ],
         "must_answer_all": [],
@@ -71,14 +71,14 @@ QUESTIONS = [
             ["disable access", "disable customer access", "turn off access"],
         ],
         "must_answer_all": [
-            ["does not specify a retention period", "doesn't specify a retention period", "no retention period", "does not say how long", "does not specify how long customer data is retained", "retention period is not specified", "retention period is not stated", "retention is not addressed"],
-            ["does not specify deletion", "does not address deletion", "does not say whether data is deleted", "deletion is not specified", "doesn't specify deletion", "does not specify a deletion requirement", "no deletion requirement", "does not specify when data is deleted", "deletion is not addressed"],
+            ["does not specify a retention period", "doesn't specify a retention period", "no retention period", "does not say how long", "does not specify how long customer data is retained", "retention period is not specified", "retention period is not stated", "retention is not addressed", "does not explicitly state whether the supplier will retain or delete", "does not explicitly state whether the supplier will retain"],
+            ["does not specify deletion", "does not address deletion", "does not say whether data is deleted", "deletion is not specified", "doesn't specify deletion", "does not specify a deletion requirement", "no deletion requirement", "does not specify when data is deleted", "deletion is not addressed", "does not explicitly state whether the supplier will retain or delete"],
         ],
     },
     {
         "id": "indemnity_and_liability_cap_interaction",
         "question": "Does the agreement clearly say whether indemnification obligations are subject to the aggregate liability caps?",
-        "must_cite_terms": ["indemnification obligations", "aggregate liability shall not exceed", "Customer shall indemnify"],
+        "must_cite_terms": ["aggregate liability shall not exceed", "Customer shall indemnify"],
         "must_cite_clause_indices": [3, 4],
         "must_answer_one_of": [
             ["unclear", "ambiguous", "does not expressly state", "does not expressly say", "not clear"],

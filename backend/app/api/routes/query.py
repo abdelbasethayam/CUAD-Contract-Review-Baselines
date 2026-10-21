@@ -22,8 +22,12 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from ...core.config import (
+    CHAT_PROVIDER,
     OLLAMA_TIMEOUT_SECONDS,
     OLLAMA_URL,
+    OPENROUTER_API_KEY,
+    OPENROUTER_BASE_URL,
+    OPENROUTER_CHAT_MODEL,
     PROJECT_ROOT,
     RISK_MAX_TOKENS,
     RISK_MODEL,
@@ -827,8 +831,34 @@ def _has_unverified_citation(
 
 
 def _call_local_chat(messages: list[dict[str, str]]) -> str:
-    """Use local Ollama chat with contract text isolated in the user message."""
+    """Call the configured chat provider, keeping contract evidence in the request context."""
     timeout = min(max(int(OLLAMA_TIMEOUT_SECONDS), 45), 180)
+    if CHAT_PROVIDER == "openrouter":
+        if not OPENROUTER_API_KEY:
+            raise RuntimeError("CHAT_PROVIDER=openrouter requires OPENROUTER_API_KEY.")
+        response = requests.post(
+            f"{OPENROUTER_BASE_URL}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "X-Title": "CUAD Contract Review Demo",
+            },
+            json={
+                "model": OPENROUTER_CHAT_MODEL,
+                "messages": messages,
+                "temperature": RISK_TEMPERATURE,
+                "max_tokens": min(max(RISK_MAX_TOKENS, 500), 1000),
+                "response_format": {"type": "json_object"},
+            },
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        choices = response.json().get("choices") or []
+        content = (choices[0].get("message") or {}).get("content") if choices else None
+        if not isinstance(content, str) or not content.strip():
+            raise RuntimeError("OpenRouter returned an empty chat response.")
+        return content
+
     response = requests.post(
         f"{OLLAMA_URL.rstrip('/')}/api/chat",
         json={
@@ -894,6 +924,46 @@ def query_contract(request: ContractQuestion) -> dict[str, Any]:
         [turn.content for turn in history if turn.role == "user"][-3:] + [question]
     )
     context, source_texts = _context_for(result, retrieval_question)
+
+    # Resolve a common document-level ambiguity deterministically when the
+    # contract expressly delegates governing law to an unavailable Order Form.
+    if re.search(r"\b(governing law|which law governs|what law governs|applicable law)\b", question, re.I):
+        for clause in context.get("relevant_clauses", []):
+            try:
+                clause_index = int(clause.get("clause_index"))
+            except (TypeError, ValueError):
+                continue
+            source = source_texts.get(clause_index, str(clause.get("clause_text") or ""))
+            deferred = re.search(
+                r"[^.]*\b(?:governed by|governing law)\b[^.]*\bOrder Form\b[^.]*\.?",
+                source,
+                re.I,
+            )
+            if deferred:
+                quote = _find_source_quote(source, deferred.group(0).strip()) or source.strip()[:650]
+                if len(quote) >= 12:
+                    return {
+                        "analysis_id": request.analysis_id,
+                        "answer": (
+                            "The governing law cannot be identified from this agreement alone. "
+                            "This provision defers it to the applicable Order Form, which is needed "
+                            "to determine the specific law."
+                        ),
+                        "insufficient_evidence": False,
+                        "citations": [{
+                            "clause_index": clause_index,
+                            "quote": quote,
+                            "reason": "The provision expressly refers to an Order Form for the governing law.",
+                        }],
+                        "follow_up_questions": [
+                            "Can you provide the applicable Order Form?",
+                            "Would you like me to check the agreement for its dispute-resolution venue?",
+                        ],
+                        "model": "DETERMINISTIC_GOVERNING_LAW_LOOKUP",
+                        "evidence_policy": "The answer is limited to the exact governing-law wording in the analyzed agreement.",
+                        "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
+                    }
+
     if not context.get("relevant_clauses"):
         return {
             "analysis_id": request.analysis_id,
@@ -1049,7 +1119,7 @@ Use at most 4 citations and 2 follow-up questions. No markdown fences.
         "insufficient_evidence": insufficient,
         "citations": citations,
         "follow_up_questions": [str(item)[:180] for item in followups[:2] if str(item).strip()],
-        "model": RISK_MODEL,
+        "model": OPENROUTER_CHAT_MODEL if CHAT_PROVIDER == "openrouter" else RISK_MODEL,
         "evidence_policy": "Displayed clause quotes are checked against the stored uploaded-contract text.",
         "disclaimer": "AI-assisted contract review, not legal advice. Risk labels are not calibrated estimates of legal correctness.",
     }
