@@ -338,6 +338,7 @@ a { color: var(--ultra); text-underline-offset: 3px; }
 .composer textarea {
   flex: 1; min-height: 28px; max-height: 150px; padding: 5px 0; border: 0; outline: none; resize: none; background: none; line-height: 1.5;
 }
+.composer textarea:focus-visible { box-shadow: none; }
 .composer textarea::placeholder { color: #8e9ab2; }
 .composer__send {
   display: grid; place-items: center; flex: none; width: 36px; height: 36px; border: 0; border-radius: 50%;
