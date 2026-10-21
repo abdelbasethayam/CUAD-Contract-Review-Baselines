@@ -10,9 +10,9 @@ const STARTERS = [
   "What happens to our data when the contract ends?",
 ];
 
-function Sources({ citations, onOpenClause }) {
+function Sources({ citations, onOpenClause, expanded }) {
   return (
-    <details className="sources" open={citations.length <= 2}>
+    <details className="sources" open={expanded || citations.length <= 2}>
       <summary>{plural(citations.length, "passage")} from the contract</summary>
       {citations.map((citation, index) => (
         <Quote
@@ -85,7 +85,7 @@ export default function ChatPanel({ name, messages, loading, error, onAsk, onCle
               <RichText text={message.answer} />
               {message.insufficient_evidence && message.model !== "SOURCE_EXCERPTS" && message.model !== "EXTRACTIVE_FALLBACK" && <p className="msg__note">The contract text gives limited support for this answer.</p>}
               {message.model === "EXTRACTIVE_FALLBACK" && <p className="msg__note">The language model was unavailable, so this answer only quotes the contract.</p>}
-              {message.citations?.length > 0 && <Sources citations={message.citations} onOpenClause={onOpenClause} />}
+              {message.citations?.length > 0 && <Sources citations={message.citations} onOpenClause={onOpenClause} expanded={message.model === "SOURCE_EXCERPTS" || message.model === "EXTRACTIVE_FALLBACK"} />}
             </div>
           )
         ))}
