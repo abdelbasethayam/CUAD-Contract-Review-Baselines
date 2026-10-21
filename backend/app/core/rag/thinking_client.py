@@ -14,6 +14,11 @@ from typing import Any
 import requests
 
 from ..config import (
+    CHAT_PROVIDER,
+    OPENROUTER_API_KEY,
+    OPENROUTER_BASE_URL,
+    OPENROUTER_CHAT_MODEL,
+    OPENROUTER_TIMEOUT_SECONDS,
     OLLAMA_MAX_RETRY_ATTEMPTS,
     OLLAMA_MODEL,
     OLLAMA_TIMEOUT_SECONDS,
@@ -72,8 +77,34 @@ def call_thinking_ollama(
     think: bool | None = None,
     max_tokens: int | None = None,
 ) -> str:
-    """Call Ollama generate API; return raw model text (may include think tags)."""
+    """Call the configured local or hosted model and return its raw text."""
     selected = model or OLLAMA_MODEL
+    if CHAT_PROVIDER == "openrouter":
+        if not OPENROUTER_API_KEY:
+            raise RuntimeError("CHAT_PROVIDER=openrouter requires OPENROUTER_API_KEY.")
+        response = requests.post(
+            f"{OPENROUTER_BASE_URL}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "X-Title": "CUAD Contract Review Demo",
+            },
+            json={
+                "model": OPENROUTER_CHAT_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": temperature,
+                "max_tokens": int(max_tokens or 700),
+                "response_format": {"type": "json_object"},
+            },
+            timeout=OPENROUTER_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        choices = response.json().get("choices") or []
+        content = (choices[0].get("message") or {}).get("content") if choices else None
+        if isinstance(content, str) and content.strip():
+            return content
+        raise RuntimeError("OpenRouter returned an empty model response.")
+
     last_error: Exception | None = None
 
     for attempt in range(1, OLLAMA_MAX_RETRY_ATTEMPTS + 1):
